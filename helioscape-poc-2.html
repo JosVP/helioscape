@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HELIOSCAPE — POC</title>
+<style>
+/* ═══════════════════════════════════════════════════
+   BASE: 14px = 1em. All font-sizes in em.
+   Increase body font-size to scale everything.
+   ═══════════════════════════════════════════════════ */
+:root {
+  --bg:        #060402;
+  --bg-panel:  #0e0b06;
+  --bg-card:   #151108;
+  --bg-hover:  #1e1608;
+  --border:    #4a3418;
+  --border-d:  #2a1c0a;
+  --text:      #e0b880;
+  --text-d:    #9a7848;
+  --text-b:    #f8d890;
+  --accent:    #e8841a;
+  --accent-d:  #7a3e08;
+  --accent-g:  rgba(232,132,26,.14);
+  --green:     #6aaa58;
+  --blue:      #4a80c0;
+  --font:      'Courier New', Courier, monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px}
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.03) 2px,rgba(0,0,0,.03) 4px);pointer-events:none;z-index:9999}
+
+/* ── LAYOUT ─────────────────────────────────────────────── */
+#app{display:flex;flex-direction:column;height:100vh}
+
+/* TOP BAR */
+#topbar{height:44px;background:#0a0704;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 1em;gap:.85em;flex-shrink:0}
+.gtitle{color:var(--accent);font-size:1em;font-weight:bold;letter-spacing:.35em}
+.vd{width:1px;height:1.2em;background:var(--border)}
+#yr{color:var(--text-b);font-size:1em;letter-spacing:.2em;min-width:7em}
+.spds{display:flex;gap:.2em}
+.spd{background:transparent;border:1px solid var(--border);color:var(--text-d);font-family:var(--font);font-size:.85em;letter-spacing:.07em;padding:.15em .5em;cursor:pointer;transition:all .1s}
+.spd:hover{border-color:var(--accent);color:var(--text)}
+.spd.on{background:var(--accent);color:#000;border-color:var(--accent)}
+.flex1{flex:1}
+.musicw{display:flex;align-items:center;gap:.5em;font-size:.85em;color:var(--text-d);letter-spacing:.07em}
+.musicw button{background:transparent;border:1px solid var(--border);color:var(--text-d);font-family:var(--font);font-size:.85em;padding:.15em .55em;cursor:pointer}
+.musicw button:hover{border-color:var(--accent);color:var(--accent)}
+#main{display:flex;flex:1;overflow:hidden;min-height:0}
+
+/* ── SOLAR SYSTEM ────────────────────────────────────────── */
+#ss-wrap{flex:1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+#ss-wrap::before{content:'';position:absolute;inset:0;background-image:
+  radial-gradient(1px 1px at  8% 12%,rgba(255,255,200,.45) 0%,transparent 100%),
+  radial-gradient(1px 1px at 22% 68%,rgba(255,255,200,.30) 0%,transparent 100%),
+  radial-gradient(1px 1px at 38% 32%,rgba(255,255,200,.50) 0%,transparent 100%),
+  radial-gradient(1px 1px at 54% 85%,rgba(255,255,200,.30) 0%,transparent 100%),
+  radial-gradient(1px 1px at 67% 20%,rgba(255,255,200,.40) 0%,transparent 100%),
+  radial-gradient(1px 1px at 79% 54%,rgba(255,255,200,.30) 0%,transparent 100%),
+  radial-gradient(1px 1px at 91%  9%,rgba(255,255,200,.50) 0%,transparent 100%),
+  radial-gradient(1px 1px at 14% 44%,rgba(255,255,200,.25) 0%,transparent 100%),
+  radial-gradient(1px 1px at 46% 58%,rgba(255,255,200,.30) 0%,transparent 100%),
+  radial-gradient(1px 1px at 71% 76%,rgba(255,255,200,.35) 0%,transparent 100%),
+  radial-gradient(1px 1px at  4% 88%,rgba(255,255,200,.22) 0%,transparent 100%),
+  radial-gradient(1px 1px at 84% 38%,rgba(255,255,200,.28) 0%,transparent 100%),
+  radial-gradient(1px 1px at 31%  7%,rgba(255,255,200,.40) 0%,transparent 100%),
+  radial-gradient(1px 1px at 59% 46%,rgba(255,255,200,.22) 0%,transparent 100%),
+  radial-gradient(1px 1px at 93% 66%,rgba(255,255,200,.35) 0%,transparent 100%);
+  pointer-events:none}
+#scene{perspective:800px;perspective-origin:50% 48%}
+#ss{width:620px;height:620px;position:relative;transform-style:preserve-3d;transform:rotateX(56deg)}
+.oring{position:absolute;top:50%;left:50%;border-radius:50%;border:1px solid rgba(90,62,22,.3);transform:translate(-50%,-50%);pointer-events:none}
+#sun{position:absolute;top:50%;left:50%;width:40px;height:40px;transform:translate(-50%,-50%);border-radius:50%;
+  background:radial-gradient(circle,#fffae0 0%,#ffd020 35%,#ff8800 70%,#cc3300 100%);
+  box-shadow:0 0 18px rgba(255,180,30,.9),0 0 45px rgba(255,100,0,.5),0 0 80px rgba(255,60,0,.2);z-index:10}
+.ow{position:absolute;top:50%;left:50%;width:0;height:0;animation:spin linear infinite}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.pd{position:absolute;border-radius:50%;top:0;transform:translateY(-50%);cursor:pointer;transition:filter .2s;z-index:20}
+.pd:hover{filter:brightness(1.5)}
+.pd.inert{cursor:default}
+#hint-ss{position:absolute;bottom:.85em;left:.85em;font-size:.85em;color:var(--text-d);letter-spacing:.15em}
+
+/* ── INSPECT VIEW ────────────────────────────────────────── */
+#inspect{flex:1;display:none;overflow:hidden}
+#inspect.active{display:flex}
+
+#insp-left{width:40%;min-width:240px;flex-shrink:0;display:flex;flex-direction:column;position:relative;overflow:hidden}
+#planet-bg{flex:0 0 46%;display:flex;align-items:center;justify-content:center;background:#030201;position:relative;overflow:hidden}
+#planet-bg::before{content:'';position:absolute;inset:0;background-image:
+  radial-gradient(1px 1px at 15% 20%,rgba(255,255,200,.35) 0%,transparent 100%),
+  radial-gradient(1px 1px at 70% 15%,rgba(255,255,200,.28) 0%,transparent 100%),
+  radial-gradient(1px 1px at 30% 75%,rgba(255,255,200,.30) 0%,transparent 100%),
+  radial-gradient(1px 1px at 80% 65%,rgba(255,255,200,.22) 0%,transparent 100%),
+  radial-gradient(1px 1px at 10% 55%,rgba(255,255,200,.25) 0%,transparent 100%),
+  radial-gradient(1px 1px at 90% 30%,rgba(255,255,200,.30) 0%,transparent 100%);pointer-events:none}
+#planet-glow{position:absolute;width:170px;height:170px;border-radius:50%;transition:box-shadow 1.5s;z-index:1}
+#planet-orb{width:140px;height:140px;border-radius:50%;transition:background 1.5s;box-shadow:0 0 40px rgba(0,0,0,.8),0 0 80px rgba(0,0,0,.6);position:relative;z-index:2}
+/* ════════════════════════════════════════════════════════════
+   SPACE VIEW: target #planet-orb + step class added by JS
+   .space-mars-0 { background-image: url('mars-space-0.png') !important; background-size:cover !important; }
+   ════════════════════════════════════════════════════════════ */
+
+#vignette{flex:1;position:relative;overflow:hidden;transition:background 1.5s}
+/* ════════════════════════════════════════════════════════════
+   VIGNETTE IMAGES: target the step class, e.g.
+   .vig-mars-0 { background-image: url('vignette-mars-0.jpg') !important; background-size:cover !important; background-position:center !important; }
+   ════════════════════════════════════════════════════════════ */
+#vig-cap{position:absolute;bottom:0;left:0;right:0;padding:.55em .75em;background:linear-gradient(transparent,rgba(0,0,0,.9));font-size:.85em;color:rgba(230,180,110,.85);letter-spacing:.07em;font-style:italic;line-height:1.45}
+
+#insp-right{flex:1;background:var(--bg-card);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.ir-head{padding:.65em 1em;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.7em;flex-shrink:0}
+.ir-pname{font-size:1.3em;font-weight:bold;color:var(--text-b);letter-spacing:.35em;flex:1}
+.ir-yr{font-size:.85em;color:var(--text-d);letter-spacing:.15em}
+.ir-back{background:transparent;border:1px solid var(--border);color:var(--text-d);font-family:var(--font);font-size:.85em;padding:.25em .65em;cursor:pointer;letter-spacing:.07em}
+.ir-back:hover{border-color:var(--accent);color:var(--accent)}
+.ir-body{flex:1;overflow-y:auto;padding:1em 1.1em;display:flex;flex-direction:column;gap:1em}
+.ir-sec{}
+.ir-shdr{font-size:.85em;color:var(--accent);letter-spacing:.22em;margin-bottom:.55em}
+.phase-name{font-size:1.1em;color:var(--text-b);letter-spacing:.15em;margin-bottom:.4em}
+.phase-desc{font-size:.9em;color:var(--text-d);line-height:1.75}
+
+/* Stats */
+.srow{display:flex;justify-content:space-between;padding:.3em 0;border-bottom:1px solid var(--border-d);font-size:.9em}
+.srow .l{color:var(--text-d);letter-spacing:.07em}
+.srow .v{color:var(--text-b);font-weight:bold}
+.bwrap{margin:.5em 0 .1em}
+.blbl{display:flex;justify-content:space-between;font-size:.85em;color:var(--text-d);letter-spacing:.07em;margin-bottom:.2em}
+.bbar{height:3px;background:var(--border-d);border-radius:2px;overflow:hidden}
+.bfill{height:100%;border-radius:2px;transition:width .8s ease}
+.bfill.h{background:var(--green)}
+.bfill.o{background:var(--blue)}
+.bfill.w{background:#3080b8}
+
+/* Decision choices */
+.choices-wrap{display:flex;flex-direction:column;gap:.5em}
+.choice-card{padding:.7em .85em;border:1px solid var(--border-d);transition:all .12s}
+.choice-card.active{border-color:var(--accent-d);cursor:pointer}
+.choice-card.active:hover{background:var(--bg-hover);border-color:var(--accent)}
+.choice-card.inactive{opacity:.5;cursor:not-allowed}
+.cc-top{display:flex;align-items:center;gap:.5em;margin-bottom:.3em}
+.cc-name{font-size:.95em;font-weight:bold;color:var(--text-d);letter-spacing:.07em;flex:1}
+.choice-card.active .cc-name{color:var(--text-b)}
+.cc-tag{font-size:.75em;padding:.1em .4em;border:1px solid;letter-spacing:.07em;white-space:nowrap}
+.cc-tag.rec{color:var(--accent);border-color:var(--accent-d);background:var(--accent-g)}
+.cc-tag.alt{color:var(--text-d);border-color:var(--border-d)}
+.cc-tag.poc{color:var(--text-d);border-color:var(--border-d);font-size:.7em}
+.cc-desc{font-size:.82em;color:var(--text-d);line-height:1.6;margin-bottom:.25em}
+.cc-proj{font-size:.8em;color:#7a9870;font-style:italic;line-height:1.5;margin-top:.25em}
+
+/* Processing */
+.proc-box{padding:.85em 1em;border:1px solid var(--border)}
+.proc-lbl{font-size:.85em;color:var(--text-d);letter-spacing:.2em}
+.proc-yrs{display:block;color:var(--accent);font-size:1.4em;font-weight:bold;margin:.4em 0;letter-spacing:.15em}
+.proc-bar{height:3px;background:var(--border-d);border-radius:2px;overflow:hidden;margin-top:.5em}
+.proc-fill{height:100%;background:var(--accent);border-radius:2px;width:0%;transition:width .5s}
+.next-preview{margin-top:.75em;padding:.65em .85em;border:1px solid var(--border-d);background:rgba(0,0,0,.2)}
+.np-lbl{font-size:.78em;color:var(--text-d);letter-spacing:.15em;margin-bottom:.3em}
+.np-name{font-size:.9em;color:var(--text-b);letter-spacing:.1em;margin-bottom:.2em}
+.np-desc{font-size:.8em;color:var(--text-d);line-height:1.6}
+
+/* Done */
+.done-box{padding:1em;border:1px solid var(--green);text-align:center;color:var(--green);font-size:.95em;letter-spacing:.2em;line-height:1.9}
+
+/* ── PLANET PANEL ───────────────────────────────────────── */
+#panel{width:252px;background:var(--bg-panel);border-left:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+.phdr{padding:.6em .85em;border-bottom:1px solid var(--border);font-size:.85em;letter-spacing:.22em;color:var(--accent);flex-shrink:0}
+.ptile{padding:.75em .85em;border-bottom:1px solid var(--border-d);cursor:pointer;transition:background .12s}
+.ptile:hover{background:var(--bg-hover)}
+.ptile.sel{background:var(--bg-hover);border-left:2px solid var(--accent)}
+.pttop{display:flex;align-items:center;gap:.6em;margin-bottom:.4em}
+.ptorb{width:28px;height:28px;border-radius:50%;flex-shrink:0;transition:background 1.2s}
+.ptinfo{flex:1}
+.ptname{font-size:.95em;font-weight:bold;color:var(--text-b);letter-spacing:.15em}
+.ptphase{font-size:.8em;color:var(--text-d);letter-spacing:.07em;margin-top:.1em}
+.ptbdg{width:1em;height:1em;border-radius:50%;background:var(--accent);color:#000;font-size:.85em;font-weight:bold;display:flex;align-items:center;justify-content:center;flex-shrink:0;animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(232,132,26,.5)}50%{box-shadow:0 0 0 4px rgba(232,132,26,0)}}
+.ptbar{height:2px;background:var(--border-d);border-radius:1px;overflow:hidden}
+.ptbf{height:100%;background:var(--accent);border-radius:1px;width:0%;transition:width .5s}
+.ptst{font-size:.8em;color:var(--text-d);letter-spacing:.07em;margin-top:.35em}
+.pnote{padding:.75em .85em;font-size:.8em;color:var(--text-d);line-height:1.75;border-top:1px solid var(--border-d)}
+
+/* ── STATUS BAR ─────────────────────────────────────────── */
+#statusbar{height:26px;background:#0a0704;border-top:1px solid var(--border);display:flex;align-items:center;padding:0 1em;gap:1.3em;font-size:.82em;color:var(--text-d);letter-spacing:.15em;flex-shrink:0}
+.sbl{color:var(--accent)}
+.sbv{color:var(--text)}
+
+/* ── CULTURE EVENT ──────────────────────────────────────── */
+.ceov{position:fixed;inset:0;background:rgba(3,2,1,.92);display:flex;align-items:center;justify-content:center;z-index:500;backdrop-filter:blur(5px)}
+.ceov.hidden{display:none!important}
+#cei{background:var(--bg-card);border:1px solid var(--border);width:660px;max-width:95vw;display:flex;flex-direction:column}
+.cehdr{padding:.65em 1.1em;border-bottom:1px solid var(--border);font-size:.85em;color:var(--accent);letter-spacing:.28em;flex-shrink:0}
+.ce-body-wrap{display:flex;overflow:hidden;min-height:0}
+/* Portrait vignette 3:4 ratio */
+.ce-vig{
+  width:165px;flex-shrink:0;
+  position:relative;overflow:hidden;
+  /* aspect ratio 3:4 = width:height */
+  aspect-ratio:3/4;
+  /*
+  ══════════════════════════════════════════════
+  CE VIGNETTE IMAGE: add background-image to the
+  class set by JS, e.g. .ce-vig.vig-mars-rain { background-image: url(...) !important; }
+  ══════════════════════════════════════════════
+  */
+}
+.ce-vig-cap{position:absolute;bottom:0;left:0;right:0;padding:.4em .6em;background:linear-gradient(transparent,rgba(0,0,0,.88));font-size:.8em;color:rgba(210,170,100,.8);font-style:italic;letter-spacing:.07em;line-height:1.35}
+.ce-text-col{flex:1;padding:1.5em 1.4em 1em;overflow-y:auto;display:flex;flex-direction:column;gap:.75em}
+.cetitle{font-size:1.25em;color:var(--text-b);letter-spacing:.15em;line-height:1.3}
+.cetext{font-size:.9em;color:var(--text);line-height:1.9;font-style:italic}
+.cefooter{display:flex;justify-content:space-between;align-items:center;padding:.65em 1.1em;border-top:1px solid var(--border);flex-shrink:0}
+.ceyr{font-size:.82em;color:var(--text-d);letter-spacing:.15em}
+.cebtn{background:transparent;border:1px solid var(--accent);color:var(--accent);font-family:var(--font);font-size:.88em;letter-spacing:.15em;padding:.4em .85em;cursor:pointer}
+.cebtn:hover{background:var(--accent-g)}
+
+/* ═══════════════════════════════════════════════════════════
+   VIGNETTE PLACEHOLDER GRADIENTS
+   Replace by targeting the class name in your own CSS:
+   .vig-mars-0 { background-image: url('mars-0.jpg') !important; background-size:cover !important; background-position:center !important; }
+   ═══════════════════════════════════════════════════════════ */
+.vig-mars-0{background:linear-gradient(180deg,#0a0200 0%,#1c0600 25%,#421400 55%,#6a2808 80%,#8a3812 100%)}
+.vig-mars-1{background:linear-gradient(180deg,#100500 0%,#281000 22%,#542005 55%,#884010 75%,#1a2234 100%)}
+.vig-mars-2{background:linear-gradient(180deg,#100400 0%,#2c0e00 22%,#502400 50%,#804018 72%,#2e4862 100%)}
+.vig-mars-3{background:linear-gradient(180deg,#0a0e06 0%,#141c0e 18%,#263618 48%,#225033 72%,#102e4a 100%)}
+.vig-mars-4{background:linear-gradient(180deg,#071408 0%,#0e2210 18%,#183818 42%,#145030 68%,#0a2040 100%)}
+.vig-mars-5{background:linear-gradient(180deg,#071410 0%,#0e2212 18%,#163c1a 40%,#144e34 65%,#0c2848 100%)}
+.vig-venus-0{background:linear-gradient(180deg,#160500 0%,#381000 20%,#702800 50%,#b06018 75%,#d88018 100%)}
+.vig-venus-1{background:linear-gradient(180deg,#120400 0%,#2c0c00 20%,#582000 50%,#905210 75%,#b06e12 100%)}
+.vig-venus-2{background:linear-gradient(180deg,#0c0400 0%,#1e0c00 20%,#3e1c00 50%,#683c08 75%,#88540e 100%)}
+.vig-venus-3{background:linear-gradient(180deg,#081208 0%,#121e0e 20%,#1e2c16 48%,#2c4430 72%,#142038 100%)}
+.vig-venus-4{background:linear-gradient(180deg,#081610 0%,#0e2212 18%,#183c1e 42%,#1a4e38 66%,#0e2440 100%)}
+
+/* Orb colors */
+.oc-mer{background:radial-gradient(circle at 32% 30%,#b8a898,#706050,#402c20)}
+.oc-ear{background:radial-gradient(circle at 32% 30%,#50a8f0,#2868b0,#104070)}
+.oc-moo{background:radial-gradient(circle at 32% 30%,#b8b8b8,#787878,#404040)}
+.oc-v0{background:radial-gradient(circle at 32% 30%,#f0d870,#c89020,#886008)}
+.oc-v1{background:radial-gradient(circle at 32% 30%,#d8b840,#a87818,#6a5c08)}
+.oc-v2{background:radial-gradient(circle at 32% 30%,#b09030,#886010,#565008)}
+.oc-v3{background:radial-gradient(circle at 32% 30%,#a0a858,#6a7838,#384820)}
+.oc-v4{background:radial-gradient(circle at 32% 30%,#5a9870,#387850,#1c4830)}
+.oc-m0{background:radial-gradient(circle at 32% 30%,#c84020,#8a2810,#501808)}
+.oc-m1{background:radial-gradient(circle at 32% 30%,#c85830,#984020,#601810)}
+.oc-m2{background:radial-gradient(circle at 32% 30%,#aa6848,#806040,#4c3a28)}
+.oc-m3{background:radial-gradient(circle at 32% 30%,#607870,#425e58,#264040)}
+.oc-m4{background:radial-gradient(circle at 32% 30%,#488068,#306858,#183c38)}
+.oc-m5{background:radial-gradient(circle at 32% 30%,#408868,#285a50,#103830)}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- TOP BAR -->
+  <div id="topbar">
+    <span class="gtitle">HELIOSCAPE</span>
+    <div class="vd"></div>
+    <span id="yr">YEAR 2033</span>
+    <div class="spds">
+      <button class="spd on" onclick="setSpd(1)">1×</button>
+      <button class="spd"    onclick="setSpd(5)">5×</button>
+      <button class="spd"    onclick="setSpd(20)">20×</button>
+    </div>
+    <div class="flex1"></div>
+    <div class="musicw">
+      <span>♪ BGM</span>
+      <button id="mbtn" onclick="toggleMusic()">▶ PLAY</button>
+      <!-- Add src="your.mp3" to play background music -->
+      <audio id="bgm" loop></audio>
+    </div>
+  </div>
+
+  <div id="main">
+
+    <!-- ── SOLAR SYSTEM VIEW ── -->
+    <div id="ss-wrap">
+      <div id="scene">
+        <div id="ss">
+          <div class="oring" style="width:130px;height:130px"></div>
+          <div class="oring" style="width:210px;height:210px"></div>
+          <div class="oring" style="width:290px;height:290px"></div>
+          <div class="oring" style="width:380px;height:380px"></div>
+          <div id="sun"></div>
+          <!-- Mercury: decorative. IDs for orbit wrappers to allow JS speed control -->
+          <div class="ow" id="ow-mercury">
+            <div class="pd oc-mer inert" style="width:7px;height:7px;left:65px;margin-left:-3.5px" title="Mercury"></div>
+          </div>
+          <!-- Venus: interactive -->
+          <div class="ow" id="ow-venus">
+            <div class="pd oc-v0" id="pd-venus" style="width:13px;height:13px;left:105px;margin-left:-6.5px" onclick="openPlanet('venus')" title="Venus"></div>
+          </div>
+          <!-- Earth: decorative -->
+          <div class="ow" id="ow-earth">
+            <div class="pd oc-ear inert" style="width:14px;height:14px;left:145px;margin-left:-7px" title="Earth"></div>
+          </div>
+          <!-- Mars: interactive -->
+          <div class="ow" id="ow-mars">
+            <div class="pd oc-m0" id="pd-mars" style="width:10px;height:10px;left:190px;margin-left:-5px" onclick="openPlanet('mars')" title="Mars"></div>
+          </div>
+        </div>
+      </div>
+      <div id="hint-ss">CLICK A PLANET IN THE PANEL TO INSPECT</div>
+    </div>
+
+    <!-- ── PLANET INSPECT VIEW ── -->
+    <div id="inspect">
+      <div id="insp-left">
+        <div id="planet-bg">
+          <div id="planet-glow"></div>
+          <div id="planet-orb" class="oc-m0"></div>
+        </div>
+        <div id="vignette" class="vig-mars-0">
+          <div id="vig-cap">The Martian surface. -60°C. Ancient and silent.</div>
+        </div>
+      </div>
+      <div id="insp-right">
+        <div class="ir-head">
+          <span class="ir-pname" id="ir-pname">MARS</span>
+          <span class="ir-yr"    id="ir-yr">YEAR 2033</span>
+          <button class="ir-back" onclick="closePlanet()">← BACK</button>
+        </div>
+        <div class="ir-body">
+          <div class="ir-sec">
+            <div class="ir-shdr">// CURRENT STATE</div>
+            <div class="phase-name" id="ir-phase">—</div>
+            <div class="phase-desc" id="ir-desc">—</div>
+          </div>
+          <div class="ir-sec">
+            <div class="ir-shdr">// PLANETARY DATA</div>
+            <div class="srow"><span class="l">SURFACE TEMP</span><span class="v" id="s-temp">—</span></div>
+            <div class="srow"><span class="l">PRESSURE</span><span class="v" id="s-pres">—</span></div>
+            <div class="srow"><span class="l">WATER COVER</span><span class="v" id="s-water">—</span></div>
+            <div class="srow"><span class="l">OXYGEN</span><span class="v" id="s-oxy">—</span></div>
+            <div class="bwrap">
+              <div class="blbl"><span>HABITABILITY</span><span id="bvh">0%</span></div>
+              <div class="bbar"><div class="bfill h" id="bh" style="width:0%"></div></div>
+            </div>
+            <div class="bwrap">
+              <div class="blbl"><span>OXYGEN LEVEL</span><span id="bvo">0%</span></div>
+              <div class="bbar"><div class="bfill o" id="bo" style="width:0%"></div></div>
+            </div>
+            <div class="bwrap">
+              <div class="blbl"><span>WATER COVER</span><span id="bvw">0%</span></div>
+              <div class="bbar"><div class="bfill w" id="bw" style="width:0%"></div></div>
+            </div>
+          </div>
+          <div class="ir-sec" id="ir-action-wrap"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PLANET PANEL ── -->
+    <div id="panel">
+      <div class="phdr">// SOLAR SYSTEM</div>
+
+      <div class="ptile" id="tile-venus" onclick="openPlanet('venus')">
+        <div class="pttop">
+          <div class="ptorb oc-v0" id="torb-venus"></div>
+          <div class="ptinfo">
+            <div class="ptname">VENUS</div>
+            <div class="ptphase" id="tph-venus">Initial State</div>
+          </div>
+          <div class="ptbdg" id="tbdg-venus" style="display:none">!</div>
+        </div>
+        <div class="ptbar"><div class="ptbf" id="tprog-venus"></div></div>
+        <div class="ptst" id="tst-venus">INSPECTABLE · DECISION PENDING</div>
+      </div>
+
+      <div class="ptile" onclick="openPlanet('earth')">
+        <div class="pttop">
+          <div class="ptorb oc-ear"></div>
+          <div class="ptinfo"><div class="ptname">EARTH</div><div class="ptphase">Research Hub · T1 Active</div></div>
+        </div>
+        <div class="ptst">HOME WORLD</div>
+      </div>
+
+      <div class="ptile" id="tile-mars" onclick="openPlanet('mars')">
+        <div class="pttop">
+          <div class="ptorb oc-m0" id="torb-mars"></div>
+          <div class="ptinfo">
+            <div class="ptname">MARS</div>
+            <div class="ptphase" id="tph-mars">Initial State</div>
+          </div>
+          <div class="ptbdg" id="tbdg-mars">!</div>
+        </div>
+        <div class="ptbar"><div class="ptbf" id="tprog-mars"></div></div>
+        <div class="ptst" id="tst-mars">DECISION REQUIRED</div>
+      </div>
+
+      <div class="ptile" onclick="openPlanet('moon')">
+        <div class="pttop">
+          <div class="ptorb oc-moo"></div>
+          <div class="ptinfo"><div class="ptname">MOON</div><div class="ptphase">Artemis Base · Phase 3</div></div>
+        </div>
+        <div class="ptst">RESEARCH OUTPOST ACTIVE</div>
+      </div>
+
+      <div class="ptile" onclick="openPlanet('mercury')">
+        <div class="pttop">
+          <div class="ptorb oc-mer"></div>
+          <div class="ptinfo"><div class="ptname">MERCURY</div><div class="ptphase">Future industrial hub</div></div>
+        </div>
+        <div class="ptst">MISSION NOT YET LAUNCHED</div>
+      </div>
+
+      <div class="pnote">
+        <span style="color:var(--accent);letter-spacing:.15em">// POC NOTE</span><br><br>
+        All planets inspectable. Mars &amp; Venus have active terraforming.<br><br>
+        Swap vignettes: add <code>background-image</code> to CSS classes like <code>.vig-mars-0</code>.
+      </div>
+    </div>
+
+  </div><!-- #main -->
+
+  <div id="statusbar">
+    <span class="sbl">// STATUS</span>
+    <span>MARS <span class="sbv" id="sb-mars">Awaiting decision</span></span>
+    <span>VENUS <span class="sbv" id="sb-venus">Awaiting decision</span></span>
+    <div style="flex:1"></div>
+    <span>1 YEAR = 2 SEC AT 1×</span>
+  </div>
+
+</div><!-- #app -->
+
+<!-- CULTURE EVENT MODAL -->
+<div class="ceov hidden" id="ceov">
+  <div id="cei">
+    <div class="cehdr">// CULTURE EVENT</div>
+    <div class="ce-body-wrap">
+      <!-- Portrait vignette 3:4 -->
+      <div class="ce-vig vig-mars-0" id="ce-vig">
+        <div class="ce-vig-cap" id="ce-vig-cap"></div>
+      </div>
+      <div class="ce-text-col">
+        <div class="cetitle" id="cetitle">—</div>
+        <div class="cetext"  id="cetext">—</div>
+      </div>
+    </div>
+    <div class="cefooter">
+      <span class="ceyr" id="ceyr">YEAR —</span>
+      <button class="cebtn" onclick="dismissCE()">CONTINUE →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+//  HELIOSCAPE POC v3
+// ══════════════════════════════════════════════════════════
+
+// ── Lerp helper ───────────────────────────────────────────
+const lerp = (a, b, t) => a + (b - a) * Math.min(Math.max(t, 0), 1);
+const fmt1 = n => Math.round(n * 10) / 10;
+
+// ── Planet data for non-terraforming planets ──────────────
+const STATIC = {
+  earth: {
+    name: 'Earth', orbC: 'oc-ear',
+    vigC: 'vig-mars-3', // greenest placeholder
+    cap: 'Home. Population ~10 billion. T1 research in progress.',
+    glow: '0 0 50px rgba(40,100,200,.5)',
+    desc: 'The origin of all of this. Earth\'s research campus drives all terraforming knowledge. The Type 1 milestone — full harnessing of Earth\'s own energy — is underway. Fusion ignition is 40–60 years away.',
+    stats: { temp:15, pres:1.0, water:71, oxy:21, hab:100 }
+  },
+  moon: {
+    name: 'Moon', orbC: 'oc-moo',
+    vigC: 'vig-mars-0',
+    cap: 'Shackleton Crater base. Rotating crew of 4.',
+    glow: '0 0 30px rgba(160,160,180,.3)',
+    desc: 'The Artemis base is operational since 2030. A rotating crew of four conducts research on low-gravity medicine, closed-loop life support, and regolith construction. Small fission reactors provide power through the two-week lunar night. First helium-3 extraction experiments underway.',
+    stats: { temp:-23, pres:0, water:0.1, oxy:0, hab:0 }
+  },
+  mercury: {
+    name: 'Mercury', orbC: 'oc-mer',
+    vigC: 'vig-venus-0',
+    cap: 'Perpetual sunrise at the poles. A world waiting.',
+    glow: '0 0 35px rgba(200,120,20,.4)',
+    desc: 'The future industrial heartland of the solar system. Polar craters contain water ice and are in permanent shadow — ideal for fusion reactor siting. Sun-facing crater rims receive continuous solar radiation. Once a mission launches, Mercury will become the primary source of Dyson swarm components. Estimated launch window: 15–20 years.',
+    stats: { temp:167, pres:0, water:0.5, oxy:0, hab:0 }
+  }
+};
+
+// ── Terraforming data ─────────────────────────────────────
+// events: [{pct, title, text, vigC, vigCap}] — fire at progress %, tracked per step
+// choices: [{label, desc, projection, active, dur}]
+const TD = {
+
+  mars: [
+    {
+      name:'Barren Mars', phase:'Initial State',
+      desc:'The red planet. Thin CO₂ atmosphere at 0.6% of Earth\'s pressure. Average -60°C surface. No magnetic field. No liquid water. Silence across a world that may once have had oceans.',
+      stats:{temp:-60,pres:0.006,water:0,oxy:0.13,hab:0},
+      vigC:'vig-mars-0', orbC:'oc-m0', glow:'0 0 28px rgba(180,60,20,.3)',
+      cap:'The Martian surface. Ancient and silent.',
+      events:[],
+      choices:[
+        { label:'Orbital Laser Arrays', active:true, dur:80,
+          desc:'Construct a network of orbital mirrors that focus solar energy on the polar CO₂ ice caps. Atmospheric thickening begins from orbit. Fastest warming method.',
+          proj:'→ Atmosphere reaches 2% Earth pressure in ~80 years. Triggers first dust storm season.' },
+        { label:'Statite Mirror Array', active:false, dur:120,
+          desc:'Reflective mirrors at Mars-Sun L1. Passive warming over a longer period. Significantly cheaper in Mercury components.',
+          proj:'→ Slower path. 120 years to equivalent warming. More energy-efficient but no orbital infrastructure built.' },
+        { label:'Polar Nuclear Detonations', active:false, dur:20,
+          desc:'Targeted nuclear strikes at the poles. CO₂ sublimes in years rather than decades. Uncontrolled, radiation risk, no infrastructure benefit.',
+          proj:'→ Fastest method: 20 years. Radiation dissipates before biological phase. No reusable infrastructure.' }
+      ]
+    },
+    {
+      name:'Warming Mars', phase:'Atmospheric Thickening',
+      desc:'Orbital laser arrays firing continuously. Polar caps retreating. CO₂ sublimating — pressure rising slowly. The average temperature is climbing. Something is changing.',
+      stats:{temp:-45,pres:0.02,water:0,oxy:0.13,hab:0},
+      vigC:'vig-mars-1', orbC:'oc-m1', glow:'0 0 34px rgba(200,80,30,.35)',
+      cap:'The poles are retreating. Year by year, Mars breathes a little more.',
+      events:[
+        { pct:.55, vigC:'vig-mars-1', vigCap:'Orbital data shows the first measurable atmospheric change.',
+          title:'Atmospheric Pressure: First Milestone',
+          text:'At mission year 44, the atmospheric monitoring array recorded the first measurable pressure increase above baseline. 0.008 atmospheres. Less than 1% of Earth\'s. Scientists called the press conference anyway. The room was full. Someone asked if it was enough to feel. The answer was no. Not for three hundred more years. The room stayed full.' },
+        { pct:.88, vigC:'vig-mars-1', vigCap:'The first Martian dust storm season. Unexpected. Magnificent.',
+          title:'First Dust Storm Season',
+          text:'As the atmosphere thickens, something unexpected emerges: the first recorded dust storm season. The same atmospheric density that will one day let humans breathe is, for now, picking up ancient surface dust and throwing it across continents. Scientists on Earth watch the satellite feeds in silence. One writes in her notes: it looks angry.' }
+      ],
+      choices:[
+        { label:'L1 Magnetic Umbrella', active:true, dur:30,
+          desc:'A superconducting structure at the Mars-Sun L1 Lagrange point. Deflects solar wind. Without this, the growing atmosphere will slowly erode back into space over centuries.',
+          proj:'→ Atmosphere protected permanently. Essential for all future biological phases.' },
+        { label:'Plasma Torus Shield', active:false, dur:40,
+          desc:'An artificial plasma torus injected into Mars orbit. More powerful coverage than the L1 umbrella. Complex to maintain.',
+          proj:'→ 10 years slower, more powerful. Risk of instability events requiring intervention.' }
+      ]
+    },
+    {
+      name:'Shielded Mars', phase:'Magnetic Protection Active',
+      desc:'The L1 magnetic umbrella is operational. Solar wind now deflects around Mars. The growing atmosphere is protected. Temperature still extreme but stable. Next challenge: water.',
+      stats:{temp:-35,pres:0.06,water:0,oxy:0.13,hab:0},
+      vigC:'vig-mars-2', orbC:'oc-m2', glow:'0 0 38px rgba(120,100,80,.32)',
+      cap:'The magnetic umbrella holds. Mars keeps its air.',
+      events:[
+        { pct:.6, vigC:'vig-mars-2', vigCap:'The first frost. Not CO₂ this time. Water.',
+          title:'First Water Ice on the Surface',
+          text:'Atmospheric moisture from the slowly thickening air is condensing and freezing at the poles. Small amounts. Trace quantities. But for the first time in three billion years, water ice is forming naturally on the Martian surface from the atmosphere rather than lying dormant underground. The lead atmospheric scientist sent a message that night to her daughter on Earth. It said: it is working.' }
+      ],
+      choices:[
+        { label:'Europa Ice Import', active:true, dur:70,
+          desc:'Redirect ice bodies from the outer solar system toward Mars. Calculated gravitational nudges and solar sail tugs over decades. Billions of tonnes of water ice delivered.',
+          proj:'→ 15% water cover in 70 years. Requires no local resources. Cross-planet logistics.' },
+        { label:'Comet Redirection', active:false, dur:90,
+          desc:'Capture and redirect comets through the inner solar system. Higher water yield but imprecise delivery. Some surface scarring.',
+          proj:'→ 20% water cover, 90 years. More water than Europa option. Rougher delivery.' },
+        { label:'Subsurface Drilling', active:false, dur:100,
+          desc:'Extract ancient subsurface ice reserves using deep drill networks. Entirely local — no import logistics required.',
+          proj:'→ 10% water cover, 100 years. Self-sufficient method. Releases some trapped gases.' }
+      ]
+    },
+    {
+      name:'Wet Mars', phase:'First Oceans',
+      desc:'The first Martian seas. Cold, shallow, mineral-dense. Nothing lives in them yet. But they exist. The pressure is rising. Temperature approaching survivable. Mars is becoming something it hasn\'t been in three billion years.',
+      stats:{temp:-10,pres:0.18,water:15,oxy:0.5,hab:2},
+      vigC:'vig-mars-3', orbC:'oc-m3', glow:'0 0 44px rgba(50,90,130,.4)',
+      cap:'The first Martian sea. No name yet. No life yet.',
+      events:[
+        { pct:.35, vigC:'vig-mars-3', vigCap:'14:23 local time. 2.3mm of precipitation.',
+          title:'First Rain on Mars',
+          text:'At 14:23 local time, water fell from the Martian sky for the first time in three billion years. The meteorological station recorded 2.3 millimetres of precipitation before the event ended. The lead scientist, watching from the habitat window, said nothing for a long time. Then she said: that\'s it. That\'s exactly it.' },
+        { pct:.78, vigC:'vig-mars-3', vigCap:'A Mars-born generation is growing up.',
+          title:'Children of Mars',
+          text:'The census counted 34,000 permanent Martian residents this year. Among them, 847 children born on Mars. The oldest of them have never been to Earth. They describe Earth photographs as looking "too blue." Physiologists note their bone density is measurably lower than Earth-born norms. Psychologists note they show no anxiety about enclosed spaces. A new generation is forming. It is not quite the same as us.' }
+      ],
+      choices:[
+        { label:'Pioneer Bacterial Seeding', active:true, dur:120,
+          desc:'Engineered cyanobacteria and nitrogen-fixing microbes, stress-tested on the Moon base. Introduced to Martian seas and soil. Building a biosphere from chemistry up.',
+          proj:'→ Natural biosphere foundation in 120 years. Wild, unpredictable, genuinely alive.' },
+        { label:'Synthetic Biology Package', active:false, dur:60,
+          desc:'Synthetic organisms with non-Earth biochemistry designed for Mars conditions. Faster but produces a managed rather than wild ecosystem.',
+          proj:'→ 60 years to stable biosphere. More controlled, less surprising. Locks out some natural evolution paths.' }
+      ]
+    },
+    {
+      name:'Living Mars', phase:'Biological Colonisation',
+      desc:'The first organisms establishing. Bacterial mats on shallow sea floors. Lichen spreading across equatorial rock faces. The atmosphere thickens from biological output. Mars is, for the first time in geological memory, alive.',
+      stats:{temp:5,pres:0.35,water:30,oxy:4,hab:15},
+      vigC:'vig-mars-4', orbC:'oc-m4', glow:'0 0 50px rgba(50,120,70,.44)',
+      cap:'The first green Mars has ever seen. It took five centuries.',
+      events:[
+        { pct:.3, vigC:'vig-mars-4', vigCap:'The first insects. A milestone so small, so enormous.',
+          title:'First Insects on Mars',
+          text:'The entomology team released the first batch of engineered pollinators into the equatorial dome trial zones today. They are small. Unremarkable-looking. They are the first animals to have ever lived on Mars. The team watched them for three hours without moving. One of the interns asked if they should name them. The team lead said: give them a century first. See what they become.' },
+        { pct:.72, vigC:'vig-mars-4', vigCap:'The first Martian autumn.',
+          title:'Red Season',
+          text:'The first autumn on a settled Mars arrived quietly. Scientists had predicted the colours — the imported maples and aspens performing exactly as their genetics instructed, indifferent to the alien sky. What nobody predicted was what the settlers called it. Red Season. For two centuries, red had meant dust and thin air. Now it meant something else — a planet briefly wearing the colour of what it used to be. The first Red Season festival lasted three days. It has not stopped since.' }
+      ],
+      choices:[
+        { label:'Continue Ecosystem Development', active:true, dur:150,
+          desc:'Allow the biosphere to mature over another century and a half. Introduce complex organisms. Let Mars find its own ecological equilibrium.',
+          proj:'→ Rich, self-sustaining biosphere in 150 years. Unpredictable evolution. Maximum ecological wealth.' }
+      ]
+    },
+    {
+      name:'New Mars', phase:'Terraforming Complete',
+      desc:'Mars is habitable. Not Earth — it never will be. 0.38g. A sky blue-green at the horizon. But humans walk its surface unassisted. A second world exists in this solar system.',
+      stats:{temp:14,pres:0.6,water:45,oxy:18,hab:72},
+      vigC:'vig-mars-5', orbC:'oc-m5', glow:'0 0 55px rgba(40,130,90,.5)',
+      cap:'Mars. Inhabited. Alive. A second home.',
+      events:[],
+      choices:[]
+    }
+  ],
+
+  venus: [
+    {
+      name:'Hell Planet', phase:'Initial State',
+      desc:'460°C surface. 90 atmospheres of CO₂. Sulphuric acid clouds. The most hostile surface in the inner solar system. And yet: almost exactly Earth\'s size. Almost exactly Earth\'s gravity.',
+      stats:{temp:460,pres:90,water:0,oxy:0,hab:0},
+      vigC:'vig-venus-0', orbC:'oc-v0', glow:'0 0 34px rgba(220,120,20,.5)',
+      cap:'The surface of Venus. Lead would be liquid here.',
+      events:[],
+      choices:[
+        { label:'Shade Mirror at L1', active:true, dur:100,
+          desc:'A vast reflective structure at the Venus-Sun L1 point, blocking 30% of solar input. Passive cooling — the planet cools on planetary timescales. Sets up all future operations.',
+          proj:'→ 12°C cooling per 50 years. Foundation for all other methods. Required first step.' },
+        { label:'Atmospheric Vortex Engines', active:false, dur:60,
+          desc:'Active thermodynamic pumps that exploit the temperature differential between surface and upper atmosphere. Cools faster and generates surplus energy.',
+          proj:'→ 40% faster cooling. Generates energy that offsets construction cost. More complex to deploy.' }
+      ]
+    },
+    {
+      name:'Cooling Venus', phase:'Shade Mirror Active',
+      desc:'The shade mirror is operational. 30% of solar input blocked. Venus is cooling — slowly, stubbornly. The thick CO₂ atmosphere holds heat for centuries. In fifty years, twelve degrees.',
+      stats:{temp:380,pres:88,water:0,oxy:0,hab:0},
+      vigC:'vig-venus-1', orbC:'oc-v1', glow:'0 0 38px rgba(200,100,15,.42)',
+      cap:'Slightly less hellish. Progress measured in decades.',
+      events:[
+        { pct:.48, vigC:'vig-venus-1', vigCap:'The shade mirror. Humanity\'s largest structure.',
+          title:'The Long Cooling',
+          text:'The shade mirror has been operational for fifty years. Venus has cooled by twelve degrees Celsius. The scientists have run the projections again. Complete cooling will take approximately 800 more years at the current rate. The lead engineer submitted a funding request for the next generation of shade panels. The committee approved it in twelve minutes.' },
+        { pct:.88, vigC:'vig-venus-1', vigCap:'The CO₂ rain is coming. Limestone falling from the sky.',
+          title:'Carbonate Rain Begins',
+          text:'Spectrographic analysis of the upper atmosphere confirms: the carbonate catalyst seeding is reacting. CO₂ molecules are binding with the catalyst compounds and precipitating as calcium carbonate — limestone, falling through 50 kilometres of atmosphere to settle on a surface that has not seen rain in four billion years. It is not water. But something is falling from the sky of Venus for the first time in geological memory.' }
+      ],
+      choices:[
+        { label:'Carbonate Catalyst Seeding', active:true, dur:80,
+          desc:'Engineered catalysts seeded into the atmosphere bind with CO₂ to form calcium carbonate, which precipitates to the surface. The CO₂ rains out as limestone. Exported CO₂ is redirected to Mars as rocket fuel.',
+          proj:'→ Atmosphere at 40 atm in 80 years. CO₂ exported to Mars: resource synergy.' },
+        { label:'CO₂ Mass Driver Export', active:false, dur:120,
+          desc:'Physically launch compressed CO₂ into solar orbit via surface mass drivers. Precise extraction but energy-intensive. Requires surface infrastructure at extreme temperatures.',
+          proj:'→ 120 years. More CO₂ removed per year but at 3× the energy cost. No byproduct.' }
+      ]
+    },
+    {
+      name:'Thinning Venus', phase:'CO₂ Removal',
+      desc:'The carbonate catalyst seeding is working. Pressure dropping decade by decade. Temperature still extreme — 180°C — but falling. The surface is becoming accessible to robotic infrastructure.',
+      stats:{temp:180,pres:40,water:0,oxy:0,hab:0},
+      vigC:'vig-venus-2', orbC:'oc-v2', glow:'0 0 36px rgba(160,90,12,.34)',
+      cap:'CO₂ rains as limestone. The sky is slightly less orange.',
+      events:[
+        { pct:.65, vigC:'vig-venus-2', vigCap:'The surface temperature drops below 200°C for the first time.',
+          title:'Below 200°C — A Threshold',
+          text:'The surface monitoring network recorded 197°C today. A number. A threshold. Below this temperature, certain advanced ceramics survive indefinitely on the Venusian surface. The first permanent robotic infrastructure can now be deployed — water distribution nodes, atmospheric processors, the foundations of a supply chain. The planet is no longer just a target. It is becoming a worksite.' }
+      ],
+      choices:[
+        { label:'Water Delivery Operations', active:true, dur:90,
+          desc:'Redirect ice bodies from the outer solar system toward Venus orbit. Decades of gravitational assists and sail tugs. Billions of tonnes of water ice over ninety years.',
+          proj:'→ 10% water cover in 90 years. Enables biological phase.' },
+        { label:'In-Situ Hydrogen Extraction', active:false, dur:110,
+          desc:'Extract hydrogen from the remaining CO₂ atmosphere via electrolysis, combine with oxygen to form water in-situ. Entirely local — no import logistics.',
+          proj:'→ 8% water cover, 110 years. Self-sufficient. Lower volume than import option.' }
+      ]
+    },
+    {
+      name:'Water Venus', phase:'Hydrosphere Forming',
+      desc:'Water is arriving on Venus. The first rains in billions of years — not acid, just water. Temperature has fallen below 100°C. Pressure approaching breathable. Venus is stirring toward life.',
+      stats:{temp:65,pres:3,water:10,oxy:1,hab:5},
+      vigC:'vig-venus-3', orbC:'oc-v3', glow:'0 0 44px rgba(80,130,80,.4)',
+      cap:'The first rain on Venus that isn\'t acid.',
+      events:[
+        { pct:.28, vigC:'vig-venus-3', vigCap:'09:17 local time. The monitoring station recorded it.',
+          title:'First Rain on Venus',
+          text:'The atmospheric monitoring station recorded precipitation at 09:17 local time. Water. Not sulphuric acid — water. The station had been placed to record exactly this moment. Its designers had been dead for forty years. The data was transmitted to Earth in eleven minutes. The response from the receiving station was a single word, sent back eleven minutes later: confirmed.' },
+        { pct:.75, vigC:'vig-venus-3', vigCap:'The terminator zone. Perpetual golden hour.',
+          title:'The Cities of the Terminator',
+          text:'Urban planners published the first serious proposal for Venusian habitation this year. Not on the surface — not yet — but the terminator zone: that permanent band of twilight where night and day meet, drifting at 6.5 kilometres per hour around the equator. A city built wide enough that the habitable band drifts through it over weeks. The sunlit quarter rotates. The architecture rotates with it. Someone would always be in the golden hour.' }
+      ],
+      choices:[
+        { label:'Begin Biological Seeding', active:true, dur:140,
+          desc:'Pioneer organisms adapted for Venus\'s specific chemistry and long solar day. Cyanobacteria in the new seas. Extremophile lichen on coastal rocks. The biosphere begins.',
+          proj:'→ Habitable Venus in 140 years. 0.9g gravity. Terminator zone cities first.' }
+      ]
+    },
+    {
+      name:'Living Venus', phase:'Terraforming Complete',
+      desc:'Venus is habitable. 0.9g — almost Earth-normal. The slow rotation creates climate bands rather than seasons, but the terminator zone is the most temperate environment in the solar system outside Earth. Three worlds now carry life.',
+      stats:{temp:28,pres:1.2,water:35,oxy:20,hab:65},
+      vigC:'vig-venus-4', orbC:'oc-v4', glow:'0 0 55px rgba(55,135,85,.5)',
+      cap:'Venus. Reborn. The terminator cities catch perpetual sunrise.',
+      events:[],
+      choices:[]
+    }
+  ]
+};
+
+// ── State ─────────────────────────────────────────────────
+const S = {
+  year: 2033, speed: 1, paused: false, openP: null,
+  p: {
+    mars:  { step:0, busy:false, prog:0, yLeft:0, yTotal:0, avail:true,  firedEvents:{} },
+    venus: { step:0, busy:false, prog:0, yLeft:0, yTotal:0, avail:true,  firedEvents:{} }
+  },
+  ceQ: [], ceActive: false
+};
+
+// ── Tick ──────────────────────────────────────────────────
+let lastT = null;
+function tick(ts) {
+  if (!lastT) lastT = ts;
+  const dt = (ts - lastT) / 1000; lastT = ts;
+  if (!S.paused) {
+    const dy = dt * S.speed / 2; // 2 sec = 1 game-year at 1×
+    S.year += dy;
+    const yStr = `YEAR ${~~S.year}`;
+    document.getElementById('yr').textContent    = yStr;
+    document.getElementById('ir-yr').textContent = yStr;
+    tickPlanets(dy);
+    drainCE();
+    if (S.openP && (S.openP === 'mars' || S.openP === 'venus')) refreshStats(S.openP);
+  }
+  requestAnimationFrame(tick);
+}
+
+function tickPlanets(dy) {
+  ['mars','venus'].forEach(p => {
+    const ps = S.p[p];
+    if (!ps.busy) return;
+    ps.yLeft -= dy;
+    ps.prog = Math.min(1, 1 - ps.yLeft / ps.yTotal);
+
+    // Progress bar in panel tile
+    const pf = document.getElementById(`tprog-${p}`);
+    if (pf) pf.style.width = (ps.prog * 100) + '%';
+    tst(p, `${Math.max(0,~~ps.yLeft)} YRS REMAINING`);
+
+    // Mid-phase culture events
+    const d = TD[p][ps.step];
+    if (d.events) {
+      d.events.forEach((ev, i) => {
+        const key = `${ps.step}-${i}`;
+        if (!ps.firedEvents[key] && ps.prog >= ev.pct) {
+          ps.firedEvents[key] = true;
+          S.ceQ.push({ ...ev, year: ~~S.year });
+        }
+      });
+    }
+
+    // Refresh action section if open
+    if (S.openP === p) refreshActionWrap(p);
+
+    // Phase complete
+    if (ps.yLeft <= 0) {
+      ps.busy = false; ps.prog = 1;
+      ps.step++;
+      const nxt = TD[p][ps.step];
+      if (nxt && nxt.choices.length > 0) {
+        ps.avail = true; badge(p, true); tst(p, 'DECISION REQUIRED');
+      } else if (!nxt || nxt.choices.length === 0) {
+        badge(p, false); tst(p, 'TERRAFORMING COMPLETE ✓');
+      }
+      updVis(p); tph(p);
+      if (S.openP === p) renderInspect(p);
+    }
+  });
+}
+
+// ── Culture events ────────────────────────────────────────
+function drainCE() {
+  if (S.ceActive || !S.ceQ.length) return;
+  const e = S.ceQ.shift();
+  S.ceActive = true; S.paused = true;
+  document.getElementById('cetitle').textContent   = e.title;
+  document.getElementById('cetext').textContent    = e.text;
+  document.getElementById('ceyr').textContent      = `YEAR ${e.year}`;
+  const cv = document.getElementById('ce-vig');
+  cv.className = `ce-vig ${e.vigC || 'vig-mars-0'}`;
+  document.getElementById('ce-vig-cap').textContent = e.vigCap || '';
+  document.getElementById('ceov').classList.remove('hidden');
+}
+function dismissCE() {
+  document.getElementById('ceov').classList.add('hidden');
+  S.ceActive = false; S.paused = false;
+}
+
+// ── Inspect view ──────────────────────────────────────────
+function openPlanet(p) {
+  S.openP = p;
+  document.querySelectorAll('.ptile').forEach(t => t.classList.remove('sel'));
+  const tile = document.getElementById(`tile-${p}`);
+  if (tile) tile.classList.add('sel');
+  document.getElementById('ss-wrap').style.display = 'none';
+  document.getElementById('inspect').classList.add('active');
+  if (p === 'mars' || p === 'venus') {
+    renderInspect(p);
+  } else {
+    renderStatic(p);
+  }
+}
+
+function closePlanet() {
+  S.openP = null;
+  document.querySelectorAll('.ptile').forEach(t => t.classList.remove('sel'));
+  document.getElementById('ss-wrap').style.display = '';
+  document.getElementById('inspect').classList.remove('active');
+}
+
+function renderStatic(p) {
+  const d = STATIC[p];
+  document.getElementById('ir-pname').textContent = d.name.toUpperCase();
+  document.getElementById('planet-orb').className = d.orbC;
+  document.getElementById('planet-glow').style.boxShadow = d.glow;
+  document.getElementById('vignette').className = d.vigC;
+  document.getElementById('vig-cap').textContent = d.cap;
+  document.getElementById('ir-phase').textContent = d.name;
+  document.getElementById('ir-desc').textContent  = d.desc;
+  const st = d.stats;
+  document.getElementById('s-temp').textContent  = `${st.temp}°C`;
+  document.getElementById('s-pres').textContent  = `${st.pres} atm`;
+  document.getElementById('s-water').textContent = `${st.water}%`;
+  document.getElementById('s-oxy').textContent   = `${st.oxy}%`;
+  setBar('bh','bvh', Math.min(st.hab,100), st.hab+'%');
+  setBar('bo','bvo', Math.min(st.oxy/21*100,100), st.oxy+'%');
+  setBar('bw','bvw', Math.min(st.water,100), st.water+'%');
+  document.getElementById('ir-action-wrap').innerHTML = `
+    <div class="ir-shdr">// STATUS</div>
+    <div style="font-size:.88em;color:var(--text-d);line-height:1.75;padding:.5em .7em;border:1px solid var(--border-d)">
+      ${p === 'earth' ? 'Type 1 research in progress. Fusion ignition projected in 40–60 years. Assign more scientists to accelerate.' :
+        p === 'moon'  ? 'Research outpost active. Tracks: low-gravity medicine, closed-loop life support, helium-3 extraction. Provides Mars/Venus colonisation bonuses.' :
+                        'Mission not yet launched. Resources from Mercury will dramatically accelerate Dyson swarm production and all terraforming timelines.'}
+    </div>`;
+}
+
+function renderInspect(p) {
+  const ps = S.p[p];
+  const si = Math.min(ps.step, TD[p].length - 1);
+  const d  = TD[p][si];
+  document.getElementById('ir-pname').textContent = p.toUpperCase();
+  document.getElementById('planet-orb').className = d.orbC;
+  document.getElementById('planet-glow').style.boxShadow = d.glow;
+  document.getElementById('vignette').className = d.vigC;
+  document.getElementById('vig-cap').textContent = d.cap;
+  document.getElementById('ir-phase').textContent = d.name;
+  document.getElementById('ir-desc').textContent  = d.desc;
+  refreshStats(p);
+  refreshActionWrap(p);
+}
+
+// Real-time interpolated stats
+function refreshStats(p) {
+  const ps = S.p[p];
+  const si = Math.min(ps.step, TD[p].length - 1);
+  const curr = TD[p][si].stats;
+  let st = { ...curr };
+  if (ps.busy && ps.step + 1 < TD[p].length) {
+    const next = TD[p][ps.step + 1].stats;
+    const t = ps.prog;
+    st = {
+      temp:  fmt1(lerp(curr.temp,  next.temp,  t)),
+      pres:  fmt1(lerp(curr.pres,  next.pres,  t)),
+      water: fmt1(lerp(curr.water, next.water, t)),
+      oxy:   fmt1(lerp(curr.oxy,   next.oxy,   t)),
+      hab:   fmt1(lerp(curr.hab,   next.hab,   t))
+    };
+  }
+  document.getElementById('s-temp').textContent  = `${st.temp}°C`;
+  document.getElementById('s-pres').textContent  = `${st.pres} atm`;
+  document.getElementById('s-water').textContent = `${st.water}%`;
+  document.getElementById('s-oxy').textContent   = `${st.oxy}%`;
+  setBar('bh','bvh', Math.min(st.hab,100), st.hab+'%');
+  setBar('bo','bvo', Math.min(st.oxy/21*100,100), st.oxy+'%');
+  setBar('bw','bvw', Math.min(st.water,100), st.water+'%');
+}
+
+function refreshActionWrap(p) {
+  const ps  = S.p[p];
+  const si  = Math.min(ps.step, TD[p].length - 1);
+  const d   = TD[p][si];
+  const box = document.getElementById('ir-action-wrap');
+
+  // PROCESSING STATE
+  if (ps.busy) {
+    const pct    = ~~(ps.prog * 100);
+    const yLeft  = Math.max(0, ~~ps.yLeft);
+    const nextSi = Math.min(ps.step + 1, TD[p].length - 1);
+    const nextD  = TD[p][nextSi];
+    const hasNext = nextSi !== si;
+    box.innerHTML = `
+      <div class="ir-shdr">// IN PROGRESS</div>
+      <div class="proc-box">
+        <div class="proc-lbl">PROCESSING</div>
+        <span class="proc-yrs">${yLeft} YEARS REMAINING</span>
+        <div class="proc-bar"><div class="proc-fill" style="width:${pct}%"></div></div>
+      </div>
+      ${hasNext ? `
+      <div class="next-preview">
+        <div class="np-lbl">// NEXT CHALLENGE</div>
+        <div class="np-name">${nextD.name}</div>
+        <div class="np-desc">${nextD.desc.substring(0,180)}…</div>
+      </div>` : ''}`;
+    return;
+  }
+
+  // COMPLETE STATE
+  if (!d.choices || d.choices.length === 0) {
+    box.innerHTML = `
+      <div class="ir-shdr">// COMPLETE</div>
+      <div class="done-box">✓ TERRAFORMING<br>COMPLETE<br><br>${p.toUpperCase()} IS NOW HABITABLE</div>`;
+    return;
+  }
+
+  // DECISION STATE — show all choices (active + disabled)
+  const html = [`<div class="ir-shdr">// DECISION REQUIRED</div><div class="choices-wrap">`];
+  d.choices.forEach(ch => {
+    const cls = ch.active ? 'active' : 'inactive';
+    const tag = ch.active
+      ? `<span class="cc-tag rec">RECOMMENDED — POC PATH</span>`
+      : `<span class="cc-tag poc">LOCKED IN POC</span>`;
+    const clickAttr = ch.active && ps.avail
+      ? `onclick="doAction('${p}', ${ch.dur})"` : '';
+    html.push(`
+      <div class="choice-card ${cls}" ${clickAttr}>
+        <div class="cc-top"><span class="cc-name">${ch.label}</span>${tag}</div>
+        <div class="cc-desc">${ch.desc}</div>
+        <div class="cc-proj">${ch.proj}</div>
+      </div>`);
+  });
+  html.push('</div>');
+  box.innerHTML = html.join('');
+}
+
+// ── Helpers ───────────────────────────────────────────────
+function doAction(p, dur) {
+  const ps = S.p[p];
+  if (ps.busy || !ps.avail) return;
+  ps.busy = true; ps.yLeft = dur; ps.yTotal = dur; ps.prog = 0; ps.avail = false;
+  badge(p, false);
+  tst(p, `${dur} YRS REMAINING`);
+  refreshActionWrap(p);
+}
+
+function setBar(bid, vid, pct, label) {
+  document.getElementById(bid).style.width = pct + '%';
+  document.getElementById(vid).textContent = label;
+}
+
+function updVis(p) {
+  const si = Math.min(S.p[p].step, TD[p].length - 1);
+  const d  = TD[p][si];
+  const dot = document.getElementById(`pd-${p}`);
+  if (dot) { dot.className = `pd ${d.orbC}`; dot.onclick = () => openPlanet(p); }
+  const to = document.getElementById(`torb-${p}`);
+  if (to) to.className = `ptorb ${d.orbC}`;
+  const sb = document.getElementById(`sb-${p}`);
+  if (sb) sb.textContent = d.phase;
+}
+
+function tph(p) {
+  const si = Math.min(S.p[p].step, TD[p].length - 1);
+  const el = document.getElementById(`tph-${p}`);
+  if (el) el.textContent = TD[p][si].phase;
+}
+
+function badge(p, show) {
+  const b = document.getElementById(`tbdg-${p}`);
+  if (b) b.style.display = show ? 'flex' : 'none';
+}
+
+function tst(p, txt) {
+  const el = document.getElementById(`tst-${p}`);
+  if (el) el.textContent = txt;
+}
+
+// ── Speed + orbit visual speed ────────────────────────────
+function setSpd(s) {
+  S.speed = s;
+  document.querySelectorAll('.spd').forEach((b,i) => b.classList.toggle('on',[1,5,20][i]===s));
+  updateOrbits(s);
+}
+
+function updateOrbits(s) {
+  // Visual orbit speed: pleasant and readable regardless of game speed
+  // Base: Earth year = 20 real seconds at 1×. Slight scaling with game speed.
+  const base  = 20;
+  const scale = s <= 1 ? 1 : s <= 5 ? 1.35 : 1.8;
+  const planets = [['mercury',0.24],['venus',0.615],['earth',1],['mars',1.88]];
+  planets.forEach(([name, period]) => {
+    const el = document.getElementById(`ow-${name}`);
+    if (el) el.style.animationDuration = `${(base * period / scale).toFixed(2)}s`;
+  });
+}
+
+// ── Music ─────────────────────────────────────────────────
+let mon = false;
+function toggleMusic() {
+  const a = document.getElementById('bgm');
+  const b = document.getElementById('mbtn');
+  if (!a.src || a.src === window.location.href) { b.textContent = '— ADD SRC'; return; }
+  if (mon) { a.pause(); b.textContent = '▶ PLAY'; }
+  else     { a.play().catch(() => b.textContent = '— ERROR'); b.textContent = '⏸ PAUSE'; }
+  mon = !mon;
+}
+
+// ── Boot ──────────────────────────────────────────────────
+badge('venus', false);
+badge('mars', true);
+updateOrbits(1);
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>
