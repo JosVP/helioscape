@@ -14,6 +14,24 @@ config/name="Helioscape"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 config/icon="res://icon.svg"
 
+[autoload]
+
+EventBus="*res://src/autoloads/EventBus.gd"
+LocalizationManager="*res://src/autoloads/LocalizationManager.gd"
+AudioManager="*res://src/autoloads/AudioManager.gd"
+
+[audio]
+
+buses/default_bus_layout="res://default_bus_layout.tres"
+
+[gui]
+
+theme/custom="res://assets/theme/helioscape_theme.tres"
+
+[internationalization]
+
+locale/translations=PackedStringArray("res://data/localization/en.en.translation")
+
 [physics]
 
 3d/physics_engine="Jolt Physics"

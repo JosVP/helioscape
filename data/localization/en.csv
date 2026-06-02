@@ -1,0 +1,65 @@
+keys,en
+UI_YEAR_LABEL,Year {year}
+UI_PAUSE,Pause
+UI_PLAY,Play
+UI_SPEED_1X,1×
+UI_SPEED_5X,5×
+UI_PLANET_LOCKED,Humanity hasn't reached this far yet.
+UI_RESEARCH_EMPTY,No active research. Select a track to begin.
+UI_RP_DISPLAY,{used} / {total} RP in use
+UI_YEARS_REMAINING,~{n} years
+UI_TECH_COST,{rp} RP · {years} years
+UI_COMMIT_READY,Commit composition
+UI_COMMIT_NEEDS_SLOTS,Fill all required slots to commit
+UI_PREVIEW_COMPOSITION,Preview composition
+UI_BACK_TO_PALETTE,Back to palette
+STATUS_EXTREME_COLD,Extreme cold — cryophilic organisms only
+STATUS_SEVERE_COLD,Severe cold — adapted pioneers viable
+STATUS_COLD,Cold — tundra-specialist organisms
+STATUS_TEMPERATE,Temperate — broad organism tolerance
+STATUS_WARM,Warm — full palette available
+STATUS_EXTREME_HEAT,Extreme heat — most organisms non-viable
+STATUS_TRACE_ATMOSPHERE,Trace atmosphere — nearly vacuum
+STATUS_THIN_ATMOSPHERE,Thin atmosphere — high-altitude Earth equivalent
+STATUS_BUILDING_ATMOSPHERE,Building — some weather developing
+STATUS_SUBSTANTIAL_ATMOSPHERE,Substantial atmosphere — pressure suit optional
+STATUS_EXTREME_PRESSURE,Extreme pressure — crushing at surface
+STATUS_HIGH_PRESSURE,High pressure — survivable in sealed habitat
+STATUS_SOIL_RAW_REGOLITH,Raw regolith — no organic matter, extreme pH
+STATUS_SOIL_EARLY_MINERALS,Early mineral chemistry developing
+STATUS_SOIL_BASIC,Basic soil established
+STATUS_SOIL_COMPLEX,Growing soil complexity
+STATUS_NO_LIQUID_WATER,No liquid water — aquatic organisms unavailable
+STATUS_FRESH_OCEAN,Fresh to slightly saline — broad microbial tolerance
+STATUS_ACID_OCEAN,Residual acidity — sulphur-tolerant organisms recommended
+STABILITY_NO_DECOMPOSERS,No decomposers — organic matter will accumulate and choke photosynthesis around Year ~12
+STABILITY_NO_HOST_PLANT,Nitrogen-fixers present but no anchor plant — nitrogen disperses before it's usable
+STABILITY_NEAR_MANDATORY_MISSING,Acidic Soil Remediation Package strongly recommended for Venus Bio II
+STABILITY_PREDATOR_NO_PREY,Predator insects with no prey — composition will collapse
+KARDASHEV_LABEL,K {level}
+KARDASHEV_073,Pre-fusion civilisation
+KARDASHEV_10,Type I Civilisation
+KARDASHEV_15,First Era Complete
+KARDASHEV_20,Type II Civilisation
+CONFIRM_IRREVERSIBLE,This cannot be undone.
+CONFIRM_POLAR_DETONATION,Authorise polar detonation on Mars? This is permanent and will delay dome colonisation by ~40 years.
+CONFIRM_EUROPA_IMPACT,Authorise Europa redirected impact? The impactor will arrive in ~50-70 years. The Hunt for Life window will close.
+CONFIRM_BIO_COMMIT,Commit this composition? Once running, the phase cannot be redesigned unless it collapses.
+CONFIRM_YES,Confirm
+CONFIRM_CANCEL,Cancel
+BIO_SLOT_FOUNDATION,Foundation
+BIO_SLOT_CATALYST,Catalyst
+BIO_SLOT_STABILISER,Stabiliser
+BIO_SLOT_BOOSTER,Booster
+BIO_SLOT_EMERGENT,Emergent
+BIO_SLOT_EMERGENT_LOCKED,Locked — may activate mid-phase
+BIO_DURATION_ESTIMATE,Estimated duration: ~{years} years
+BIO_STABILITY_LABEL,Stability
+BIO_TAG_LEAN,This composition leans {tag}
+BIO_TAG_NATURALIST,Naturalist
+BIO_TAG_ARCHITECT,Architect
+BIO_TAG_NEUTRAL,Neutral
+BIO_PROJECTION_PLACEHOLDER,Biosphere projection: {planet} Phase {phase}
+BIO_COUNTS_AS_3,Counts as 3 organisms
+BIO_NEAR_MANDATORY,Strongly recommended for these conditions
+BIO_AUTO_APPLIED,Auto-applied
