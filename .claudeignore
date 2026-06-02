@@ -1,0 +1,7 @@
+.godot/
+assets/textures/
+assets/audio/
+*.import
+*.uid
+*.tres
+*.res
