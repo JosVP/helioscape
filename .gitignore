@@ -1,2 +1,8 @@
+# Godot's .godot/ directory is build cache, not source. It is safe to delete and
+# Godot will regenerate it the next time the project is opened.
+.godot/
+*.import
+export_presets.cfg
 .DS_Store
 **/.DS_Store
+Thumbs.db
