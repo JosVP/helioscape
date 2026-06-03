@@ -1,0 +1,83 @@
+[
+  {
+    "id": "type_1",
+    "display_name": "Type I Civilisation",
+    "description": "We have learned to draw on our star at a planetary scale, and the future now feels like something we can build rather than merely survive.",
+    "conditions": [
+      {
+        "type": "deuterium_fusion_online"
+      },
+      {
+        "type": "dyson_15_percent"
+      }
+    ],
+    "approximate_year_range": "Year 80-120",
+    "effects": [
+      {
+        "type": "unlock_dyson_panel_tier",
+        "tier": "mid"
+      },
+      {
+        "type": "emit_event",
+        "event_id": "ce_type1_reached"
+      }
+    ]
+  },
+  {
+    "id": "first_era_complete",
+    "display_name": "First Era Complete",
+    "description": "We are no longer a species clinging to one wounded cradle, but a civilisation that has made multiple worlds habitable and kept going.",
+    "conditions": [
+      {
+        "type": "two_habitable_worlds"
+      },
+      {
+        "type": "first_self_sustaining_colony"
+      },
+      {
+        "type": "dyson_50_percent"
+      }
+    ],
+    "approximate_year_range": "Year 400-700",
+    "effects": [
+      {
+        "type": "emit_event",
+        "event_id": "ce_first_era_complete"
+      }
+    ]
+  },
+  {
+    "id": "type_2",
+    "display_name": "Type II Civilisation",
+    "description": "We have wrapped our industry around the Sun so completely that the scale of our work is no longer planetary, but stellar.",
+    "conditions": [
+      {
+        "type": "dyson_100_percent"
+      }
+    ],
+    "approximate_year_range": "Year 800-1200",
+    "effects": [
+      {
+        "type": "emit_event",
+        "event_id": "ce_type2_reached"
+      }
+    ]
+  },
+  {
+    "id": "type_3_gesture",
+    "display_name": "First Interstellar Seed Ship",
+    "description": "We have not become a galactic civilisation, but we have finally sent a living promise beyond the Sun and into the dark between stars.",
+    "conditions": [
+      {
+        "type": "interstellar_seed_ship_launched"
+      }
+    ],
+    "approximate_year_range": "Year 1000-1500+",
+    "effects": [
+      {
+        "type": "emit_event",
+        "event_id": "ce_seed_ship_launched"
+      }
+    ]
+  }
+]
