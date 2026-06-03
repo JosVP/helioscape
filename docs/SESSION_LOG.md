@@ -1,3 +1,9 @@
+## 2026-06-03 — GameState.gd
+Done: Replaced the GameState autoload stub with the full typed runtime state schema for clock, planets, Mercury resources, Dyson progression, research capacity, culture history, milestones, decisions, Europa mission state, and orrery focus, plus a reset() method that reassigns every field to its default new-game value.
+Signals: None.
+Depends on: Registered as the GameState autoload in project.godot; future systems mutating these fields directly and SaveManager serializing the same public state.
+Gap: Collection fields remain plain Array and Dictionary containers to match the current codebase patterns, so typed element wrappers or helper accessors are still absent.
+
 ## 2026-06-03 — research_tracks.json
 Done: Added the Phase 1 research track dataset for Moon and Earth, including RP costs, durations, descriptions, direct prerequisites, and completion effects aligned with the existing tech tree IDs.
 Signals: None.
