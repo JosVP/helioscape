@@ -118,6 +118,12 @@ Signals: None.
 Depends on: Future materials, scenes, and shader parameters.
 Gap: No rendering logic exists yet beyond placeholder shader declarations.
 
+## 2026-06-03 — tech_tree.json
+Done: Added the first authored tech tree dataset covering Earth, Moon, Mercury phase markers and buildout nodes, plus Mars and Venus terraforming choice nodes and spillover marker nodes.
+Signals: Encodes emit_event, spillover_unlock, apply_terraforming_choice, and tag_decision effects for TechTreeSystem to process.
+Depends on: DataManager loading data/tech_tree.json; GameState.completed_techs for prerequisite and spillover gating; future TechTreeSystem and TerraformingSystem runtime handling for effect application.
+Gap: Prompt-requested inline comments were not embedded because the repository's authored data files are strict JSON; if commentable data is required later, the loader will need JSONC support or a parallel documentation field.
+
 ## 2026-06-03 — planets.json
 Done: Added authored planet data for Earth, Mercury, Mars, and Venus using the architecture schema plus the extended visual fields for spin, atmosphere, lava, and city lights.
 Signals: None.
