@@ -1,0 +1,139 @@
+{
+  "earth": {
+    "id": "earth",
+    "display_name": "Earth",
+    "unlock_condition": null,
+    "initial_state": {
+      "atmosphere_pressure": 1.0,
+      "temperature_celsius": 15,
+      "terraforming_phase": 0
+    },
+    "visual": {
+      "base_color": "#4a6fb3",
+      "axis_spin_speed": 1.0,
+      "cloud_rotation_speed": 0.002,
+      "atmosphere_color": "#4488ff",
+      "atmosphere_density_initial": 0.35,
+      "layer_textures": {
+        "surface": "res://assets/textures/planets/earth_surface.png",
+        "water": "res://assets/textures/planets/earth_water.png",
+        "green": "res://assets/textures/planets/earth_green.png",
+        "cloud": "res://assets/textures/planets/earth_cloud.png"
+      },
+      "water_spot_uvs": [],
+      "green_spot_uvs": [],
+      "city_lights_texture": "res://assets/textures/planets/earth_city_lights.png"
+    },
+    "terraforming_paths": []
+  },
+  "mercury": {
+    "id": "mercury",
+    "display_name": "Mercury",
+    "unlock_condition": "earth_launch_mercury_mission",
+    "initial_state": {
+      "atmosphere_pressure": 0.0,
+      "temperature_celsius": 430,
+      "terraforming_phase": 0
+    },
+    "visual": {
+      "base_color": "#8c7f73",
+      "axis_spin_speed": 0.017,
+      "cloud_rotation_speed": 0.0,
+      "atmosphere_color": "#000000",
+      "atmosphere_density_initial": 0.0,
+      "layer_textures": {
+        "surface": "res://assets/textures/planets/mercury_surface.png",
+        "water": "",
+        "green": "",
+        "cloud": ""
+      },
+      "water_spot_uvs": [],
+      "green_spot_uvs": []
+    },
+    "terraforming_paths": []
+  },
+  "mars": {
+    "id": "mars",
+    "display_name": "Mars",
+    "unlock_condition": "mercury_phase_2",
+    "initial_state": {
+      "atmosphere_pressure": 0.006,
+      "temperature_celsius": -60,
+      "terraforming_phase": 0
+    },
+    "visual": {
+      "base_color": "#c1440e",
+      "axis_spin_speed": 0.97,
+      "cloud_rotation_speed": 0.0,
+      "atmosphere_color": "#cc6644",
+      "atmosphere_density_initial": 0.05,
+      "layer_textures": {
+        "surface": "res://assets/textures/planets/mars_surface.png",
+        "lava": "res://assets/textures/planets/mars_lava.png",
+        "water": "res://assets/textures/planets/mars_water.png",
+        "green": "res://assets/textures/planets/mars_green.png",
+        "cloud": "res://assets/textures/planets/mars_cloud.png"
+      },
+      "water_spot_uvs": [
+        [0.3, 0.5],
+        [0.6, 0.4],
+        [0.45, 0.65],
+        [0.7, 0.55],
+        [0.2, 0.35]
+      ],
+      "green_spot_uvs": [
+        [0.35, 0.45],
+        [0.55, 0.6],
+        [0.25, 0.55]
+      ],
+      "lava_spot_uvs": [
+        [0.4, 0.35],
+        [0.45, 0.3],
+        [0.38, 0.4],
+        [0.42, 0.45]
+      ],
+      "lava_hue_data": {
+        "hot_hue": 0.0,
+        "cooled_hue": 0.72
+      }
+    },
+    "terraforming_paths": [
+      "mars_polar_detonation",
+      "mars_orbital_mirror",
+      "mars_magnetic_umbrella"
+    ]
+  },
+  "venus": {
+    "id": "venus",
+    "display_name": "Venus",
+    "unlock_condition": "mercury_phase_2",
+    "initial_state": {
+      "atmosphere_pressure": 92.0,
+      "temperature_celsius": 465,
+      "terraforming_phase": 0
+    },
+    "visual": {
+      "base_color": "#8f8577",
+      "axis_spin_speed": {
+        "initial": 0.004,
+        "spunup": 0.9
+      },
+      "cloud_rotation_speed": 0.012,
+      "atmosphere_color": "#ffcc44",
+      "atmosphere_density_initial": 0.95,
+      "layer_textures": {
+        "surface": "res://assets/textures/planets/venus_surface.png",
+        "water": "res://assets/textures/planets/venus_water.png",
+        "green": "res://assets/textures/planets/venus_green.png",
+        "cloud": "res://assets/textures/planets/venus_cloud.png"
+      },
+      "water_spot_uvs": [],
+      "green_spot_uvs": [
+        [0.32, 0.44],
+        [0.58, 0.52],
+        [0.47, 0.67]
+      ]
+    },
+    "terraforming_paths": []
+  }
+}

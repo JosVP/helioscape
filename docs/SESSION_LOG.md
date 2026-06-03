@@ -118,6 +118,12 @@ Signals: None.
 Depends on: Future materials, scenes, and shader parameters.
 Gap: No rendering logic exists yet beyond placeholder shader declarations.
 
+## 2026-06-03 — planets.json
+Done: Added authored planet data for Earth, Mercury, Mars, and Venus using the architecture schema plus the extended visual fields for spin, atmosphere, lava, and city lights.
+Signals: None.
+Depends on: DataManager consuming data/planets.json; future planet visual updates via EventBus.planet_visual_params_changed.
+Gap: Referenced planet texture assets and runtime consumers for the new visual keys are not implemented yet in the current workspace.
+
 ## 2026-06-03 — Main.tscn / project.godot
 Done: Added the initial root scene scaffold with the Systems node, placeholder UI layer, SubViewport-based SolarSystem root, a layer-4 DebugConsole attachment, and scene-level placeholder nodes for BioPhaseSystem and MercuryBuildQueue.
 Signals: None.
