@@ -154,6 +154,12 @@ Signals: None.
 Depends on: data/localization/en.csv translation keys for event titles, narrator text, and choice labels; future DataManager loading of data/culture_events.json; future CultureEventSystem and CultureEventCard support for title_key, narrator_text_key, and label_key fields.
 Gap: Runtime consumers currently described in the prompts still reference inline title and narrator_text fields, so the future UI/system implementation needs to resolve localization keys instead of raw strings.
 
+## 2026-06-03 — DataManager.gd
+Done: Replaced the autoload stub with typed JSON loading, mixed root-shape normalization, id-indexed caches, and planet-filtered accessor methods for planets, tech nodes, research tracks, culture events, Kardashev milestones, and resources.
+Signals: None.
+Depends on: data/planets.json using a dictionary root; data/tech_tree.json, data/research_tracks.json, data/culture_events.json, data/kardashev_milestones.json, and data/resources.json using arrays of entries with id fields.
+Gap: The loader currently treats malformed or missing ids as skipped entries and only exposes the prompt-requested accessors; future callers needing full culture-event or resource listings may need additional typed getter methods.
+
 ## 2026-06-03 — resources.json
 Done: Added Mercury resource data for common ore, rare metals, and polar volatiles with IDs, display names, descriptions, rarity, base accumulation rates, and UI colors.
 Signals: None.
