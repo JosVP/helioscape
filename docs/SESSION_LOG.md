@@ -171,3 +171,27 @@ Done: Added Mercury resource data for common ore, rare metals, and polar volatil
 Signals: None.
 Depends on: Future DataManager loading of data/resources.json and resource consumers such as ResourceSystem and HUD counters.
 Gap: Runtime systems and UI that consume these resource definitions are still stubs or not implemented in the current workspace.
+
+## 2026-06-03 — TimeManager.gd
+Done: Replaced the clock autoload stub with typed accumulator-based ticking, 1x and 5x speed control, pause toggling, and EventBus.game_year_ticked emission every in-game year.
+Signals: Emits EventBus.game_year_ticked.
+Depends on: GameState.game_year, game_speed, and is_paused; EventBus.game_year_ticked listeners in downstream systems and UI.
+Gap: Tick rollover currently resets the accumulator to zero as requested by the prompt, so any overshoot beyond a tick interval is intentionally discarded rather than carried into the next frame.
+
+## 2026-06-03 — SaveManager.gd
+Done: Replaced the persistence stub with versioned save serialization to user://save_slot_1.json, safe load-time defaulting across all current GameState public fields, save existence checks, and save deletion.
+Signals: Emits EventBus.game_saved and EventBus.game_loaded.
+Depends on: GameState public vars remaining the authoritative save schema and EventBus lifecycle listeners when present.
+Gap: _migrate() is still a forward-compatible stub, so future schema changes will need explicit version-to-version migration functions before older saves can be upgraded safely.
+
+## 2026-06-03 — ResourceSystem.gd
+Done: Replaced the Mercury resource stub with typed yearly accumulation from data/resources.json, Mercury phase-based production scaling, tech-based output bonuses, spend helpers, and resource plus phase signal emission for HUD and downstream systems.
+Signals: Connects to EventBus.game_year_ticked and tech_node_unlocked; emits resource_accumulated, resource_accumulation_updated, and mercury_phase_changed.
+Depends on: DataManager.get_resource() for base accumulation rates; GameState.completed_techs and mercury_resources; Mercury phase marker tech ids in data/tech_tree.json.
+Gap: Resource production tuning is still encoded as local constants in the system, so if design wants fully data-authored building yields later these phase and tech bonus tables should move into JSON.
+
+## 2026-06-03 — DysonSystem.gd
+Done: Replaced the Dyson stub with yearly panel production, energy and coverage recomputation, milestone tracking, a basic-tier CME loss check, and ResourceSystem-backed ore spending for new panels.
+Signals: Connects to EventBus.game_year_ticked; emits EventBus.dyson_panel_produced and EventBus.dyson_energy_updated.
+Depends on: ResourceSystem as a sibling system node for spend_resources(); GameState Mercury resources, panel tier, and milestone storage.
+Gap: Visual shader material updates and culture-event emission beyond queueing the CME notification still need to be wired once the Sun and Dyson swarm scene materials exist.
