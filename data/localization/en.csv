@@ -63,3 +63,64 @@ BIO_PROJECTION_PLACEHOLDER,Biosphere projection: {planet} Phase {phase}
 BIO_COUNTS_AS_3,Counts as 3 organisms
 BIO_NEAR_MANDATORY,Strongly recommended for these conditions
 BIO_AUTO_APPLIED,Auto-applied
+CE_MERCURY_LANDING_TITLE,First Step on Mercury
+CE_MERCURY_LANDING_TEXT,"We bring the lander down by numbers and breath. The alarms are quiet, the checklist is not, and every hand moves exactly where it should. When the dust settles, the cabin goes still before anyone speaks.
+
+We step out into a light so hard it feels carved. Nothing here welcomes us, but nothing turns us away either. We plant instruments first, not flags, and begin with the small work that lets a world become reachable."
+CE_FIRST_DAYS_ON_MERCURY_TITLE,The First Days Hold
+CE_FIRST_DAYS_ON_MERCURY_TEXT,"We stop sounding like visitors. The routines take shape, the habitat smells faintly of metal and coffee, and the messages home get shorter because life here is no longer an event every hour. We are still careful with every seal and every shadow, but the place has started to learn our weight."
+CE_FUSION_THEORY_COMPLETE_TITLE,The Equation Closes
+CE_FUSION_THEORY_COMPLETE_TEXT,"The proof does not arrive like thunder. It arrives in revisions, late nights, and one final line that does not break when we push on it. After generations of almost, we can finally see the machine clearly enough to believe it belongs to the real world.
+
+We know what this means before anyone says it aloud. It is not just a better power plant. It is permission to plan farther than scarcity usually allows, and we feel the future widen by several worlds at once."
+CE_TYPE1_REACHED_TITLE,We Cross Type I
+CE_TYPE1_REACHED_TEXT,"For most of history, energy has been a ceiling hanging just above our heads. We spend ourselves against it, bargain under it, and call the bargains realism. Now, for the first time, we feel that ceiling give way.
+
+We are still human after crossing it. We still argue, repair, hesitate, and grieve. But the scale has changed, and with it our sense of what stewardship can mean when an entire civilisation learns to hold power without immediately burning through its own future."
+CE_FIRST_ERA_COMPLETE_TITLE,First Era Complete
+CE_FIRST_ERA_COMPLETE_TEXT,"We remember how this begins: one damaged home world, one silent Moon, one brutal Mercury waiting at the edge of our courage, and the long habit of believing that the solar system is mostly elsewhere. We start small because that is what survival allows. We start anyway.
+
+Now the system answers back in human time. There is industry where there was glare, weather where there was only prediction, and the steady traffic of lives that no longer end at a single shoreline. We have changed more than machines; we have changed the distance at which care remains practical.
+
+We are still at the beginning. That is what gives this moment its weight. We have not finished the work of becoming a solar civilisation, but we have stopped wondering whether it can be done."
+CE_DYSON_10_PERCENT_TITLE,The Swarm Becomes Visible
+CE_DYSON_10_PERCENT_TEXT,"We can no longer pretend the swarm is an accounting detail. It has become a feature of the sky and of our intentions, a structure large enough that our descendants will inherit its silhouette as casually as we inherit weather."
+CE_DYSON_25_PERCENT_TITLE,The Sun Changes Shape
+CE_DYSON_25_PERCENT_TEXT,"From Mercury's surface, the Sun looks slightly wrong now. Not dim, not wounded, just interrupted by a geometry that did not exist when we were born. We stand in our suits and watch it with the same expression we once reserved for eclipses, except this shadow is one we learned to manufacture."
+CE_DYSON_50_PERCENT_TITLE,Half the Swarm
+CE_DYSON_50_PERCENT_TEXT,"Half is a strange threshold. It does not feel complete, but it leaves no room for denial. What we are building around the Sun is now large enough to shape policy, migration, and imagination all at once.
+
+We feel the scale of it most clearly in ordinary things. A child points upward and draws the swarm correctly from memory. A maintenance crew complains about panel dust patterns. The impossible has become infrastructure."
+CE_MARS_FIRST_LIQUID_WATER_TITLE,Water Stays
+CE_MARS_FIRST_LIQUID_WATER_TEXT,"The first report is cautious because caution has kept us honest on Mars. The instruments say liquid water, then say it again, and this time the readings hold through the local night. We do not cheer at first. We watch to see whether the planet keeps the gift.
+
+When it does, the room changes. We are no longer talking only about warming rock or thickening air. We are talking about cycles now, about reflection, erosion, chemistry, and the first fragile habits of a world learning how not to be dead."
+CE_MOON_FIRST_BIRTHDAY_TITLE,Birthday Under Regolith
+CE_MOON_FIRST_BIRTHDAY_TEXT,"We improvise a cake from ration powders, print a paper crown that barely fits under the low ceiling, and sing softly enough that the air scrubbers almost drown us out. For a few minutes the Moon does not feel distant at all. It feels like home making room for another home."
+CE_MOON_REFUSING_RETURN_TITLE,We Choose Who Belongs There
+CE_MOON_REFUSING_RETURN_TEXT,"The request comes back to Earth in a voice that is calm enough to make it harder. One of the crew does not want to rotate home when the window opens. They say the Moon has stopped feeling like assignment time and started feeling like the place where their life is actually happening.
+
+We understand immediately, and we do not understand at all. We build off-world habitats to extend the human story, but the story changes the moment someone asks to remain away from the planet that wrote the first chapters."
+CE_MOON_REFUSING_RETURN_CHOICE_RESPECT,Respect the choice
+CE_MOON_REFUSING_RETURN_CHOICE_RECALL,Recall them
+CE_FERMI_SILENCE_DETECTED_TITLE,The Silence Notices Us Back
+CE_FERMI_SILENCE_DETECTED_TEXT,"At thirty percent coverage, the models become uncomfortably concrete. From far enough away, our star no longer reads as a natural star. It flickers with intention. Any observatory within roughly one hundred and fifty light-years that is patient enough could notice the same thing we have just confirmed.
+
+We do not learn anything comforting from that realisation. The sky remains silent. No archive opens, no beacon answers, and no elder civilisation steps forward to explain whether this quiet is mercy, indifference, or warning. What changes is not the universe. What changes is that we know we have become visible within it."
+CE_FERMI_SILENCE_DETECTED_CHOICE_BROADCAST,Broadcast openly
+CE_FERMI_SILENCE_DETECTED_CHOICE_GO_QUIET,Go quiet
+CE_FERMI_SILENCE_DETECTED_CHOICE_CONTINUE,Continue as normal
+CE_EUROPA_WARNING_TITLE,The Window Narrows
+CE_EUROPA_WARNING_TEXT,"The impact packages are already years into their long fall. We made the decision when it still felt abstract enough to fit inside strategy decks and mission briefs. Now the dates sit on our desks like weather approaching.
+
+If there is living chemistry in Europa's ocean, our time to find it is no longer measured in eras. It is measured in budgets, launches, and whether we can bear to ask one world to wait while we change another forever."
+CE_VENUS_COOLING_BEGINS_TITLE,Shade Over Venus
+CE_VENUS_COOLING_BEGINS_TEXT,"The mirror does not make Venus gentle. It makes Venus start changing, and for now that is enough. We watch the energy balance shift by fractions, then by trends, and we allow ourselves the careful relief of seeing a furnace admit the possibility of seasons."
+CE_MARS_POLAR_DETONATION_TITLE,The Poles Detonate
+CE_MARS_POLAR_DETONATION_TEXT,"The flash is visible, the shock models hold, and the numbers move exactly where we force them to move. It is a dramatic act, but we do not mistake drama for simplicity. We have traded one kind of deadness for a different kind of risk, and the radiation tables stay open beside the atmosphere tables for a reason.
+
+Even so, the planet answers. Frozen carbon lifts, pressure starts to climb, and Mars becomes more changeable than it was yesterday. We measure the gain carefully because we will live with the cost just as carefully."
+CE_EUROPA_IMPACT_TITLE,Europa Arrives
+CE_EUROPA_IMPACT_TEXT,"We know the hour before it happens. We have known it, in some sense, for decades. When Europa finally strikes, Venus does not become kind all at once. It becomes louder, stranger, and newly open to futures that were impossible under perfect stillness.
+
+We will spend generations sorting gift from damage. Water has arrived with violence, rotation has been forced where there was almost none, and an entire planet now carries the mark of a choice we made long before most of us were born."

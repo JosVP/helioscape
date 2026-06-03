@@ -4,6 +4,12 @@ Signals: None.
 Depends on: data/tech_tree.json tech IDs including earth_advanced_renewables, earth_deuterium_extraction, earth_fusion_ignition_theory, moon_* research tech nodes, and mars_ocean_confirmed spillover progression.
 Gap: The current research track schema only exposes a single prerequisite_tech field, so Moon Organism Library Tier II keeps direct chaining to the Tier I track while Mars spillover remains aligned through the corresponding tech-tree unlock rather than a second explicit track prerequisite.
 
+## 2026-06-03 — culture_events.json / localization/en.csv
+Done: Added a localized seed culture event dataset with 15 events, including the required Mercury, Moon, Mars, Venus, Dyson, and Kardashev beats plus matching English translation keys for titles, body text, and choice labels.
+Signals: None.
+Depends on: DataManager loading data/culture_events.json; LocalizationManager/Godot translations resolving the CE_* keys stored in event title, narrator_text, and choice label fields; future CultureEventSystem special handling for europa_warning, europa_impact, and mars_first_liquid_water.
+Gap: The current event/UI stubs still expect direct display strings, so CultureEventCard and any event-trigger matching logic will need to call tr() on these stored keys and explicitly handle the special trigger IDs.
+
 ## 2026-06-02 — CreateTheme.gd
 Done: Added a Godot 4 editor script that generates the Helioscape theme resource with named colours, spacing constants, button variants, progress bar styles, and panel styles.
 Signals: None.
@@ -141,6 +147,12 @@ Done: Added the initial root scene scaffold with the Systems node, placeholder U
 Signals: None.
 Depends on: Existing system stubs under src/systems/ and DebugConsole.gd; run/main_scene now points to res://scenes/Main.tscn.
 Gap: Most UI and solar-system scripts/scenes still do not exist, so Main.tscn currently uses placeholder Control and Node3D nodes instead of the final scripted components.
+
+## 2026-06-03 — culture_events.json
+Done: Added the Phase 1 culture event dataset with localized title/body/choice keys, required milestone and year triggers, special-case trigger markers for runtime-handled events, and the deferred Fermi event flagged with v1_candidate false.
+Signals: None.
+Depends on: data/localization/en.csv translation keys for event titles, narrator text, and choice labels; future DataManager loading of data/culture_events.json; future CultureEventSystem and CultureEventCard support for title_key, narrator_text_key, and label_key fields.
+Gap: Runtime consumers currently described in the prompts still reference inline title and narrator_text fields, so the future UI/system implementation needs to resolve localization keys instead of raw strings.
 
 ## 2026-06-03 — resources.json
 Done: Added Mercury resource data for common ore, rare metals, and polar volatiles with IDs, display names, descriptions, rarity, base accumulation rates, and UI colors.

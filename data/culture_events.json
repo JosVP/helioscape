@@ -1,0 +1,229 @@
+[
+  {
+    "id": "ce_mercury_landing",
+    "title": "CE_MERCURY_LANDING_TITLE",
+    "narrator_text": "CE_MERCURY_LANDING_TEXT",
+    "portrait": "res://assets/textures/ui/ce_ce_mercury_landing.png",
+    "choices": [],
+    "tags": ["mercury", "arrival"],
+    "trigger": {
+      "type": "tech_completed",
+      "tech_id": "earth_launch_mercury_mission"
+    }
+  },
+  {
+    "id": "ce_first_days_on_mercury",
+    "title": "CE_FIRST_DAYS_ON_MERCURY_TITLE",
+    "narrator_text": "CE_FIRST_DAYS_ON_MERCURY_TEXT",
+    "portrait": "res://assets/textures/ui/ce_ce_first_days_on_mercury.png",
+    "choices": [],
+    "tags": ["mercury", "settlement"],
+    "trigger": {
+      "type": "year_reached",
+      "year": 2038
+    }
+  },
+  {
+    "id": "ce_fusion_theory_complete",
+    "title": "CE_FUSION_THEORY_COMPLETE_TITLE",
+    "narrator_text": "CE_FUSION_THEORY_COMPLETE_TEXT",
+    "portrait": "res://assets/textures/ui/ce_ce_fusion_theory_complete.png",
+    "choices": [],
+    "tags": ["earth", "fusion", "science"],
+    "trigger": {
+      "type": "tech_completed",
+      "tech_id": "earth_fusion_ignition_theory"
+    }
+  },
+  {
+    "id": "ce_type1_reached",
+    "title": "CE_TYPE1_REACHED_TITLE",
+    "narrator_text": "CE_TYPE1_REACHED_TEXT",
+    "portrait": "res://assets/textures/ui/ce_ce_type1_reached.png",
+    "choices": [],
+    "tags": ["kardashev", "milestone"],
+    "trigger": {
+      "type": "milestone_reached",
+      "milestone_id": "type_1"
+    }
+  },
+  {
+    "id": "ce_first_era_complete",
+    "title": "CE_FIRST_ERA_COMPLETE_TITLE",
+    "narrator_text": "CE_FIRST_ERA_COMPLETE_TEXT",
+    "portrait": "res://assets/textures/ui/ce_ce_first_era_complete.png",
+    "choices": [],
+    "tags": ["kardashev", "milestone", "v1_climax"],
+    "trigger": {
+      "type": "milestone_reached",
+      "milestone_id": "first_era_complete"
+    }
+  },
+  {
+    "id": "ce_dyson_10_percent",
+    "title": "CE_DYSON_10_PERCENT_TITLE",
+    "narrator_text": "CE_DYSON_10_PERCENT_TEXT",
+    "portrait": "res://assets/textures/ui/ce_ce_dyson_10_percent.png",
+    "choices": [],
+    "tags": ["dyson", "milestone"],
+    "trigger": {
+      "type": "dyson_percent_reached",
+      "percent": 10
+    }
+  },
+  {
+    "id": "ce_dyson_25_percent",
+    "title": "CE_DYSON_25_PERCENT_TITLE",
+    "narrator_text": "CE_DYSON_25_PERCENT_TEXT",
+    "portrait": "res://assets/textures/ui/ce_ce_dyson_25_percent.png",
+    "choices": [],
+    "tags": ["dyson", "mercury"],
+    "trigger": {
+      "type": "dyson_percent_reached",
+      "percent": 25
+    }
+  },
+  {
+    "id": "ce_dyson_50_percent",
+    "title": "CE_DYSON_50_PERCENT_TITLE",
+    "narrator_text": "CE_DYSON_50_PERCENT_TEXT",
+    "portrait": "res://assets/textures/ui/ce_ce_dyson_50_percent.png",
+    "choices": [],
+    "tags": ["dyson", "milestone"],
+    "trigger": {
+      "type": "dyson_percent_reached",
+      "percent": 50
+    }
+  },
+  {
+    "id": "ce_mars_first_liquid_water",
+    "title": "CE_MARS_FIRST_LIQUID_WATER_TITLE",
+    "narrator_text": "CE_MARS_FIRST_LIQUID_WATER_TEXT",
+    "portrait": "res://assets/textures/ui/ce_ce_mars_first_liquid_water.png",
+    "choices": [],
+    "tags": ["mars", "water", "terraforming"],
+    "trigger": {
+      "type": "special",
+      "id": "mars_first_liquid_water"
+    }
+  },
+  {
+    "id": "ce_moon_first_birthday",
+    "title": "CE_MOON_FIRST_BIRTHDAY_TITLE",
+    "narrator_text": "CE_MOON_FIRST_BIRTHDAY_TEXT",
+    "portrait": "res://assets/textures/ui/ce_ce_moon_first_birthday.png",
+    "choices": [],
+    "tags": ["moon", "crew", "intimate"],
+    "trigger": {
+      "type": "year_reached",
+      "year": 2035
+    }
+  },
+  {
+    "id": "ce_moon_refusing_return",
+    "title": "CE_MOON_REFUSING_RETURN_TITLE",
+    "narrator_text": "CE_MOON_REFUSING_RETURN_TEXT",
+    "portrait": "res://assets/textures/ui/ce_ce_moon_refusing_return.png",
+    "choices": [
+      {
+        "id": "respect_the_decision",
+        "label": "CE_MOON_REFUSING_RETURN_CHOICE_RESPECT",
+        "tag": "naturalist",
+        "effects": []
+      },
+      {
+        "id": "recall_them",
+        "label": "CE_MOON_REFUSING_RETURN_CHOICE_RECALL",
+        "tag": "architect",
+        "effects": []
+      }
+    ],
+    "tags": ["moon", "choice", "identity"],
+    "trigger": {
+      "type": "year_reached",
+      "year": 2040
+    }
+  },
+  {
+    "id": "ce_fermi_silence_detected",
+    "title": "CE_FERMI_SILENCE_DETECTED_TITLE",
+    "narrator_text": "CE_FERMI_SILENCE_DETECTED_TEXT",
+    "portrait": "res://assets/textures/ui/ce_ce_fermi_silence_detected.png",
+    "choices": [
+      {
+        "id": "broadcast",
+        "label": "CE_FERMI_SILENCE_DETECTED_CHOICE_BROADCAST",
+        "tag": "architect",
+        "effects": []
+      },
+      {
+        "id": "go_quiet",
+        "label": "CE_FERMI_SILENCE_DETECTED_CHOICE_GO_QUIET",
+        "tag": "naturalist",
+        "effects": []
+      },
+      {
+        "id": "continue_as_normal",
+        "label": "CE_FERMI_SILENCE_DETECTED_CHOICE_CONTINUE",
+        "tag": "",
+        "effects": []
+      }
+    ],
+    "tags": ["dyson", "fermi", "choice"],
+    "v1_candidate": false,
+    "trigger": {
+      "type": "dyson_percent_reached",
+      "percent": 30
+    }
+  },
+  {
+    "id": "ce_europa_warning",
+    "title": "CE_EUROPA_WARNING_TITLE",
+    "narrator_text": "CE_EUROPA_WARNING_TEXT",
+    "portrait": "res://assets/textures/ui/ce_ce_europa_warning.png",
+    "choices": [],
+    "tags": ["venus", "europa", "warning"],
+    "trigger": {
+      "type": "special",
+      "id": "europa_warning"
+    }
+  },
+  {
+    "id": "ce_venus_cooling_begins",
+    "title": "CE_VENUS_COOLING_BEGINS_TITLE",
+    "narrator_text": "CE_VENUS_COOLING_BEGINS_TEXT",
+    "portrait": "res://assets/textures/ui/ce_ce_venus_cooling_begins.png",
+    "choices": [],
+    "tags": ["venus", "terraforming"],
+    "trigger": {
+      "type": "terraforming_choice_applied",
+      "planet": "venus",
+      "choice_id": "venus_orbital_shade_mirror"
+    }
+  },
+  {
+    "id": "ce_mars_polar_detonation",
+    "title": "CE_MARS_POLAR_DETONATION_TITLE",
+    "narrator_text": "CE_MARS_POLAR_DETONATION_TEXT",
+    "portrait": "res://assets/textures/ui/ce_ce_mars_polar_detonation.png",
+    "choices": [],
+    "tags": ["mars", "architect", "terraforming"],
+    "trigger": {
+      "type": "terraforming_choice_applied",
+      "planet": "mars",
+      "choice_id": "mars_polar_detonation"
+    }
+  },
+  {
+    "id": "ce_europa_impact",
+    "title": "CE_EUROPA_IMPACT_TITLE",
+    "narrator_text": "CE_EUROPA_IMPACT_TEXT",
+    "portrait": "res://assets/textures/ui/ce_ce_europa_impact.png",
+    "choices": [],
+    "tags": ["venus", "europa", "impact"],
+    "trigger": {
+      "type": "special",
+      "id": "europa_impact"
+    }
+  }
+]
