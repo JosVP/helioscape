@@ -1,3 +1,9 @@
+## 2026-06-03 — research_tracks.json
+Done: Added the Phase 1 research track dataset for Moon and Earth, including RP costs, durations, descriptions, direct prerequisites, and completion effects aligned with the existing tech tree IDs.
+Signals: None.
+Depends on: data/tech_tree.json tech IDs including earth_advanced_renewables, earth_deuterium_extraction, earth_fusion_ignition_theory, moon_* research tech nodes, and mars_ocean_confirmed spillover progression.
+Gap: The current research track schema only exposes a single prerequisite_tech field, so Moon Organism Library Tier II keeps direct chaining to the Tier I track while Mars spillover remains aligned through the corresponding tech-tree unlock rather than a second explicit track prerequisite.
+
 ## 2026-06-02 — CreateTheme.gd
 Done: Added a Godot 4 editor script that generates the Helioscape theme resource with named colours, spacing constants, button variants, progress bar styles, and panel styles.
 Signals: None.
