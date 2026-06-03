@@ -129,3 +129,9 @@ Done: Added the initial root scene scaffold with the Systems node, placeholder U
 Signals: None.
 Depends on: Existing system stubs under src/systems/ and DebugConsole.gd; run/main_scene now points to res://scenes/Main.tscn.
 Gap: Most UI and solar-system scripts/scenes still do not exist, so Main.tscn currently uses placeholder Control and Node3D nodes instead of the final scripted components.
+
+## 2026-06-03 — resources.json
+Done: Added Mercury resource data for common ore, rare metals, and polar volatiles with IDs, display names, descriptions, rarity, base accumulation rates, and UI colors.
+Signals: None.
+Depends on: Future DataManager loading of data/resources.json and resource consumers such as ResourceSystem and HUD counters.
+Gap: Runtime systems and UI that consume these resource definitions are still stubs or not implemented in the current workspace.

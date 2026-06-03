@@ -1,0 +1,26 @@
+[
+  {
+    "id": "common_ore",
+    "display_name": "Common Ore",
+    "description": "Abundant iron, silicon, and aluminium deposits used for standard construction across Mercury's industrial buildout.",
+    "rarity": "common",
+    "base_accumulation_rate": 10,
+    "color": "#8A8F98"
+  },
+  {
+    "id": "rare_metals",
+    "display_name": "Rare Metals",
+    "description": "Titanium and chromium from specific crater deposits for advanced components and mid to high-tier Dyson panels.",
+    "rarity": "rare",
+    "base_accumulation_rate": 3,
+    "color": "#6FA8DC"
+  },
+  {
+    "id": "polar_volatiles",
+    "display_name": "Polar Volatiles",
+    "description": "Water ice and carbon compounds that support life support, organic chemistry, and rocket propellant via water electrolysis.",
+    "rarity": "volatile",
+    "base_accumulation_rate": 2,
+    "color": "#7FD4C6"
+  }
+]
