@@ -1,11 +1,11 @@
 class_name DebugConsole
 extends Control
 
-const IS_DEBUG: bool = OS.is_debug_build()
 const CONSOLE_HEIGHT: float = 200.0
 const MAX_OUTPUT_LINES: int = 120
 const DEFAULT_DYSON_TOTAL_PANELS: int = 1000000
 
+var _is_debug_build: bool = OS.is_debug_build()
 var _commands: Dictionary = {}
 var _command_descriptions: Dictionary = {}
 var _output_lines: Array[Dictionary] = []
@@ -15,11 +15,13 @@ var _output_scroll: ScrollContainer
 var _output_box: VBoxContainer
 var _input_line: LineEdit
 
+
 func _ready() -> void:
 	# A long-horizon strategy game needs a debug console because late-game states are too expensive to reach by normal play.
-	# Jumping straight to a Dyson swarm at 80% completion or a specific biosphere phase turns hours of waiting into seconds.
+	# Jumping straight to a Dyson swarm at 80% completion or a specific biosphere
+	# phase turns hours of waiting into seconds.
 	# This is a development-only tool, so it removes itself entirely outside debug builds.
-	if not IS_DEBUG:
+	if not _is_debug_build:
 		queue_free()
 		return
 
@@ -31,8 +33,9 @@ func _ready() -> void:
 	_build_ui()
 	_write_info("Debug console ready. Type 'help' for commands.")
 
+
 func _unhandled_input(event: InputEvent) -> void:
-	if not IS_DEBUG:
+	if not _is_debug_build:
 		return
 	if event.is_action_pressed("debug_console"):
 		_toggle_console()
@@ -46,6 +49,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			_autocomplete_command()
 			accept_event()
 
+
 func _register_input_action() -> void:
 	if InputMap.has_action("debug_console"):
 		return
@@ -53,6 +57,7 @@ func _register_input_action() -> void:
 	event.keycode = KEY_QUOTELEFT
 	InputMap.add_action("debug_console")
 	InputMap.action_add_event("debug_console", event)
+
 
 func _build_ui() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -100,10 +105,17 @@ func _build_ui() -> void:
 	_input_line.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_input_line.placeholder_text = "Enter debug command..."
 	_input_line.text_submitted.connect(_on_input_submitted)
-	_input_line.add_theme_color_override("font_color", _get_theme_color("text_primary", Color(0.91, 0.88, 0.83)))
-	_input_line.add_theme_color_override("font_placeholder_color", _get_theme_color("text_secondary", Color(0.54, 0.50, 0.44)))
-	_input_line.add_theme_color_override("caret_color", _get_theme_color("accent_glow", Color(0.91, 0.63, 0.19)))
+	_input_line.add_theme_color_override(
+		"font_color", _get_theme_color("text_primary", Color(0.91, 0.88, 0.83))
+	)
+	_input_line.add_theme_color_override(
+		"font_placeholder_color", _get_theme_color("text_secondary", Color(0.54, 0.50, 0.44))
+	)
+	_input_line.add_theme_color_override(
+		"caret_color", _get_theme_color("accent_glow", Color(0.91, 0.63, 0.19))
+	)
 	root_box.add_child(_input_line)
+
 
 func _toggle_console() -> void:
 	visible = not visible
@@ -115,28 +127,79 @@ func _toggle_console() -> void:
 	else:
 		_input_line.release_focus()
 
+
 func _register_commands() -> void:
 	_register_command("help", Callable(self, "_cmd_help"), "List available commands.")
-	_register_command("year", Callable(self, "_cmd_set_year"), "Set the current game year. Example: year 2150")
-	_register_command("speed", Callable(self, "_cmd_set_speed"), "Set time speed multiplier. Example: speed 5")
-	_register_command("tech", Callable(self, "_cmd_complete_tech"), "Unlock a tech. Example: tech earth earth_fusion_ignition_theory")
-	_register_command("planet", Callable(self, "_cmd_unlock_planet"), "Unlock a planet in GameState. Example: planet mars")
-	_register_command("dyson", Callable(self, "_cmd_set_dyson"), "Set Dyson coverage percent. Example: dyson 80")
-	_register_command("bio", Callable(self, "_cmd_set_bio_phase"), "Set bio phase state. Example: bio mars bio_3 running")
-	_register_command("milestone", Callable(self, "_cmd_trigger_milestone"), "Complete a Kardashev milestone. Example: milestone type_1")
-	_register_command("ce", Callable(self, "_cmd_trigger_culture_event"), "Queue a culture event. Example: ce ce_mars_first_liquid_water")
-	_register_command("resources", Callable(self, "_cmd_set_resources"), "Set Mercury resources. Example: resources 9999 9999 9999")
-	_register_command("kardashev", Callable(self, "_cmd_set_kardashev"), "Set Kardashev level. Example: kardashev 1.5")
-	_register_command("stability", Callable(self, "_cmd_set_bio_stability"), "Set bio phase stability. Example: stability mars bio_3 0.72")
-	_register_command("discovery", Callable(self, "_cmd_trigger_discovery"), "Trigger a discovery. Example: discovery mars 0 proto_soil_community")
+	_register_command(
+		"year", Callable(self, "_cmd_set_year"), "Set the current game year. Example: year 2150"
+	)
+	_register_command(
+		"speed", Callable(self, "_cmd_set_speed"), "Set time speed multiplier. Example: speed 5"
+	)
+	_register_command(
+		"tech",
+		Callable(self, "_cmd_complete_tech"),
+		"Unlock a tech. Example: tech earth earth_fusion_ignition_theory"
+	)
+	_register_command(
+		"planet",
+		Callable(self, "_cmd_unlock_planet"),
+		"Unlock a planet in GameState. Example: planet mars"
+	)
+	_register_command(
+		"dyson", Callable(self, "_cmd_set_dyson"), "Set Dyson coverage percent. Example: dyson 80"
+	)
+	_register_command(
+		"bio",
+		Callable(self, "_cmd_set_bio_phase"),
+		"Set bio phase state. Example: bio mars bio_3 running"
+	)
+	_register_command(
+		"milestone",
+		Callable(self, "_cmd_trigger_milestone"),
+		"Complete a Kardashev milestone. Example: milestone type_1"
+	)
+	_register_command(
+		"ce",
+		Callable(self, "_cmd_trigger_culture_event"),
+		"Queue a culture event. Example: ce ce_mars_first_liquid_water"
+	)
+	_register_command(
+		"resources",
+		Callable(self, "_cmd_set_resources"),
+		"Set Mercury resources. Example: resources 9999 9999 9999"
+	)
+	_register_command(
+		"kardashev",
+		Callable(self, "_cmd_set_kardashev"),
+		"Set Kardashev level. Example: kardashev 1.5"
+	)
+	_register_command(
+		"stability",
+		Callable(self, "_cmd_set_bio_stability"),
+		"Set bio phase stability. Example: stability mars bio_3 0.72"
+	)
+	_register_command(
+		"discovery",
+		Callable(self, "_cmd_trigger_discovery"),
+		"Trigger a discovery. Example: discovery mars 0 proto_soil_community"
+	)
 	_register_command("save", Callable(self, "_cmd_save"), "Invoke SaveManager.save_game().")
 	_register_command("load", Callable(self, "_cmd_load"), "Invoke SaveManager.load_game().")
-	_register_command("reset", Callable(self, "_cmd_reset_game"), "Invoke SaveManager.reset_game() or GameState.reset().")
-	_register_command("state", Callable(self, "_cmd_print_state"), "Print a JSON snapshot of GameState.")
+	_register_command(
+		"reset",
+		Callable(self, "_cmd_reset_game"),
+		"Invoke SaveManager.reset_game() or GameState.reset()."
+	)
+	_register_command(
+		"state", Callable(self, "_cmd_print_state"), "Print a JSON snapshot of GameState."
+	)
+
 
 func _register_command(command_name: String, callback: Callable, description: String) -> void:
 	_commands[command_name] = callback
 	_command_descriptions[command_name] = description
+
 
 func _on_input_submitted(text: String) -> void:
 	var trimmed: String = text.strip_edges()
@@ -145,6 +208,7 @@ func _on_input_submitted(text: String) -> void:
 	_write_command(trimmed)
 	_input_line.clear()
 	_execute_command(trimmed)
+
 
 func _execute_command(input_text: String) -> void:
 	var parts: PackedStringArray = input_text.split(" ", false)
@@ -161,6 +225,7 @@ func _execute_command(input_text: String) -> void:
 	var result: Variant = callback.call(args)
 	if result is String and not String(result).is_empty():
 		_write_success(String(result))
+
 
 func _autocomplete_command() -> void:
 	var current_text: String = _input_line.text.strip_edges()
@@ -183,6 +248,7 @@ func _autocomplete_command() -> void:
 		return
 	_write_info("Matches: %s" % ", ".join(matches))
 
+
 func _cmd_help(_args: PackedStringArray) -> String:
 	var names: Array[String] = []
 	for command_name_variant: Variant in _commands.keys():
@@ -192,6 +258,7 @@ func _cmd_help(_args: PackedStringArray) -> String:
 		_write_info("%s - %s" % [command_name, String(_command_descriptions[command_name])])
 	return "Listed %d commands." % names.size()
 
+
 func _cmd_set_year(args: PackedStringArray) -> String:
 	if args.size() < 1:
 		return _error_result("Usage: year <year>")
@@ -200,6 +267,7 @@ func _cmd_set_year(args: PackedStringArray) -> String:
 		return ""
 	game_state.set("game_year", args[0].to_float())
 	return "Set year to %s." % args[0]
+
 
 func _cmd_set_speed(args: PackedStringArray) -> String:
 	if args.size() < 1:
@@ -219,6 +287,7 @@ func _cmd_set_speed(args: PackedStringArray) -> String:
 		time_manager.set("speed_multiplier", speed_value)
 	return "Set speed to %s." % args[0]
 
+
 func _cmd_complete_tech(args: PackedStringArray) -> String:
 	if args.size() < 2:
 		return _error_result("Usage: tech <planet_id> <tech_id>")
@@ -230,13 +299,16 @@ func _cmd_complete_tech(args: PackedStringArray) -> String:
 	tech_tree_system.call("unlock_tech", args[0], args[1])
 	return "Unlocked tech %s for %s." % [args[1], args[0]]
 
+
 func _cmd_unlock_planet(args: PackedStringArray) -> String:
 	if args.size() < 1:
 		return _error_result("Usage: planet <planet_id>")
 	var game_state: Node = _require_autoload("GameState")
 	if game_state == null:
 		return ""
-	var planets: Dictionary = game_state.get("planets") if game_state.get("planets") is Dictionary else {}
+	var planets: Dictionary = (
+		game_state.get("planets") if game_state.get("planets") is Dictionary else {}
+	)
 	var planet_id: String = args[0]
 
 	var data_manager: Node = _find_autoload("DataManager")
@@ -244,7 +316,9 @@ func _cmd_unlock_planet(args: PackedStringArray) -> String:
 	if data_manager != null and data_manager.has_method("get_planet"):
 		var planet_data: Variant = data_manager.call("get_planet", planet_id)
 		if planet_data is Dictionary:
-			initial_state = Dictionary((planet_data as Dictionary).get("initial_state", {})).duplicate(true)
+			initial_state = (
+				Dictionary((planet_data as Dictionary).get("initial_state", {})).duplicate(true)
+			)
 
 	var planet_state: Dictionary = planets.get(planet_id, {}) if planets.has(planet_id) else {}
 	planet_state["id"] = planet_id
@@ -258,6 +332,7 @@ func _cmd_unlock_planet(args: PackedStringArray) -> String:
 	planets[planet_id] = planet_state
 	game_state.set("planets", planets)
 	return "Initialised planet %s." % planet_id
+
 
 func _cmd_set_dyson(args: PackedStringArray) -> String:
 	if args.size() < 1:
@@ -276,6 +351,7 @@ func _cmd_set_dyson(args: PackedStringArray) -> String:
 	game_state.set("dyson_panel_count", int(percent / 100.0 * float(total_panels)))
 	return "Set Dyson coverage to %.2f%%." % percent
 
+
 func _cmd_set_bio_phase(args: PackedStringArray) -> String:
 	if args.size() < 3:
 		return _error_result("Usage: bio <planet_id> <phase_id> <available|running>")
@@ -285,15 +361,22 @@ func _cmd_set_bio_phase(args: PackedStringArray) -> String:
 	var planet_id: String = args[0]
 	var phase_id: String = args[1]
 	var status: String = args[2]
-	var planets: Dictionary = game_state.get("planets") if game_state.get("planets") is Dictionary else {}
+	var planets: Dictionary = (
+		game_state.get("planets") if game_state.get("planets") is Dictionary else {}
+	)
 	var planet_state: Dictionary = planets.get(planet_id, {}) if planets.has(planet_id) else {}
-	var bio_phases: Dictionary = planet_state.get("bio_phases", {}) if planet_state.get("bio_phases", {}) is Dictionary else {}
+	var bio_phases: Dictionary = (
+		planet_state.get("bio_phases", {})
+		if planet_state.get("bio_phases", {}) is Dictionary
+		else {}
+	)
 	bio_phases[phase_id] = {"status": status}
 	planet_state["bio_phases"] = bio_phases
 	planet_state["unlocked"] = true
 	planets[planet_id] = planet_state
 	game_state.set("planets", planets)
 	return "Set %s %s to %s." % [planet_id, phase_id, status]
+
 
 func _cmd_trigger_milestone(args: PackedStringArray) -> String:
 	if args.size() < 1:
@@ -306,16 +389,22 @@ func _cmd_trigger_milestone(args: PackedStringArray) -> String:
 	kardashev_system.call("_complete_milestone", args[0])
 	return "Triggered milestone %s." % args[0]
 
+
 func _cmd_trigger_culture_event(args: PackedStringArray) -> String:
 	if args.size() < 1:
 		return _error_result("Usage: ce <event_id>")
 	var game_state: Node = _require_autoload("GameState")
 	if game_state == null:
 		return ""
-	var queue: Array = game_state.get("culture_event_queue") if game_state.get("culture_event_queue") is Array else []
+	var queue: Array = (
+		game_state.get("culture_event_queue")
+		if game_state.get("culture_event_queue") is Array
+		else []
+	)
 	queue.append(args[0])
 	game_state.set("culture_event_queue", queue)
 	return "Queued culture event %s." % args[0]
+
 
 func _cmd_set_resources(args: PackedStringArray) -> String:
 	if args.size() < 3:
@@ -323,12 +412,19 @@ func _cmd_set_resources(args: PackedStringArray) -> String:
 	var game_state: Node = _require_autoload("GameState")
 	if game_state == null:
 		return ""
-	game_state.set("mercury_resources", {
-		"value_a": args[0].to_float(),
-		"value_b": args[1].to_float(),
-		"value_c": args[2].to_float(),
-	})
+	(
+		game_state
+		. set(
+			"mercury_resources",
+			{
+				"value_a": args[0].to_float(),
+				"value_b": args[1].to_float(),
+				"value_c": args[2].to_float(),
+			}
+		)
+	)
 	return "Updated Mercury resources."
+
 
 func _cmd_set_kardashev(args: PackedStringArray) -> String:
 	if args.size() < 1:
@@ -339,19 +435,26 @@ func _cmd_set_kardashev(args: PackedStringArray) -> String:
 	game_state.set("kardashev_level", args[0].to_float())
 	return "Set Kardashev level to %s." % args[0]
 
+
 func _cmd_set_bio_stability(args: PackedStringArray) -> String:
 	if args.size() < 3:
 		return _error_result("Usage: stability <planet_id> <phase_id> <value>")
 	var game_state: Node = _require_autoload("GameState")
 	if game_state == null:
 		return ""
-	var planets: Dictionary = game_state.get("planets") if game_state.get("planets") is Dictionary else {}
+	var planets: Dictionary = (
+		game_state.get("planets") if game_state.get("planets") is Dictionary else {}
+	)
 	var planet_id: String = args[0]
 	var phase_id: String = args[1]
 	if not planets.has(planet_id):
 		return _error_result("Planet %s is not initialised." % planet_id)
 	var planet_state: Dictionary = (planets[planet_id] as Dictionary).duplicate(true)
-	var bio_phases: Dictionary = planet_state.get("bio_phases", {}) if planet_state.get("bio_phases", {}) is Dictionary else {}
+	var bio_phases: Dictionary = (
+		planet_state.get("bio_phases", {})
+		if planet_state.get("bio_phases", {}) is Dictionary
+		else {}
+	)
 	var phase_state: Dictionary = bio_phases.get(phase_id, {}) if bio_phases.has(phase_id) else {}
 	phase_state["stability"] = args[2].to_float()
 	bio_phases[phase_id] = phase_state
@@ -361,27 +464,40 @@ func _cmd_set_bio_stability(args: PackedStringArray) -> String:
 	game_state.set("planets", planets)
 	return "Set %s %s stability to %s." % [planet_id, phase_id, args[2]]
 
+
 func _cmd_trigger_discovery(args: PackedStringArray) -> String:
+	var error_message: String = ""
 	if args.size() < 3:
-		return _error_result("Usage: discovery <planet_id> <slot_index> <discovery_id>")
+		error_message = "Usage: discovery <planet_id> <slot_index> <discovery_id>"
 	var bio_phase_system: Node = _require_autoload("BioPhaseSystem")
-	if bio_phase_system == null:
+	if error_message.is_empty() and bio_phase_system == null:
 		return ""
-	if not bio_phase_system.has_method("_trigger_discovery"):
-		return _error_result("BioPhaseSystem._trigger_discovery() is unavailable.")
+	if error_message.is_empty() and not bio_phase_system.has_method("_trigger_discovery"):
+		error_message = "BioPhaseSystem._trigger_discovery() is unavailable."
 	var data_manager: Node = _require_autoload("DataManager")
-	if data_manager == null:
+	if error_message.is_empty() and data_manager == null:
 		return ""
-	if not data_manager.has_method("get_emergent_discoveries"):
-		return _error_result("DataManager.get_emergent_discoveries() is unavailable.")
-	var discoveries: Variant = data_manager.call("get_emergent_discoveries")
-	if not discoveries is Array:
-		return _error_result("Emergent discoveries data is not an Array.")
-	for discovery_variant: Variant in discoveries:
-		if discovery_variant is Dictionary and String((discovery_variant as Dictionary).get("id", "")) == args[2]:
-			bio_phase_system.call("_trigger_discovery", args[0], args[1].to_int(), discovery_variant)
+	if error_message.is_empty() and not data_manager.has_method("get_emergent_discoveries"):
+		error_message = "DataManager.get_emergent_discoveries() is unavailable."
+	var discoveries: Variant = []
+	if error_message.is_empty():
+		discoveries = data_manager.call("get_emergent_discoveries")
+		if not discoveries is Array:
+			error_message = "Emergent discoveries data is not an Array."
+	if not error_message.is_empty():
+		return _error_result(error_message)
+
+	for discovery_variant: Variant in discoveries as Array:
+		if (
+			discovery_variant is Dictionary
+			and String((discovery_variant as Dictionary).get("id", "")) == args[2]
+		):
+			bio_phase_system.call(
+				"_trigger_discovery", args[0], args[1].to_int(), discovery_variant
+			)
 			return "Triggered discovery %s on %s." % [args[2], args[0]]
 	return _error_result("Discovery %s was not found." % args[2])
+
 
 func _cmd_save(_args: PackedStringArray) -> String:
 	var save_manager: Node = _require_autoload("SaveManager")
@@ -392,6 +508,7 @@ func _cmd_save(_args: PackedStringArray) -> String:
 		return "Save requested."
 	return _error_result("SaveManager.save_game() is unavailable.")
 
+
 func _cmd_load(_args: PackedStringArray) -> String:
 	var save_manager: Node = _require_autoload("SaveManager")
 	if save_manager == null:
@@ -400,6 +517,7 @@ func _cmd_load(_args: PackedStringArray) -> String:
 		save_manager.call("load_game")
 		return "Load requested."
 	return _error_result("SaveManager.load_game() is unavailable.")
+
 
 func _cmd_reset_game(_args: PackedStringArray) -> String:
 	var save_manager: Node = _find_autoload("SaveManager")
@@ -414,6 +532,7 @@ func _cmd_reset_game(_args: PackedStringArray) -> String:
 		return "Reset requested through GameState.reset()."
 	return _error_result("No supported reset API was found.")
 
+
 func _cmd_print_state(_args: PackedStringArray) -> String:
 	var game_state: Node = _require_autoload("GameState")
 	if game_state == null:
@@ -423,6 +542,7 @@ func _cmd_print_state(_args: PackedStringArray) -> String:
 	for line: String in json_text.split("\n"):
 		_write_info(line)
 	return "Printed GameState snapshot."
+
 
 func _snapshot_node_properties(target: Object) -> Dictionary:
 	var snapshot: Dictionary = {}
@@ -439,8 +559,10 @@ func _snapshot_node_properties(target: Object) -> Dictionary:
 		snapshot[property_name] = value
 	return snapshot
 
+
 func _find_autoload(name: String) -> Node:
 	return get_tree().root.get_node_or_null(name)
+
 
 func _require_autoload(name: String) -> Node:
 	var autoload: Node = _find_autoload(name)
@@ -448,27 +570,34 @@ func _require_autoload(name: String) -> Node:
 		_write_error("Autoload/system '%s' is not available in the current scene." % name)
 	return autoload
 
+
 func _write_command(text: String) -> void:
 	_append_output("> %s" % text, _get_theme_color("accent_glow", Color(0.91, 0.63, 0.19)))
+
 
 func _write_info(text: String) -> void:
 	_append_output(text, _get_theme_color("text_primary", Color(0.91, 0.88, 0.83)))
 
+
 func _write_success(text: String) -> void:
 	_append_output(text, _get_theme_color("status_good", Color(0.35, 0.62, 0.35)))
+
 
 func _write_error(text: String) -> void:
 	_append_output(text, _get_theme_color("status_bad", Color(0.62, 0.23, 0.16)))
 
+
 func _error_result(text: String) -> String:
 	_write_error(text)
 	return ""
+
 
 func _append_output(text: String, color: Color) -> void:
 	_output_lines.append({"text": text, "color": color})
 	while _output_lines.size() > MAX_OUTPUT_LINES:
 		_output_lines.remove_at(0)
 	_refresh_output()
+
 
 func _refresh_output() -> void:
 	for child: Node in _output_box.get_children():
@@ -482,14 +611,17 @@ func _refresh_output() -> void:
 		_output_box.add_child(label)
 	call_deferred("_scroll_output_to_bottom")
 
+
 func _scroll_output_to_bottom() -> void:
 	if _output_scroll != null:
 		_output_scroll.scroll_vertical = int(_output_scroll.get_v_scroll_bar().max_value)
+
 
 func _get_theme_color(color_name: String, fallback: Color) -> Color:
 	if theme != null and theme.has_color(color_name, "Global"):
 		return theme.get_color(color_name, "Global")
 	return fallback
+
 
 func _get_theme_constant(constant_name: String, fallback: int) -> int:
 	if theme != null and theme.has_constant(constant_name, "Global"):

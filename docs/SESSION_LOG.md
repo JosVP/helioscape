@@ -39,3 +39,87 @@ Done: Added a typed development-only debug console UI script with runtime input-
 Signals: None.
 Depends on: Theme colour/constants when available; debug-only `debug_console` input action; optional autoloads/systems including GameState, DataManager, TimeManager, SaveManager, TechTreeSystem, DysonSystem, KardashevSystem, and BioPhaseSystem.
 Gap: Main.tscn is not present in the current workspace snapshot, so the layer-4 CanvasLayer scene wiring has not been added yet.
+
+## 2026-06-02 — Setup scaffold folders / project.godot / .gitignore / pre-commit
+Done: Created the missing architecture folders, registered the core architecture autoload entries in project.godot, added the gdUnit4 temp ignore, and prepared the repository for a local pre-commit hook.
+Signals: None.
+Depends on: src/autoloads/DataManager.gd, GameState.gd, TimeManager.gd, and SaveManager.gd existing as registered autoload targets; tests/ folder in the project root.
+Gap: Godot editor tasks still remain manual, including opening the project in Godot and installing gdUnit4 from AssetLib.
+
+## 2026-06-02 — DataManager.gd
+Done: Added the initial autoload stub for authored JSON loading and caching responsibilities.
+Signals: None.
+Depends on: Registered in project.godot as the DataManager autoload.
+Gap: No JSON loading or typed accessors exist yet.
+
+## 2026-06-02 — GameState.gd
+Done: Added the initial autoload stub for mutable runtime state ownership.
+Signals: None.
+Depends on: Registered in project.godot as the GameState autoload.
+Gap: No state schema or persistence fields exist yet.
+
+## 2026-06-02 — TimeManager.gd
+Done: Added the initial autoload stub for simulation clock ownership.
+Signals: None.
+Depends on: Registered in project.godot as the TimeManager autoload.
+Gap: No pause, speed, or ticking logic exists yet.
+
+## 2026-06-02 — SaveManager.gd
+Done: Added the initial autoload stub for save and load responsibilities.
+Signals: None.
+Depends on: Registered in project.godot as the SaveManager autoload.
+Gap: No serialization or versioned save format exists yet.
+
+## 2026-06-02 — TechTreeSystem.gd
+Done: Added the initial system stub for technology prerequisite and unlock logic.
+Signals: None.
+Depends on: Future GameState, DataManager, and EventBus integration.
+Gap: No unlocking logic exists yet.
+
+## 2026-06-02 — ResearchSystem.gd
+Done: Added the initial system stub for research track progression.
+Signals: None.
+Depends on: Future GameState, DataManager, and EventBus integration.
+Gap: No track scheduling or completion logic exists yet.
+
+## 2026-06-02 — ResourceSystem.gd
+Done: Added the initial system stub for resource accumulation and spending.
+Signals: None.
+Depends on: Future GameState and EventBus integration.
+Gap: No resource economy logic exists yet.
+
+## 2026-06-02 — TerraformingSystem.gd
+Done: Added the initial system stub for planet terraforming progression.
+Signals: None.
+Depends on: Future GameState, DataManager, and EventBus integration.
+Gap: No phase transitions or planet progression logic exists yet.
+
+## 2026-06-02 — DysonSystem.gd
+Done: Added the initial system stub for Dyson infrastructure progression.
+Signals: None.
+Depends on: Future GameState and EventBus integration.
+Gap: No queue or energy-output logic exists yet.
+
+## 2026-06-02 — CultureEventSystem.gd
+Done: Added the initial system stub for cultural event trigger evaluation.
+Signals: None.
+Depends on: Future GameState, DataManager, and EventBus integration.
+Gap: No trigger evaluation or queueing logic exists yet.
+
+## 2026-06-02 — KardashevSystem.gd
+Done: Added the initial system stub for Kardashev milestone evaluation.
+Signals: None.
+Depends on: Future GameState, DataManager, and EventBus integration.
+Gap: No milestone or tag logic exists yet.
+
+## 2026-06-02 — PlanetSurface.gdshader / Atmosphere.gdshader / DysonSwarm.gdshader / PixelFilter.gdshader
+Done: Added minimal shader stub files so the architecture scaffold now includes the named shader surfaces from the design docs.
+Signals: None.
+Depends on: Future materials, scenes, and shader parameters.
+Gap: No rendering logic exists yet beyond placeholder shader declarations.
+
+## 2026-06-03 — Main.tscn / project.godot
+Done: Added the initial root scene scaffold with the Systems node, placeholder UI layer, SubViewport-based SolarSystem root, a layer-4 DebugConsole attachment, and scene-level placeholder nodes for BioPhaseSystem and MercuryBuildQueue.
+Signals: None.
+Depends on: Existing system stubs under src/systems/ and DebugConsole.gd; run/main_scene now points to res://scenes/Main.tscn.
+Gap: Most UI and solar-system scripts/scenes still do not exist, so Main.tscn currently uses placeholder Control and Node3D nodes instead of the final scripted components.

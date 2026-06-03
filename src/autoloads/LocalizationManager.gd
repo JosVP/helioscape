@@ -1,8 +1,9 @@
-class_name LocalizationManager
 extends Node
 
+
 # Godot's built-in tr("KEY") handles plain translation lookups.
-# For strings with placeholders like "Year {year}", use tr() first and then substitute the named parameters.
+# For strings with placeholders like "Year {year}", use tr() first and then
+# substitute the named parameters.
 # Simple: tr("UI_PAUSE") -> "Pause"
 # Parameterised: LocalizationManager.trf("UI_YEAR_LABEL", {"year": 2087}) -> "Year 2087"
 # In scripts: always use tr() or LocalizationManager.trf() - never string literals in UI.

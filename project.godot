@@ -13,16 +13,21 @@ config_version=5
 config/name="Helioscape"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 config/icon="res://icon.svg"
+run/main_scene="res://scenes/Main.tscn"
 
 [autoload]
 
+DataManager="*res://src/autoloads/DataManager.gd"
+GameState="*res://src/autoloads/GameState.gd"
 EventBus="*res://src/autoloads/EventBus.gd"
+TimeManager="*res://src/autoloads/TimeManager.gd"
+SaveManager="*res://src/autoloads/SaveManager.gd"
 LocalizationManager="*res://src/autoloads/LocalizationManager.gd"
 AudioManager="*res://src/autoloads/AudioManager.gd"
 
-[audio]
+[editor_plugins]
 
-buses/default_bus_layout="res://default_bus_layout.tres"
+enabled=PackedStringArray("res://addons/gdUnit4/plugin.cfg")
 
 [gui]
 

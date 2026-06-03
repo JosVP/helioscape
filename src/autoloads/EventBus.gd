@@ -1,4 +1,3 @@
-class_name EventBus
 extends Node
 
 # Time
@@ -41,6 +40,6 @@ signal kardashev_milestone_reached(milestone_id: String)
 signal kardashev_tag_applied(tag: String)
 
 # Game lifecycle
-signal game_started()
-signal game_saved()
-signal game_loaded()
+signal game_started
+signal game_saved
+signal game_loaded

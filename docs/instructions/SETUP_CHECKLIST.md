@@ -1,95 +1,35 @@
 # Helioscape — Project Setup Checklist
 
-## 1. Install tools
-
-- [ ] **Godot 4** — download from godotengine.org (standard build, not .NET)
-- [ ] **Cursor** — cursor.com, select Claude Sonnet as default model in Settings → Models
-- [ ] **Node.js** — required for the Godot MCP server (nodejs.org, LTS version)
-- [ ] **Git** — git-scm.com (if not already installed)
-- [ ] **gdtoolkit** — GDScript linter + formatter: `pip install gdtoolkit`
-- [ ] **SourceTree** — sourcetreeapp.com, or use VS Code's git panel if you prefer staying in one place
-
----
-
-## 2. Create the repo
-
-```bash
-git init helioscape
-cd helioscape
-```
-
-Create `.gitignore`:
-```
-.godot/
-*.import
-*.uid
-export_presets.cfg
-```
-
-Create `.claudeignore` (prevents Claude from loading binary/cache files into context):
-```
-.godot/
-assets/textures/
-assets/audio/
-*.import
-*.uid
-*.tres
-*.res
-```
-
----
 
 ## 3. Set up the Godot project
 
-- [ ] Open Godot → New Project → point to the `helioscape/` folder
-- [ ] Project → Project Settings → Autoload → add in this order:
+- [x] Open Godot → New Project → point to the `helioscape/` folder
+- [x] Register the core autoloads in `project.godot` in this order:
   - `DataManager` → `src/autoloads/DataManager.gd`
   - `GameState` → `src/autoloads/GameState.gd`
   - `EventBus` → `src/autoloads/EventBus.gd`
   - `TimeManager` → `src/autoloads/TimeManager.gd`
   - `SaveManager` → `src/autoloads/SaveManager.gd`
-- [ ] Create the folder structure from `docs/ARCHITECTURE.md` manually or ask Cursor to scaffold it
+- [x] Create the folder structure from `docs/ARCHITECTURE.md`
 
 ---
 
-## 4. Set up Cursor
-
-- [ ] Open the `helioscape/` folder in Cursor
-- [ ] Copy `.cursorrules` into the project root (the short version from `docs/`)
-- [ ] Settings → Features → enable **Auto-accept** (use SourceTree to review/revert diffs)
-- [ ] Settings → Models → set Claude Sonnet as default
-- [ ] Familiarise yourself with **Composer** (Cmd+I / Ctrl+I) — this is the agent mode for multi-file tasks
-
----
-
-## 5. Set up the Godot MCP server
+## 5. Optional: set up the Godot MCP server
 
 ```bash
-# Test that it works — Cursor will auto-start it via config
+# Test that it works
 npx -y @satelliteoflove/godot-mcp
 ```
 
-Create `.cursor/mcp.json` in the project root:
-```json
-{
-  "mcpServers": {
-    "godot": {
-      "command": "npx",
-      "args": ["-y", "@satelliteoflove/godot-mcp"]
-    }
-  }
-}
-```
-
-In Cursor Settings → MCP → verify the godot server shows as connected.
+Configure the server in whichever MCP-capable client you actually use. This checklist no longer assumes Cursor specifically.
 
 ---
 
 ## 6. Set up gdUnit4 (test framework)
 
-- [ ] In Godot → AssetLib → search "gdUnit4" → install
-- [ ] Create `tests/` folder in project root
-- [ ] Add to `.gitignore`: `addons/gdUnit4/.tmp/`
+- [x] In Godot → AssetLib → search "gdUnit4" → install
+- [x] Create `tests/` folder in project root
+- [x] Add to `.gitignore`: `addons/gdUnit4/.tmp/`
 
 ---
 
@@ -115,35 +55,15 @@ fi
 chmod +x .git/hooks/pre-commit
 ```
 
----
-
-## 8. Copy docs into the project
-
-```
-helioscape/
-└── docs/
-    ├── ARCHITECTURE.md        ← from this chat
-    ├── SESSION_LOG.md         ← create empty, Claude appends to this
-    ├── gdd-main.md            ← your main GDD
-    └── gdd-economy-logistics.md
-```
+On Windows, creating the hook file is enough for local Git usage in most setups; the executable bit mainly matters on Unix-like environments.
 
 ---
 
-## 9. First Cursor session — scaffold the architecture
+## 9. First Copilot session — scaffold the architecture
 
-Once everything above is done, open Composer in Cursor and paste:
+Once everything above is done, ask Copilot to scaffold the architecture stubs directly in this repo. The folder structure and stub files can be created without using a separate Cursor workflow.
 
-> "Read docs/ARCHITECTURE.md. Use Plan mode first: propose how to scaffold the full folder structure and create empty stub files for every autoload, system, and shader listed. Do not write any implementation yet — stubs only with class_name, extends, and a comment describing the file's responsibility."
+> "Read docs/ARCHITECTURE.md. Propose how to scaffold the full folder structure and create empty stub files for every autoload, system, and shader listed. Do not write any implementation yet — stubs only with class_name, extends, and a comment describing the file's responsibility."
 
 Review the plan, approve, then let it execute.
 Commit: `chore: scaffold project structure`
-
----
-
-## 10. Commit discipline (ongoing)
-
-- Claude proposes → you review in SourceTree → you commit
-- One logical change per commit
-- Format: `feat(ResearchSystem): implement track completion`
-- Run `git push` yourself, never ask Claude to push

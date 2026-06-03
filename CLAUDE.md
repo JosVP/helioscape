@@ -14,6 +14,7 @@ Full architecture: docs/ARCHITECTURE.md. GDD: GDD/helioscape-gdd-caveman.md.
 3. **Data lives in JSON.** Nothing hardcoded in GDScript. All content in `data/*.json`.
 4. **Signals via EventBus only.** Never connect systems directly. Never call UI from a system.
 5. **Static typing always.** Every var and param needs an explicit type.
+6. **GDScript 4 static typing always** Signals over direct calls. Constants UPPER_SNAKE_CASE, variables snake_case, classes PascalCase. Comments explain *why*, not what. No `get_node()` paths longer than one level in UI scripts.
 
 ---
 
@@ -33,6 +34,9 @@ Gap: [anything deferred]
 ```
 
 **Code review step:** when asked to review, use read-only mode. List violations only — do not fix without being asked.
+
+**Communication:** keep descriptions of what you're doing between steps very brief. once you're done you can explain more about what you did, this makes it easier for the dev to scan the conclusion of a prompt and this should save some tokens.
+when the dev needs to perform actions inside godot, add steps on how to do it so the dev does not need to search how to do it. for example dont say "run the test through gdUnit4", but explain how to get to gdunit4 and how to execute tests in godot.
 
 ---
 

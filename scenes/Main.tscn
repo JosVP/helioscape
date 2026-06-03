@@ -1,0 +1,97 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://src/systems/TechTreeSystem.gd" id="1_wk4m8"]
+[ext_resource type="Script" path="res://src/systems/ResearchSystem.gd" id="2_t045v"]
+[ext_resource type="Script" path="res://src/systems/ResourceSystem.gd" id="3_a1ugq"]
+[ext_resource type="Script" path="res://src/systems/TerraformingSystem.gd" id="4_g778q"]
+[ext_resource type="Script" path="res://src/systems/DysonSystem.gd" id="5_i5p8h"]
+[ext_resource type="Script" path="res://src/systems/CultureEventSystem.gd" id="6_ejc85"]
+[ext_resource type="Script" path="res://src/systems/KardashevSystem.gd" id="7_q1n3s"]
+[ext_resource type="Script" path="res://src/ui/debug/DebugConsole.gd" id="8_krxqt"]
+
+[node name="Main" type="Node"]
+
+[node name="Systems" type="Node" parent="."]
+
+[node name="TechTreeSystem" type="Node" parent="Systems"]
+script = ExtResource("1_wk4m8")
+
+[node name="ResearchSystem" type="Node" parent="Systems"]
+script = ExtResource("2_t045v")
+
+[node name="ResourceSystem" type="Node" parent="Systems"]
+script = ExtResource("3_a1ugq")
+
+[node name="TerraformingSystem" type="Node" parent="Systems"]
+script = ExtResource("4_g778q")
+
+[node name="DysonSystem" type="Node" parent="Systems"]
+script = ExtResource("5_i5p8h")
+
+[node name="CultureEventSystem" type="Node" parent="Systems"]
+script = ExtResource("6_ejc85")
+
+[node name="KardashevSystem" type="Node" parent="Systems"]
+script = ExtResource("7_q1n3s")
+
+[node name="BioPhaseSystem" type="Node" parent="Systems"]
+
+[node name="MercuryBuildQueue" type="Node" parent="Systems"]
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="HUD" type="Control" parent="UI"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CultureEventQueue" type="Control" parent="UI"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CultureEventCard" type="Control" parent="UI"]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PlanetPanel" type="Control" parent="UI"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="SolarSystemViewport" type="SubViewport" parent="."]
+size = Vector2i(1920, 1080)
+transparent_bg = true
+handle_input_locally = false
+
+[node name="SolarSystem" type="Node3D" parent="SolarSystemViewport"]
+
+[node name="Sun" type="MeshInstance3D" parent="SolarSystemViewport/SolarSystem"]
+
+[node name="DysonSwarm" type="MeshInstance3D" parent="SolarSystemViewport/SolarSystem"]
+
+[node name="Camera3D" type="Camera3D" parent="SolarSystemViewport/SolarSystem"]
+current = true
+transform = Transform3D(0.866025, 0, -0.5, 0.176777, 0.935414, 0.306186, 0.467707, -0.353553, 0.809017, 0, 6, 14)
+
+[node name="DebugLayer" type="CanvasLayer" parent="."]
+layer = 4
+
+[node name="DebugConsole" type="Control" parent="DebugLayer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("8_krxqt")
