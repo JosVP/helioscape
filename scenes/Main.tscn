@@ -45,7 +45,7 @@ script = ExtResource("4_g778q")
 script = ExtResource("5_i5p8h")
 
 [node name="CultureEventSystem" type="Node" parent="Systems"]
-script = ExtResource("6_ejc85")
+#script = ExtResource("6_ejc85")
 
 [node name="KardashevSystem" type="Node" parent="Systems"]
 script = ExtResource("7_q1n3s")
@@ -62,6 +62,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 1
 script = ExtResource("11_hud")
 
 [node name="PlanetsPanel" type="Control" parent="UI/HUD"]
@@ -70,6 +71,7 @@ offset_left = 16.0
 offset_top = 60.0
 offset_right = 300.0
 offset_bottom = 520.0
+mouse_filter = 0
 script = ExtResource("12_planets")
 
 [node name="CultureEventQueue" type="Control" parent="UI"]
@@ -78,6 +80,8 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+visible = false
+mouse_filter = 2
 script = ExtResource("9_cequeue")
 
 [node name="BellIcon" type="Button" parent="UI/CultureEventQueue"]
@@ -175,6 +179,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 
 [node name="SolarSystemViewport" type="SubViewport" parent="."]
 size = Vector2i(1920, 1080)

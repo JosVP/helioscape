@@ -9,8 +9,11 @@ extends Node
 # as the player reads and dismisses. The queue is never lost between saves —
 # it is part of GameState.
 
+var _last_checked_year: float = 0.0
+
 
 func _ready() -> void:
+	_last_checked_year = GameState.game_year
 	EventBus.game_year_ticked.connect(_on_year_ticked)
 	EventBus.kardashev_milestone_reached.connect(_on_milestone_reached)
 	EventBus.tech_node_unlocked.connect(_on_tech_unlocked)
@@ -20,7 +23,8 @@ func _ready() -> void:
 
 
 func _on_year_ticked(year: float) -> void:
-	_check_year_triggers(year)
+	_check_year_triggers(_last_checked_year, year)
+	_last_checked_year = year
 
 	if GameState.europa_mission_authorised and not GameState.europa_impacted:
 		var years_to_impact: float = GameState.europa_impact_year - year
@@ -124,8 +128,8 @@ func _record_history(event_id: String) -> void:
 	)
 
 
-func _check_year_triggers(year: float) -> void:
-	# Push any year_reached events whose threshold has now been crossed and haven't fired yet.
+func _check_year_triggers(previous_year: float, current_year: float) -> void:
+	# Push year_reached events only when crossing the threshold between ticks.
 	for event: Dictionary in DataManager.get_all_culture_events():
 		if event.get("v1_candidate", true) == false:
 			continue
@@ -133,5 +137,5 @@ func _check_year_triggers(year: float) -> void:
 		if trigger.get("type", "") != "year_reached":
 			continue
 		var threshold_year: float = float(trigger.get("year", 0.0))
-		if year >= threshold_year:
+		if previous_year < threshold_year and current_year >= threshold_year:
 			_push_event(String(event.get("id", "")))

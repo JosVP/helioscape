@@ -40,10 +40,10 @@ func _on_event_triggered(event_id: String) -> void:
 		_portrait_texture.texture = null
 
 	# Title
-	_title_label.text = String(event.get("title", ""))
+	_title_label.text = tr(String(event.get("title", "")))
 
 	# Narrator text — typewriter via visible_ratio
-	var narrator_text: String = String(event.get("narrator_text", ""))
+	var narrator_text: String = tr(String(event.get("narrator_text", "")))
 	_narrator_text.text = narrator_text
 	_narrator_text.visible_ratio = 0.0
 
@@ -76,9 +76,9 @@ func _build_choices(choices: Array) -> void:
 	for choice_variant: Variant in choices:
 		var choice: Dictionary = choice_variant
 		var btn: Button = Button.new()
-		btn.text = String(choice.get("label", ""))
-		var choice_id: String = String(choice.get("id", ""))
-		btn.pressed.connect(func() -> void: _on_choice_made(_current_event_id, choice_id))
+		btn.text = tr(String(choice.get("label", "")))
+		var captured_choice_id: String = String(choice.get("id", ""))
+		btn.pressed.connect(func() -> void: _on_choice_made(_current_event_id, captured_choice_id))
 		_choices_container.add_child(btn)
 		_choice_buttons.append(btn)
 
@@ -88,18 +88,21 @@ func _build_choices(choices: Array) -> void:
 
 
 func _on_choice_made(event_id: String, choice_id: String) -> void:
+	if event_id.is_empty():
+		return
+
 	if choice_id != "":
 		EventBus.culture_event_choice_made.emit(event_id, choice_id)
-	_dismiss()
+	_dismiss(event_id)
 
 
-func _dismiss() -> void:
-	_current_event_id = ""
+func _dismiss(event_id: String) -> void:
 	if _typewriter_tween:
 		_typewriter_tween.kill()
 		_typewriter_tween = null
 	visible = false
-	EventBus.culture_event_dismissed.emit(_current_event_id)
+	EventBus.culture_event_dismissed.emit(event_id)
+	_current_event_id = ""
 
 
 func _skip_typewriter() -> void:
@@ -117,6 +120,11 @@ func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		var mouse_event: InputEventMouseButton = event
 		if mouse_event.pressed and mouse_event.button_index == MOUSE_BUTTON_LEFT:
+			var click_over_choices: bool = _choices_container.get_global_rect().has_point(
+				get_global_mouse_position()
+			)
+			if click_over_choices:
+				return
 			if not _typewriter_complete:
 				_skip_typewriter()
 				get_viewport().set_input_as_handled()

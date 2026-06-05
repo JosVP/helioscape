@@ -83,7 +83,8 @@ func _spawn_planets() -> void:
 	# visual sphere for easier selection), and PlanetVisual.gd on the root.
 	var planet_view_packed: PackedScene = load(PLANET_VIEW_SCENE)
 	if planet_view_packed == null:
-		push_warning("SolarSystemView: PlanetView scene missing, using runtime fallback planets.")
+		push_warning("SolarSystemView: could not load PlanetView scene at %s" % PLANET_VIEW_SCENE)
+		return
 
 	var all_planets: Dictionary = DataManager.get_all_planets()
 
@@ -97,11 +98,7 @@ func _spawn_planets() -> void:
 			stagger_index += 1
 			continue
 
-		var planet_instance: Node3D = (
-			planet_view_packed.instantiate()
-			if planet_view_packed != null
-			else _create_planet_fallback(pid)
-		)
+		var planet_instance: Node3D = planet_view_packed.instantiate()
 		add_child(planet_instance)
 
 		# Set the planet_id export so PlanetVisual.gd initialises correctly.
@@ -192,48 +189,6 @@ func _spawn_orbit_ring_fallback(pid: String, radius: float, is_locked: bool) -> 
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mesh_instance.set_surface_override_material(0, mat)
-
-
-func _create_planet_fallback(pid: String) -> Node3D:
-	var root: Node3D = Node3D.new()
-	root.name = "Planet_%s" % pid
-
-	var mesh_instance: MeshInstance3D = MeshInstance3D.new()
-	var sphere: SphereMesh = SphereMesh.new()
-	sphere.radius = 0.35
-	sphere.height = 0.7
-	mesh_instance.mesh = sphere
-
-	var mat: StandardMaterial3D = StandardMaterial3D.new()
-	mat.albedo_color = _fallback_color_for_planet(pid)
-	mesh_instance.material_override = mat
-	root.add_child(mesh_instance)
-
-	var click_area: Area3D = Area3D.new()
-	click_area.name = "ClickArea"
-	click_area.input_ray_pickable = true
-	var shape: CollisionShape3D = CollisionShape3D.new()
-	var sphere_shape: SphereShape3D = SphereShape3D.new()
-	sphere_shape.radius = 0.45
-	shape.shape = sphere_shape
-	click_area.add_child(shape)
-	root.add_child(click_area)
-
-	return root
-
-
-func _fallback_color_for_planet(pid: String) -> Color:
-	match pid:
-		"mercury":
-			return Color(0.7, 0.66, 0.61)
-		"venus":
-			return Color(0.86, 0.72, 0.43)
-		"earth":
-			return Color(0.35, 0.55, 0.95)
-		"mars":
-			return Color(0.85, 0.44, 0.3)
-		_:
-			return Color(0.8, 0.8, 0.8)
 
 
 # ---------------------------------------------------------------------------
