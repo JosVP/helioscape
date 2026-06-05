@@ -296,3 +296,39 @@ Done: Implemented Venus additive-choice planet logic with required visual-layeri
 Signals: None.
 Depends on: GameState.planets["venus"] terraforming_phase and terraforming_choices, GameState.completed_techs, GameState.europa_mission_authorised, GameState.europa_impact_year, GameState.europa_impacted, and GameState.game_year.
 Gap: The display name uses ASCII formatting ("465C") to keep source encoding simple; if you want the degree symbol in UI text, it can be switched in a localization pass.
+
+## 2026-06-05 - PlanetPanel.gd
+Done: Added the planet detail container controller with typed planet switching, swipe-out/swipe-in content transitions, panel population for TechTreeUI/ResearchUI/VignetteDisplay, locked-state handling, and phase/status refresh using planet helper scripts.
+Signals: Connects EventBus.planet_selected and EventBus.terraforming_phase_changed.
+Depends on: DataManager.get_planet, GameState.planets and mercury_phase, EventBus metadata for Moon-tab request, and UI child nodes ContentContainer, PlanetNameLabel, TabContainer, LockedMessage, TechTreeUI, ResearchUI, VignetteDisplay.
+Gap: Moon-tab opening currently relies on EventBus metadata and assumes TabContainer + MoonTab exist in the final scene.
+
+## 2026-06-05 - VignetteDisplay.gd
+Done: Added a typed vignette renderer with trigger-driven refresh hooks, forward-compatible DataManager.get_vignette_data stub handling, dynamic location tabs, layered TextureRect crossfades (1.5s sine easing), and placeholder fallback behavior when vignette data is absent.
+Signals: Connects EventBus.terraforming_phase_changed, tech_node_unlocked, and kardashev_milestone_reached.
+Depends on: Optional DataManager.get_vignette_data(planet_id), GameState phase/milestone/tech data, and UI nodes LocationTabs, LocationViewport, LocationTitle.
+Gap: State-selection rules are intentionally generic until data/vignettes.json schema is finalized.
+
+## 2026-06-05 - HUD.gd
+Done: Added root HUD script with cached top-bar references, year updates, resource-counter updates, Mercury resource visibility gating, and optional Dyson wattage readout updates.
+Signals: Connects EventBus.game_year_ticked, resource_accumulation_updated, dyson_energy_updated, and mercury_phase_changed.
+Depends on: GameState game_year/mercury data and DataManager resource display names.
+Gap: Final visual layout and style are scene-driven and need editor wiring to match the target HUD composition.
+
+## 2026-06-05 - PlanetsPanel.gd
+Done: Added always-visible planet side-panel logic with ordered entry creation (Earth, Moon, Mercury, Mars, Venus), locked/active/flourishing status markers, selected-row highlighting, phase label refresh, and click emission to EventBus.planet_selected including Earth/Moon special handling.
+Signals: Connects EventBus.planet_selected and terraforming_phase_changed; emits EventBus.planet_selected on entry clicks.
+Depends on: DataManager planet definitions, GameState unlock and phase state, planet helper scripts for display names, and optional EventBus metadata for Moon-tab requests.
+Gap: Moon-open flag is passed through EventBus metadata; a dedicated typed signal can replace this later if desired.
+
+## 2026-06-05 - TimeControls.gd
+Done: Added pause/play control script with first-playthrough gating for speed controls, speed toggle between 1x and 5x, and pause-state text sync on tick events.
+Signals: Connects EventBus.game_year_ticked.
+Depends on: TimeManager.toggle_pause/set_speed and GameState is_paused/game_speed/is_first_playthrough.
+Gap: Button captions currently use ASCII text (Play/Pause, 1x/5x); iconographic labels can be added in final UI polish.
+
+## 2026-06-05 - KardashevBar.gd
+Done: Added Kardashev progress UI script with smooth 0.8s fill tweening, K-level label updates, milestone marker labels, and warm-white pulse feedback on milestone reached.
+Signals: Connects EventBus.game_year_ticked and kardashev_milestone_reached.
+Depends on: GameState.kardashev_level and a ProgressBar/Label marker layout in the scene.
+Gap: Marker placement is currently label-based; precise marker ticks should be aligned to the final art-directed bar component.
