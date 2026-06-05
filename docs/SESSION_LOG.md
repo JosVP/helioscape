@@ -195,3 +195,15 @@ Done: Replaced the Dyson stub with yearly panel production, energy and coverage 
 Signals: Connects to EventBus.game_year_ticked; emits EventBus.dyson_panel_produced and EventBus.dyson_energy_updated.
 Depends on: ResourceSystem as a sibling system node for spend_resources(); GameState Mercury resources, panel tier, and milestone storage.
 Gap: Visual shader material updates and culture-event emission beyond queueing the CME notification still need to be wired once the Sun and Dyson swarm scene materials exist.
+
+## 2026-06-05 — PixelFilter.gdshader
+Done: Replaced the shader stub with a canvas_item post-process that snaps SCREEN_TEXTURE sampling to a pixel_size grid and adds a subtle combined scanline/dither overlay at low opacity for retro texture.
+Signals: None.
+Depends on: SubViewport output presented through a CanvasItem using this shader; SCREEN_PIXEL_SIZE and SCREEN_TEXTURE availability in the rendering path.
+Gap: Final visual feel tuning still depends on in-editor testing against camera framing and target output resolution.
+
+## 2026-06-05 — PlanetVisual.gd
+Done: Added a typed PlanetVisual bridge that caches shader materials, applies initial visual params instantly, updates cloud offset and planet spin on game_year_ticked, tweens slow-changing shader params over a fixed 2.0-second interval, seeds UV spot arrays via PackedVector2Array, and updates sun_direction from a scene Sun Node3D.
+Signals: Connects to EventBus.game_year_ticked, planet_visual_params_changed, and game_loaded.
+Depends on: GameState.planets[planet_id] state keys, DataManager planet visual data, EventBus signal emissions, PlanetSphere and AtmosphereShell child nodes with shader materials.
+Gap: Sun node discovery uses a group/name fallback scan and should be tightened to a single explicit scene hook once the final SolarSystem scene path or group convention is locked.
