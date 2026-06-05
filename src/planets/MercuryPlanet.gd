@@ -7,7 +7,9 @@ const PHASE_RATE_MULTIPLIER: Dictionary = {
 	2: 2.4,
 }
 
-var planet_id: String = "mercury"
+
+func _init() -> void:
+	planet_id = "mercury"
 
 
 func get_unlock_condition() -> String:

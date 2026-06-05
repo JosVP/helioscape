@@ -332,3 +332,27 @@ Done: Added Kardashev progress UI script with smooth 0.8s fill tweening, K-level
 Signals: Connects EventBus.game_year_ticked and kardashev_milestone_reached.
 Depends on: GameState.kardashev_level and a ProgressBar/Label marker layout in the scene.
 Gap: Marker placement is currently label-based; precise marker ticks should be aligned to the final art-directed bar component.
+
+## 2026-06-05 - EarthPlanet.gd
+Done: Fixed Godot parse error by removing child redeclaration of inherited planet_id and assigning planet_id in _init() instead.
+Signals: None.
+Depends on: PlanetBase.planet_id inherited member and PlanetBase._ready assertion.
+Gap: None.
+
+## 2026-06-05 - MercuryPlanet.gd
+Done: Fixed Godot parse error by removing child redeclaration of inherited planet_id and assigning planet_id in _init() instead.
+Signals: None.
+Depends on: PlanetBase.planet_id inherited member and PlanetBase._ready assertion.
+Gap: None.
+
+## 2026-06-05 - MarsPlanet.gd
+Done: Fixed Godot parse error by removing child redeclaration of inherited planet_id and assigning planet_id in _init() instead.
+Signals: None.
+Depends on: PlanetBase.planet_id inherited member and PlanetBase._ready assertion.
+Gap: None.
+
+## 2026-06-05 - VenusPlanet.gd
+Done: Fixed Godot parse error by removing child redeclaration of inherited planet_id and assigning planet_id in _init() instead.
+Signals: None.
+Depends on: PlanetBase.planet_id inherited member and PlanetBase._ready assertion.
+Gap: None.

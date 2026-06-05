@@ -1,7 +1,9 @@
 class_name MarsPlanet
 extends PlanetBase
 
-var planet_id: String = "mars"
+
+func _init() -> void:
+	planet_id = "mars"
 
 
 func get_unlock_condition() -> String:

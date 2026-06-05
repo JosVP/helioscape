@@ -1,7 +1,9 @@
 class_name EarthPlanet
 extends PlanetBase
 
-var planet_id: String = "earth"
+
+func _init() -> void:
+	planet_id = "earth"
 
 
 func get_terraforming_display_name(_phase: int) -> String:
