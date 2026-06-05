@@ -1,3 +1,9 @@
+## 2026-06-05 — TerraformingSystem.gd
+Done: Replaced the terraforming stub with a typed choice-driven system that initializes per-planet runtime state from DataManager, applies additive per-choice yearly rates, advances phases, manages lockout conflicts, handles Mars radiation-clear unblocking, computes per-planet visual params, and emits terraforming/visual signals.
+Signals: Connects EventBus.game_year_ticked and tech_node_unlocked; emits terraforming_phase_changed, planet_visual_params_changed, terraforming_choice_applied, and culture_event_triggered (phase events).
+Depends on: DataManager.get_all_planets(), GameState.planets schema (choices/locked_out/atmosphere/visual fields), EventBus terraforming and culture-event signals, TechTreeSystem calling apply_choice().
+Gap: CHOICE_RATES and CHOICE_CONFLICTS are currently local constants tuned as a first pass; final balancing should be playtested and aligned with authored tech progression pacing.
+
 ## 2026-06-05 — GameState.gd + SaveManager.gd (Research Completion Years)
 Done: Added GameState.completed_research_years and wired SaveManager save/load so completed research timestamps persist across save files and reloads.
 Signals: None.
