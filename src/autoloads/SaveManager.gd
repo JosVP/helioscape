@@ -33,6 +33,7 @@ func save_game() -> void:
 		"completed_milestones": GameState.completed_milestones,
 		"naturalist_decisions": GameState.naturalist_decisions,
 		"architect_decisions": GameState.architect_decisions,
+		"naturalist_ratio": GameState.naturalist_ratio,
 		"europa_mission_authorised": GameState.europa_mission_authorised,
 		"europa_impact_year": GameState.europa_impact_year,
 		"europa_impacted": GameState.europa_impacted,
@@ -97,6 +98,7 @@ func load_game() -> void:
 	GameState.completed_milestones = save_data.get("completed_milestones", [])
 	GameState.naturalist_decisions = int(save_data.get("naturalist_decisions", 0))
 	GameState.architect_decisions = int(save_data.get("architect_decisions", 0))
+	GameState.naturalist_ratio = float(save_data.get("naturalist_ratio", 0.0))
 	GameState.europa_mission_authorised = bool(save_data.get("europa_mission_authorised", false))
 	GameState.europa_impact_year = float(save_data.get("europa_impact_year", 0.0))
 	GameState.europa_impacted = bool(save_data.get("europa_impacted", false))

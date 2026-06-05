@@ -51,6 +51,7 @@ var completed_milestones: Array = []
 
 var naturalist_decisions: int = 0
 var architect_decisions: int = 0
+var naturalist_ratio: float = 0.0
 
 var europa_mission_authorised: bool = false
 var europa_impact_year: float = 0.0
@@ -94,6 +95,7 @@ func reset() -> void:
 
 	naturalist_decisions = 0
 	architect_decisions = 0
+	naturalist_ratio = 0.0
 
 	europa_mission_authorised = false
 	europa_impact_year = 0.0
