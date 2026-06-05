@@ -267,3 +267,32 @@ Done: Added a typed PlanetVisual bridge that caches shader materials, applies in
 Signals: Connects to EventBus.game_year_ticked, planet_visual_params_changed, and game_loaded.
 Depends on: GameState.planets[planet_id] state keys, DataManager planet visual data, EventBus signal emissions, PlanetSphere and AtmosphereShell child nodes with shader materials.
 Gap: Sun node discovery uses a group/name fallback scan and should be tightened to a single explicit scene hook once the final SolarSystem scene path or group convention is locked.
+## 2026-06-05 - PlanetBase.gd
+Done: Added a typed base planet contract with required interface methods, unlock-condition default handling against GameState.completed_techs, and a _ready assertion that child scripts must set planet_id.
+Signals: None.
+Depends on: GameState.completed_techs for default is_unlocked() checks in child classes that provide unlock tech ids.
+Gap: Base methods currently warn and return fallback values when not overridden; if stricter enforcement is desired these can be hardened with push_error assertions.
+
+## 2026-06-05 - EarthPlanet.gd
+Done: Implemented Earth-specific planet logic with always-unlocked behavior, narrator-voice phase description derived from completed Earth tech progression, Kardashev band summary text, and Moon research summary counts (active/completed/available).
+Signals: None.
+Depends on: GameState.completed_techs, GameState.kardashev_level, GameState.active_research, and DataManager.get_research_tracks_for("moon").
+Gap: Earth description text currently keys off a focused subset of Earth tech IDs and may need expansion once additional Earth narrative milestones are authored.
+
+## 2026-06-05 - MercuryPlanet.gd
+Done: Implemented Mercury planet logic with unlock condition, phase naming, narrator one-line phase descriptions, phase-scaled resource rate reporting from DataManager resource definitions, and Dyson output summary formatting.
+Signals: None.
+Depends on: GameState.mercury_phase, GameState.completed_techs, GameState.dyson_panel_count, GameState.dyson_energy_watts, and DataManager.get_resource().
+Gap: Phase production multipliers are local constants for now and should be aligned with final economy balancing after playtesting.
+
+## 2026-06-05 - MarsPlanet.gd
+Done: Implemented Mars additive-choice planet logic with active choice discovery from GameState.planets.mars.terraforming_choices, phase display naming from choice combinations, narrator one-line phase descriptions that reference active choices, unlock checks, and radiation-window helpers.
+Signals: None.
+Depends on: GameState.planets["mars"] terraforming_phase and terraforming_choices, GameState.completed_techs, GameState.mercury_radiation_clear_year, and GameState.game_year.
+Gap: Narrator strings are authored defaults; if culture-event beats are later preferred in this panel, descriptions may be redirected to localized keys.
+
+## 2026-06-05 - VenusPlanet.gd
+Done: Implemented Venus additive-choice planet logic with required visual-layering rationale comment, active choice discovery, phase naming from active choices, narrator one-line phase descriptions (including Europa spin-up and sky-city context), unlock checks, Europa mission availability window, ETA helper, and current spin speed helper.
+Signals: None.
+Depends on: GameState.planets["venus"] terraforming_phase and terraforming_choices, GameState.completed_techs, GameState.europa_mission_authorised, GameState.europa_impact_year, GameState.europa_impacted, and GameState.game_year.
+Gap: The display name uses ASCII formatting ("465C") to keep source encoding simple; if you want the degree symbol in UI text, it can be switched in a localization pass.
