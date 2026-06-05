@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://src/systems/TechTreeSystem.gd" id="1_wk4m8"]
 [ext_resource type="Script" path="res://src/systems/ResearchSystem.gd" id="2_t045v"]
@@ -8,6 +8,8 @@
 [ext_resource type="Script" path="res://src/systems/CultureEventSystem.gd" id="6_ejc85"]
 [ext_resource type="Script" path="res://src/systems/KardashevSystem.gd" id="7_q1n3s"]
 [ext_resource type="Script" path="res://src/ui/debug/DebugConsole.gd" id="8_krxqt"]
+[ext_resource type="Script" path="res://src/ui/culture_events/CultureEventQueue.gd" id="9_cequeue"]
+[ext_resource type="Script" path="res://src/ui/culture_events/CultureEventCard.gd" id="10_cecard"]
 
 [node name="Main" type="Node"]
 
@@ -53,14 +55,96 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("9_cequeue")
 
-[node name="CultureEventCard" type="Control" parent="UI"]
-visible = false
-anchors_preset = 15
+[node name="BellIcon" type="Button" parent="UI/CultureEventQueue"]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 0.0
 anchor_right = 1.0
+anchor_bottom = 0.0
+offset_left = -60.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = 50.0
+text = "🔔"
+
+[node name="UnreadBadge" type="Label" parent="UI/CultureEventQueue/BellIcon"]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -16.0
+offset_top = -8.0
+offset_right = 4.0
+offset_bottom = 12.0
+visible = false
+text = ""
+
+[node name="ToastContainer" type="VBoxContainer" parent="UI/CultureEventQueue"]
+anchors_preset = 2
+anchor_top = 1.0
 anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = -320.0
+offset_right = 420.0
+offset_bottom = -10.0
+grow_vertical = 0
+
+[node name="BellDropdown" type="PanelContainer" parent="UI/CultureEventQueue"]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -310.0
+offset_top = 55.0
+offset_right = -10.0
+offset_bottom = 305.0
+visible = false
+
+[node name="ScrollContainer" type="ScrollContainer" parent="UI/CultureEventQueue/BellDropdown"]
+layout_mode = 2
+
+[node name="DropdownList" type="VBoxContainer" parent="UI/CultureEventQueue/BellDropdown/ScrollContainer"]
+layout_mode = 2
+
+[node name="CultureEventCard" type="PanelContainer" parent="UI/CultureEventQueue"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -400.0
+offset_top = -260.0
+offset_right = 400.0
+offset_bottom = 260.0
 grow_horizontal = 2
 grow_vertical = 2
+visible = false
+script = ExtResource("10_cecard")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="UI/CultureEventQueue/CultureEventCard"]
+layout_mode = 2
+
+[node name="PortraitTexture" type="TextureRect" parent="UI/CultureEventQueue/CultureEventCard/HBoxContainer"]
+custom_minimum_size = Vector2(245, 0)
+layout_mode = 2
+expand_mode = 3
+stretch_mode = 6
+
+[node name="ContentColumn" type="VBoxContainer" parent="UI/CultureEventQueue/CultureEventCard/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="TitleLabel" type="Label" parent="UI/CultureEventQueue/CultureEventCard/HBoxContainer/ContentColumn"]
+layout_mode = 2
+
+[node name="NarratorText" type="RichTextLabel" parent="UI/CultureEventQueue/CultureEventCard/HBoxContainer/ContentColumn"]
+layout_mode = 2
+size_flags_vertical = 3
+bbcode_enabled = true
+fit_content = false
+
+[node name="ChoicesContainer" type="VBoxContainer" parent="UI/CultureEventQueue/CultureEventCard/HBoxContainer/ContentColumn"]
+layout_mode = 2
 
 [node name="PlanetPanel" type="Control" parent="UI"]
 anchors_preset = 15

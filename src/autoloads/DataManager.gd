@@ -52,6 +52,10 @@ func get_culture_event(event_id: String) -> Dictionary:
 	return _culture_events.get(event_id, {})
 
 
+func get_all_culture_events() -> Array[Dictionary]:
+	return _dictionary_values(_culture_events)
+
+
 func get_kardashev_milestone(milestone_id: String) -> Dictionary:
 	return _kardashev_milestones.get(milestone_id, {})
 
