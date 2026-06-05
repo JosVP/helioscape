@@ -22,6 +22,7 @@ func save_game() -> void:
 		"dyson_panel_tier": GameState.dyson_panel_tier,
 		"dyson_coverage_percent": GameState.dyson_coverage_percent,
 		"active_research": GameState.active_research,
+		"completed_research_years": GameState.completed_research_years,
 		"total_rp_capacity": GameState.total_rp_capacity,
 		"used_rp_capacity": GameState.used_rp_capacity,
 		"kardashev_level": GameState.kardashev_level,
@@ -85,6 +86,7 @@ func load_game() -> void:
 	GameState.dyson_panel_tier = String(save_data.get("dyson_panel_tier", "basic"))
 	GameState.dyson_coverage_percent = float(save_data.get("dyson_coverage_percent", 0.0))
 	GameState.active_research = save_data.get("active_research", [])
+	GameState.completed_research_years = save_data.get("completed_research_years", {})
 	GameState.total_rp_capacity = int(save_data.get("total_rp_capacity", 60))
 	GameState.used_rp_capacity = int(save_data.get("used_rp_capacity", 0))
 	GameState.kardashev_level = float(save_data.get("kardashev_level", 0.73))

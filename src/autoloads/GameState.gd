@@ -35,6 +35,7 @@ var dyson_coverage_percent: float = 0.0
 
 var active_research: Array = []
 # Each entry: { "track_id": String, "planet_id": String, "progress_years": float, "is_paused": bool }
+var completed_research_years: Dictionary = {}
 var total_rp_capacity: int = 60
 var used_rp_capacity: int = 0
 
@@ -78,6 +79,7 @@ func reset() -> void:
 	dyson_coverage_percent = 0.0
 
 	active_research = []
+	completed_research_years = {}
 	total_rp_capacity = 60
 	used_rp_capacity = 0
 

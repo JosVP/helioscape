@@ -1,3 +1,45 @@
+## 2026-06-05 — GameState.gd + SaveManager.gd (Research Completion Years)
+Done: Added GameState.completed_research_years and wired SaveManager save/load so completed research timestamps persist across save files and reloads.
+Signals: None.
+Depends on: ResearchSystem writing completion years on track completion; ResearchUI reading GameState.completed_research_years.
+Gap: Existing old saves that predate this field will load with an empty completion-year dictionary until tracks complete again or data is backfilled.
+
+## 2026-06-05 — TechTreeUI.gd + ResearchUI.gd (Panel Flow Wiring)
+Done: Wired both panel UI scripts to EventBus.planet_selected so they update planet_id and refresh when the selected planet changes; removed deep absolute get_node fallbacks from UI scripts to keep one-level node-path constraints.
+Signals: Connects EventBus.planet_selected in both UI scripts.
+Depends on: SolarSystemView/PlanetsPanel emitting EventBus.planet_selected and systems registering in groups (tech_tree_system, research_system).
+Gap: A dedicated PlanetPanel.gd scene script is still not present in this workspace snapshot, so tab/animation-specific panel behavior remains for a later file task.
+
+## 2026-06-05 — TechTreeSystem.gd
+Done: Replaced the tech tree stub with typed prerequisite checking, unlock processing, chained unlock support, spillover notification/event handling, terraforming choice forwarding, decision-tag counting, and available-tech listing for a planet.
+Signals: Emits EventBus.tech_node_unlocked and EventBus.culture_event_triggered; emits EventBus.tech_node_available for spillover unlock hints.
+Depends on: DataManager.get_tech_node/get_tech_tree_for, GameState.planets + completed_techs + culture_event_queue + decision counters, optional TerraformingSystem.apply_choice.
+Gap: Spillover event IDs currently default to generated ids when effect.event_id is absent, so authored culture event ids should be added in data if specific narrative beats are required.
+
+## 2026-06-05 — ResearchSystem.gd
+Done: Replaced the research stub with typed yearly progression, completion handling, RP capacity accounting, start/pause/resume lifecycle, on-complete effect processing, and tech unlock bridging through TechTreeSystem.
+Signals: Connects EventBus.game_year_ticked; emits EventBus.research_track_started/completed/paused/resumed; may emit tech and culture-event signals through effect application.
+Depends on: DataManager.get_research_track and track on_complete_effects schema, GameState.active_research + used_rp_capacity + total_rp_capacity + completed_techs, optional TechTreeSystem and TerraformingSystem instances.
+Gap: Completion year is not persisted in GameState yet; completed track timestamps are currently only tracked in UI memory during runtime.
+
+## 2026-06-05 — TechTreeUI.gd
+Done: Added a planet-scoped tech tree UI that builds buttons from DataManager tech nodes, applies visibility/muting/silhouette rules from missing prerequisite count, forwards node clicks to TechTreeSystem, and refreshes on tech_node_unlocked.
+Signals: Connects EventBus.tech_node_unlocked; invokes TechTreeSystem.unlock_tech.
+Depends on: DataManager.get_tech_tree_for/get_tech_node, GameState.completed_techs, TechTreeSystem node in scene/group tech_tree_system.
+Gap: Current implementation builds a fallback VBox layout when expected child nodes are absent; final scene-specific styling/layout still needs editor-side wiring.
+
+## 2026-06-05 — ResearchUI.gd
+Done: Added a planet-scoped research UI that separates running, paused, available, and completed tracks, renders progress/remaining years, supports start/pause/resume actions, and displays RP usage with resume-capacity tooltips.
+Signals: Connects EventBus.research_track_completed/paused/resumed and refreshes view state; invokes ResearchSystem track control methods.
+Depends on: DataManager.get_research_tracks_for, GameState.active_research + completed_techs + RP capacity fields, ResearchSystem node in scene/group research_system.
+Gap: Completed track year labels are runtime-only (tracked locally from completion signals) and show a placeholder for pre-completed tracks loaded from save.
+
+## 2026-06-05 — SolarSystemView.gd + PlanetOrbit.gd
+Done: Created SolarSystemView (orrery root — fixed camera, planet spawning from DataManager, continuous orbit animation in _process, camera zoom tweens to planets, zoom_out, year-tick dim for locked planets) and PlanetOrbit (fixed orbit ring with TorusMesh, 16-sphere click detection distributed around the ring, lock visual state, forwards clicks to EventBus.planet_selected).
+Signals: Connects EventBus.planet_selected, EventBus.game_year_ticked; emits EventBus.orrery_zoom_requested on zoom complete.
+Depends on: DataManager.get_all_planets(), GameState.planets / orrery_zoomed_planet, EventBus.planet_selected / orrery_zoom_requested / game_year_ticked, scenes/planets/PlanetView.tscn (must have ClickArea Area3D child), src/ui/solar_system/PlanetOrbit.tscn (optional — falls back to code-built torus if absent).
+Gap: PlanetOrbit.tscn and PlanetView.tscn scene files still need to be built in the Godot editor. Camera overview/zoom constants (OVERVIEW_CAMERA_POSITION, ZOOM_CAMERA_OFFSET) will need tuning once scenes exist.
+
 ## 2026-06-03 — GameState.gd
 Done: Replaced the GameState autoload stub with the full typed runtime state schema for clock, planets, Mercury resources, Dyson progression, research capacity, culture history, milestones, decisions, Europa mission state, and orrery focus, plus a reset() method that reassigns every field to its default new-game value.
 Signals: None.
