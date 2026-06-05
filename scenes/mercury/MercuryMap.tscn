@@ -1,0 +1,137 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://src/systems/MercuryMapSystem.gd" id="1_map"]
+[ext_resource type="Script" path="res://src/systems/MercuryMiningSystem.gd" id="2_mining"]
+[ext_resource type="Script" path="res://src/systems/MercuryQueueSystem.gd" id="3_queue"]
+[ext_resource type="Script" path="res://src/ui/mercury/MercuryMapUI.gd" id="4_ui"]
+[ext_resource type="Script" path="res://src/ui/mercury/ResourceBar.gd" id="5_res"]
+[ext_resource type="Script" path="res://src/ui/mercury/ProductionQueuePanel.gd" id="6_prod"]
+[ext_resource type="Script" path="res://src/ui/mercury/MinerAssignmentPanel.gd" id="7_assign"]
+[ext_resource type="Script" path="res://src/ui/mercury/MercuryCameraController.gd" id="8_cam"]
+
+[node name="MercuryMap" type="Node2D"]
+
+[node name="Systems" type="Node" parent="."]
+
+[node name="MercuryMapSystem" type="Node" parent="Systems"]
+script = ExtResource("1_map")
+
+[node name="MercuryMiningSystem" type="Node" parent="Systems"]
+script = ExtResource("2_mining")
+
+[node name="MercuryQueueSystem" type="Node" parent="Systems"]
+script = ExtResource("3_queue")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(640, 360)
+current = true
+script = ExtResource("8_cam")
+
+[node name="TileMap" type="TileMap" parent="."]
+
+[node name="NodesLayer" type="Node2D" parent="."]
+
+[node name="UI" type="CanvasLayer" parent="."]
+script = ExtResource("4_ui")
+
+[node name="StartingZonePanel" type="PanelContainer" parent="UI"]
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 420.0
+offset_bottom = 260.0
+
+[node name="ZoneButtons" type="VBoxContainer" parent="UI/StartingZonePanel"]
+
+[node name="BuildPanel" type="PanelContainer" parent="UI"]
+offset_left = 20.0
+offset_top = 280.0
+offset_right = 420.0
+offset_bottom = 420.0
+
+[node name="NodeButtons" type="Control" parent="UI"]
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 1280.0
+offset_bottom = 720.0
+
+[node name="BackButton" type="Button" parent="UI"]
+offset_left = 20.0
+offset_top = 680.0
+offset_right = 150.0
+offset_bottom = 712.0
+text = "Back to Main"
+
+[node name="BuildInfo" type="Label" parent="UI/BuildPanel"]
+offset_left = 12.0
+offset_top = 12.0
+offset_right = 360.0
+offset_bottom = 52.0
+text = "Build"
+
+[node name="ConfirmBuildButton" type="Button" parent="UI/BuildPanel"]
+offset_left = 12.0
+offset_top = 62.0
+offset_right = 200.0
+offset_bottom = 102.0
+text = "Confirm"
+
+[node name="ResourceBar" type="HBoxContainer" parent="UI"]
+script = ExtResource("5_res")
+offset_left = 20.0
+offset_top = 440.0
+offset_right = 640.0
+offset_bottom = 480.0
+
+[node name="CommonLabel" type="Label" parent="UI/ResourceBar"]
+text = "Common: 0"
+
+[node name="RareLabel" type="Label" parent="UI/ResourceBar"]
+text = "Rare: 0"
+
+[node name="VolatilesLabel" type="Label" parent="UI/ResourceBar"]
+text = "Volatiles: 0"
+
+[node name="ProductionQueuePanel" type="PanelContainer" parent="UI"]
+script = ExtResource("6_prod")
+offset_left = 980.0
+offset_top = 20.0
+offset_right = 1260.0
+offset_bottom = 360.0
+
+[node name="Rows" type="VBoxContainer" parent="UI/ProductionQueuePanel"]
+
+[node name="Controls" type="HBoxContainer" parent="UI/ProductionQueuePanel"]
+offset_left = 8.0
+offset_top = 300.0
+offset_right = 260.0
+offset_bottom = 336.0
+
+[node name="AddMinerButton" type="Button" parent="UI/ProductionQueuePanel/Controls"]
+text = "Queue Miner"
+
+[node name="MinerAssignmentPanel" type="PanelContainer" parent="UI"]
+script = ExtResource("7_assign")
+offset_left = 980.0
+offset_top = 380.0
+offset_right = 1260.0
+offset_bottom = 700.0
+
+[node name="Title" type="Label" parent="UI/MinerAssignmentPanel"]
+offset_left = 10.0
+offset_top = 10.0
+offset_right = 250.0
+offset_bottom = 32.0
+text = "Refinery"
+
+[node name="Slots" type="VBoxContainer" parent="UI/MinerAssignmentPanel"]
+offset_left = 10.0
+offset_top = 42.0
+offset_right = 260.0
+offset_bottom = 250.0
+
+[node name="AddMinerButton" type="Button" parent="UI/MinerAssignmentPanel"]
+offset_left = 10.0
+offset_top = 260.0
+offset_right = 200.0
+offset_bottom = 298.0
+text = "Add Miner"

@@ -1,0 +1,117 @@
+{
+  "starting_zones": [
+    {
+      "id": 0,
+      "name": "Caloris Rim",
+      "summary": "Common + Rare Metals",
+      "node_ids": ["mine_common_1", "ref_common_1a", "ref_common_1b"]
+    },
+    {
+      "id": 1,
+      "name": "Borealis Line",
+      "summary": "All three types spread out",
+      "node_ids": ["mine_rare_1", "ref_rare_1a", "solar_1"]
+    },
+    {
+      "id": 2,
+      "name": "Terminator Reach",
+      "summary": "Volatiles heavy, near mass driver",
+      "node_ids": ["mine_vol_1", "ref_vol_1a", "mass_driver_1"]
+    }
+  ],
+  "nodes": [
+    {
+      "id": "mine_common_1",
+      "slot_type": "mine",
+      "ore_type": "common_ore",
+      "position": [260.0, 320.0],
+      "adjacent": ["ref_common_1a", "ref_common_1b"],
+      "costs": {"common_ore": 8.0},
+      "duration_years": 1.0
+    },
+    {
+      "id": "mine_common_2",
+      "slot_type": "mine",
+      "ore_type": "common_ore",
+      "position": [380.0, 300.0],
+      "adjacent": ["ref_common_2a"],
+      "costs": {"common_ore": 9.0},
+      "duration_years": 1.0
+    },
+    {
+      "id": "mine_common_3",
+      "slot_type": "mine",
+      "ore_type": "common_ore",
+      "position": [500.0, 330.0],
+      "adjacent": ["ref_common_3a"],
+      "costs": {"common_ore": 9.0},
+      "duration_years": 1.2
+    },
+    {
+      "id": "mine_rare_1",
+      "slot_type": "mine",
+      "ore_type": "rare_metals",
+      "position": [620.0, 290.0],
+      "adjacent": ["ref_rare_1a", "ref_rare_1b"],
+      "costs": {"common_ore": 10.0, "rare_metals": 2.0},
+      "duration_years": 1.5
+    },
+    {
+      "id": "mine_rare_2",
+      "slot_type": "mine",
+      "ore_type": "rare_metals",
+      "position": [760.0, 350.0],
+      "adjacent": ["ref_rare_2a"],
+      "costs": {"common_ore": 12.0, "rare_metals": 2.0},
+      "duration_years": 1.8
+    },
+    {
+      "id": "mine_vol_1",
+      "slot_type": "mine",
+      "ore_type": "polar_volatiles",
+      "position": [860.0, 460.0],
+      "adjacent": ["ref_vol_1a"],
+      "costs": {"common_ore": 12.0, "rare_metals": 3.0},
+      "duration_years": 2.0
+    },
+    {
+      "id": "mine_vol_2",
+      "slot_type": "mine",
+      "ore_type": "polar_volatiles",
+      "position": [940.0, 520.0],
+      "adjacent": ["ref_vol_2a"],
+      "costs": {"common_ore": 14.0, "rare_metals": 3.0},
+      "duration_years": 2.2
+    },
+    {
+      "id": "mine_mix_1",
+      "slot_type": "mine",
+      "ore_type": "common_ore",
+      "position": [700.0, 470.0],
+      "adjacent": ["ref_mix_1a"],
+      "costs": {"common_ore": 11.0},
+      "duration_years": 1.4
+    },
+    {"id": "ref_common_1a", "slot_type": "refinery", "position": [300.0, 370.0], "adjacent": ["factory_1"], "costs": {"common_ore": 10.0}, "duration_years": 1.0},
+    {"id": "ref_common_1b", "slot_type": "refinery", "position": [335.0, 410.0], "adjacent": ["factory_1"], "costs": {"common_ore": 10.0}, "duration_years": 1.0},
+    {"id": "ref_common_2a", "slot_type": "refinery", "position": [430.0, 355.0], "adjacent": ["factory_2"], "costs": {"common_ore": 11.0}, "duration_years": 1.2},
+    {"id": "ref_common_3a", "slot_type": "refinery", "position": [540.0, 360.0], "adjacent": ["factory_2"], "costs": {"common_ore": 11.0}, "duration_years": 1.2},
+    {"id": "ref_rare_1a", "slot_type": "refinery", "position": [660.0, 340.0], "adjacent": ["factory_3"], "costs": {"common_ore": 12.0}, "duration_years": 1.4},
+    {"id": "ref_rare_1b", "slot_type": "refinery", "position": [705.0, 320.0], "adjacent": ["factory_3"], "costs": {"common_ore": 12.0}, "duration_years": 1.4},
+    {"id": "ref_rare_2a", "slot_type": "refinery", "position": [800.0, 400.0], "adjacent": ["factory_4"], "costs": {"common_ore": 13.0}, "duration_years": 1.6},
+    {"id": "ref_vol_1a", "slot_type": "refinery", "position": [890.0, 430.0], "adjacent": ["factory_5", "mass_driver_1"], "costs": {"common_ore": 13.0, "rare_metals": 2.0}, "duration_years": 1.8},
+    {"id": "ref_vol_2a", "slot_type": "refinery", "position": [980.0, 480.0], "adjacent": ["factory_6", "mass_driver_1"], "costs": {"common_ore": 14.0, "rare_metals": 2.0}, "duration_years": 1.8},
+    {"id": "ref_mix_1a", "slot_type": "refinery", "position": [740.0, 510.0], "adjacent": ["factory_5"], "costs": {"common_ore": 12.0}, "duration_years": 1.5},
+    {"id": "factory_1", "slot_type": "factory", "position": [360.0, 470.0], "adjacent": ["solar_1"], "costs": {"common_ore": 15.0, "rare_metals": 2.0}, "duration_years": 2.0},
+    {"id": "factory_2", "slot_type": "factory", "position": [510.0, 460.0], "adjacent": ["solar_2"], "costs": {"common_ore": 15.0, "rare_metals": 2.0}, "duration_years": 2.0},
+    {"id": "factory_3", "slot_type": "factory", "position": [690.0, 430.0], "adjacent": ["solar_3"], "costs": {"common_ore": 16.0, "rare_metals": 3.0}, "duration_years": 2.2},
+    {"id": "factory_4", "slot_type": "factory", "position": [840.0, 450.0], "adjacent": ["solar_4"], "costs": {"common_ore": 16.0, "rare_metals": 3.0}, "duration_years": 2.2},
+    {"id": "factory_5", "slot_type": "factory", "position": [820.0, 560.0], "adjacent": ["mass_driver_1"], "costs": {"common_ore": 17.0, "rare_metals": 4.0}, "duration_years": 2.5},
+    {"id": "factory_6", "slot_type": "factory", "position": [980.0, 590.0], "adjacent": ["mass_driver_1"], "costs": {"common_ore": 17.0, "rare_metals": 4.0}, "duration_years": 2.5},
+    {"id": "mass_driver_1", "slot_type": "mass_driver", "position": [1120.0, 540.0], "adjacent": [], "costs": {"common_ore": 25.0, "rare_metals": 8.0, "polar_volatiles": 3.0}, "duration_years": 3.5},
+    {"id": "solar_1", "slot_type": "solar", "position": [300.0, 560.0], "adjacent": [], "costs": {"common_ore": 10.0}, "duration_years": 1.5},
+    {"id": "solar_2", "slot_type": "solar", "position": [470.0, 570.0], "adjacent": [], "costs": {"common_ore": 10.0}, "duration_years": 1.5},
+    {"id": "solar_3", "slot_type": "solar", "position": [650.0, 590.0], "adjacent": [], "costs": {"common_ore": 11.0}, "duration_years": 1.7},
+    {"id": "solar_4", "slot_type": "solar", "position": [860.0, 650.0], "adjacent": [], "costs": {"common_ore": 11.0}, "duration_years": 1.7}
+  ]
+}

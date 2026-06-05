@@ -1,13 +1,29 @@
 # Helioscape — Copilot Prompts: Mercury
 
-Use one prompt at a time in Copilot Chat. If you already have Mercury-related autoloads or scenes, mention them in the same chat so the generated code matches the existing structure.
+Use one prompt at a time in Copilot Chat. These prompts are pre-aligned with the current Helioscape architecture (Godot 4 + strict typed GDScript + EventBus signals + GameState persistence).
 
-Here are two prompts. Adjust node names and autoload references to match your existing project structure.
+Before using a prompt, include any existing Mercury scene or script names already in your project so Copilot can merge instead of re-inventing structure.
 
 Prompt 1 — Mercury Map, Camera & Building System
-Create a MercuryMap scene in Godot 4 (GDScript) for a strategy game 
-called Helioscape. Mercury is an RTS-lite base builder the player 
-expands over the course of the game.
+Create and wire a Mercury map gameplay slice for Helioscape in Godot 4 GDScript.
+
+Important project constraints:
+- Static typing only. Type all vars, params, return values, and signals.
+- One file, one responsibility.
+- Systems must not reference UI nodes directly.
+- Use EventBus for cross-system signals (do not connect systems directly).
+- Persist mutable state in GameState.
+- Use existing Mercury resource keys: common_ore, rare_metals, polar_volatiles.
+
+Implement this in phases and provide code per file.
+
+FILES TO CREATE/UPDATE (in this order)
+1) data/mercury_map_nodes.json
+2) src/systems/MercuryMapSystem.gd
+3) src/autoloads/GameState.gd (only add Mercury map state keys)
+4) src/autoloads/EventBus.gd (only add missing Mercury map signals)
+5) src/ui/mercury/MercuryMapUI.gd (UI coordinator)
+6) scenes/mercury/MercuryMap.tscn (scene wiring)
 
 SCENE STRUCTURE
 MercuryMap (Node2D)
@@ -19,9 +35,10 @@ MercuryMap (Node2D)
     BuildPanel
     ResourceBar
 
+Use map interaction in MercuryMapSystem and keep UI behavior in MercuryMapUI.
+
 MAP DATA
-All node positions are hardcoded, not procedural. Define them as a 
-Dictionary or Array of Resources. The map contains:
+All node positions are hardcoded, not procedural. Load from data/mercury_map_nodes.json through DataManager. Map contains:
 
 - 3 starting zones. Each zone is a named cluster of nearby nodes. 
   Described by ore composition e.g. "Common + Rare Metals", 
@@ -35,23 +52,25 @@ Dictionary or Array of Resources. The map contains:
 - 1 mass driver slot (fixed far-side position)
 - 4 solar array slots
 
+Each node/slot must have a stable string id.
+
 NODE STATES
 Every placeable slot has a state enum:
-  LOCKED — not reachable yet
-  AVAILABLE — adjacent operational building exists, can build
-  BUILDING — timer running, construction in progress
-  OPERATIONAL — active
+  LOCKED = 0
+  AVAILABLE = 1
+  BUILDING = 2
+  OPERATIONAL = 3
 
-On scene load all nodes start LOCKED except those in the chosen 
-starting zone.
+On scene load all nodes start LOCKED except the chosen starting zone.
 
 STARTING ZONE SELECTION
-On first Mercury visit show StartingZonePanel with 3 buttons, one 
-per zone. Each button shows the zone name and ore type summary. 
-On selection: mark that zone's nodes as AVAILABLE, hide panel 
-permanently, emit signal starting_zone_chosen(zone_id: int).
-Store choice in a persistent game state autoload so panel never 
-shows again.
+On first Mercury visit show StartingZonePanel with 3 buttons, one per zone.
+Each button shows zone name and ore summary.
+On selection:
+- Mark selected zone nodes AVAILABLE.
+- Persist selection in GameState (e.g. mercury_starting_zone_id and mercury_starting_zone_selected).
+- Hide panel permanently for future visits.
+- Emit via EventBus: starting_zone_chosen(zone_id: int).
 
 BUILDING PLACEMENT
 Player clicks an AVAILABLE slot:
@@ -65,29 +84,56 @@ Player clicks an AVAILABLE slot:
   (set their state to AVAILABLE), emit 
   building_completed(node_id: String, building_type: String)
 
+Use ResourceSystem for spend checks (can_spend_resources/spend_resources), do not duplicate economy logic.
+Use TimeManager conversion rules for years->seconds consistency.
+
 CAMERA
 Edge-scroll panning: when mouse is within 40px of any screen edge, 
 move Camera2D in that direction at constant speed. Clamp to map 
 bounds. No zoom needed for prototype.
 
+Add typed constants for pan margin, pan speed, and map clamp bounds.
+
 SIGNALS
+Add these to EventBus if missing:
   starting_zone_chosen(zone_id: int)
   building_completed(node_id: String, building_type: String)
   node_selected(node_id: String)
 
+OUTPUT FORMAT
+- For each file, show full typed code.
+- Include a short note listing which EventBus signals are emitted/connected.
+- Keep each script under ~150 lines where practical; split helpers if needed.
+
 Prompt 2 — Miners, Resource Economy & Production Queue
-Extend the existing MercuryMap scene in Godot 4 (GDScript) with 
-the resource economy, miner units, and production queue.
+Extend the existing Mercury map implementation with miners and production queue.
+
+Important project constraints:
+- Keep logic in systems, UI in ui scripts, communication through EventBus.
+- Keep mutable values in GameState.
+- Use existing resource ids: common_ore, rare_metals, polar_volatiles.
+- Keep strict typing and one-file-one-job.
+
+Implement/update these files in order:
+1) src/systems/MercuryMiningSystem.gd
+2) src/systems/MercuryQueueSystem.gd
+3) src/systems/MinerUnit.gd
+4) src/autoloads/GameState.gd (add only required queue/miner state)
+5) src/autoloads/EventBus.gd (add missing signals)
+6) src/ui/mercury/ResourceBar.gd
+7) src/ui/mercury/ProductionQueuePanel.gd
+8) src/ui/mercury/MinerAssignmentPanel.gd
 
 RESOURCE COUNTERS
-Add to the game state autoload (or a MercuryEconomy autoload):
+Use GameState.mercury_resources (Dictionary) as source of truth.
+Ensure keys exist:
   common_ore: float
   rare_metals: float
-  volatiles: float
+  polar_volatiles: float
 
 Each operational refinery runs a repeating Timer. On each tick it 
 adds to its ore_type counter: amount = base_rate * miners_assigned. 
-Emit resource_changed(ore_type: String, new_value: float) on change. 
+Emit EventBus.resource_accumulation_updated(resource_id: String, amount: float) on change. 
 ResourceBar in UI listens to this signal and updates labels.
 
 MINER UNITS
@@ -108,8 +154,7 @@ Miner movement:
 - On reassignment: finish current tween segment, then create a 
   new Tween to the new refinery position in a straight line, 
   then begin new slot's waypoint loop
-- Miners only contribute to resource ticks while OPERATIONAL 
-  (i.e. not REASSIGNING)
+- Miners only contribute while in active loop states (not REASSIGNING)
 
 Miner assignment UI:
 - Click operational refinery → show sidebar with miner slots 
@@ -121,9 +166,10 @@ Miner assignment UI:
 - Player starts with 4 miners in reserve. Additional miners 
   built via production queue (cost: common ore).
 
+Emit EventBus.miner_reassigned(miner_id: int, new_refinery_id: String) when reassignment completes.
+
 PRODUCTION QUEUE
-Vertical queue, managed by MercuryEconomy. Displayed in a 
-sidebar panel.
+Vertical queue managed by MercuryQueueSystem. Displayed in a sidebar panel.
 
 Data structure per queue item:
   label: String
@@ -143,6 +189,10 @@ Rules:
   default), begin next item.
 - Default Dyson Panel repeats infinitely
 
+On completion:
+- Emit EventBus.component_completed(component_id: String) for normal items.
+- Emit EventBus.dyson_panel_produced(count: int) for Dyson panel default loop.
+
 Queue UI:
 - Scrollable VBoxContainer
 - Each row: item label | cost icons | progress bar if active | 
@@ -150,9 +200,17 @@ Queue UI:
 - Default row visually distinct (greyed, locked icon)
 
 SIGNALS
-  resource_changed(ore_type: String, new_value: float)
+Add to EventBus if missing:
   miner_reassigned(miner_id: int, new_refinery_id: String)
-  component_delivered(component_type: String)
-  dyson_panel_launched()
 
-One note: the waypoint arrays in Prompt 2 are the one thing Copilot can't generate for you — those depend on where you've actually placed nodes on the map. Define those manually once you've laid out the map in the editor, then reference them by slot ID.
+Reuse existing EventBus signals where possible:
+  resource_accumulation_updated(resource_id: String, amount: float)
+  component_queued(component_id: String)
+  component_completed(component_id: String)
+  dyson_panel_produced(count: int)
+
+OUTPUT FORMAT
+- Provide full typed code for each touched file.
+- Include a compact test checklist for in-editor/manual verification.
+
+One note: waypoint arrays in Prompt 2 must be authored manually after node layout is finalized in the editor. Reference paths by refinery slot id.

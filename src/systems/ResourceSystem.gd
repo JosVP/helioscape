@@ -21,6 +21,7 @@ const TECH_RESOURCE_BONUSES: Dictionary = {
 
 
 func _ready() -> void:
+	add_to_group("resource_system")
 	_ensure_resource_keys()
 	_update_mercury_phase_from_progress()
 	EventBus.game_year_ticked.connect(_on_year_ticked)

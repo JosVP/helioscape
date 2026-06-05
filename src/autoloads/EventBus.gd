@@ -35,6 +35,10 @@ signal resource_accumulation_updated(resource_id: String, amount: float)
 signal component_queued(component_id: String)
 signal component_completed(component_id: String)
 signal mercury_phase_changed(phase: int)
+signal starting_zone_chosen(zone_id: int)
+signal building_completed(node_id: String, building_type: String)
+signal node_selected(node_id: String)
+signal miner_reassigned(miner_id: int, new_refinery_id: String)
 
 # Dyson
 signal dyson_panel_produced(count: int)

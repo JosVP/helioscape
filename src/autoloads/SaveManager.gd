@@ -17,6 +17,14 @@ func save_game() -> void:
 		"mercury_phase": GameState.mercury_phase,
 		"mercury_resources": GameState.mercury_resources,
 		"mercury_radiation_clear_year": GameState.mercury_radiation_clear_year,
+		"mercury_starting_zone_selected": GameState.mercury_starting_zone_selected,
+		"mercury_starting_zone_id": GameState.mercury_starting_zone_id,
+		"mercury_node_states": GameState.mercury_node_states,
+		"mercury_queue": GameState.mercury_queue,
+		"mercury_queue_active_index": GameState.mercury_queue_active_index,
+		"mercury_queue_active_remaining_years": GameState.mercury_queue_active_remaining_years,
+		"mercury_miners": GameState.mercury_miners,
+		"mercury_refinery_assignments": GameState.mercury_refinery_assignments,
 		"dyson_energy_watts": GameState.dyson_energy_watts,
 		"dyson_panel_count": GameState.dyson_panel_count,
 		"dyson_panel_tier": GameState.dyson_panel_tier,
@@ -82,6 +90,18 @@ func load_game() -> void:
 	GameState.mercury_radiation_clear_year = float(
 		save_data.get("mercury_radiation_clear_year", 0.0)
 	)
+	GameState.mercury_starting_zone_selected = bool(
+		save_data.get("mercury_starting_zone_selected", false)
+	)
+	GameState.mercury_starting_zone_id = int(save_data.get("mercury_starting_zone_id", -1))
+	GameState.mercury_node_states = save_data.get("mercury_node_states", {})
+	GameState.mercury_queue = save_data.get("mercury_queue", [])
+	GameState.mercury_queue_active_index = int(save_data.get("mercury_queue_active_index", -1))
+	GameState.mercury_queue_active_remaining_years = float(
+		save_data.get("mercury_queue_active_remaining_years", 0.0)
+	)
+	GameState.mercury_miners = save_data.get("mercury_miners", [])
+	GameState.mercury_refinery_assignments = save_data.get("mercury_refinery_assignments", {})
 	GameState.dyson_energy_watts = float(save_data.get("dyson_energy_watts", 0.0))
 	GameState.dyson_panel_count = int(save_data.get("dyson_panel_count", 0))
 	GameState.dyson_panel_tier = String(save_data.get("dyson_panel_tier", "basic"))

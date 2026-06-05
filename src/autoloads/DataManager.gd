@@ -6,6 +6,7 @@ const RESEARCH_TRACKS_PATH: String = "res://data/research_tracks.json"
 const CULTURE_EVENTS_PATH: String = "res://data/culture_events.json"
 const KARDASHEV_MILESTONES_PATH: String = "res://data/kardashev_milestones.json"
 const RESOURCES_PATH: String = "res://data/resources.json"
+const MERCURY_MAP_NODES_PATH: String = "res://data/mercury_map_nodes.json"
 
 var _planets: Dictionary = {}
 var _tech_nodes: Dictionary = {}
@@ -13,6 +14,7 @@ var _research_tracks: Dictionary = {}
 var _culture_events: Dictionary = {}
 var _kardashev_milestones: Dictionary = {}
 var _resources: Dictionary = {}
+var _mercury_map_data: Dictionary = {}
 
 
 func _ready() -> void:
@@ -22,6 +24,7 @@ func _ready() -> void:
 	_culture_events = _index_by_id(_load_json(CULTURE_EVENTS_PATH).get("items", []))
 	_kardashev_milestones = _index_by_id(_load_json(KARDASHEV_MILESTONES_PATH).get("items", []))
 	_resources = _index_by_id(_load_json(RESOURCES_PATH).get("items", []))
+	_mercury_map_data = _load_json(MERCURY_MAP_NODES_PATH)
 
 
 func get_planet(planet_id: String) -> Dictionary:
@@ -66,6 +69,10 @@ func get_all_milestones() -> Array[Dictionary]:
 
 func get_resource(resource_id: String) -> Dictionary:
 	return _resources.get(resource_id, {})
+
+
+func get_mercury_map_data() -> Dictionary:
+	return _mercury_map_data
 
 
 func _load_json(path: String) -> Dictionary:

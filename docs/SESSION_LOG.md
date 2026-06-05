@@ -1,3 +1,15 @@
+## 2026-06-05 — Main scene wiring + Mercury entry + lint order fixes
+Done: Fixed gdscript class-definitions-order issues in MercuryMapUI and MinerAssignmentPanel by reordering global definitions; wired Main.tscn to actually render the SubViewport and run SolarSystemView/HUD/PlanetsPanel scripts; added Main scene controller that opens MercuryMap when mercury is selected; added runtime fallback planet rendering in SolarSystemView when PlanetView.tscn is missing; added BackButton in MercuryMap scene to return to Main.
+Signals: Main controller connects EventBus.planet_selected to scene transition for mercury; existing EventBus Mercury/UI signals unchanged.
+Depends on: scenes/Main.tscn script/ext_resource wiring, src/Main.gd, src/ui/solar_system/SolarSystemView.gd fallback paths, scenes/mercury/MercuryMap.tscn BackButton path expected by MercuryMapUI.
+Gap: PlanetView.tscn and PlanetOrbit.tscn are still absent, so SolarSystemView runs in fallback planet mode until those scenes are authored.
+
+## 2026-06-05 — MercuryMap implementation (Prompt 1 + Prompt 2)
+Done: Implemented Mercury map gameplay scaffold with hardcoded JSON map data, typed map state machine (LOCKED/AVAILABLE/BUILDING/OPERATIONAL), starting-zone selection persistence, construction flow with adjacency unlocks, edge-scroll camera controller, refinery-driven mining with miner assignment/reassignment, production queue with permanent default Dyson panel row, and dedicated Mercury UI panels for zone selection, build confirmation, resource counters, queue list, and miner assignments.
+Signals: Added EventBus.starting_zone_chosen, building_completed, node_selected, miner_reassigned; connected queue and miner systems to existing resource_accumulation_updated/component_queued/component_completed/dyson_panel_produced flows.
+Depends on: DataManager.get_mercury_map_data(), GameState mercury map/miner/queue fields, ResourceSystem group access for resource spend/add, SaveManager persistence for new Mercury fields.
+Gap: Mercury waypoint arrays for MinerUnit path loops are still placeholders and should be authored per-slot after final map layout in editor; MercuryMap scene is created at res://scenes/mercury/MercuryMap.tscn but not yet linked into main navigation flow.
+
 ## 2026-06-05 — DysonSystem.gd
 Done: Implemented typed Dyson swarm system with panel accumulation driven by Mercury common_ore, energy-per-tier calculation, coverage percent tracking, shader parameter updates (dyson_coverage, sun_dim_factor), milestone threshold checks (10/25/50/100%), and CME (coronal mass ejection) event triggering. Explanation: swarm is a procedural transparent sphere around Sun; dyson_coverage drives shader fill on DysonSwarm.gdshader; sun_dim_factor on Sun material caps at 0.35 to preserve Earth sunlight per GDD. CME: 0.5% chance per year (basic tier only) destroys 2% of panels.
 Signals: Connects EventBus.game_year_ticked; emits EventBus.dyson_energy_updated, culture_event_triggered (for CME).

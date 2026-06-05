@@ -27,6 +27,14 @@ var planets: Dictionary = {}
 var mercury_phase: int = 0
 var mercury_resources: Dictionary = {"common_ore": 0.0, "rare_metals": 0.0, "polar_volatiles": 0.0}
 var mercury_radiation_clear_year: float = 0.0
+var mercury_starting_zone_selected: bool = false
+var mercury_starting_zone_id: int = -1
+var mercury_node_states: Dictionary = {}
+var mercury_queue: Array = []
+var mercury_queue_active_index: int = -1
+var mercury_queue_active_remaining_years: float = 0.0
+var mercury_miners: Array = []
+var mercury_refinery_assignments: Dictionary = {}
 
 var dyson_energy_watts: float = 0.0
 var dyson_panel_count: int = 0
@@ -73,6 +81,14 @@ func reset() -> void:
 	mercury_phase = 0
 	mercury_resources = {"common_ore": 0.0, "rare_metals": 0.0, "polar_volatiles": 0.0}
 	mercury_radiation_clear_year = 0.0
+	mercury_starting_zone_selected = false
+	mercury_starting_zone_id = -1
+	mercury_node_states = {}
+	mercury_queue = []
+	mercury_queue_active_index = -1
+	mercury_queue_active_remaining_years = 0.0
+	mercury_miners = []
+	mercury_refinery_assignments = {}
 
 	dyson_energy_watts = 0.0
 	dyson_panel_count = 0
