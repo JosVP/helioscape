@@ -53,28 +53,45 @@ func _ready() -> void:
 func _initialise_planet_states() -> void:
 	var all_planets: Dictionary = DataManager.get_all_planets()
 	for planet_id_variant: Variant in all_planets.keys():
-		var planet_id: String = String(planet_id_variant)
-		if GameState.planets.has(planet_id):
+		var planet_id: String = str(planet_id_variant)
+
+		# Only Earth starts initialised. All other planets initialise when their
+		# unlock tech is completed, so locked planets never appear in GameState.planets
+		# and _is_planet_unlocked() returns false correctly.
+		var planet_data: Dictionary = all_planets.get(planet_id, {})
+		var unlock_condition: String = str(planet_data.get("unlock_condition", ""))
+		if (
+			unlock_condition != ""
+			and unlock_condition != "null"
+			and not GameState.completed_techs.has(unlock_condition)
+		):
 			continue
 
-		var planet_data: Dictionary = all_planets.get(planet_id, {})
-		var initial_state: Dictionary = planet_data.get("initial_state", {})
-		var visual_data: Dictionary = planet_data.get("visual", {})
+		_initialise_single_planet(planet_id)
 
-		GameState.planets[planet_id] = {
-			"terraforming_phase": int(initial_state.get("terraforming_phase", 0)),
-			"terraforming_progress": float(initial_state.get("terraforming_progress", 0.0)),
-			"terraforming_choices": {},
-			"locked_out_choices": [],
-			"population": int(initial_state.get("population", 0)),
-			"atmosphere_pressure": float(initial_state.get("atmosphere_pressure", 0.0)),
-			"temperature_celsius": float(initial_state.get("temperature_celsius", 0.0)),
-			"axis_spin_speed": _extract_axis_spin_speed(visual_data),
-			"cloud_rotation_speed": float(visual_data.get("cloud_rotation_speed", 0.0)),
-			"visual_params": {}
-		}
 
-		_emit_visual_params(planet_id)
+func _initialise_single_planet(planet_id: String) -> void:
+	if GameState.planets.has(planet_id):
+		return
+
+	var planet_data: Dictionary = DataManager.get_planet(planet_id)
+	var initial_state: Dictionary = planet_data.get("initial_state", {})
+	var visual_data: Dictionary = planet_data.get("visual", {})
+
+	GameState.planets[planet_id] = {
+		"terraforming_phase": int(initial_state.get("terraforming_phase", 0)),
+		"terraforming_progress": float(initial_state.get("terraforming_progress", 0.0)),
+		"terraforming_choices": {},
+		"locked_out_choices": [],
+		"population": int(initial_state.get("population", 0)),
+		"atmosphere_pressure": float(initial_state.get("atmosphere_pressure", 0.0)),
+		"temperature_celsius": float(initial_state.get("temperature_celsius", 0.0)),
+		"axis_spin_speed": _extract_axis_spin_speed(visual_data),
+		"cloud_rotation_speed": float(visual_data.get("cloud_rotation_speed", 0.0)),
+		"visual_params": {}
+	}
+
+	_emit_visual_params(planet_id)
 
 
 func _on_year_ticked(year: float) -> void:
@@ -231,9 +248,18 @@ func apply_choice(planet_id: String, choice_id: String, permanent: bool) -> void
 	EventBus.terraforming_choice_applied.emit(planet_id, choice_id)
 
 
-func _on_tech_unlocked(_planet_id: String, _node_id: String) -> void:
-	# TechTreeSystem handles apply_terraforming_choice effects directly.
-	pass
+func _on_tech_unlocked(_planet_id: String, node_id: String) -> void:
+	# When a tech is unlocked, check if it is an unlock_condition for any planet.
+	# If so, initialise that planet's state now.
+	var all_planets: Dictionary = DataManager.get_all_planets()
+	for planet_id_variant: Variant in all_planets.keys():
+		var pid: String = str(planet_id_variant)
+		if GameState.planets.has(pid):
+			continue
+		var planet_data: Dictionary = DataManager.get_planet(pid)
+		var unlock_condition: String = str(planet_data.get("unlock_condition", ""))
+		if unlock_condition != "null" and unlock_condition == node_id:
+			_initialise_single_planet(pid)
 
 
 func _get_phase_event_id(planet_id: String, phase: int) -> String:

@@ -34,10 +34,17 @@ var _locked_message: Label
 func _ready() -> void:
 	_cache_nodes()
 	EventBus.planet_selected.connect(open)
+	EventBus.orrery_zoom_requested.connect(open)
 	EventBus.terraforming_phase_changed.connect(_on_terraforming_phase_changed)
+	# Show Earth panel by default on game start.
+	open("earth")
 
 
 func open(new_planet_id: String) -> void:
+	# Mercury uses a dedicated map scene — do not open PlanetPanel for it.
+	if new_planet_id == "mercury":
+		return
+
 	if new_planet_id == _current_planet_id:
 		return
 
@@ -191,14 +198,17 @@ func _apply_pending_moon_tab_request() -> void:
 
 func _cache_nodes() -> void:
 	_content_container = _as_control(get_node_or_null("ContentContainer"))
-	_planet_name_label = _as_label(get_node_or_null("PlanetNameLabel"))
-	_phase_name_label = _as_label(get_node_or_null("PhaseNameLabel"))
-	_phase_description_label = _as_label(get_node_or_null("PhaseDescriptionLabel"))
-	_tech_tree_ui = get_node_or_null("TechTreeUI")
-	_research_ui = get_node_or_null("ResearchUI")
-	_vignette_display = get_node_or_null("VignetteDisplay")
-	_tab_container = _as_control(get_node_or_null("TabContainer"))
-	_locked_message = _as_label(get_node_or_null("LockedMessage"))
+
+	# Labels and tab container live inside ContentContainer in the scene.
+	var root: Node = _content_container if _content_container != null else self
+	_planet_name_label = _as_label(root.get_node_or_null("PlanetNameLabel"))
+	_phase_name_label = _as_label(root.get_node_or_null("PhaseNameLabel"))
+	_phase_description_label = _as_label(root.get_node_or_null("PhaseDescriptionLabel"))
+	_tech_tree_ui = root.get_node_or_null("TechTreeUI")
+	_research_ui = root.get_node_or_null("ResearchUI")
+	_vignette_display = root.get_node_or_null("VignetteDisplay")
+	_tab_container = _as_control(root.get_node_or_null("TabContainer"))
+	_locked_message = _as_label(root.get_node_or_null("LockedMessage"))
 
 	if _tab_container != null:
 		_moon_tab = _as_control(_tab_container.get_node_or_null("MoonTab"))

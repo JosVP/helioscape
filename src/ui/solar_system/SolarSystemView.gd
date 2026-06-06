@@ -83,8 +83,12 @@ func _spawn_planets() -> void:
 	# visual sphere for easier selection), and PlanetVisual.gd on the root.
 	var planet_view_packed: PackedScene = load(PLANET_VIEW_SCENE)
 	if planet_view_packed == null:
-		push_warning("SolarSystemView: could not load PlanetView scene at %s" % PLANET_VIEW_SCENE)
-		return
+		push_warning(
+			(
+				"SolarSystemView: could not load PlanetView scene at %s — using code fallback."
+				% PLANET_VIEW_SCENE
+			)
+		)
 
 	var all_planets: Dictionary = DataManager.get_all_planets()
 
@@ -98,11 +102,18 @@ func _spawn_planets() -> void:
 			stagger_index += 1
 			continue
 
-		var planet_instance: Node3D = planet_view_packed.instantiate()
+		var planet_instance: Node3D
+		if planet_view_packed != null:
+			planet_instance = planet_view_packed.instantiate()
+		else:
+			# Code fallback: a simple sphere + click area so the orrery works
+			# even before the scene file is registered in Godot's filesystem.
+			planet_instance = _spawn_planet_fallback(pid)
+
 		add_child(planet_instance)
 
 		# Set the planet_id export so PlanetVisual.gd initialises correctly.
-		if planet_instance.has_method("get") and "planet_id" in planet_instance:
+		if "planet_id" in planet_instance:
 			planet_instance.planet_id = pid
 
 		# Staggered starting angle.
@@ -112,8 +123,11 @@ func _spawn_planets() -> void:
 		_update_planet_position(pid)
 
 		# Connect the ClickArea's input_event signal for mouse click detection.
-		# PlanetView.tscn must have a child Area3D named "ClickArea".
-		var click_area: Area3D = planet_instance.get_node_or_null("ClickArea")
+		# In PlanetView.tscn the ClickArea is nested under PlanetSphere.
+		var click_area: Area3D = planet_instance.get_node_or_null("PlanetSphere/ClickArea")
+		if click_area == null:
+			# Fallback: check direct child for scenes with a flat hierarchy.
+			click_area = planet_instance.get_node_or_null("ClickArea")
 		if click_area != null:
 			# Capture planet_id in a local var so the lambda closes over the correct value.
 			var captured_pid: String = pid
@@ -136,6 +150,45 @@ func _spawn_planets() -> void:
 			push_warning("SolarSystemView: PlanetView for '%s' has no ClickArea child." % pid)
 
 		stagger_index += 1
+
+
+func _spawn_planet_fallback(pid: String) -> Node3D:
+	# Builds a minimal planet node in pure code when PlanetView.tscn cannot be loaded.
+	# Produces a coloured sphere + a click-detectable Area3D so the orrery is functional.
+	var root: Node3D = Node3D.new()
+	root.name = "PlanetFallback_" + pid
+
+	var mesh_instance: MeshInstance3D = MeshInstance3D.new()
+	mesh_instance.name = "PlanetSphere"
+	var sphere: SphereMesh = SphereMesh.new()
+	sphere.radius = 0.5
+	sphere.height = 1.0
+	mesh_instance.mesh = sphere
+
+	var mat: StandardMaterial3D = StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	# Assign a distinct colour per planet for easy identification.
+	var colours: Dictionary = {
+		"earth": Color(0.2, 0.5, 0.9),
+		"mars": Color(0.8, 0.3, 0.1),
+		"venus": Color(0.9, 0.7, 0.2),
+		"mercury": Color(0.6, 0.6, 0.6),
+	}
+	mat.albedo_color = colours.get(pid, Color(0.7, 0.7, 0.7))
+	mesh_instance.set_surface_override_material(0, mat)
+	root.add_child(mesh_instance)
+
+	var click_area: Area3D = Area3D.new()
+	click_area.name = "ClickArea"
+	click_area.input_ray_pickable = true
+	var col_shape: CollisionShape3D = CollisionShape3D.new()
+	var shape: SphereShape3D = SphereShape3D.new()
+	shape.radius = 0.7
+	col_shape.shape = shape
+	click_area.add_child(col_shape)
+	root.add_child(click_area)
+
+	return root
 
 
 func _spawn_orbit_rings() -> void:
@@ -288,9 +341,25 @@ func _on_planet_selected(pid: String) -> void:
 
 func _on_year_ticked(_year: float) -> void:
 	# Update the visual dim state of each planet node and orbit ring based on lock status.
-	# Locked planets are always visible in the orrery — their orbit ring and sphere are
-	# simply modulated to appear dimmed, signalling they are not yet reachable.
+	# Locked planets are dimmed by reducing their mesh material's albedo alpha.
 	for pid in planet_nodes:
 		var is_unlocked: bool = GameState.planets.has(pid)
 		var target_alpha: float = 1.0 if is_unlocked else 0.35
-		planet_nodes[pid].modulate.a = target_alpha
+		_set_planet_alpha(planet_nodes[pid], target_alpha)
+
+
+func _set_planet_alpha(planet_node: Node3D, alpha: float) -> void:
+	# Node3D has no modulate — walk child MeshInstance3D nodes and set material alpha.
+	for child: Node in planet_node.get_children():
+		if child is MeshInstance3D:
+			var mat: Material = (child as MeshInstance3D).get_surface_override_material(0)
+			if mat is StandardMaterial3D:
+				var std_mat: StandardMaterial3D = mat as StandardMaterial3D
+				std_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+				var col: Color = std_mat.albedo_color
+				col.a = alpha
+				std_mat.albedo_color = col
+			elif mat is ShaderMaterial:
+				# ShaderMaterials (PlanetSurface, Atmosphere) don't support simple alpha —
+				# just set the node's visibility instead for locked planets.
+				planet_node.visible = alpha > 0.0

@@ -21,9 +21,18 @@ const PANELS_PER_YEAR_BASE: int = 2
 # Total panels needed for 100% swarm coverage in shader visualization.
 const TOTAL_PANELS_FOR_100_PERCENT: int = 1000
 
-# References to shader materials. Set in _ready() via scene node references.
+# References to shader materials. Set by Main.gd after the scene loads.
+# Use public names (no underscore prefix) so Main.gd can write them via set().
 var _dyson_sphere_material: ShaderMaterial = null
 var _sun_material: ShaderMaterial = null
+
+
+func set_dyson_sphere_material(mat: ShaderMaterial) -> void:
+	_dyson_sphere_material = mat
+
+
+func set_sun_material(mat: ShaderMaterial) -> void:
+	_sun_material = mat
 
 
 func _ready() -> void:
@@ -95,10 +104,13 @@ func _check_milestones() -> void:
 
 
 func _check_cme_event() -> void:
-	# CME (coronal mass ejection) can only occur during Basic tier panel construction.
-	# Probability: 0.5% per game year = roughly one CME event per 200 years on average.
-	# Panel loss: 2% of current swarm (flavour, not punishing).
-	if GameState.dyson_panel_tier == "basic" and randf() < 0.005:
+	# CME can only occur once panels exist and during Basic tier construction.
+	# Probability: 0.5% per game year. Panel loss: 2% of current swarm (flavour).
+	if (
+		GameState.dyson_panel_tier == "basic"
+		and GameState.dyson_panel_count > 0
+		and randf() < 0.005
+	):
 		var destroyed: int = int(float(GameState.dyson_panel_count) * 0.02)
 		GameState.dyson_panel_count -= destroyed
 		GameState.culture_event_queue.append("ce_cme_hit_swarm")

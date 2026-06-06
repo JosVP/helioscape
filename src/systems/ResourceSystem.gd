@@ -26,6 +26,8 @@ func _ready() -> void:
 	_update_mercury_phase_from_progress()
 	EventBus.game_year_ticked.connect(_on_year_ticked)
 	EventBus.tech_node_unlocked.connect(_on_tech_node_unlocked)
+	# Emit initial values so HUD labels populate on startup.
+	_emit_all_resource_totals()
 
 
 func _on_year_ticked(_year: float) -> void:

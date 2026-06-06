@@ -45,9 +45,8 @@ func _on_resources_updated(resource_id: String, amount: float) -> void:
 func _on_mercury_phase_changed(phase: int) -> void:
 	if _resource_counters == null:
 		return
-	_resource_counters.visible = (
-		phase >= 0 and float(GameState.mercury_resources.get("common_ore", 0.0)) > 0.0
-	)
+	# Show resource counters as soon as Mercury is active (phase >= 0 and unlocked).
+	_resource_counters.visible = (phase >= 0 and GameState.planets.has("mercury"))
 
 
 func _on_dyson_updated(watts: float) -> void:
@@ -72,6 +71,9 @@ func _cache_nodes() -> void:
 	if _top_bar == null:
 		_top_bar = HBoxContainer.new()
 		_top_bar.name = "TopBar"
+		# Anchor the bar to the full top of the screen.
+		_top_bar.set_anchors_preset(Control.PRESET_TOP_WIDE)
+		_top_bar.offset_bottom = 40.0
 		add_child(_top_bar)
 
 	_year_label = _as_label(_top_bar.get_node_or_null("YearLabel"))

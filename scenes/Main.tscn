@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3]
+[gd_scene load_steps=23 format=3]
 
 [ext_resource type="Script" path="res://src/Main.gd" id="1_main"]
 [ext_resource type="Script" path="res://src/systems/TechTreeSystem.gd" id="1_wk4m8"]
@@ -14,6 +14,34 @@
 [ext_resource type="Script" path="res://src/ui/hud/HUD.gd" id="11_hud"]
 [ext_resource type="Script" path="res://src/ui/hud/PlanetsPanel.gd" id="12_planets"]
 [ext_resource type="Script" path="res://src/ui/solar_system/SolarSystemView.gd" id="13_solar"]
+[ext_resource type="Script" path="res://src/ui/planet_panel/PlanetPanel.gd" id="14_planetpanel"]
+[ext_resource type="Shader" path="res://src/shaders/DysonSwarm.gdshader" id="15_dyson_shader"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_sun"]
+radius = 1.0
+height = 2.0
+radial_segments = 32
+rings = 16
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sun"]
+shading_mode = 2
+albedo_color = Color(1.0, 0.95, 0.7, 1.0)
+emission_enabled = true
+emission = Color(1.0, 0.9, 0.5, 1.0)
+emission_energy_multiplier = 2.0
+
+[sub_resource type="SphereMesh" id="SphereMesh_dyson"]
+radius = 18.0
+height = 36.0
+radial_segments = 64
+rings = 32
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_dyson"]
+shader = ExtResource("15_dyson_shader")
+shader_parameter/dyson_coverage = 0.0
+shader_parameter/panel_color = Color(0.03, 0.03, 0.06, 1.0)
+shader_parameter/panel_cluster_size = 0.018
+shader_parameter/randomness = 0.7
 
 [node name="Main" type="Node"]
 script = ExtResource("1_main")
@@ -25,7 +53,31 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 stretch = true
-sub_viewport = NodePath("../SolarSystemViewport")
+
+[node name="SolarSystemViewport" type="SubViewport" parent="SolarSystemViewportContainer"]
+size = Vector2i(1920, 1080)
+transparent_bg = true
+handle_input_locally = true
+physics_object_picking = true
+
+[node name="SolarSystem" type="Node3D" parent="SolarSystemViewportContainer/SolarSystemViewport"]
+script = ExtResource("13_solar")
+
+[node name="Sun" type="MeshInstance3D" parent="SolarSystemViewportContainer/SolarSystemViewport/SolarSystem"]
+mesh = SubResource("SphereMesh_sun")
+surface_material_override/0 = SubResource("StandardMaterial3D_sun")
+
+[node name="DysonSwarm" type="MeshInstance3D" parent="SolarSystemViewportContainer/SolarSystemViewport/SolarSystem"]
+mesh = SubResource("SphereMesh_dyson")
+surface_material_override/0 = SubResource("ShaderMaterial_dyson")
+
+[node name="Camera3D" type="Camera3D" parent="SolarSystemViewportContainer/SolarSystemViewport/SolarSystem"]
+current = true
+transform = Transform3D(1, 0, 0, 0, 0.63325, 0.77460, 0, -0.77460, 0.63325, 0, 22, 18)
+
+[node name="SunLight" type="DirectionalLight3D" parent="SolarSystemViewportContainer/SolarSystemViewport/SolarSystem"]
+light_energy = 1.35
+rotation_degrees = Vector3(-50, 0, 0)
 
 [node name="Systems" type="Node" parent="."]
 
@@ -80,7 +132,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-visible = false
+visible = true
 mouse_filter = 2
 script = ExtResource("9_cequeue")
 
@@ -94,7 +146,7 @@ offset_left = -60.0
 offset_top = 10.0
 offset_right = -10.0
 offset_bottom = 50.0
-text = "🔔"
+text = "Bell"
 
 [node name="UnreadBadge" type="Label" parent="UI/CultureEventQueue/BellIcon"]
 anchors_preset = 3
@@ -180,26 +232,50 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+script = ExtResource("14_planetpanel")
 
-[node name="SolarSystemViewport" type="SubViewport" parent="."]
-size = Vector2i(1920, 1080)
-transparent_bg = true
-handle_input_locally = false
+[node name="ContentContainer" type="VBoxContainer" parent="UI/PlanetPanel"]
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_top = 0.0
+anchor_bottom = 0.0
+offset_left = -360.0
+offset_top = 60.0
+offset_right = 0.0
+offset_bottom = 760.0
+mouse_filter = 0
 
-[node name="SolarSystem" type="Node3D" parent="SolarSystemViewport"]
-script = ExtResource("13_solar")
+[node name="PlanetNameLabel" type="Label" parent="UI/PlanetPanel/ContentContainer"]
+layout_mode = 2
 
-[node name="Sun" type="MeshInstance3D" parent="SolarSystemViewport/SolarSystem"]
+[node name="PhaseNameLabel" type="Label" parent="UI/PlanetPanel/ContentContainer"]
+layout_mode = 2
 
-[node name="DysonSwarm" type="MeshInstance3D" parent="SolarSystemViewport/SolarSystem"]
+[node name="PhaseDescriptionLabel" type="Label" parent="UI/PlanetPanel/ContentContainer"]
+layout_mode = 2
+autowrap_mode = 3
 
-[node name="Camera3D" type="Camera3D" parent="SolarSystemViewport/SolarSystem"]
-current = true
-transform = Transform3D(0.866025, 0, -0.5, 0.176777, 0.935414, 0.306186, 0.467707, -0.353553, 0.809017, 0, 6, 14)
+[node name="LockedMessage" type="Label" parent="UI/PlanetPanel/ContentContainer"]
+layout_mode = 2
+visible = false
+text = "Humanity hasn't reached this far yet."
 
-[node name="SunLight" type="DirectionalLight3D" parent="SolarSystemViewport/SolarSystem"]
-light_energy = 1.35
-rotation_degrees = Vector3(-50, 0, 0)
+[node name="TabContainer" type="TabContainer" parent="UI/PlanetPanel/ContentContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Overview" type="Control" parent="UI/PlanetPanel/ContentContainer/TabContainer"]
+layout_mode = 2
+
+[node name="TechTree" type="Control" parent="UI/PlanetPanel/ContentContainer/TabContainer"]
+layout_mode = 2
+
+[node name="Research" type="Control" parent="UI/PlanetPanel/ContentContainer/TabContainer"]
+layout_mode = 2
+
+[node name="MoonTab" type="Control" parent="UI/PlanetPanel/ContentContainer/TabContainer"]
+layout_mode = 2
+visible = false
 
 [node name="DebugLayer" type="CanvasLayer" parent="."]
 layer = 4

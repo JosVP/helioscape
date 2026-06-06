@@ -1,0 +1,45 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://src/ui/planet_panel/PlanetVisual.gd" id="1_visual"]
+[ext_resource type="Shader" path="res://src/shaders/PlanetSurface.gdshader" id="2_surface"]
+[ext_resource type="Shader" path="res://src/shaders/Atmosphere.gdshader" id="3_atmos"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_planet"]
+radius = 0.5
+height = 1.0
+radial_segments = 32
+rings = 16
+
+[sub_resource type="SphereMesh" id="SphereMesh_atmos"]
+radius = 0.54
+height = 1.08
+radial_segments = 32
+rings = 16
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_surface"]
+shader = ExtResource("2_surface")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_atmos"]
+shader = ExtResource("3_atmos")
+shader_parameter/atmosphere_density = 0.3
+shader_parameter/rim_power = 3.0
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_click"]
+radius = 0.7
+
+[node name="PlanetView" type="Node3D"]
+script = ExtResource("1_visual")
+
+[node name="PlanetSphere" type="MeshInstance3D" parent="."]
+mesh = SubResource("SphereMesh_planet")
+surface_material_override/0 = SubResource("ShaderMaterial_surface")
+
+[node name="ClickArea" type="Area3D" parent="PlanetSphere"]
+input_ray_pickable = true
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="PlanetSphere/ClickArea"]
+shape = SubResource("SphereShape3D_click")
+
+[node name="AtmosphereShell" type="MeshInstance3D" parent="."]
+mesh = SubResource("SphereMesh_atmos")
+surface_material_override/0 = SubResource("ShaderMaterial_atmos")

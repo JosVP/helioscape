@@ -34,6 +34,10 @@ func _ready() -> void:
 
 
 func _on_event_triggered(event_id: String) -> void:
+	# Silently discard events that have no data in culture_events.json.
+	# This prevents stub/placeholder events (e.g. ce_cme_hit_swarm) from cluttering the UI.
+	if DataManager.get_culture_event(event_id).is_empty():
+		return
 	unread_count += 1
 	queued_event_ids.append(event_id)
 	_update_bell_icon()
