@@ -234,7 +234,7 @@ grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("14_planetpanel")
 
-[node name="ContentContainer" type="VBoxContainer" parent="UI/PlanetPanel"]
+[node name="ContentContainer" type="PanelContainer" parent="UI/PlanetPanel"]
 anchor_left = 1.0
 anchor_right = 1.0
 anchor_top = 0.0
@@ -245,35 +245,39 @@ offset_right = 0.0
 offset_bottom = 760.0
 mouse_filter = 0
 
-[node name="PlanetNameLabel" type="Label" parent="UI/PlanetPanel/ContentContainer"]
+[node name="ContentVBox" type="VBoxContainer" parent="UI/PlanetPanel/ContentContainer"]
 layout_mode = 2
 
-[node name="PhaseNameLabel" type="Label" parent="UI/PlanetPanel/ContentContainer"]
+[node name="PlanetNameLabel" type="Label" parent="UI/PlanetPanel/ContentContainer/ContentVBox"]
 layout_mode = 2
 
-[node name="PhaseDescriptionLabel" type="Label" parent="UI/PlanetPanel/ContentContainer"]
+[node name="PhaseNameLabel" type="Label" parent="UI/PlanetPanel/ContentContainer/ContentVBox"]
+layout_mode = 2
+
+[node name="PhaseDescriptionLabel" type="Label" parent="UI/PlanetPanel/ContentContainer/ContentVBox"]
 layout_mode = 2
 autowrap_mode = 3
 
-[node name="LockedMessage" type="Label" parent="UI/PlanetPanel/ContentContainer"]
+[node name="LockedMessage" type="Label" parent="UI/PlanetPanel/ContentContainer/ContentVBox"]
 layout_mode = 2
 visible = false
+autowrap_mode = 3
 text = "Humanity hasn't reached this far yet."
 
-[node name="TabContainer" type="TabContainer" parent="UI/PlanetPanel/ContentContainer"]
+[node name="TabContainer" type="TabContainer" parent="UI/PlanetPanel/ContentContainer/ContentVBox"]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="Overview" type="Control" parent="UI/PlanetPanel/ContentContainer/TabContainer"]
+[node name="Overview" type="Control" parent="UI/PlanetPanel/ContentContainer/ContentVBox/TabContainer"]
 layout_mode = 2
 
-[node name="TechTree" type="Control" parent="UI/PlanetPanel/ContentContainer/TabContainer"]
+[node name="TechTree" type="Control" parent="UI/PlanetPanel/ContentContainer/ContentVBox/TabContainer"]
 layout_mode = 2
 
-[node name="Research" type="Control" parent="UI/PlanetPanel/ContentContainer/TabContainer"]
+[node name="Research" type="Control" parent="UI/PlanetPanel/ContentContainer/ContentVBox/TabContainer"]
 layout_mode = 2
 
-[node name="MoonTab" type="Control" parent="UI/PlanetPanel/ContentContainer/TabContainer"]
+[node name="MoonTab" type="Control" parent="UI/PlanetPanel/ContentContainer/ContentVBox/TabContainer"]
 layout_mode = 2
 visible = false
 

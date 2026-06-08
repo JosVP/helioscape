@@ -51,6 +51,7 @@ func _ready() -> void:
 		)
 
 	_set_uv_seed_points()
+	_apply_base_color()
 	_apply_params_instant()
 
 	if not EventBus.game_year_ticked.is_connected(_on_year_ticked):
@@ -280,3 +281,27 @@ func _variant_to_color(value: Variant, fallback: Color) -> Color:
 		if Color.html_is_valid(color_string):
 			return Color(color_string)
 	return fallback
+
+
+func _apply_base_color() -> void:
+	# Reads visual.base_color and visual.atmosphere_* from static planet data so the orrery
+	# planet spheres show a distinct colour even before game textures are loaded.
+	if _surface_material == null or planet_id.is_empty():
+		return
+
+	var planet_data: Dictionary = DataManager.get_planet(planet_id)
+	var visual: Dictionary = planet_data.get("visual", {})
+
+	var base_color_str: String = String(visual.get("base_color", ""))
+	if not base_color_str.is_empty() and Color.html_is_valid(base_color_str):
+		_surface_material.set_shader_parameter("base_color", Color(base_color_str))
+
+	if _atmosphere_material == null:
+		return
+
+	var atmos_color_str: String = String(visual.get("atmosphere_color", ""))
+	if not atmos_color_str.is_empty() and Color.html_is_valid(atmos_color_str):
+		_atmosphere_material.set_shader_parameter("atmosphere_color", Color(atmos_color_str))
+
+	var atmos_density: float = float(visual.get("atmosphere_density_initial", 0.0))
+	_atmosphere_material.set_shader_parameter("atmosphere_density", atmos_density)

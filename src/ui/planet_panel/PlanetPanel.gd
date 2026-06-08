@@ -5,8 +5,7 @@ extends Control
 # selecting a new planet swipes current content left, then swipes new content in from the right.
 
 const SWIPE_DURATION: float = 0.25
-const SWIPE_OFFSET_X: float = 400.0
-const LOCKED_MESSAGE_TEXT: String = "Humanity hasn't reached this far yet."
+const PANEL_WIDTH: float = 360.0
 
 const PLANET_SCRIPT_PATHS: Dictionary = {
 	"earth": "res://src/planets/EarthPlanet.gd",
@@ -29,15 +28,17 @@ var _vignette_display: Node
 var _tab_container: Control
 var _moon_tab: Control
 var _locked_message: Label
+var _close_button: Button
 
 
 func _ready() -> void:
 	_cache_nodes()
+	_add_close_button()
+	if _content_container != null:
+		_content_container.visible = false
 	EventBus.planet_selected.connect(open)
 	EventBus.orrery_zoom_requested.connect(open)
 	EventBus.terraforming_phase_changed.connect(_on_terraforming_phase_changed)
-	# Show Earth panel by default on game start.
-	open("earth")
 
 
 func open(new_planet_id: String) -> void:
@@ -45,40 +46,61 @@ func open(new_planet_id: String) -> void:
 	if new_planet_id == "mercury":
 		return
 
-	if new_planet_id == _current_planet_id:
+	if (
+		new_planet_id == _current_planet_id
+		and _content_container != null
+		and _content_container.visible
+	):
 		return
-
-	if _current_planet_id != "":
-		_swipe_out()
-		await get_tree().create_timer(SWIPE_DURATION).timeout
 
 	_current_planet_id = new_planet_id
 	planet_id = new_planet_id
 	_populate(new_planet_id)
-	_swipe_in()
+
+	if _content_container != null and not _content_container.visible:
+		_content_container.visible = true
+		_swipe_in()
+
+
+func close() -> void:
+	if _content_container == null or not _content_container.visible:
+		return
+	_swipe_out()
+	await get_tree().create_timer(SWIPE_DURATION).timeout
+	if _content_container != null:
+		_content_container.visible = false
+	_current_planet_id = ""
+	planet_id = ""
 
 
 func _swipe_out() -> void:
 	if _content_container == null:
 		return
 
+	# Slide back off-screen to the right (mirrors _swipe_in in reverse).
 	var tween: Tween = create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
-	tween.tween_property(_content_container, "position:x", -SWIPE_OFFSET_X, SWIPE_DURATION)
+	tween.tween_property(_content_container, "offset_left", 0.0, SWIPE_DURATION)
+	tween.parallel().tween_property(_content_container, "offset_right", PANEL_WIDTH, SWIPE_DURATION)
 
 
 func _swipe_in() -> void:
 	if _content_container == null:
 		return
 
-	_content_container.position.x = SWIPE_OFFSET_X
+	# Start just off the right edge of the screen, then slide left to rest position.
+	_content_container.offset_left = 0.0
+	_content_container.offset_right = PANEL_WIDTH
 	var tween: Tween = create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	tween.tween_property(_content_container, "position:x", 0.0, SWIPE_DURATION)
+	tween.tween_property(_content_container, "offset_left", -PANEL_WIDTH, SWIPE_DURATION)
+	tween.parallel().tween_property(_content_container, "offset_right", 0.0, SWIPE_DURATION)
 
 
 func _populate(pid: String) -> void:
 	var planet_data: Dictionary = DataManager.get_planet(pid)
 	if _planet_name_label != null:
 		_planet_name_label.text = String(planet_data.get("display_name", pid.capitalize()))
+		_planet_name_label.add_theme_color_override("font_color", Color(0.973, 0.847, 0.565))
+		_planet_name_label.add_theme_font_size_override("font_size", 18)
 
 	if _tech_tree_ui != null and _tech_tree_ui.has_method("set"):
 		_tech_tree_ui.set("planet_id", pid)
@@ -102,7 +124,14 @@ func _populate(pid: String) -> void:
 	if _locked_message != null:
 		_locked_message.visible = not is_unlocked
 		if not is_unlocked:
-			_locked_message.text = LOCKED_MESSAGE_TEXT
+			var initial: Dictionary = planet_data.get("initial_state", {})
+			var pressure: float = float(initial.get("atmosphere_pressure", 0.0))
+			var temp_c: int = int(initial.get("temperature_celsius", 0))
+			var display: String = String(planet_data.get("display_name", pid.capitalize()))
+			_locked_message.text = (
+				"%s is not yet accessible.\n\nAtmospheric pressure: %.3f atm\nSurface temperature: %d°C"
+				% [display, pressure, temp_c]
+			)
 
 	if _tab_container != null:
 		_tab_container.visible = is_unlocked
@@ -126,8 +155,10 @@ func _refresh_status() -> void:
 	var phase: int = _get_planet_phase(_current_planet_id)
 	if _phase_name_label != null:
 		_phase_name_label.text = helper.get_terraforming_display_name(phase)
+		_phase_name_label.add_theme_color_override("font_color", Color(0.91, 0.518, 0.102))
 	if _phase_description_label != null:
 		_phase_description_label.text = helper.get_current_phase_description()
+		_phase_description_label.add_theme_color_override("font_color", Color(0.604, 0.471, 0.282))
 
 
 func _on_terraforming_phase_changed(changed_planet_id: String, _phase: int) -> void:
@@ -199,8 +230,11 @@ func _apply_pending_moon_tab_request() -> void:
 func _cache_nodes() -> void:
 	_content_container = _as_control(get_node_or_null("ContentContainer"))
 
-	# Labels and tab container live inside ContentContainer in the scene.
-	var root: Node = _content_container if _content_container != null else self
+	# Labels and tab container live inside ContentVBox (child of ContentContainer PanelContainer).
+	var root: Node = self
+	if _content_container != null:
+		var vbox: Node = _content_container.get_node_or_null("ContentVBox")
+		root = vbox if vbox != null else _content_container
 	_planet_name_label = _as_label(root.get_node_or_null("PlanetNameLabel"))
 	_phase_name_label = _as_label(root.get_node_or_null("PhaseNameLabel"))
 	_phase_description_label = _as_label(root.get_node_or_null("PhaseDescriptionLabel"))
@@ -212,6 +246,38 @@ func _cache_nodes() -> void:
 
 	if _tab_container != null:
 		_moon_tab = _as_control(_tab_container.get_node_or_null("MoonTab"))
+
+
+func _add_close_button() -> void:
+	if _content_container == null:
+		return
+
+	# Dark panel background with amber left border and content padding.
+	var panel_style: StyleBoxFlat = StyleBoxFlat.new()
+	panel_style.bg_color = Color(0.055, 0.043, 0.024, 0.96)
+	panel_style.border_width_left = 1
+	panel_style.border_color = Color(0.29, 0.204, 0.094, 1.0)
+	panel_style.content_margin_left = 14.0
+	panel_style.content_margin_right = 14.0
+	panel_style.content_margin_top = 10.0
+	panel_style.content_margin_bottom = 10.0
+	_content_container.add_theme_stylebox_override("panel", panel_style)
+
+	# Amber close button — top-right corner inside ContentVBox.
+	var vbox: Control = _as_control(_content_container.get_node_or_null("ContentVBox"))
+	var btn_parent: Control = vbox if vbox != null else _content_container
+	_close_button = Button.new()
+	_close_button.name = "CloseButton"
+	_close_button.text = "✕"
+	_close_button.flat = true
+	_close_button.mouse_filter = Control.MOUSE_FILTER_STOP
+	_close_button.custom_minimum_size = Vector2(28.0, 28.0)
+	_close_button.size_flags_horizontal = Control.SIZE_SHRINK_END
+	_close_button.add_theme_color_override("font_color", Color(0.91, 0.518, 0.102))
+	_close_button.add_theme_color_override("font_hover_color", Color(1.0, 0.7, 0.3))
+	_close_button.pressed.connect(func() -> void: close())
+	btn_parent.add_child(_close_button)
+	btn_parent.move_child(_close_button, 0)
 
 
 func _as_control(node: Node) -> Control:

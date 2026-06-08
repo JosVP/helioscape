@@ -56,8 +56,10 @@ var zoom_tween: Tween
 
 
 func _ready() -> void:
+	_setup_orrery_environment()
 	_spawn_planets()
 	_spawn_orbit_rings()
+	_spawn_grid()
 	EventBus.planet_selected.connect(_on_planet_selected)
 	EventBus.game_year_ticked.connect(_on_year_ticked)
 
@@ -110,11 +112,11 @@ func _spawn_planets() -> void:
 			# even before the scene file is registered in Godot's filesystem.
 			planet_instance = _spawn_planet_fallback(pid)
 
-		add_child(planet_instance)
-
-		# Set the planet_id export so PlanetVisual.gd initialises correctly.
+		# Set planet_id BEFORE add_child so PlanetVisual._ready() uses the correct id.
 		if "planet_id" in planet_instance:
 			planet_instance.planet_id = pid
+
+		add_child(planet_instance)
 
 		# Staggered starting angle.
 		var start_angle: float = stagger_step * stagger_index
@@ -207,14 +209,15 @@ func _spawn_orbit_rings() -> void:
 
 		if orbit_packed != null:
 			# Preferred: scene-based PlanetOrbit node with PlanetOrbit.gd.
+			# Properties MUST be set before add_child so _ready() uses the correct values.
 			var orbit_node: Node3D = orbit_packed.instantiate()
-			add_child(orbit_node)
 			if "planet_id" in orbit_node:
 				orbit_node.planet_id = pid
 			if "orbit_radius" in orbit_node:
 				orbit_node.orbit_radius = radius
 			if "is_locked" in orbit_node:
 				orbit_node.is_locked = is_locked
+			add_child(orbit_node)
 		else:
 			# Fallback: create a bare MeshInstance3D torus ring in code.
 			# PlanetOrbit.tscn was not found — this gives a visual placeholder.
@@ -242,6 +245,100 @@ func _spawn_orbit_ring_fallback(pid: String, radius: float, is_locked: bool) -> 
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mesh_instance.set_surface_override_material(0, mat)
+
+
+# ---------------------------------------------------------------------------
+# Environment + background
+# ---------------------------------------------------------------------------
+
+
+func _setup_orrery_environment() -> void:
+	# Dark navy background with a slight vignette gradient.
+	# We use WorldEnvironment for the base colour and a large background sphere
+	# for the radial darkening effect (darker at poles/edges, lighter at centre).
+	var env_node: WorldEnvironment = WorldEnvironment.new()
+	env_node.name = "OrreryEnvironment"
+
+	var env: Environment = Environment.new()
+	env.background_mode = Environment.BG_COLOR
+	# Deep space navy-black — slightly blue-tinted so it reads as "space" not plain black.
+	env.background_color = Color(0.012, 0.022, 0.055)
+	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	env.ambient_light_color = Color(0.05, 0.07, 0.12)
+	env.ambient_light_energy = 0.15
+	env_node.environment = env
+	add_child(env_node)
+
+	# Large inverted-normals sphere for a radial vignette: center is slightly lighter,
+	# edges fade to near-black. Placed at radius 60 so it is always behind all other geometry.
+	var bg_mesh: MeshInstance3D = MeshInstance3D.new()
+	bg_mesh.name = "BackgroundSphere"
+	var sphere: SphereMesh = SphereMesh.new()
+	sphere.radius = 60.0
+	sphere.height = 120.0
+	sphere.radial_segments = 32
+	sphere.rings = 16
+	# flip_faces makes the sphere visible from the inside.
+	sphere.flip_faces = true
+	bg_mesh.mesh = sphere
+
+	var bg_mat: StandardMaterial3D = StandardMaterial3D.new()
+	bg_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	# Vertex color from shader — use a gradient via emission.
+	# We tint from dark navy at the equator to near-black at the poles.
+	bg_mat.albedo_color = Color(0.015, 0.028, 0.07)
+	bg_mat.emission_enabled = true
+	bg_mat.emission = Color(0.008, 0.014, 0.04)
+	bg_mat.emission_energy_multiplier = 1.0
+	bg_mesh.set_surface_override_material(0, bg_mat)
+	add_child(bg_mesh)
+
+
+# ---------------------------------------------------------------------------
+# Grid
+# ---------------------------------------------------------------------------
+
+
+func _spawn_grid() -> void:
+	# Flat grid on the XZ plane (y = -0.15) representing the orbital ecliptic floor.
+	# Lines run from -GRID_EXTENT to +GRID_EXTENT with GRID_STEP spacing.
+	const GRID_EXTENT: float = 16.0
+	const GRID_STEP: float = 4.0
+	const GRID_Y: float = -0.15
+	const LINE_HALF_W: float = 0.025
+	const LINE_HALF_H: float = 0.01
+
+	var grid_root: Node3D = Node3D.new()
+	grid_root.name = "OrreryGrid"
+	add_child(grid_root)
+
+	var grid_mat: StandardMaterial3D = StandardMaterial3D.new()
+	grid_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	grid_mat.albedo_color = Color(0.18, 0.25, 0.45, 0.28)
+	grid_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+
+	var step: float = GRID_STEP
+	var pos: float = -GRID_EXTENT
+	while pos <= GRID_EXTENT + 0.001:
+		# Line along X axis at z = pos.
+		var hline: MeshInstance3D = MeshInstance3D.new()
+		var hbox: BoxMesh = BoxMesh.new()
+		hbox.size = Vector3(GRID_EXTENT * 2.0, LINE_HALF_H * 2.0, LINE_HALF_W * 2.0)
+		hline.mesh = hbox
+		hline.position = Vector3(0.0, GRID_Y, pos)
+		hline.set_surface_override_material(0, grid_mat)
+		grid_root.add_child(hline)
+
+		# Line along Z axis at x = pos.
+		var vline: MeshInstance3D = MeshInstance3D.new()
+		var vbox: BoxMesh = BoxMesh.new()
+		vbox.size = Vector3(LINE_HALF_W * 2.0, LINE_HALF_H * 2.0, GRID_EXTENT * 2.0)
+		vline.mesh = vbox
+		vline.position = Vector3(pos, GRID_Y, 0.0)
+		vline.set_surface_override_material(0, grid_mat)
+		grid_root.add_child(vline)
+
+		pos += step
 
 
 # ---------------------------------------------------------------------------

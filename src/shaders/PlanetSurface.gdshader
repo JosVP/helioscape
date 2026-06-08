@@ -8,6 +8,10 @@ uniform sampler2D layer_green : source_color, hint_default_transparent;
 uniform sampler2D layer_cloud : source_color, hint_default_transparent;
 uniform sampler2D layer_city_lights : source_color, hint_default_transparent;
 
+// Tints the base surface texture — set from planets.json visual.base_color so each planet
+// has a distinct colour before real textures are loaded.
+uniform vec4 base_color : source_color = vec4(1.0, 1.0, 1.0, 1.0);
+
 // lava_hue_shift stays at 0.0 while lava is still hot red, then moves toward 1.0 as the surface cools over many game years after laser activity stops.
 uniform vec2 lava_spots[8];
 uniform int lava_spot_count = 0;
@@ -71,7 +75,7 @@ vec3 hue_shift(vec3 color, float shift) {
 void fragment() {
 	vec2 uv = UV;
 
-	vec4 surface_col = texture(layer_surface, uv);
+	vec4 surface_col = texture(layer_surface, uv) * base_color;
 	vec4 lava_col = texture(layer_lava, uv);
 	vec4 water_col = texture(layer_water, uv);
 	vec4 green_col = texture(layer_green, uv);

@@ -56,10 +56,10 @@ offset_bottom = 720.0
 
 [node name="BackButton" type="Button" parent="UI"]
 offset_left = 20.0
-offset_top = 680.0
-offset_right = 150.0
-offset_bottom = 712.0
-text = "Back to Main"
+offset_top = 10.0
+offset_right = 160.0
+offset_bottom = 42.0
+text = "← Back to Main"
 
 [node name="BuildInfo" type="Label" parent="UI/BuildPanel"]
 offset_left = 12.0

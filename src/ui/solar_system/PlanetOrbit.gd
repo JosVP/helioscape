@@ -11,9 +11,8 @@ class_name PlanetOrbit
 extends Node3D
 
 # Colours for unlocked and locked orbit rings.
-const COLOR_UNLOCKED: Color = Color(1.0, 1.0, 1.0, 0.35)
-const COLOR_LOCKED: Color = Color(1.0, 1.0, 1.0, 0.18)
-
+const COLOR_UNLOCKED: Color = Color(0.29, 0.38, 0.65, 0.45)
+const COLOR_LOCKED: Color = Color(0.2, 0.22, 0.35, 0.22)
 # Torus geometry: very thin ring (inner ≈ outer) lying flat in the XZ plane.
 const RING_HALF_WIDTH: float = 0.04  # half the torus tube radius
 const RING_SEGMENTS: int = 64  # smoothness of the circle
