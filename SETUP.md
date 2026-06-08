@@ -94,6 +94,31 @@ npm install @tauri-apps/plugin-fs
 # No extra install needed
 ```
 
+```markdown
+## Install Tauri plugins
+
+Tauri 2 uses a plugin system for file I/O. Install the store plugin for save files:
+
+```bash
+npm install @tauri-apps/plugin-store
+```
+
+Then add the plugin to src-tauri/Cargo.toml (Tauri will create this file during init):
+```toml
+[dependencies]
+tauri-plugin-store = "2"
+```
+
+And register it in src-tauri/src/main.rs:
+```rust
+fn main() {
+    tauri::Builder::default()
+        .plugin(tauri_plugin_store::Builder::default().build())
+        .run(tauri::generate_context!())
+        .expect("error while running tauri application");
+}
+```
+
 ---
 
 ## Initialise Tauri

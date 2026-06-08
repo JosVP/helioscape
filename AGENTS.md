@@ -256,6 +256,123 @@ private animate(): void {
 }
 ```
 
+## Memory leak prevention
+
+Every component that creates a subscription, interval, or event listener
+MUST clean it up on destroy. No exceptions.
+
+### RxJS subscriptions
+Always use takeUntilDestroyed():
+```ts
+private destroyRef = inject(DestroyRef);
+
+this.eventBus.techUnlocked$
+  .pipe(takeUntilDestroyed(this.destroyRef))
+  .subscribe(...);
+```
+
+Never use manual unsubscribe arrays. Never use ngOnDestroy for subscriptions
+if takeUntilDestroyed works (it works everywhere inject() works).
+
+### Effects
+Effects created with effect() are automatically cleaned up when the component
+is destroyed. No manual cleanup needed.
+
+### RAF loops (canvas components)
+MUST cancel in ngOnDestroy:
+```ts
+private animationId = 0;
+
+private animate(): void {
+  this.animationId = requestAnimationFrame(() => this.animate());
+  // ...
+}
+
+ngOnDestroy(): void {
+  cancelAnimationFrame(this.animationId);
+  // Also dispose Three.js renderer if applicable:
+  this.renderer?.dispose();
+}
+```
+
+### setInterval / setTimeout
+Store the reference and clear on destroy:
+```ts
+private tickInterval: ReturnType<typeof setInterval> | null = null;
+
+ngOnDestroy(): void {
+  if (this.tickInterval) clearInterval(this.tickInterval);
+}
+```
+
+Note: GameLoopService is the ONLY place setInterval runs for game ticks.
+Components should never create their own intervals for game logic.
+
+### DOM event listeners added manually
+If you use addEventListener() directly (rare in Angular but happens in
+canvas components for mouse events), always removeEventListener in ngOnDestroy:
+```ts
+private boundOnClick = this.onClick.bind(this);
+
+ngAfterViewInit(): void {
+  this.canvas.addEventListener('click', this.boundOnClick);
+}
+
+ngOnDestroy(): void {
+  this.canvas.removeEventListener('click', this.boundOnClick);
+}
+```
+
+### Three.js specific
+Dispose geometries, materials, and textures when the orrery component destroys:
+```ts
+ngOnDestroy(): void {
+  cancelAnimationFrame(this.animationId);
+  this.scene.traverse(obj => {
+    if (obj instanceof THREE.Mesh) {
+      obj.geometry.dispose();
+      if (Array.isArray(obj.material)) {
+        obj.material.forEach(m => m.dispose());
+      } else {
+        obj.material.dispose();
+      }
+    }
+  });
+  this.renderer.dispose();
+}
+```
+
+Failing to dispose Three.js resources is the most common source of
+GPU memory leaks in web games.
+
+## Audio context
+
+Never call AudioService methods before user interaction.
+The browser blocks audio until the first click or keypress.
+AudioService.initialise() must be called in a user event handler, not in
+ngOnInit or a constructor. GameShellComponent owns this responsibility.
+
+## Tauri API calls
+
+Only call Tauri APIs (plugin-store, window, etc.) from SaveService or
+SettingsService. No other service or component touches Tauri directly.
+
+Always guard Tauri calls:
+```ts
+private readonly isTauri = '__TAURI__' in window;
+
+async save(): Promise<void> {
+  if (this.isTauri) {
+    // Tauri path
+  } else {
+    // localStorage fallback for browser dev
+  }
+}
+```
+
+This keeps the app runnable in the browser during development without
+Tauri running.
+
 ---
 
 ## What to do when a prompt is ambiguous

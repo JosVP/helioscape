@@ -517,6 +517,63 @@ and `SettingsService`. No other service touches Tauri APIs directly.
 During development (`ng serve`): Tauri is not running. `SaveService` detects this
 and falls back to `localStorage`. All other functionality works in the browser.
 
+## Save file storage
+
+Use `tauri-plugin-store` instead of raw `@tauri-apps/plugin-fs` for save files.
+Plugin-store handles atomic writes (no corrupted saves on crash), file locking,
+and provides a cleaner API than manual JSON read/write.
+
+```ts
+// In SaveService — Tauri path
+import { Store } from '@tauri-apps/plugin-store';
+
+const store = new Store('helioscape_saves.json');
+await store.set(`slot_${slot}`, serialisedState);
+await store.save(); // flush to disk
+
+const data = await store.get(`slot_${slot}`);
+```
+
+Browser fallback (dev mode) uses localStorage with the same interface pattern.
+SaveService detects environment and uses the correct backend.
+
+## Audio autoplay policy
+
+Browsers (and Tauri's webview) block audio playback until the first user
+interaction. This applies to all platforms — Windows, Mac, and Linux.
+
+AudioService must resume the AudioContext on first interaction:
+
+```ts
+// In AudioService constructor:
+private audioContext = new AudioContext();
+
+initialise(): void {
+  // Call this on first user click/keypress anywhere in the app.
+  // GameShellComponent calls this in its first click handler.
+  if (this.audioContext.state === 'suspended') {
+    this.audioContext.resume();
+  }
+}
+```
+
+GameShellComponent adds a one-time click listener that calls
+AudioService.initialise() and then removes itself.
+This is the correct pattern — do not attempt to play audio before user
+interaction or it will silently fail.
+
+## Linux / Steam Deck
+
+Tauri uses WebKitGTK on Linux, which has known compatibility issues.
+The Steam Deck runs SteamOS (Linux).
+
+Current plan: ship Tauri for Windows and Mac. Assess Linux/Steam Deck support
+closer to launch. If Steam Deck support is required, switch the Linux build
+to Electron (same Angular codebase, different wrapper, ~400MB vs ~15MB).
+
+This is a launch decision, not a development decision.
+Do not let this block progress — develop with Tauri, reassess before shipping.
+
 ---
 
 ## Mercury isometric coordinate reference

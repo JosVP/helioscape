@@ -578,56 +578,80 @@ Read AGENTS.md and ARCHITECTURE.md.
 
 @Injectable({ providedIn: 'root' }) singleton.
 
-Responsibility: serialise/deserialise GameStateService to/from JSON.
-Detects Tauri vs browser environment and uses appropriate storage.
+Responsibility: serialise/deserialise GameStateService to/from persistent storage.
+Uses tauri-plugin-store when running in Tauri, localStorage when running in browser.
 
 Inject: GameStateService, SettingsService.
+Import type { Store } from '@tauri-apps/plugin-store' — lazy import inside methods,
+not at top level, so the module only loads when running in Tauri.
 
 const SAVE_VERSION = 1;
 const MAX_SLOTS = 3;
 const AUTOSAVE_SLOT = 0;
+const STORE_FILE = 'helioscape_saves.json';
 
-readonly isTauri: boolean = '__TAURI__' in window;
+private readonly isTauri = '__TAURI__' in window;
+private store: Store | null = null;  // Tauri store instance, null in browser
 
-getSavePath(slot: number): string
-  — slot 0: 'helioscape_autosave'
-  — slot N: 'helioscape_save_N'
-  — in browser: used as localStorage key
-  — in Tauri: used as filename (comment: TODO add appDataDir() prefix)
+private async _getStore(): Promise<Store | null>
+  If not isTauri: return null.
+  If store already initialised: return it.
+  const { Store } = await import('@tauri-apps/plugin-store').
+  this.store = new Store(STORE_FILE).
+  Return this.store.
+
+private _getLocalKey(slot: number): string
+  slot === AUTOSAVE_SLOT ? 'helioscape_autosave' : `helioscape_save_${slot}`
 
 save(slot: number): Promise<void>
-  const state = this.gameState.serialise();
-  const payload = JSON.stringify({ ...state, version: SAVE_VERSION,
-    saveTimestamp: Date.now() });
-  if (isTauri) { /* TODO: write via @tauri-apps/plugin-fs */ }
-  else { localStorage.setItem(this.getSavePath(slot), payload); }
+  const state = this.gameState.serialise().
+  const payload = { ...state, version: SAVE_VERSION, saveTimestamp: Date.now() }.
+  const store = await this._getStore().
+  if (store) {
+    await store.set(this._getLocalKey(slot), payload).
+    await store.save().
+  } else {
+    localStorage.setItem(this._getLocalKey(slot), JSON.stringify(payload)).
+  }
+  this._autosaveSignal.update(n => n + 1) if slot === AUTOSAVE_SLOT.
 
 load(slot: number): Promise<boolean>
-  Reads from storage. Parses JSON. Checks version. Calls _migrate() if needed.
-  Calls this.gameState.hydrate(parsed). Returns true on success, false if not found.
+  const store = await this._getStore().
+  let data: SerializedGameState | null = null.
+  if (store) {
+    data = await store.get<SerializedGameState>(this._getLocalKey(slot)).
+  } else {
+    const raw = localStorage.getItem(this._getLocalKey(slot)).
+    data = raw ? JSON.parse(raw) : null.
+  }
+  If data is null: return false.
+  Check data.version. Call _migrate() if needed.
+  this.gameState.hydrate(data). Return true.
 
 autosave(): Promise<void>
-  Calls save(AUTOSAVE_SLOT). Quiet — no UI feedback from this service.
-  (HUD listens to a signal that this service sets after autosave.)
+  await this.save(AUTOSAVE_SLOT).
 
-private _autosaveSignal = signal(0);
-readonly autosaveCompleted = this._autosaveSignal.asReadonly();
-After each autosave: this._autosaveSignal.update(n => n + 1);
+private _autosaveSignal = signal(0).
+readonly autosaveCompleted = this._autosaveSignal.asReadonly().
 
-getSlotInfo(slot: number): SlotInfo
-  interface SlotInfo { exists: boolean; gameYear?: number;
-    kardashevLevel?: number; saveTimestamp?: number; isAutosave: boolean; }
-  Reads from storage without full deserialisation.
-  Parses only top-level fields for display.
+getSlotInfo(slot: number): Promise<SlotInfo>
+  interface SlotInfo: { exists: boolean, gameYear?: number,
+    kardashevLevel?: number, saveTimestamp?: number, isAutosave: boolean }
+  Read only top-level metadata — do not full-deserialise.
+  
+getAllSlotInfos(): Promise<SlotInfo[]>
 
-getAllSlotInfos(): SlotInfo[]  — returns array for slots 0 through MAX_SLOTS
+hasSave(): Promise<boolean>
 
-hasSave(): boolean — true if any slot has data
-
-delete(slot: number): void — removes from storage
+delete(slot: number): Promise<void>
+  Tauri: await store.delete(key), await store.save().
+  Browser: localStorage.removeItem(key).
 
 private _migrate(data: any, fromVersion: number): SerializedGameState
-  Stub with comment explaining version-keyed migration pattern.
+  Stub with comment about version-keyed migration.
+
+All Tauri calls wrapped in try/catch — log errors, never crash.
+Methods are async — callers must await them.
 ```
 
 ---
@@ -1270,6 +1294,20 @@ On Escape key (HostListener): toggle pause menu.
 
 The PlanetPanelComponent slides in with CSS transform transition.
 The panel is in the DOM always (not @if) so transition works — visibility toggled by signal.
+
+Add a one-time user interaction handler for audio initialisation:
+
+private audioInitialised = false;
+private audioService = inject(AudioService);
+
+@HostListener('click')
+@HostListener('keydown')
+onFirstInteraction(): void {
+  if (this.audioInitialised) return;
+  this.audioInitialised = true;
+  this.audioService.initialise();
+}
+
 ```
 
 ---
