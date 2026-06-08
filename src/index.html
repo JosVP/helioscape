@@ -1597,5 +1597,23 @@ updateOrbits(1);
 openPlanet('earth');
 requestAnimationFrame(tick);
 </script>
+<button id="close-btn" style="position:fixed; bottom: 10px; left: 10px; z-index:9001">Close Game</button>
+
+<script>
+  document.getElementById('close-btn').addEventListener('click', async () => {
+    // Check if running inside the Tauri shell environment
+    if (window.__TAURI__) {
+      const { getCurrentWindow } = window.__TAURI__.window;
+      const appWindow = getCurrentWindow();
+      await appWindow.close(); // Closes the app window
+    } else {
+      console.log("Not running inside Tauri. Button clicked!");
+    }
+  });
+  document.addEventListener('contextmenu', (event) => {
+    //event.preventDefault();
+  });
+</script>
+
 </body>
 </html>
