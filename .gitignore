@@ -6,6 +6,10 @@
 /out-tsc
 /bazel-out
 
+# Tauri
+/src-tauri/target/debug
+/src-tauri/target/release
+
 # Node
 /node_modules
 npm-debug.log
