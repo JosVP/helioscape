@@ -1,0 +1,54 @@
+:root {
+  // Colours
+  --color-bg-base: #0d0d0f;
+  --color-bg-surface: #161618;
+  --color-bg-elevated: #1e1e22;
+  --color-bg-overlay: rgba(0, 0, 0, 0.7);
+  --color-text-primary: #e8e0d4;
+  --color-text-secondary: #8a8070;
+  --color-text-disabled: #4a4440;
+  --color-accent: #c8861e;
+  --color-accent-dim: #8a5c14;
+  --color-accent-glow: #e8a030;
+  --color-good: #5a9e5a;
+  --color-warn: #c8a020;
+  --color-bad: #9e3a2a;
+  --color-neutral: #4a6a8a;
+  --color-tag-naturalist: #4a8a4a;
+  --color-tag-architect: #4a6ab8;
+
+  // Planet accents
+  --color-earth: #3a7ab8;
+  --color-mercury: #8a7a5a;
+  --color-mars: #b84a2a;
+  --color-venus: #c8a030;
+
+  // Typography
+  --font-mono: 'Press Start 2P', 'Courier New', monospace;
+  --font-body: 'YourBodyFont', system-ui, sans-serif;
+  --text-xs: 11px;
+  --text-sm: 13px;
+  --text-md: 14px;
+  --text-lg: 16px;
+  --text-xl: 20px;
+  --text-2xl: 28px;
+
+  // Spacing (base unit: 8px)
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+
+  // Transitions
+  --transition-tick: width 1s linear; // tick-driven values
+  --transition-ui: all 0.25s ease-out; // UI interactions
+  --transition-panel: transform 0.25s ease-in-out; // panel slide
+  --transition-initial: all 0.8s ease-out; // initial-load state
+
+  // Borders
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --border-subtle: 1px solid rgba(255, 255, 255, 0.06);
+  --border-accent: 1px solid var(--color-accent-dim);
+}
