@@ -5,6 +5,27 @@ Read this file and ARCHITECTURE.md before responding to any prompt.
 
 ---
 
+## The agent workflow
+
+Helioscape features are built by a small team of specialised agents that hand off to each other.
+The user usually pastes a build prompt (often a numbered block from `docs/agents/PROMPTS.md` or
+`PROMPTS-pt2.md`). Pick the right agent to start, then follow the `handoffs`:
+
+| Stage           | Agent              | Purpose                                                                                                                                    |
+| --------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1. Understand   | `analyst`          | Analyse the prompt against the repo, GDD and prompt sequence. Scope the work; flag gaps/contradictions; defer anything a later block owns. |
+| 2. Plan         | `lead-developer`   | Turn the analysis into a file-by-file technical plan.                                                                                      |
+| 3. Build        | `developer`        | Implement the plan — Angular, services, Three.js orrery, Mercury canvas, JSON data, placeholder assets.                                    |
+| 3b. Polish      | `ui-ux-specialist` | Styling, layout, tokens, motion, accessibility, visual consistency.                                                                        |
+| 4. Review       | `reviewer`         | Find bugs, leaks and inconsistencies; hand fixes back to the developer.                                                                    |
+| 4b. Stress-test | `tester`           | Edge cases, failure/perf/leak scenarios, Vitest specs.                                                                                     |
+
+Agent definitions live in `.github/agents/`; their reusable procedures live in `.github/skills/`.
+A short orientation for any agent is in `.github/copilot-instructions.md`. Every agent must still
+obey the standards in **this file** and **ARCHITECTURE.md**.
+
+---
+
 ## Your role
 
 You write production-quality Angular code for a real shipped game. You are not writing tutorials
@@ -17,62 +38,34 @@ existing architecture without requiring manual fixes.
 
 Use the latest stable Angular. All code must use:
 
-- **Standalone components** — no NgModules, no CommonModule imports
+- **Standalone components** — no NgModules, no `CommonModule` imports
 - **Signals** — `signal()`, `computed()`, `effect()` for all reactive state
-- **New control flow** — `@if`, `@for`, `@switch` in templates, never `*ngIf` or `*ngFor`
-- **`inject()`** — always use `inject()` for dependency injection, never constructor parameters
-- **`input()` and `output()`** — for component I/O, not `@Input()`/`@Output()` decorators
-- **`input.required()`** — for required inputs
-- **TypeScript strict mode** — no `any`, no `!` non-null assertions unless absolutely necessary
-  with an explanatory comment, no implicit returns
+- **New control flow** — `@if`, `@for` (always with `track`), `@switch`; never `*ngIf`/`*ngFor`
+- **`inject()`** — never constructor-parameter DI
+- **`input()` / `output()` / `input.required()`** — not `@Input()`/`@Output()` decorators
+- **`ChangeDetectionStrategy.OnPush`** on every component
+- **TypeScript strict mode** — no `any`; no `!` non-null assertions (unless unavoidable, with a
+  comment); explicit return types on public methods; `readonly` on service signals; interfaces (not
+  inline object types) for data shapes; named exports; `import type` for type-only imports
 
 ```ts
-// CORRECT
-@Component({ standalone: true, ... })
+// CORRECT — the canonical component shape
+@Component({
+  selector: 'app-planet-panel',
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `...`,
+})
 export class PlanetPanelComponent {
   private gameState = inject(GameStateService);
   planetId = input.required<string>();
   panelClosed = output<void>();
-  
   planet = computed(() => this.gameState.planets()[this.planetId()]);
 }
-
-// WRONG — never do this
-@Component({ ... })
-export class PlanetPanelComponent {
-  @Input() planetId: string;
-  @Output() panelClosed = new EventEmitter();
-  constructor(private gameState: GameStateService) {}
-}
 ```
 
----
-
-## TypeScript standards
-
-- Strict null checks always on
-- Explicit return types on all public methods and functions
-- Interfaces for all data shapes, no inline object types on public APIs
-- `readonly` on all service signals
-- `const` over `let` wherever possible
-- Named exports, not default exports (except for lazy-loaded routes if needed)
-- Type imports: `import type { Foo } from './foo'` when only used as a type
-
-```ts
-// CORRECT
-export interface PlanetState {
-  readonly id: string;
-  readonly atmospherePressure: number;
-  readonly temperatureCelsius: number;
-  readonly terraformingPhase: number;
-}
-
-// WRONG
-export type PlanetState = {
-  id: string,
-  atmospherePressure: any,
-}
-```
+Never: `@Input()`/`@Output()` decorators, constructor DI, `any`, `*ngIf`/`*ngFor`, default exports
+(except lazy routes).
 
 ---
 
@@ -80,298 +73,111 @@ export type PlanetState = {
 
 All services are `providedIn: 'root'` singletons unless explicitly stated otherwise.
 
-**State services** — hold signals, expose readonly views, provide mutation methods:
+- **State services** (`GameStateService`) — hold private writable signals, expose public
+  `.asReadonly()` views, provide typed mutation methods. No other service mutates state directly.
+- **System services** — contain game logic; react to state via `effect()`, wrapping the body in
+  `untracked()` to avoid circular dependencies.
+- **Never** put game logic in components. Components read state and call service methods. That is all.
 
-```ts
-@Injectable({ providedIn: 'root' })
-export class GameStateService {
-  // Private writable signals
-  private readonly _gameYear = signal(2033);
-  private readonly _isPaused = signal(false);
-  
-  // Public readonly signals
-  readonly gameYear = this._gameYear.asReadonly();
-  readonly isPaused = this._isPaused.asReadonly();
-  
-  // Mutation methods
-  setYear(year: number): void {
-    this._gameYear.set(year);
-  }
-  
-  togglePause(): void {
-    this._isPaused.update(p => !p);
-  }
-}
-```
-
-**System services** — contain game logic, react to state changes via `effect()`:
-
-```ts
-@Injectable({ providedIn: 'root' })
-export class TerraformingService {
-  private gameState = inject(GameStateService);
-  private gameLoop = inject(GameLoopService);
-  
-  constructor() {
-    // React to game year changes
-    effect(() => {
-      const year = this.gameLoop.currentYear();
-      // untracked to avoid circular dependencies
-      untracked(() => this.processYear(year));
-    });
-  }
-}
-```
-
-**Never** put game logic in components. Components read state and call service methods. That is all.
+→ Canonical examples and the full signal hierarchy: **ARCHITECTURE.md › State architecture**.
 
 ---
 
 ## Component patterns
 
-```ts
-@Component({
-  selector: 'app-planet-panel',
-  standalone: true,
-  imports: [CommonModule], // only if needed — prefer specific imports
-  template: `
-    @if (planet(); as p) {
-      <div class="planet-panel">
-        <h2 class="planet-panel__title">{{ p.displayName }}</h2>
-        
-        @for (tech of availableTechs(); track tech.id) {
-          <app-tech-node [techId]="tech.id" />
-        }
-      </div>
-    }
-  `,
-  styles: [`
-    .planet-panel { padding: var(--space-md); }
-    .planet-panel__title { font-family: var(--font-mono); }
-  `],
-  changeDetection: ChangeDetectionStrategy.OnPush
-})
-export class PlanetPanelComponent {
-  private techTree = inject(TechTreeService);
-  
-  planetId = input.required<string>();
-  
-  planet = computed(() => 
-    inject(GameStateService).planets()[this.planetId()]
-  );
-  
-  availableTechs = computed(() =>
-    this.techTree.getAvailableFor(this.planetId())
-  );
-}
-```
-
-- **Always** use `ChangeDetectionStrategy.OnPush`
-- **Always** use `track` in `@for` loops
-- Keep templates thin — computed signals in the class, not inline template expressions
-- One component per file
-- BEM naming for CSS classes: `block__element--modifier`
+- `ChangeDetectionStrategy.OnPush` always; `track` in every `@for`.
+- Keep templates thin — derive values with `computed()` in the class, not inline template logic.
+- One component per file; keep components under ~200 lines (split if longer).
+- BEM CSS class names: `block__element--modifier`.
+- Import only what's needed — prefer specific imports over `CommonModule`.
 
 ---
 
 ## CSS standards
 
-- **CSS custom properties** for all design tokens — never hardcode colours, fonts, or spacing
-- **No inline styles** except when driven by dynamic values (hue rotation, bar width)
-- Dynamic values via CSS custom properties set in the component class:
-
-```ts
-// Setting a dynamic CSS value
-this.elementRef.nativeElement.style.setProperty('--bar-width', `${percent}%`);
-```
-
-```css
-.atmosphere-bar__fill {
-  width: var(--bar-width, 0%);
-  transition: width 1s linear; /* tick-driven: always linear */
-}
-
-.atmosphere-bar--initial-load .atmosphere-bar__fill {
-  transition: width 0.8s ease-out; /* first open: ease-out */
-}
-```
-
-- **SCSS** for all stylesheets (project is configured for SCSS)
-- Component styles are scoped — no need for deep selectors
-- Global tokens defined in `styles/tokens.scss`, imported globally
-- No magic numbers — reference a token or explain the value in a comment
+- **Design tokens only** — reference CSS custom properties from `styles/tokens.scss`; never hardcode
+  colours, fonts, spacing, radius or transitions. No magic numbers (reference a token or comment why).
+- **SCSS**, scoped component styles, no deep selectors.
+- **No inline styles** except dynamic values (bar width, hue), which are set as CSS custom properties
+  in the class (e.g. `--bar-width`), not as inline style strings.
+- **Transitions follow the visual-value pattern**: tick-driven values use `... 1s linear`; the
+  first-open `initial-load` variant uses ease-out. → **ARCHITECTURE.md › Visual value pattern**.
 
 ---
 
 ## File and folder naming
 
-```
-kebab-case for all files and folders
-feature-name.component.ts
-feature-name.service.ts
-feature-name.model.ts     ← interfaces and types
-feature-name.pipe.ts
-feature-name.directive.ts
-```
+`kebab-case` for all files and folders: `feature-name.component.ts`, `feature-name.service.ts`,
+`feature-name.model.ts` (interfaces/types), `.pipe.ts`, `.directive.ts`.
 
 ---
 
 ## Game-specific rules
 
-**Pure value derivation** — all visual values that change over time are computed from `gameYear`,
-never stored as animation state:
+- **Pure value derivation** — every visual value that changes over time is computed from `gameYear`
+  via a pure function (`getValueAtYear()`), never stored as animation/transition state. This is what
+  makes save/load safe. → **ARCHITECTURE.md › Visual value pattern**.
+- **No `setTimeout`/`setInterval` in components** — the only game timer lives in `GameLoopService`.
+- **No direct DOM manipulation in services** — services update signals; components react.
+- **Canvas components** (`OrreryComponent`, `MercuryGridComponent`) own their RAF loop: start in
+  `ngAfterViewInit`, cancel in `ngOnDestroy`, pause when hidden, and **read signals once into locals
+  at the top of the RAF callback** — never call signal getters mid-render. → **ARCHITECTURE.md ›
+  Canvas components**.
 
-```ts
-// CORRECT — pure function, safe to call on load
-getAtmospherePressure(planet: PlanetState, year: number): number {
-  const t = clamp((year - planet.startYear) / (planet.endYear - planet.startYear), 0, 1);
-  return lerp(planet.startPressure, planet.targetPressure, t);
-}
-
-// WRONG — stores transition state separately from game year
-startTransition(from: number, to: number, durationMs: number): void { ... }
-```
-
-**No setTimeout/setInterval in components** — only in `GameLoopService`.
-
-**No direct DOM manipulation in services** — services update signals, components react.
-
-**Canvas components** (OrreryComponent, MercuryGridComponent) own their RAF loop:
-- Start RAF in `ngAfterViewInit`
-- Cancel RAF in `ngOnDestroy`
-- Pause RAF when component is hidden (`document.hidden` or `@if` destroying the component)
-- Never let Three.js or canvas logic touch Angular signals directly from inside RAF —
-  read signals into local variables at the top of the RAF callback
-
-```ts
-private animate(): void {
-  this.animationId = requestAnimationFrame(() => this.animate());
-  
-  // Read signals once at top — never call signal getters mid-render
-  const year = this.gameLoop.currentYear();
-  const planets = this.gameState.planets();
-  
-  this.updateScene(year, planets);
-  this.renderer.render(this.scene, this.camera);
-}
-```
+---
 
 ## Memory leak prevention
 
-Every component that creates a subscription, interval, or event listener
-MUST clean it up on destroy. No exceptions.
+Every component that creates a subscription, interval, listener, RAF loop, or Three.js resource MUST
+clean it up on destroy. No exceptions — this is the most-reviewed thing in the codebase.
 
-### RxJS subscriptions
-Always use takeUntilDestroyed():
-```ts
-private destroyRef = inject(DestroyRef);
+- **RxJS subscriptions** — always `.pipe(takeUntilDestroyed(this.destroyRef))`. Never manual
+  unsubscribe arrays. (Prefer signals over Observables in the first place.)
+- **Effects** — `effect()` auto-disposes on destroy; no manual cleanup.
+- **RAF loops** — store the id; `cancelAnimationFrame()` in `ngOnDestroy`.
+- **`setInterval`/`setTimeout`** — store the ref and clear on destroy. (Game ticks: `GameLoopService`
+  only.)
+- **Manual DOM listeners** (e.g. canvas mouse events) — `removeEventListener` in `ngOnDestroy`.
+- **Three.js** — in `ngOnDestroy`, traverse the scene and dispose every geometry, material and
+  texture, then `renderer.dispose()`. Failing to do this is the #1 source of GPU leaks in web games.
 
-this.eventBus.techUnlocked$
-  .pipe(takeUntilDestroyed(this.destroyRef))
-  .subscribe(...);
-```
+→ Code patterns for each of the above: **ARCHITECTURE.md** (Canvas components / cleanup sections).
 
-Never use manual unsubscribe arrays. Never use ngOnDestroy for subscriptions
-if takeUntilDestroyed works (it works everywhere inject() works).
-
-### Effects
-Effects created with effect() are automatically cleaned up when the component
-is destroyed. No manual cleanup needed.
-
-### RAF loops (canvas components)
-MUST cancel in ngOnDestroy:
-```ts
-private animationId = 0;
-
-private animate(): void {
-  this.animationId = requestAnimationFrame(() => this.animate());
-  // ...
-}
-
-ngOnDestroy(): void {
-  cancelAnimationFrame(this.animationId);
-  // Also dispose Three.js renderer if applicable:
-  this.renderer?.dispose();
-}
-```
-
-### setInterval / setTimeout
-Store the reference and clear on destroy:
-```ts
-private tickInterval: ReturnType<typeof setInterval> | null = null;
-
-ngOnDestroy(): void {
-  if (this.tickInterval) clearInterval(this.tickInterval);
-}
-```
-
-Note: GameLoopService is the ONLY place setInterval runs for game ticks.
-Components should never create their own intervals for game logic.
-
-### DOM event listeners added manually
-If you use addEventListener() directly (rare in Angular but happens in
-canvas components for mouse events), always removeEventListener in ngOnDestroy:
-```ts
-private boundOnClick = this.onClick.bind(this);
-
-ngAfterViewInit(): void {
-  this.canvas.addEventListener('click', this.boundOnClick);
-}
-
-ngOnDestroy(): void {
-  this.canvas.removeEventListener('click', this.boundOnClick);
-}
-```
-
-### Three.js specific
-Dispose geometries, materials, and textures when the orrery component destroys:
-```ts
-ngOnDestroy(): void {
-  cancelAnimationFrame(this.animationId);
-  this.scene.traverse(obj => {
-    if (obj instanceof THREE.Mesh) {
-      obj.geometry.dispose();
-      if (Array.isArray(obj.material)) {
-        obj.material.forEach(m => m.dispose());
-      } else {
-        obj.material.dispose();
-      }
-    }
-  });
-  this.renderer.dispose();
-}
-```
-
-Failing to dispose Three.js resources is the most common source of
-GPU memory leaks in web games.
+---
 
 ## Audio context
 
-Never call AudioService methods before user interaction.
-The browser blocks audio until the first click or keypress.
-AudioService.initialise() must be called in a user event handler, not in
-ngOnInit or a constructor. GameShellComponent owns this responsibility.
+Browsers block audio until the first user interaction. Never call `AudioService` methods before then;
+`AudioService.initialise()` must run inside a user event handler (owned by `GameShellComponent`), not
+in a constructor or `ngOnInit`. → **ARCHITECTURE.md › Audio autoplay policy**.
+
+## Placeholder assets
+
+Helioscape needs a lot of visual and audio assets. Missing art or sound must **never** block a
+feature. When a prompt requires an asset that doesn't exist yet, generate a clearly-marked
+placeholder at the exact path and size the code expects, then continue.
+
+- **Visual assets** (planet textures, planet-state vignettes, culture-event portraits, tech-tree and
+  UI icons, Mercury building sprites) → a simple **placeholder SVG** built from basic shapes
+  (`<rect>`, `<circle>`, `<polygon>`, ...), correctly sized, that the user can swap later. Examples:
+  an Earth texture is green blobs on a blue field at 2:1; a landscape vignette is a blue sky
+  rectangle, a green ground rectangle, brown-trunk + green-triangle trees, and a yellow sun disc.
+  Include a `<!-- PLACEHOLDER -->` comment and a visible marker (dashed border/label).
+  Procedure + recipes + default sizes: `.github/skills/create-placeholder-svg`.
+- **Sound effects** (clicks, notifications, milestone stings, ambient beds) → a short, basic
+  **placeholder WAV** (a brief synthesised tone of the right category/length), generated with the
+  no-dependency Node script in `.github/skills/create-placeholder-audio`, at the path the code
+  references.
+
+Placeholders must be obvious placeholders, live where the consuming code looks for them, and be
+called out in your summary so the user knows to replace them.
 
 ## Tauri API calls
 
-Only call Tauri APIs (plugin-store, window, etc.) from SaveService or
-SettingsService. No other service or component touches Tauri directly.
-
-Always guard Tauri calls:
-```ts
-private readonly isTauri = '__TAURI__' in window;
-
-async save(): Promise<void> {
-  if (this.isTauri) {
-    // Tauri path
-  } else {
-    // localStorage fallback for browser dev
-  }
-}
-```
-
-This keeps the app runnable in the browser during development without
-Tauri running.
+Only `SaveService` and `SettingsService` touch Tauri APIs (plugin-store, window, etc.) — no other
+service or component. Always guard with `const isTauri = '__TAURI__' in window;` and provide a
+`localStorage` fallback so the app runs in the browser during development. → **ARCHITECTURE.md ›
+Tauri integration points**.
 
 ---
 
@@ -391,4 +197,5 @@ Tauri running.
 - Never hardcode game data in TypeScript — all content comes from JSON in `src/data/`
 - Never put `providedIn: 'root'` on a service that should be feature-scoped
 - Never write a component longer than ~200 lines — split it
-
+- Never block a feature on missing art or sound — generate a placeholder asset instead (see
+  "Placeholder assets")
