@@ -4,13 +4,15 @@ import { Injectable, signal, type Signal } from '@angular/core';
  * Player settings shape — persists across all sessions, separate from game saves.
  * Stored in localStorage (key: 'helioscape_settings') with future Tauri file storage.
  */
+export type RenderResolution = '1280x720' | '1920x1080' | '2560x1440';
+
 export interface SettingsValues {
   masterVolume: number;
   musicVolume: number;
   sfxVolume: number;
   fullscreen: boolean;
   vsync: boolean;
-  uiScale: number; // 1.0 | 1.25 | 1.5 | 2.0
+  renderResolution: RenderResolution;
   textSizeMultiplier: number;
   colorblindMode: boolean;
   reducedMotion: boolean;
@@ -30,7 +32,7 @@ export interface SettingsValues {
  * Responsibility:
  * - Load settings on startup
  * - Persist on every change
- * - Apply UI-affecting settings immediately (scale, motion, colorblind, contrast)
+ * - Apply UI-affecting settings immediately (renderResolution, motion, colorblind, contrast)
  * - Volume settings: applied by AudioService (not yet implemented)
  */
 @Injectable({ providedIn: 'root' })
@@ -45,7 +47,7 @@ export class SettingsService {
     sfxVolume: 0.8,
     fullscreen: false,
     vsync: true,
-    uiScale: 1.0,
+    renderResolution: '1920x1080',
     textSizeMultiplier: 1.0,
     colorblindMode: false,
     reducedMotion: false,
@@ -60,7 +62,7 @@ export class SettingsService {
   private readonly _sfxVolume = signal<number>(this.defaults.sfxVolume);
   private readonly _fullscreen = signal<boolean>(this.defaults.fullscreen);
   private readonly _vsync = signal<boolean>(this.defaults.vsync);
-  private readonly _uiScale = signal<number>(this.defaults.uiScale);
+  private readonly _renderResolution = signal<RenderResolution>(this.defaults.renderResolution);
   private readonly _textSizeMultiplier = signal<number>(this.defaults.textSizeMultiplier);
   private readonly _colorblindMode = signal<boolean>(this.defaults.colorblindMode);
   private readonly _reducedMotion = signal<boolean>(this.defaults.reducedMotion);
@@ -74,7 +76,7 @@ export class SettingsService {
   readonly sfxVolume: Signal<number> = this._sfxVolume.asReadonly();
   readonly fullscreen: Signal<boolean> = this._fullscreen.asReadonly();
   readonly vsync: Signal<boolean> = this._vsync.asReadonly();
-  readonly uiScale: Signal<number> = this._uiScale.asReadonly();
+  readonly renderResolution: Signal<RenderResolution> = this._renderResolution.asReadonly();
   readonly textSizeMultiplier: Signal<number> = this._textSizeMultiplier.asReadonly();
   readonly colorblindMode: Signal<boolean> = this._colorblindMode.asReadonly();
   readonly reducedMotion: Signal<boolean> = this._reducedMotion.asReadonly();
@@ -101,8 +103,8 @@ export class SettingsService {
         return this._fullscreen() as SettingsValues[K];
       case 'vsync':
         return this._vsync() as SettingsValues[K];
-      case 'uiScale':
-        return this._uiScale() as SettingsValues[K];
+      case 'renderResolution':
+        return this._renderResolution() as SettingsValues[K];
       case 'textSizeMultiplier':
         return this._textSizeMultiplier() as SettingsValues[K];
       case 'colorblindMode':
@@ -135,18 +137,18 @@ export class SettingsService {
         break;
       case 'fullscreen':
         this._fullscreen.set(value as boolean);
+        // NOTE: Fullscreen stored for future Tauri window API wiring
         break;
       case 'vsync':
         this._vsync.set(value as boolean);
-        // NOTE: VSync is applied on next render loop start
+        // NOTE: VSync stored for future Tauri wiring
         break;
-      case 'uiScale':
-        this._uiScale.set(value as number);
-        this.applyUiScale(value as number);
+      case 'renderResolution':
+        this._renderResolution.set(value as RenderResolution);
+        this.applyRenderResolution(value as RenderResolution);
         break;
       case 'textSizeMultiplier':
         this._textSizeMultiplier.set(value as number);
-        // NOTE: Text size affects tokens, no direct apply needed
         break;
       case 'colorblindMode':
         this._colorblindMode.set(value as boolean);
@@ -181,7 +183,7 @@ export class SettingsService {
     this._sfxVolume.set(this.defaults.sfxVolume);
     this._fullscreen.set(this.defaults.fullscreen);
     this._vsync.set(this.defaults.vsync);
-    this._uiScale.set(this.defaults.uiScale);
+    this._renderResolution.set(this.defaults.renderResolution);
     this._textSizeMultiplier.set(this.defaults.textSizeMultiplier);
     this._colorblindMode.set(this.defaults.colorblindMode);
     this._reducedMotion.set(this.defaults.reducedMotion);
@@ -190,7 +192,7 @@ export class SettingsService {
     this._confirmIrreversible.set(this.defaults.confirmIrreversible);
 
     // Apply all UI-affecting settings
-    this.applyUiScale(this.defaults.uiScale);
+    this.applyRenderResolution(this.defaults.renderResolution);
     this.applyReducedMotion(this.defaults.reducedMotion);
     this.applyColorblind(this.defaults.colorblindMode);
     this.applyHighContrast(this.defaults.highContrast);
@@ -232,7 +234,7 @@ export class SettingsService {
     this._sfxVolume.set(settings.sfxVolume);
     this._fullscreen.set(settings.fullscreen);
     this._vsync.set(settings.vsync);
-    this._uiScale.set(settings.uiScale);
+    this._renderResolution.set(settings.renderResolution);
     this._textSizeMultiplier.set(settings.textSizeMultiplier);
     this._colorblindMode.set(settings.colorblindMode);
     this._reducedMotion.set(settings.reducedMotion);
@@ -241,7 +243,7 @@ export class SettingsService {
     this._confirmIrreversible.set(settings.confirmIrreversible);
 
     // Apply UI-affecting settings to DOM
-    this.applyUiScale(settings.uiScale);
+    this.applyRenderResolution(settings.renderResolution);
     this.applyReducedMotion(settings.reducedMotion);
     this.applyColorblind(settings.colorblindMode);
     this.applyHighContrast(settings.highContrast);
@@ -257,7 +259,7 @@ export class SettingsService {
       sfxVolume: this._sfxVolume(),
       fullscreen: this._fullscreen(),
       vsync: this._vsync(),
-      uiScale: this._uiScale(),
+      renderResolution: this._renderResolution(),
       textSizeMultiplier: this._textSizeMultiplier(),
       colorblindMode: this._colorblindMode(),
       reducedMotion: this._reducedMotion(),
@@ -274,11 +276,14 @@ export class SettingsService {
   }
 
   /**
-   * Apply UI scale to the document root.
-   * Sets CSS custom property --ui-scale.
+   * Apply render resolution to the document root.
+   * Sets CSS custom properties --logical-w and --logical-h.
+   * AppComponent reads these to compute --root-scale.
    */
-  private applyUiScale(scale: number): void {
-    document.documentElement.style.setProperty('--ui-scale', scale.toString());
+  private applyRenderResolution(res: RenderResolution): void {
+    const [w, h] = res.split('x').map(Number);
+    document.documentElement.style.setProperty('--logical-w', `${w}px`);
+    document.documentElement.style.setProperty('--logical-h', `${h}px`);
   }
 
   /**

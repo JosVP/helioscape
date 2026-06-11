@@ -74,11 +74,20 @@ No inline `// TODO:` comments in code - all tracking happens here to avoid dupli
 - **Prompt block**: TBD (audio system block)
 - **Added**: 2026-06-11
 
-### SettingsService — Fullscreen Toggle
+### SettingsService — Fullscreen + VSync Tauri Wiring
 
 - **File**: src/app/core/services/settings.service.ts
-- **Location**: In `set()` method for fullscreen
-- **TODO**: Apply fullscreen setting via Tauri window API (`@tauri-apps/api/window`)
+- **Location**: In `set()` method for `fullscreen` and `vsync`
+- **TODO**: Apply fullscreen via `appWindow.setFullscreen()` and VSync via Tauri window API (`@tauri-apps/api/window`)
+- **Depends on**: Tauri window API integration
+- **Prompt block**: TBD (Tauri integration block)
+- **Added**: 2026-06-11
+
+### AppComponent — applyRenderResolution window sizing (Tauri)
+
+- **File**: src/app/app.ts
+- **Location**: In `computeScale()` — currently uses CSS transform scale
+- **TODO**: When running in Tauri, also call `appWindow.setSize(new LogicalSize(lw, lh))` so the OS window matches the logical resolution rather than relying purely on CSS scaling
 - **Depends on**: Tauri window API integration
 - **Prompt block**: TBD (Tauri integration block)
 - **Added**: 2026-06-11

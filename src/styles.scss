@@ -14,3 +14,12 @@ body {
   font-size: var(--text-md);
   overflow: hidden;  // game fills viewport, no scroll
 }
+
+// Nearest-neighbor scaling for canvas bitmaps (Three.js orrery, Mercury grid).
+// CSS transform: scale() composites at the GPU level and bilinear-blends the
+// composited layer regardless of this rule — but canvas/img bitmaps are drawn
+// with pixelated sampling before compositing, giving crisp pixel art.
+canvas {
+  image-rendering: pixelated;   // Chrome, Firefox, Edge
+  image-rendering: crisp-edges; // Safari fallback
+}

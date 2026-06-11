@@ -3,88 +3,258 @@
     class="settings"
     role="dialog"
     aria-modal="true"
-    aria-labelledby="settings-panel-title"
+    aria-labelledby="settings-title"
     (click)="$event.stopPropagation()"
   >
-    <h2 class="settings__title" id="settings-panel-title">Options</h2>
+    <!-- Header -->
+    <header class="settings__header">
+      <h2 class="settings__title" id="settings-title">Settings</h2>
+      <button class="settings__close-x" (click)="closed.emit()" aria-label="Close settings">✕</button>
+    </header>
 
-    <div class="settings__groups">
-      <!-- Reduced Motion -->
-      <section class="settings__group settings__group--toggle">
-        <label class="settings__label" for="reduced-motion">Reduced Motion</label>
-        <input
-          id="reduced-motion"
-          class="settings__checkbox"
-          type="checkbox"
-          [checked]="settings.reducedMotion()"
-          (change)="onReducedMotion($event)"
-        />
-      </section>
+    <!-- Tab bar -->
+    <nav class="settings__tabs" role="tablist" aria-label="Settings categories">
+      @for (tab of tabs; track tab.id) {
+        <button
+          class="settings__tab"
+          role="tab"
+          [class.settings__tab--active]="activeTab() === tab.id"
+          [attr.aria-selected]="activeTab() === tab.id"
+          (click)="activeTab.set(tab.id)"
+        >{{ tab.label }}</button>
+      }
+    </nav>
 
-      <!-- Colorblind Mode -->
-      <section class="settings__group settings__group--toggle">
-        <label class="settings__label" for="colorblind">Colorblind Mode</label>
-        <input
-          id="colorblind"
-          class="settings__checkbox"
-          type="checkbox"
-          [checked]="settings.colorblindMode()"
-          (change)="onColorblind($event)"
-        />
-      </section>
+    <!-- Tab panels -->
+    <div class="settings__panel">
 
-      <!-- High Contrast -->
-      <section class="settings__group settings__group--toggle">
-        <label class="settings__label" for="high-contrast">High Contrast</label>
-        <input
-          id="high-contrast"
-          class="settings__checkbox"
-          type="checkbox"
-          [checked]="settings.highContrast()"
-          (change)="onHighContrast($event)"
-        />
-      </section>
+      @switch (activeTab()) {
 
-      <!-- Autosave Interval -->
-      <section class="settings__group">
-        <label class="settings__label" for="autosave-interval">
-          Autosave Every
-          <span class="settings__value">{{ settings.autosaveIntervalYears() }} years</span>
-        </label>
-        <input
-          id="autosave-interval"
-          class="settings__range"
-          type="range"
-          min="5"
-          max="50"
-          step="5"
-          [value]="settings.autosaveIntervalYears()"
-          (input)="onAutosaveInterval($event)"
-        />
-      </section>
+        @case ('audio') {
+          <p class="settings__note">
+            Volume controls are stored now and will be applied once the Audio system is active.
+          </p>
 
-      <!-- Confirm Irreversible Actions -->
-      <section class="settings__group settings__group--toggle">
-        <label class="settings__label" for="confirm-irreversible">
-          Confirm Irreversible Actions
-        </label>
-        <input
-          id="confirm-irreversible"
-          class="settings__checkbox"
-          type="checkbox"
-          [checked]="settings.confirmIrreversible()"
-          (change)="onConfirmIrreversible($event)"
-        />
-      </section>
+          <!-- Master Volume -->
+          <section class="settings__row settings__row--range">
+            <label class="settings__label" for="master-volume">
+              Master
+              <span class="settings__value">{{ pct(settings.masterVolume()) }}</span>
+            </label>
+            <input
+              id="master-volume"
+              class="settings__range"
+              type="range"
+              min="0" max="1" step="0.05"
+              [value]="settings.masterVolume()"
+              (input)="onMasterVolume($event)"
+            />
+          </section>
 
-      <!-- Volume — pending AudioService -->
-      <section class="settings__group settings__group--stub">
-        <p class="settings__stub-note">
-          Volume controls — available after the Audio system is implemented.
-        </p>
-      </section>
+          <!-- Music Volume -->
+          <section class="settings__row settings__row--range">
+            <label class="settings__label" for="music-volume">
+              Music
+              <span class="settings__value">{{ pct(settings.musicVolume()) }}</span>
+            </label>
+            <input
+              id="music-volume"
+              class="settings__range"
+              type="range"
+              min="0" max="1" step="0.05"
+              [value]="settings.musicVolume()"
+              (input)="onMusicVolume($event)"
+            />
+          </section>
+
+          <!-- SFX Volume -->
+          <section class="settings__row settings__row--range">
+            <label class="settings__label" for="sfx-volume">
+              Sound FX
+              <span class="settings__value">{{ pct(settings.sfxVolume()) }}</span>
+            </label>
+            <input
+              id="sfx-volume"
+              class="settings__range"
+              type="range"
+              min="0" max="1" step="0.05"
+              [value]="settings.sfxVolume()"
+              (input)="onSfxVolume($event)"
+            />
+          </section>
+        }
+
+        @case ('video') {
+          <!-- Render Resolution -->
+          <section class="settings__row">
+            <label class="settings__label" for="render-resolution">Render Resolution</label>
+            <select
+              id="render-resolution"
+              class="settings__select"
+              [value]="settings.renderResolution()"
+              (change)="onRenderResolution($event)"
+            >
+              <option value="1280x720">Performance — 1280 × 720</option>
+              <option value="1920x1080">Standard — 1920 × 1080</option>
+              <option value="2560x1440">High — 2560 × 1440</option>
+            </select>
+            <p class="settings__description">
+              The logical canvas size. Scaled to fill the screen — lower presets render faster,
+              higher presets give sharper art on large monitors.
+            </p>
+          </section>
+
+          <!-- Fullscreen -->
+          <section class="settings__row settings__row--toggle">
+            <div class="settings__label-group">
+              <label class="settings__label" for="fullscreen">Fullscreen</label>
+              <p class="settings__description">Stored for future Tauri window integration.</p>
+            </div>
+            <input
+              id="fullscreen"
+              class="settings__checkbox"
+              type="checkbox"
+              [checked]="settings.fullscreen()"
+              (change)="onFullscreen($event)"
+            />
+          </section>
+
+          <!-- VSync -->
+          <section class="settings__row settings__row--toggle">
+            <div class="settings__label-group">
+              <label class="settings__label" for="vsync">VSync</label>
+              <p class="settings__description">Stored for future Tauri window integration.</p>
+            </div>
+            <input
+              id="vsync"
+              class="settings__checkbox"
+              type="checkbox"
+              [checked]="settings.vsync()"
+              (change)="onVSync($event)"
+            />
+          </section>
+        }
+
+        @case ('accessibility') {
+          <!-- Text Size -->
+          <section class="settings__row">
+            <label class="settings__label" for="text-size">Text Size</label>
+            <select
+              id="text-size"
+              class="settings__select"
+              [value]="settings.textSizeMultiplier()"
+              (change)="onTextSize($event)"
+            >
+              <option value="1.0">Normal</option>
+              <option value="1.25">Large</option>
+              <option value="1.5">Extra Large</option>
+            </select>
+          </section>
+
+          <!-- Colorblind Mode -->
+          <section class="settings__row settings__row--toggle">
+            <div class="settings__label-group">
+              <label class="settings__label" for="colorblind">Colorblind Mode</label>
+              <p class="settings__description">
+                Replaces red/green planet-state colours with shapes and patterns.
+              </p>
+            </div>
+            <input
+              id="colorblind"
+              class="settings__checkbox"
+              type="checkbox"
+              [checked]="settings.colorblindMode()"
+              (change)="onColorblind($event)"
+            />
+          </section>
+
+          <!-- Reduced Motion -->
+          <section class="settings__row settings__row--toggle">
+            <div class="settings__label-group">
+              <label class="settings__label" for="reduced-motion">Reduced Motion</label>
+              <p class="settings__description">
+                Disables panel entrance animations, orbital trails, and progress-bar transitions.
+              </p>
+            </div>
+            <input
+              id="reduced-motion"
+              class="settings__checkbox"
+              type="checkbox"
+              [checked]="settings.reducedMotion()"
+              (change)="onReducedMotion($event)"
+            />
+          </section>
+
+          <!-- High Contrast -->
+          <section class="settings__row settings__row--toggle">
+            <div class="settings__label-group">
+              <label class="settings__label" for="high-contrast">High Contrast</label>
+              <p class="settings__description">
+                Increases border and text contrast for low-vision players.
+              </p>
+            </div>
+            <input
+              id="high-contrast"
+              class="settings__checkbox"
+              type="checkbox"
+              [checked]="settings.highContrast()"
+              (change)="onHighContrast($event)"
+            />
+          </section>
+        }
+
+        @case ('gameplay') {
+          <!-- Autosave Interval -->
+          <section class="settings__row">
+            <label class="settings__label" for="autosave-interval">Autosave Every</label>
+            <select
+              id="autosave-interval"
+              class="settings__select"
+              [value]="settings.autosaveIntervalYears()"
+              (change)="onAutosaveInterval($event)"
+            >
+              <option value="5">5 game years</option>
+              <option value="10">10 game years</option>
+              <option value="25">25 game years</option>
+              <option value="50">50 game years</option>
+              <option value="0">Off</option>
+            </select>
+          </section>
+
+          <!-- Confirm Irreversible Actions -->
+          <section class="settings__row settings__row--toggle">
+            <div class="settings__label-group">
+              <label class="settings__label" for="confirm-irreversible">Confirm Irreversible Actions</label>
+              <p class="settings__description">
+                Prompt before demolishing buildings or abandoning a planet terraforming path.
+              </p>
+            </div>
+            <input
+              id="confirm-irreversible"
+              class="settings__checkbox"
+              type="checkbox"
+              [checked]="settings.confirmIrreversible()"
+              (change)="onConfirmIrreversible($event)"
+            />
+          </section>
+        }
+
+      }
     </div>
 
-    <button class="settings__close" (click)="closed.emit()">Close</button>
+    <!-- Footer -->
+    <footer class="settings__footer">
+      @if (resetConfirming()) {
+        <span class="settings__reset-prompt">Reset all settings to defaults?</span>
+        <div class="settings__reset-actions">
+          <button class="settings__btn settings__btn--warn" (click)="onResetConfirm()">Yes, reset</button>
+          <button class="settings__btn" (click)="onResetCancel()">Cancel</button>
+        </div>
+      } @else {
+        <button class="settings__btn settings__btn--ghost" (click)="onResetClick()">Reset to Defaults</button>
+        <button class="settings__btn settings__btn--primary" (click)="closed.emit()">Close</button>
+      }
+    </footer>
+
   </div>
 </div>

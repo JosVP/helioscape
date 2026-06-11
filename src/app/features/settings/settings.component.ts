@@ -1,5 +1,11 @@
-import { ChangeDetectionStrategy, Component, inject, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, output, signal } from '@angular/core';
+import type { RenderResolution } from '@app/core/services/settings.service';
 import { SettingsService } from '@app/core/services/settings.service';
+
+interface Tab {
+  id: 'audio' | 'video' | 'accessibility' | 'gameplay';
+  label: string;
+}
 
 @Component({
   selector: 'app-settings',
@@ -13,28 +19,89 @@ export class SettingsComponent {
   readonly settings = inject(SettingsService);
   readonly closed = output<void>();
 
-  onReducedMotion(event: Event): void {
-    const checked = (event.target as HTMLInputElement).checked;
-    this.settings.set('reducedMotion', checked);
+  readonly tabs: readonly Tab[] = [
+    { id: 'audio', label: 'Audio' },
+    { id: 'video', label: 'Video' },
+    { id: 'accessibility', label: 'Accessibility' },
+    { id: 'gameplay', label: 'Gameplay' },
+  ];
+
+  readonly activeTab = signal<Tab['id']>('audio');
+  readonly resetConfirming = signal(false);
+
+  /** Format 0.0–1.0 as percentage string for volume labels. */
+  pct(val: number): string {
+    return `${Math.round(val * 100)}%`;
+  }
+
+  // ─── Audio ────────────────────────────────────────────────────────────────
+
+  onMasterVolume(event: Event): void {
+    this.settings.set('masterVolume', +(event.target as HTMLInputElement).value);
+  }
+
+  onMusicVolume(event: Event): void {
+    this.settings.set('musicVolume', +(event.target as HTMLInputElement).value);
+  }
+
+  onSfxVolume(event: Event): void {
+    this.settings.set('sfxVolume', +(event.target as HTMLInputElement).value);
+  }
+
+  // ─── Video ────────────────────────────────────────────────────────────────
+
+  onFullscreen(event: Event): void {
+    this.settings.set('fullscreen', (event.target as HTMLInputElement).checked);
+  }
+
+  onVSync(event: Event): void {
+    this.settings.set('vsync', (event.target as HTMLInputElement).checked);
+  }
+
+  onRenderResolution(event: Event): void {
+    this.settings.set('renderResolution', (event.target as HTMLSelectElement).value as RenderResolution);
+  }
+
+  // ─── Accessibility ────────────────────────────────────────────────────────
+
+  onTextSize(event: Event): void {
+    this.settings.set('textSizeMultiplier', +(event.target as HTMLSelectElement).value);
   }
 
   onColorblind(event: Event): void {
-    const checked = (event.target as HTMLInputElement).checked;
-    this.settings.set('colorblindMode', checked);
+    this.settings.set('colorblindMode', (event.target as HTMLInputElement).checked);
+  }
+
+  onReducedMotion(event: Event): void {
+    this.settings.set('reducedMotion', (event.target as HTMLInputElement).checked);
   }
 
   onHighContrast(event: Event): void {
-    const checked = (event.target as HTMLInputElement).checked;
-    this.settings.set('highContrast', checked);
+    this.settings.set('highContrast', (event.target as HTMLInputElement).checked);
   }
 
+  // ─── Gameplay ─────────────────────────────────────────────────────────────
+
   onAutosaveInterval(event: Event): void {
-    const value = +(event.target as HTMLInputElement).value;
-    this.settings.set('autosaveIntervalYears', value);
+    this.settings.set('autosaveIntervalYears', +(event.target as HTMLSelectElement).value);
   }
 
   onConfirmIrreversible(event: Event): void {
-    const checked = (event.target as HTMLInputElement).checked;
-    this.settings.set('confirmIrreversible', checked);
+    this.settings.set('confirmIrreversible', (event.target as HTMLInputElement).checked);
+  }
+
+  // ─── Reset ────────────────────────────────────────────────────────────────
+
+  onResetClick(): void {
+    this.resetConfirming.set(true);
+  }
+
+  onResetConfirm(): void {
+    this.settings.resetToDefaults();
+    this.resetConfirming.set(false);
+  }
+
+  onResetCancel(): void {
+    this.resetConfirming.set(false);
   }
 }
