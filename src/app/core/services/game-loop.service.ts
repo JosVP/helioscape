@@ -32,9 +32,7 @@ export class GameLoopService {
   // ---------------------------------------------------------------------------
 
   /** Derived tick interval driven by the GameStateService gameSpeed signal. */
-  readonly tickMs = computed(() =>
-    this.gameState.gameSpeed() === 4 ? 500 : 1000,
-  );
+  readonly tickMs = computed(() => (this.gameState.gameSpeed() === 4 ? 500 : 1000));
 
   constructor() {
     // When gameSpeed changes, restart the interval immediately with the new tickMs.
