@@ -1,4 +1,5 @@
-Create src/app/core/models/planet.model.ts for Helioscape.
+Note: code in this prompt is a suggestion and may be incomplete, incorrect or duplicate. Stay critical.
+Create a plan for src/app/core/models/planet.model.ts for Helioscape.
 
 Define these exported interfaces:
 

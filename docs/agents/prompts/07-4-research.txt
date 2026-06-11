@@ -1,4 +1,5 @@
-Create research.component.ts for Helioscape.
+Note: code in this prompt is a suggestion and may be incomplete, incorrect or duplicate. Stay critical.
+Create a plan for research.component.ts for Helioscape.
 
 Input: planetId = input.required<string>()
 Inject: GameStateService, DataService, ResearchService.

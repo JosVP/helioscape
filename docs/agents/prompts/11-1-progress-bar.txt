@@ -1,4 +1,5 @@
-Create progress-bar.component.ts for Helioscape.
+Note: code in this prompt is a suggestion and may be incomplete, incorrect or duplicate. Stay critical.
+Create a plan for progress-bar.component.ts for Helioscape.
 
 Read AGENTS.md — standalone, OnPush, signals, new control flow.
 

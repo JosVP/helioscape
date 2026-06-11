@@ -1,8 +1,10 @@
 Before implementing Steam integration:
 
 1. Register at https://partner.steamgames.com ($100 one-time fee per app)
-2. Create your app in the Steamworks portal — you'll receive an AppID
-3. Create a steam_appid.txt file in src-tauri/ containing just your AppID:
+2. Note: code in this prompt is a suggestion and may be incomplete, incorrect or duplicate. Stay critical.
+Create a plan for your app in the Steamworks portal — you'll receive an AppID
+3. Note: code in this prompt is a suggestion and may be incomplete, incorrect or duplicate. Stay critical.
+Create a plan for a steam_appid.txt file in src-tauri/ containing just your AppID:
    echo "YOUR_APP_ID" > src-tauri/steam_appid.txt
    Add this file to .gitignore — it's machine-specific.
 

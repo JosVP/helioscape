@@ -1,6 +1,8 @@
-Create src/app/core/services/save.service.ts for Helioscape.
+Note: code in this prompt is a suggestion and may be incomplete, incorrect or duplicate. Stay critical.
+Create a plan for src/app/core/services/save.service.ts for Helioscape.
 
 Read AGENTS.md and ARCHITECTURE.md.
+The code suggestions in this prompt may be wrong/incomplete. Stay critical.
 
 @Injectable({ providedIn: 'root' }) singleton.
 

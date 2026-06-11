@@ -1,4 +1,5 @@
-Create kardashev.pipe.ts for Helioscape.
+Note: code in this prompt is a suggestion and may be incomplete, incorrect or duplicate. Stay critical.
+Create a plan for kardashev.pipe.ts for Helioscape.
 
 @Pipe({ name: 'kardashev', standalone: true, pure: true })
 

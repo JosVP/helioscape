@@ -1,4 +1,5 @@
-Create culture-event-card.component.ts for Helioscape.
+Note: code in this prompt is a suggestion and may be incomplete, incorrect or duplicate. Stay critical.
+Create a plan for culture-event-card.component.ts for Helioscape.
 
 Inject: CultureEventService, DataService, GameStateService.
 

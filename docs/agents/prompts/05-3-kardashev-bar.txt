@@ -1,4 +1,5 @@
-Create kardashev-bar.component.ts for Helioscape.
+Note: code in this prompt is a suggestion and may be incomplete, incorrect or duplicate. Stay critical.
+Create a plan for kardashev-bar.component.ts for Helioscape.
 
 Inject: GameStateService, EventBusService.
 

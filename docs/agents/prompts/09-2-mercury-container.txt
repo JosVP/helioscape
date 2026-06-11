@@ -1,4 +1,5 @@
-Create mercury.component.ts for Helioscape.
+Note: code in this prompt is a suggestion and may be incomplete, incorrect or duplicate. Stay critical.
+Create a plan for mercury.component.ts for Helioscape.
 
 Container for the Mercury view.
 Inject: GameStateService, DataService.

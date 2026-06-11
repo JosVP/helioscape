@@ -1,4 +1,5 @@
-Create game-shell.component.ts for Helioscape.
+Note: code in this prompt is a suggestion and may be incomplete, incorrect or duplicate. Stay critical.
+Create a plan for game-shell.component.ts for Helioscape.
 
 Root in-game layout. All in-game UI lives here.
 
