@@ -1,0 +1,24 @@
+<!-- PLACEHOLDER: Earth avatar icon — swap with real art -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <defs>
+    <clipPath id="circle-earth">
+      <circle cx="24" cy="24" r="23"/>
+    </clipPath>
+  </defs>
+  <!-- Ocean -->
+  <circle cx="24" cy="24" r="23" fill="#2a5fa8"/>
+  <!-- Landmasses -->
+  <g clip-path="url(#circle-earth)">
+    <!-- Americas rough blob -->
+    <polygon points="8,14 14,10 18,16 16,26 12,30 8,28 6,20" fill="#4a8a4a"/>
+    <!-- Eurasia/Africa rough blob -->
+    <polygon points="24,10 34,8 38,14 36,22 30,28 26,32 22,26 20,18" fill="#4a8a4a"/>
+    <!-- Southern land -->
+    <polygon points="28,34 32,32 34,38 28,40 26,38" fill="#4a8a4a"/>
+    <!-- Ice caps -->
+    <ellipse cx="24" cy="3" rx="12" ry="5" fill="#cce0f0" opacity="0.85"/>
+    <ellipse cx="24" cy="45" rx="9" ry="4" fill="#cce0f0" opacity="0.75"/>
+  </g>
+  <!-- Atmosphere rim -->
+  <circle cx="24" cy="24" r="23" fill="none" stroke="#6aadff" stroke-width="1.5" opacity="0.45"/>
+</svg>

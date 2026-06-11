@@ -1,0 +1,28 @@
+<!-- PLACEHOLDER: Mars avatar icon — swap with real art -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <defs>
+    <clipPath id="circle-mars">
+      <circle cx="24" cy="24" r="23"/>
+    </clipPath>
+  </defs>
+  <!-- Base: rust red -->
+  <circle cx="24" cy="24" r="23" fill="#b84a2a"/>
+  <g clip-path="url(#circle-mars)">
+    <!-- Surface variation -->
+    <ellipse cx="18" cy="28" rx="14" ry="10" fill="#9a3a1a" opacity="0.55"/>
+    <ellipse cx="32" cy="18" rx="12" ry="9" fill="#c85a3a" opacity="0.4"/>
+    <!-- Valles Marineris (canyon) -->
+    <line x1="12" y1="26" x2="38" y2="24" stroke="#7a2a10" stroke-width="2" opacity="0.6"/>
+    <!-- Olympus Mons hint -->
+    <ellipse cx="12" cy="20" rx="5" ry="4" fill="#c06030" opacity="0.55"/>
+    <ellipse cx="12" cy="20" rx="2" ry="1.5" fill="#d07040" opacity="0.7"/>
+    <!-- Polar ice cap -->
+    <ellipse cx="24" cy="4" rx="11" ry="5" fill="#f0e8e0" opacity="0.88"/>
+    <ellipse cx="24" cy="4" rx="7" ry="3" fill="#ffffff" opacity="0.5"/>
+    <!-- South polar -->
+    <ellipse cx="24" cy="44" rx="7" ry="3.5" fill="#f0e8e0" opacity="0.6"/>
+    <!-- Terminator shading -->
+    <ellipse cx="38" cy="24" rx="10" ry="22" fill="#000" opacity="0.14"/>
+  </g>
+  <circle cx="24" cy="24" r="23" fill="none" stroke="#e06040" stroke-width="1" opacity="0.25"/>
+</svg>

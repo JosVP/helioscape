@@ -51,6 +51,9 @@ export class GameShellComponent implements OnInit, OnDestroy {
 
   readonly selectedPlanetId = signal<string | null>(null);
   readonly isPauseMenuOpen = signal(false);
+  /** Set to true when the player clicks the Moon row; signals PlanetPanel to open at the Moon/research tab.
+   * TODO: pass as input to PlanetPanelComponent once it has a moonTabActive input (Planet Panel block). */
+  readonly moonTabActive = signal(false);
 
   private audioInitialised = false;
 
@@ -64,6 +67,10 @@ export class GameShellComponent implements OnInit, OnDestroy {
     this.eventBus.planetSelected$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((id) => this.selectedPlanetId.set(id));
+
+    this.eventBus.moonTabRequested$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.moonTabActive.set(true));
   }
 
   ngOnDestroy(): void {

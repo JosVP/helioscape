@@ -10,6 +10,11 @@ export type PlanetId = 'earth' | 'mercury' | 'mars' | 'venus';
  *
  * @validation Use validatePlanetData() before trusting JSON/external sources
  */
+export interface PlanetPhase {
+  /** Human-readable phase name shown in the planets panel (e.g. "Barren", "Thin Atmosphere"). */
+  displayName: string;
+}
+
 export interface PlanetData {
   id: PlanetId;
   displayName: string;
@@ -17,6 +22,8 @@ export interface PlanetData {
   unlockCondition: string | null;
   initialState: PlanetInitialState;
   visual: PlanetVisualData;
+  /** Ordered phase display names, indexed by terraformingPhase. */
+  phases: PlanetPhase[];
 }
 
 /**

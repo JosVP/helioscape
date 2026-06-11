@@ -62,6 +62,9 @@ export class EventBusService {
   /** The active planet selection has changed. Payload: planetId. */
   readonly planetSelected$ = new Subject<string>();
 
+  /** Player clicked the Moon row — open Earth panel at Moon/research tab. */
+  readonly moonTabRequested$ = new Subject<void>();
+
   /** A tech fork choice is being presented to the player. */
   readonly forkPresented$ = new Subject<ForkPresentedEvent>();
 

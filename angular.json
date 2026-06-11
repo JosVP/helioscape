@@ -29,6 +29,11 @@
                 "glob": "**/*",
                 "input": "public/data",
                 "output": "data"
+              },
+              {
+                "glob": "**/*",
+                "input": "public/assets",
+                "output": "assets"
               }
             ],
             "styles": ["src/styles.scss"]

@@ -68,10 +68,15 @@ No inline `// TODO:` comments in code - all tracking happens here to avoid dupli
 ### PlanetsPanelComponent — planet list panel
 
 - **File**: src/app/features/hud/planets-panel/planets-panel.component.ts
-- **Location**: Whole file (currently a stub)
-- **TODO**: Scrollable planet list, planet icons, terraforming progress, selection highlight
-- **Depends on**: GameShellComponent (done)
-- **Prompt block**: TBD (Planets Panel block)
+- **TODO**: ~~Implement per plan `docs/agents/plans/planets-panel.md`~~ — **DONE 2026-06-11**
+
+### GameShellComponent — moonTabActive input to PlanetPanel
+
+- **File**: src/app/features/game-shell/game-shell.component.html
+- **Location**: `<app-planet-panel>` element
+- **TODO**: Add `[moonTabActive]="moonTabActive()"` input binding once PlanetPanelComponent has a `moonTabActive` input. `moonTabActive` signal and `moonTabRequested$` subscription are added to GameShellComponent in the Planets Panel block.
+- **Depends on**: PlanetPanelComponent full implementation (Planet Panel block)
+- **Prompt block**: TBD (Planet Panel block)
 - **Added**: 2026-06-11
 
 ### PlanetPanelComponent — planet detail overlay

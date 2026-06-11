@@ -428,6 +428,7 @@ describe('PlanetData validation', () => {
       lavaSpotUvs: [[0.8, 0.2]],
       lavaHueData: { hotHue: 0, cooledHue: 20 },
     },
+    phases: [{ displayName: 'Barren' }, { displayName: 'Flourishing' }],
   };
 
   it('should accept valid planet data', () => {

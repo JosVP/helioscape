@@ -23,7 +23,11 @@
       "waterSpotUvs": [],
       "greenSpotUvs": [],
       "cityLightsTexture": "/assets/textures/planets/earth_city_lights.png"
-    }
+    },
+    "phases": [
+      { "displayName": "Industrial Age" },
+      { "displayName": "Space Age" }
+    ]
   },
   {
     "id": "mercury",
@@ -45,7 +49,12 @@
       },
       "waterSpotUvs": [],
       "greenSpotUvs": []
-    }
+    },
+    "phases": [
+      { "displayName": "Operational Base" },
+      { "displayName": "Industrial Hub" },
+      { "displayName": "Ring City" }
+    ]
   },
   {
     "id": "mars",
@@ -88,7 +97,14 @@
         [0.42, 0.45]
       ],
       "lavaHueData": { "hotHue": 0.0, "cooledHue": 0.72 }
-    }
+    },
+    "phases": [
+      { "displayName": "Barren" },
+      { "displayName": "Thin Atmosphere" },
+      { "displayName": "Warming" },
+      { "displayName": "Wetting" },
+      { "displayName": "Flourishing" }
+    ]
   },
   {
     "id": "venus",
@@ -117,6 +133,13 @@
         [0.58, 0.52],
         [0.47, 0.67]
       ]
-    }
+    },
+    "phases": [
+      { "displayName": "Hellish" },
+      { "displayName": "Cooling" },
+      { "displayName": "Thinning" },
+      { "displayName": "Temperate" },
+      { "displayName": "Flourishing" }
+    ]
   }
 ]
