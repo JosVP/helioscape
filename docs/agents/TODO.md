@@ -29,6 +29,22 @@ No inline `// TODO:` comments in code - all tracking happens here to avoid dupli
 
 ## Active TODOs
 
+### Routes — TitleScreenComponent stub
+- **File**: src/app/features/title-screen/title-screen.component.ts
+- **Location**: Whole file
+- **TODO**: Replace stub with real TitleScreenComponent implementation
+- **Depends on**: Title Screen feature block
+- **Prompt block**: TBD (Title Screen block)
+- **Added**: 2026-06-11
+
+### Routes — GameShellComponent stub
+- **File**: src/app/features/game-shell/game-shell.component.ts
+- **Location**: Whole file
+- **TODO**: Replace stub with real GameShellComponent implementation
+- **Depends on**: Game Shell feature block
+- **Prompt block**: TBD (Game Shell block)
+- **Added**: 2026-06-11
+
 ### SettingsService — Audio Volume Integration
 
 - **File**: src/app/core/services/settings.service.ts
