@@ -30,6 +30,7 @@ No inline `// TODO:` comments in code - all tracking happens here to avoid dupli
 ## Active TODOs
 
 ### Routes — TitleScreenComponent stub
+
 - **File**: src/app/features/title-screen/title-screen.component.ts
 - **Location**: Whole file
 - **TODO**: Replace stub with real TitleScreenComponent implementation
@@ -38,6 +39,7 @@ No inline `// TODO:` comments in code - all tracking happens here to avoid dupli
 - **Added**: 2026-06-11
 
 ### Routes — GameShellComponent stub
+
 - **File**: src/app/features/game-shell/game-shell.component.ts
 - **Location**: Whole file
 - **TODO**: Replace stub with real GameShellComponent implementation
