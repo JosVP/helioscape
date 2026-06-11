@@ -28,7 +28,9 @@
   height: 6px;
   background: var(--color-bg-elevated);
   border-radius: var(--radius-sm);
-  overflow: hidden;
+  // overflow must be visible so marker dots (which extend beyond track height) are not clipped.
+  overflow: visible;
+  position: relative;
 }
 
 .kardashev-bar__fill {
@@ -42,6 +44,28 @@
   border-radius: var(--radius-sm);
   // Tick-driven value — always linear, always 1s to match tick interval.
   transition: width 1s linear;
+}
+
+.kardashev-bar__marker {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-text-secondary);
+  z-index: 1;
+
+  &.milestone-pulse {
+    background: #fff8e7;
+    animation: marker-pulse 0.6s ease-out;
+  }
+}
+
+@keyframes marker-pulse {
+  0%   { transform: translate(-50%, -50%) scale(1);   box-shadow: 0 0 0 0 rgba(255, 248, 231, 0.8); }
+  40%  { transform: translate(-50%, -50%) scale(1.8); box-shadow: 0 0 6px 4px rgba(255, 248, 231, 0.6); }
+  100% { transform: translate(-50%, -50%) scale(1);   box-shadow: 0 0 0 0 rgba(255, 248, 231, 0); }
 }
 
 .kardashev-bar__level {

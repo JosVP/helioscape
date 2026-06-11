@@ -1,5 +1,6 @@
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { signal } from '@angular/core';
+import { Subject } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { HudComponent } from './hud.component';
 import { GameStateService } from '@app/core/services/game-state.service';
@@ -33,7 +34,9 @@ describe('HudComponent', () => {
     autosaveCompleted: autosaveSignal.asReadonly(),
   };
 
-  const mockEventBus = {};
+  const mockEventBus = {
+    milestoneReached$: new Subject<string>(),
+  };
 
   function setup(): ComponentFixture<HudComponent> {
     TestBed.configureTestingModule({

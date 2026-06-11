@@ -2,6 +2,14 @@
   <span class="kardashev-bar__label">Kardashev</span>
   <div class="kardashev-bar__track">
     <div class="kardashev-bar__fill"></div>
+    @for (marker of MARKERS; track marker.id) {
+      <div
+        class="kardashev-bar__marker"
+        [class.milestone-pulse]="pulsingMarker() === marker.id"
+        [style.left]="marker.position + '%'"
+        [title]="marker.label"
+      ></div>
+    }
   </div>
   <span class="kardashev-bar__level">{{ levelDisplay() }}</span>
 </div>
