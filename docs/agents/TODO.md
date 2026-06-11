@@ -119,6 +119,15 @@ No inline `// TODO:` comments in code - all tracking happens here to avoid dupli
 - **Prompt block**: TBD (audio system block)
 - **Added**: 2026-06-11
 
+### MercuryBuildService — AudioService on build complete
+
+- **File**: src/app/core/systems/mercury-build.service.ts
+- **Location**: In `_completeBuild()` method, after `eventBus.mercuryBuildCompleted$.next()`
+- **TODO**: Play a build-complete sound (milestone/achievement sting) via AudioService when an orbital component finishes.
+- **Depends on**: AudioService (not yet created)
+- **Prompt block**: TBD (audio system block)
+- **Added**: 2026-06-11
+
 ### TechTreeService — TerraformingService integration
 
 - **File**: src/app/core/systems/tech-tree.service.ts

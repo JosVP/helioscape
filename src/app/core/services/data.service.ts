@@ -55,6 +55,23 @@ export interface MercuryBuilding {
   effects: MercuryBuildingEffect[];
 }
 
+/**
+ * An orbital component that can be queued for construction in the Mercury build queue.
+ * Separate from grid buildings (MercuryBuilding) — these ship to other planets.
+ */
+export interface MercuryComponent {
+  id: string;
+  displayName: string;
+  description: string;
+  buildTimeYears: number;
+  cost: ResourceStore;
+  /** A completedTech id or earthFlag key, or null if always available. */
+  unlockCondition: string | null;
+  /** 1 for singleton components (e.g. ODN), null for stackable. */
+  maxInstances: number | null;
+  targetEffect: 'odn' | 'precipitationEngine' | 'atmosphericCatalystShip' | 'bioreactor';
+}
+
 export interface BioPhaseDef {
   id: string;
   displayName: string;
@@ -89,6 +106,7 @@ export class DataService {
   private milestones: KardashevMilestone[] = [];
   private resources: ResourceData[] = [];
   private mercuryBuildings: MercuryBuilding[] = [];
+  private mercuryComponents: MercuryComponent[] = [];
   private bioPhases: Record<string, BioPhaseDef[]> = {};
 
   /**
@@ -106,6 +124,7 @@ export class DataService {
         resources,
         mercuryBuildings,
         bioPhases,
+        mercuryComponents,
       ] = await Promise.all([
         this.fetchJson<PlanetData[]>('/data/planets.json'),
         this.fetchJson<TechNode[]>('/data/tech-tree.json'),
@@ -115,6 +134,7 @@ export class DataService {
         this.fetchJson<ResourceData[]>('/data/resources.json'),
         this.fetchJson<MercuryBuilding[]>('/data/mercury-buildings.json'),
         this.fetchJson<Record<string, BioPhaseDef[]>>('/data/bio-phases.json'),
+        this.fetchJson<MercuryComponent[]>('/data/mercury-components.json'),
       ]);
 
       this.planets = planetsArray.reduce(
@@ -131,6 +151,7 @@ export class DataService {
       this.resources = resources;
       this.mercuryBuildings = mercuryBuildings;
       this.bioPhases = bioPhases;
+      this.mercuryComponents = mercuryComponents;
 
       console.log('DataService: all game data loaded');
     } catch (error) {
@@ -229,6 +250,18 @@ export class DataService {
 
   getAllMercuryBuildings(): MercuryBuilding[] {
     return this.mercuryBuildings;
+  }
+
+  // -------------------------------------------------------------------------
+  // Mercury-component accessors
+  // -------------------------------------------------------------------------
+
+  getMercuryComponent(id: string): MercuryComponent | undefined {
+    return this.mercuryComponents.find((c) => c.id === id);
+  }
+
+  getAllMercuryComponents(): MercuryComponent[] {
+    return this.mercuryComponents;
   }
 
   // -------------------------------------------------------------------------

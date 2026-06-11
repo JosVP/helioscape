@@ -463,6 +463,84 @@ export class GameStateService {
     );
   }
 
+  // -------------------------------------------------------------------------
+  // Mercury orbital component queue mutations
+  // -------------------------------------------------------------------------
+
+  /** Appends an orbital component entry to the Mercury build queue. */
+  enqueueMercuryComponent(entry: MercuryQueueEntry): void {
+    this._mercuryBuildQueue.update((q) => [...q, entry]);
+  }
+
+  /**
+   * Increments progressYears of the first queue entry by 1.
+   * No-op if the queue is empty.
+   */
+  advanceMercuryBuildProgress(): void {
+    this._mercuryBuildQueue.update((q) => {
+      if (q.length === 0) return q;
+      const [first, ...rest] = q;
+      return [{ ...first, progressYears: first.progressYears + 1 }, ...rest];
+    });
+  }
+
+  /**
+   * Removes the first entry from the Mercury build queue (the completed build).
+   * Returns the removed entry, or undefined if the queue is empty.
+   */
+  shiftMercuryBuildQueue(): MercuryQueueEntry | undefined {
+    let shifted: MercuryQueueEntry | undefined;
+    this._mercuryBuildQueue.update((q) => {
+      if (q.length === 0) return q;
+      const [first, ...rest] = q;
+      shifted = first;
+      return rest;
+    });
+    return shifted;
+  }
+
+  /**
+   * Applies a completed orbital component's arrival effect to a planet's PlanetBioState.
+   * Silent no-op for an unknown planetId or unrecognised componentId.
+   */
+  applyComponentArrival(planetId: string, componentId: string): void {
+    this._bioPhases.update((phases) => {
+      const planet = phases[planetId];
+      if (!planet) return phases;
+
+      switch (componentId) {
+        case 'odn':
+          return { ...phases, [planetId]: { ...planet, odnBuilt: true } };
+        case 'precipitationEngine':
+          return {
+            ...phases,
+            [planetId]: {
+              ...planet,
+              precipitationEnginesBuilt: planet.precipitationEnginesBuilt + 1,
+            },
+          };
+        case 'atmosphericCatalystShip':
+          return {
+            ...phases,
+            [planetId]: {
+              ...planet,
+              atmosphericCatalystShipsBuilt: planet.atmosphericCatalystShipsBuilt + 1,
+            },
+          };
+        case 'bioreactor':
+          return {
+            ...phases,
+            [planetId]: {
+              ...planet,
+              bioreactorBatchesActive: planet.bioreactorBatchesActive + 1,
+            },
+          };
+        default:
+          return phases;
+      }
+    });
+  }
+
   setDysonState(panelCount: number, coveragePercent: number, energyWatts: number): void {
     this._dysonPanelCount.set(panelCount);
     this._dysonCoveragePercent.set(coveragePercent);

@@ -1,0 +1,42 @@
+[
+  {
+    "id": "odn",
+    "displayName": "Orbital Deployment Network",
+    "description": "A network of orbital relay stations and delivery drones that enables efficient delivery of terraforming payloads to planetary surfaces. Required before precipitation engines or catalyst ships can operate.",
+    "buildTimeYears": 40,
+    "cost": { "commonOre": 0, "rareMetals": 60, "polarVolatiles": 20 },
+    "unlockCondition": null,
+    "maxInstances": 1,
+    "targetEffect": "odn"
+  },
+  {
+    "id": "precipitationEngine",
+    "displayName": "Precipitation Engine",
+    "description": "A large orbital device that seeds cloud formation and precipitation cycles on a target planet, accelerating hydrological terraforming. Each additional unit increases the rate of atmospheric change.",
+    "buildTimeYears": 30,
+    "cost": { "commonOre": 20, "rareMetals": 30, "polarVolatiles": 10 },
+    "unlockCondition": null,
+    "maxInstances": null,
+    "targetEffect": "precipitationEngine"
+  },
+  {
+    "id": "atmosphericCatalystShip",
+    "displayName": "Atmospheric Catalyst Ship",
+    "description": "A specialised vessel that releases catalytic agents into a planet's upper atmosphere, dramatically accelerating chemical reactions needed for breathable air. Multiple ships stack their effect.",
+    "buildTimeYears": 35,
+    "cost": { "commonOre": 15, "rareMetals": 40, "polarVolatiles": 15 },
+    "unlockCondition": null,
+    "maxInstances": null,
+    "targetEffect": "atmosphericCatalystShip"
+  },
+  {
+    "id": "bioreactor",
+    "displayName": "Orbital Bioreactor",
+    "description": "A pressurised orbital facility that mass-produces extremophile seed packages and delivers them to the target planet in timed batches. Each active bioreactor contributes one batch to the bio-phase system.",
+    "buildTimeYears": 25,
+    "cost": { "commonOre": 30, "rareMetals": 20, "polarVolatiles": 0 },
+    "unlockCondition": null,
+    "maxInstances": null,
+    "targetEffect": "bioreactor"
+  }
+]
