@@ -1,0 +1,19 @@
+<app-hud />
+
+<app-planets-panel [selectedPlanetId]="selectedPlanetId()" />
+
+<app-orrery />
+
+<app-planet-panel
+  class="planet-panel-overlay"
+  [class.is-open]="selectedPlanetId() !== null"
+  [planetId]="selectedPlanetId()"
+/>
+
+<app-culture-event-card />
+<app-culture-event-toast />
+
+<app-pause-menu
+  [isOpen]="isPauseMenuOpen()"
+  (closed)="isPauseMenuOpen.set(false)"
+/>

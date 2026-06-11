@@ -56,13 +56,59 @@ No inline `// TODO:` comments in code - all tracking happens here to avoid dupli
 - **Prompt block**: TBD (culture event choices block)
 - **Added**: 2026-06-11
 
-### Routes — GameShellComponent stub
+### OrreryComponent — Three.js orrery implementation
 
-- **File**: src/app/features/game-shell/game-shell.component.ts
-- **Location**: Whole file
-- **TODO**: Replace stub with real GameShellComponent implementation
-- **Depends on**: Game Shell feature block
-- **Prompt block**: TBD (Game Shell block)
+- **File**: src/app/features/orrery/orrery.component.ts
+- **Location**: Whole file (currently a stub)
+- **TODO**: Implement Three.js scene (sun, planet meshes, orbit rings), RAF loop, raycasting for planet selection, reads gameYear/planets signals
+- **Depends on**: GameShellComponent (done)
+- **Prompt block**: TBD (Orrery block)
+- **Added**: 2026-06-11
+
+### HudComponent — full HUD implementation
+
+- **File**: src/app/features/hud/hud.component.ts
+- **Location**: Whole file (currently a stub)
+- **TODO**: Game year display, speed controls (1×/4×), Kardashev bar, autosave indicator
+- **Depends on**: GameShellComponent (done)
+- **Prompt block**: TBD (HUD block)
+- **Added**: 2026-06-11
+
+### PlanetsPanelComponent — planet list panel
+
+- **File**: src/app/features/hud/planets-panel/planets-panel.component.ts
+- **Location**: Whole file (currently a stub)
+- **TODO**: Scrollable planet list, planet icons, terraforming progress, selection highlight
+- **Depends on**: GameShellComponent (done)
+- **Prompt block**: TBD (Planets Panel block)
+- **Added**: 2026-06-11
+
+### PlanetPanelComponent — planet detail overlay
+
+- **File**: src/app/features/planet-panel/planet-panel.component.ts
+- **Location**: Whole file (currently a stub)
+- **TODO**: Tech tree, research tracks, bio-phase display, vignette. Receives planetId input.
+- **Depends on**: GameShellComponent (done)
+- **Prompt block**: TBD (Planet Panel block)
+- **Added**: 2026-06-11
+
+### CultureEventCardComponent / CultureEventToastComponent — culture event UI
+
+- **File**: src/app/features/culture-events/culture-event-card/culture-event-card.component.ts
+- **File**: src/app/features/culture-events/culture-event-toast/culture-event-toast.component.ts
+- **Location**: Both files (currently stubs)
+- **TODO**: Card with event text, portrait, choice buttons; Toast for non-priority events
+- **Depends on**: GameShellComponent (done), CultureEventService
+- **Prompt block**: TBD (Culture Events UI block)
+- **Added**: 2026-06-11
+
+### PauseMenuComponent — pause menu overlay
+
+- **File**: src/app/features/pause-menu/pause-menu.component.ts
+- **Location**: Whole file (currently a stub)
+- **TODO**: Resume / Save / Load / Settings / Quit. Receives isOpen input, emits closed output.
+- **Depends on**: GameShellComponent (done)
+- **Prompt block**: TBD (Pause Menu block)
 - **Added**: 2026-06-11
 
 ### SettingsService — Audio Volume Integration
@@ -160,9 +206,9 @@ No inline `// TODO:` comments in code - all tracking happens here to avoid dupli
 ### KardashevService — eager instantiation in GameShellComponent
 
 - **File**: src/app/features/game-shell/game-shell.component.ts
-- **Location**: Constructor / `inject()` calls
-- **TODO**: Add `inject(KardashevService)` so the service's `effect()` is active during the game
-- **Depends on**: GameShellComponent (Block 14)
+- **Location**: Inject calls (GameShellComponent now implemented)
+- **TODO**: Add `inject(KardashevService)` so the service's `effect()` is active during the game session
+- **Depends on**: Nothing (GameShellComponent is now implemented)
 - **Prompt block**: 14
 - **Added**: 2026-06-11
 
@@ -210,3 +256,11 @@ _(Moved here when implemented, kept for history)_
 - **Notes**: `_applyEffect` now delegates `apply_terraforming_choice` to `terraformingService.applyChoice()`.
   TerraformingService handles validation, state write, special-case side effects (polar detonation,
   Europa impact), and `terraformingChoiceApplied$` emission.
+
+### ✅ Routes — GameShellComponent stub
+- **Completed**: 2026-06-11
+- **Implemented in**: `src/app/features/game-shell/game-shell.component.ts` (Prompt 05-1)
+- **Notes**: Full GameShellComponent with CSS Grid layout, `selectedPlanetId`/`isPauseMenuOpen` signals,
+  EventBus `planetSelected$` subscription, `document:keydown.escape` handler, AudioService one-time init
+  on first interaction, GameLoopService start/stop on init/destroy. Child components (orrery, HUD,
+  panels, culture events, pause menu) created as stubs — see Active TODOs for their full implementations.

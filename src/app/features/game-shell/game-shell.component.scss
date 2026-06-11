@@ -1,0 +1,58 @@
+:host {
+  display: grid;
+  grid-template:
+    'hud     hud'    auto
+    'planets orrery' 1fr
+    / 220px  1fr;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background: var(--color-bg-base);
+  overflow: hidden;
+}
+
+app-hud {
+  grid-area: hud;
+  z-index: 10;
+}
+
+app-planets-panel {
+  grid-area: planets;
+  z-index: 5;
+  overflow: hidden;
+}
+
+app-orrery {
+  grid-area: orrery;
+  position: relative;
+  overflow: hidden;
+}
+
+// Planet panel slides in from the right as an absolute overlay over the orrery area.
+// Always in the DOM so the CSS transform transition works correctly.
+.planet-panel-overlay {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 420px;
+  z-index: 15;
+  transform: translateX(100%);
+  transition: var(--transition-panel);
+
+  &.is-open {
+    transform: translateX(0);
+  }
+}
+
+app-culture-event-card,
+app-culture-event-toast {
+  position: absolute;
+  z-index: 20;
+}
+
+app-pause-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+}
