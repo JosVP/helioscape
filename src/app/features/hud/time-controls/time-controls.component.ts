@@ -14,43 +14,7 @@ import { GameStateService } from '@app/core/services/game-state.service';
   selector: 'app-time-controls',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <div class="time-controls">
-      <button
-        class="time-controls__btn time-controls__btn--pause"
-        [class.time-controls__btn--active]="isPaused()"
-        (click)="togglePause()"
-        [attr.aria-label]="isPaused() ? 'Resume game' : 'Pause game'"
-        [attr.aria-pressed]="isPaused()"
-      >
-        @if (isPaused()) {
-          ▶
-        } @else {
-          ⏸
-        }
-      </button>
-
-      <button
-        class="time-controls__btn time-controls__btn--speed"
-        [class.time-controls__btn--active]="gameSpeed() === 1"
-        (click)="setSpeed(1)"
-        aria-label="Normal speed (1×)"
-      >
-        1×
-      </button>
-
-      @if (!isFirstPlaythrough()) {
-        <button
-          class="time-controls__btn time-controls__btn--speed"
-          [class.time-controls__btn--active]="gameSpeed() === 4"
-          (click)="setSpeed(4)"
-          aria-label="Fast speed (4×)"
-        >
-          4×
-        </button>
-      }
-    </div>
-  `,
+  templateUrl: './time-controls.component.html',
   styleUrl: './time-controls.component.scss',
 })
 export class TimeControlsComponent {

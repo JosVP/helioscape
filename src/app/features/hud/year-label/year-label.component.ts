@@ -12,7 +12,7 @@ import { GameYearPipe } from '@app/shared/pipes/game-year.pipe';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [GameYearPipe],
-  template: `<span class="year-label">{{ gameState.gameYear() | gameYear }}</span>`,
+  templateUrl: './year-label.component.html',
   styleUrl: './year-label.component.scss',
 })
 export class YearLabelComponent {

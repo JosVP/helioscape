@@ -21,15 +21,7 @@ import { clamp } from '@app/shared/utils/math.utils';
   selector: 'app-kardashev-bar',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <div class="kardashev-bar">
-      <span class="kardashev-bar__label">Kardashev</span>
-      <div class="kardashev-bar__track">
-        <div class="kardashev-bar__fill"></div>
-      </div>
-      <span class="kardashev-bar__level">{{ levelDisplay() }}</span>
-    </div>
-  `,
+  templateUrl: './kardashev-bar.component.html',
   styleUrl: './kardashev-bar.component.scss',
 })
 export class KardashevBarComponent implements OnInit {

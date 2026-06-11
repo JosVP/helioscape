@@ -43,6 +43,8 @@ After a plan exists (from `lead-developer`), or for a small, well-understood cha
 3. Follow the non-negotiables every time:
    - Signals only; state in `GameStateService`; logic in system services, never components.
    - OnPush, `track` in `@for`, `inject()`, `input()`/`output()`, strict types (no `any`).
+   - **Always use `templateUrl`** pointing to a co-located `.component.html` file — never inline `template`.
+   - **Always use `styleUrl`** pointing to a co-located `.component.scss` file — never inline `styles`.
    - All content from `src/data/*.json` — never hardcode game content.
    - Clean up RAF / subscriptions / listeners / Three.js resources on destroy.
    - Tauri only via `SaveService`/`SettingsService`, guarded for browser dev.
