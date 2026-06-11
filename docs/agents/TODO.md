@@ -29,6 +29,33 @@ No inline `// TODO:` comments in code - all tracking happens here to avoid dupli
 
 ## Active TODOs
 
+### CultureEventService — AudioService on event display
+
+- **File**: src/app/core/systems/culture-event.service.ts
+- **Location**: In `_displayEvent()` method
+- **TODO**: Play a culture-event notification sound via AudioService when an event is displayed
+- **Depends on**: AudioService (not yet created)
+- **Prompt block**: TBD (audio system block)
+- **Added**: 2026-06-11
+
+### CultureEventService — SaveService resumeQueueAfterLoad wiring
+
+- **File**: src/app/core/services/save.service.ts (or GameShellComponent)
+- **Location**: After `hydrate()` call
+- **TODO**: Call `cultureEventService.resumeQueueAfterLoad()` after save data is hydrated into GameStateService, so any queued events from the save are resumed
+- **Depends on**: CultureEventService, SaveService hydrate flow
+- **Prompt block**: TBD (save/load block)
+- **Added**: 2026-06-11
+
+### CultureEventService — Choice effects application
+
+- **File**: src/app/core/systems/culture-event.service.ts
+- **Location**: New `applyChoice(eventId, choiceId)` public method
+- **TODO**: Apply `CultureEventChoice.effects[]` (colonist tag increments, tech unlocks, etc.) when a choice is selected. Currently all choices in JSON have empty effects arrays.
+- **Depends on**: Choice effects being populated in culture-events.json + TechTreeService integration
+- **Prompt block**: TBD (culture event choices block)
+- **Added**: 2026-06-11
+
 ### Routes — TitleScreenComponent stub
 
 - **File**: src/app/features/title-screen/title-screen.component.ts
