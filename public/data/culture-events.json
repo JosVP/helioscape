@@ -178,7 +178,11 @@
     "portrait": "/assets/svg/portraits/ce_venus_cooling_begins.svg",
     "choices": [],
     "tags": [],
-    "trigger": { "type": "terraforming_choice_applied", "planet": "venus", "choiceId": "venus_orbital_shade_mirror" },
+    "trigger": {
+      "type": "terraforming_choice_applied",
+      "planet": "venus",
+      "choiceId": "venus_orbital_shade_mirror"
+    },
     "priority": false
   },
   {
@@ -188,7 +192,11 @@
     "portrait": "/assets/svg/portraits/ce_mars_polar_detonation.svg",
     "choices": [],
     "tags": ["architect"],
-    "trigger": { "type": "terraforming_choice_applied", "planet": "mars", "choiceId": "mars_polar_detonation" },
+    "trigger": {
+      "type": "terraforming_choice_applied",
+      "planet": "mars",
+      "choiceId": "mars_polar_detonation"
+    },
     "priority": false
   },
   {

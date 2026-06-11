@@ -5,9 +5,7 @@
     "description": "We have learned to draw on our star at a planetary scale, and the future now feels like something we can build rather than merely survive.",
     "conditions": ["deuterium_fusion_online", "dyson_15_percent"],
     "approximateYearRange": "Year 80-120",
-    "effects": [
-      { "type": "emit_event", "eventId": "ce_type1_reached" }
-    ]
+    "effects": [{ "type": "emit_event", "eventId": "ce_type1_reached" }]
   },
   {
     "id": "first_era_complete",
@@ -15,9 +13,7 @@
     "description": "We are no longer a species clinging to one wounded cradle, but a civilisation that has made multiple worlds habitable and kept going.",
     "conditions": ["two_habitable_worlds", "first_self_sustaining_colony", "dyson_50_percent"],
     "approximateYearRange": "Year 400-700",
-    "effects": [
-      { "type": "emit_event", "eventId": "ce_first_era_complete" }
-    ]
+    "effects": [{ "type": "emit_event", "eventId": "ce_first_era_complete" }]
   },
   {
     "id": "type_2",
@@ -25,9 +21,7 @@
     "description": "We have wrapped our industry around the Sun so completely that the scale of our work is no longer planetary, but stellar.",
     "conditions": ["dyson_100_percent"],
     "approximateYearRange": "Year 800-1200",
-    "effects": [
-      { "type": "emit_event", "eventId": "ce_type2_reached" }
-    ]
+    "effects": [{ "type": "emit_event", "eventId": "ce_type2_reached" }]
   },
   {
     "id": "type_3_gesture",
@@ -35,8 +29,6 @@
     "description": "We have not become a galactic civilisation, but we have finally sent a living promise beyond the Sun and into the dark between stars.",
     "conditions": ["interstellar_seed_ship_launched"],
     "approximateYearRange": "Year 1000-1500+",
-    "effects": [
-      { "type": "emit_event", "eventId": "ce_seed_ship_launched" }
-    ]
+    "effects": [{ "type": "emit_event", "eventId": "ce_seed_ship_launched" }]
   }
 ]

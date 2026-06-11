@@ -7,9 +7,7 @@
     "spilloverPrerequisites": [],
     "rpCost": 0,
     "durationYears": 0,
-    "effects": [
-      { "type": "emit_event", "eventId": "ce_mercury_landing" }
-    ]
+    "effects": [{ "type": "emit_event", "eventId": "ce_mercury_landing" }]
   },
   {
     "id": "earth_advanced_renewables",
@@ -59,9 +57,7 @@
     "spilloverPrerequisites": [],
     "rpCost": 50,
     "durationYears": 40,
-    "effects": [
-      { "type": "emit_event", "eventId": "ce_fusion_theory_complete" }
-    ]
+    "effects": [{ "type": "emit_event", "eventId": "ce_fusion_theory_complete" }]
   },
   {
     "id": "earth_co2_drawdown",
@@ -222,7 +218,12 @@
     "rpCost": 0,
     "durationYears": 0,
     "effects": [
-      { "type": "apply_terraforming_choice", "planet": "mercury", "choiceId": "phase_0", "permanent": true }
+      {
+        "type": "apply_terraforming_choice",
+        "planet": "mercury",
+        "choiceId": "phase_0",
+        "permanent": true
+      }
     ]
   },
   {
@@ -269,12 +270,22 @@
     "id": "mercury_phase_1_complete",
     "planet": "mercury",
     "displayName": "Mercury Phase 1 Complete",
-    "prerequisites": ["mercury_refinery", "mercury_fabricator", "mercury_solar_array_expansion", "mercury_rare_metals_mining"],
+    "prerequisites": [
+      "mercury_refinery",
+      "mercury_fabricator",
+      "mercury_solar_array_expansion",
+      "mercury_rare_metals_mining"
+    ],
     "spilloverPrerequisites": [],
     "rpCost": 0,
     "durationYears": 0,
     "effects": [
-      { "type": "apply_terraforming_choice", "planet": "mercury", "choiceId": "phase_1", "permanent": true }
+      {
+        "type": "apply_terraforming_choice",
+        "planet": "mercury",
+        "choiceId": "phase_1",
+        "permanent": true
+      }
     ]
   },
   {
@@ -311,12 +322,21 @@
     "id": "mercury_phase_2_complete",
     "planet": "mercury",
     "displayName": "Mercury Phase 2 Complete",
-    "prerequisites": ["mercury_mass_driver", "mercury_dyson_panel_production", "mercury_polar_volatiles_extraction"],
+    "prerequisites": [
+      "mercury_mass_driver",
+      "mercury_dyson_panel_production",
+      "mercury_polar_volatiles_extraction"
+    ],
     "spilloverPrerequisites": [],
     "rpCost": 0,
     "durationYears": 0,
     "effects": [
-      { "type": "apply_terraforming_choice", "planet": "mercury", "choiceId": "phase_2", "permanent": true }
+      {
+        "type": "apply_terraforming_choice",
+        "planet": "mercury",
+        "choiceId": "phase_2",
+        "permanent": true
+      }
     ]
   },
   {
@@ -328,7 +348,12 @@
     "rpCost": 60,
     "durationYears": 20,
     "effects": [
-      { "type": "apply_terraforming_choice", "planet": "mars", "choiceId": "mars_polar_detonation", "permanent": true },
+      {
+        "type": "apply_terraforming_choice",
+        "planet": "mars",
+        "choiceId": "mars_polar_detonation",
+        "permanent": true
+      },
       { "type": "tag_decision", "tag": "architect" },
       { "type": "emit_event", "eventId": "ce_mars_polar_detonation" }
     ]
@@ -342,7 +367,12 @@
     "rpCost": 50,
     "durationYears": 35,
     "effects": [
-      { "type": "apply_terraforming_choice", "planet": "mars", "choiceId": "mars_orbital_mirrors", "permanent": false },
+      {
+        "type": "apply_terraforming_choice",
+        "planet": "mars",
+        "choiceId": "mars_orbital_mirrors",
+        "permanent": false
+      },
       { "type": "tag_decision", "tag": "architect" }
     ]
   },
@@ -355,7 +385,12 @@
     "rpCost": 50,
     "durationYears": 40,
     "effects": [
-      { "type": "apply_terraforming_choice", "planet": "mars", "choiceId": "mars_magnetic_umbrella", "permanent": false },
+      {
+        "type": "apply_terraforming_choice",
+        "planet": "mars",
+        "choiceId": "mars_magnetic_umbrella",
+        "permanent": false
+      },
       { "type": "tag_decision", "tag": "naturalist" }
     ]
   },
@@ -368,7 +403,12 @@
     "rpCost": 30,
     "durationYears": 20,
     "effects": [
-      { "type": "apply_terraforming_choice", "planet": "mars", "choiceId": "mars_aerogel_domes", "permanent": false }
+      {
+        "type": "apply_terraforming_choice",
+        "planet": "mars",
+        "choiceId": "mars_aerogel_domes",
+        "permanent": false
+      }
     ]
   },
   {
@@ -380,7 +420,12 @@
     "rpCost": 60,
     "durationYears": 35,
     "effects": [
-      { "type": "apply_terraforming_choice", "planet": "mars", "choiceId": "mars_comet_water_delivery", "permanent": false }
+      {
+        "type": "apply_terraforming_choice",
+        "planet": "mars",
+        "choiceId": "mars_comet_water_delivery",
+        "permanent": false
+      }
     ]
   },
   {
@@ -393,7 +438,11 @@
     "durationYears": 0,
     "effects": [
       { "type": "emit_event", "eventId": "ce_mars_first_liquid_water" },
-      { "type": "spillover_unlock", "targetPlanet": "moon", "targetTech": "moon_organism_library_t2" }
+      {
+        "type": "spillover_unlock",
+        "targetPlanet": "moon",
+        "targetTech": "moon_organism_library_t2"
+      }
     ]
   },
   {
@@ -405,7 +454,12 @@
     "rpCost": 50,
     "durationYears": 30,
     "effects": [
-      { "type": "apply_terraforming_choice", "planet": "mars", "choiceId": "mars_biological_seeding", "permanent": false },
+      {
+        "type": "apply_terraforming_choice",
+        "planet": "mars",
+        "choiceId": "mars_biological_seeding",
+        "permanent": false
+      },
       { "type": "tag_decision", "tag": "naturalist" }
     ]
   },
@@ -418,7 +472,11 @@
     "rpCost": 0,
     "durationYears": 0,
     "effects": [
-      { "type": "spillover_unlock", "targetPlanet": "earth", "targetTech": "earth_soil_restoration" }
+      {
+        "type": "spillover_unlock",
+        "targetPlanet": "earth",
+        "targetTech": "earth_soil_restoration"
+      }
     ]
   },
   {
@@ -442,7 +500,12 @@
     "rpCost": 60,
     "durationYears": 40,
     "effects": [
-      { "type": "apply_terraforming_choice", "planet": "venus", "choiceId": "venus_orbital_shade_mirror", "permanent": false },
+      {
+        "type": "apply_terraforming_choice",
+        "planet": "venus",
+        "choiceId": "venus_orbital_shade_mirror",
+        "permanent": false
+      },
       { "type": "tag_decision", "tag": "architect" },
       { "type": "emit_event", "eventId": "ce_venus_cooling_begins" }
     ]
@@ -456,7 +519,12 @@
     "rpCost": 50,
     "durationYears": 35,
     "effects": [
-      { "type": "apply_terraforming_choice", "planet": "venus", "choiceId": "venus_carbonate_sequestration", "permanent": false },
+      {
+        "type": "apply_terraforming_choice",
+        "planet": "venus",
+        "choiceId": "venus_carbonate_sequestration",
+        "permanent": false
+      },
       { "type": "tag_decision", "tag": "naturalist" }
     ]
   },
@@ -470,7 +538,11 @@
     "durationYears": 0,
     "effects": [
       { "type": "spillover_unlock", "targetPlanet": "earth", "targetTech": "earth_co2_drawdown" },
-      { "type": "spillover_unlock", "targetPlanet": "earth", "targetTech": "earth_ocean_acidification_reversal" }
+      {
+        "type": "spillover_unlock",
+        "targetPlanet": "earth",
+        "targetTech": "earth_ocean_acidification_reversal"
+      }
     ]
   },
   {
@@ -482,7 +554,12 @@
     "rpCost": 80,
     "durationYears": 50,
     "effects": [
-      { "type": "apply_terraforming_choice", "planet": "venus", "choiceId": "venus_europa_impact", "permanent": true },
+      {
+        "type": "apply_terraforming_choice",
+        "planet": "venus",
+        "choiceId": "venus_europa_impact",
+        "permanent": true
+      },
       { "type": "tag_decision", "tag": "architect" }
     ]
   },
@@ -495,7 +572,12 @@
     "rpCost": 40,
     "durationYears": 25,
     "effects": [
-      { "type": "apply_terraforming_choice", "planet": "venus", "choiceId": "venus_sky_cities", "permanent": false },
+      {
+        "type": "apply_terraforming_choice",
+        "planet": "venus",
+        "choiceId": "venus_sky_cities",
+        "permanent": false
+      },
       { "type": "tag_decision", "tag": "naturalist" }
     ]
   },
@@ -508,7 +590,12 @@
     "rpCost": 50,
     "durationYears": 30,
     "effects": [
-      { "type": "apply_terraforming_choice", "planet": "venus", "choiceId": "venus_sky_city_descent", "permanent": false },
+      {
+        "type": "apply_terraforming_choice",
+        "planet": "venus",
+        "choiceId": "venus_sky_city_descent",
+        "permanent": false
+      },
       { "type": "tag_decision", "tag": "architect" }
     ]
   }

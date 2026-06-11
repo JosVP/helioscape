@@ -110,7 +110,14 @@ const fakeMilestones = [
 ];
 
 const fakeResources = [
-  { id: 'common_ore', displayName: 'Common Ore', description: 'Iron', rarity: 'common', baseAccumulationRate: 10, color: '#8A8F98' },
+  {
+    id: 'common_ore',
+    displayName: 'Common Ore',
+    description: 'Iron',
+    rarity: 'common',
+    baseAccumulationRate: 10,
+    color: '#8A8F98',
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -198,7 +205,9 @@ describe('DataService', () => {
       );
       const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
-      await expect(service.loadAll()).rejects.toThrow('DataService: HTTP 500 fetching "/data/planets.json"');
+      await expect(service.loadAll()).rejects.toThrow(
+        'DataService: HTTP 500 fetching "/data/planets.json"',
+      );
       expect(errorSpy).toHaveBeenCalledWith(
         'DataService: failed to load game data',
         expect.any(Error),

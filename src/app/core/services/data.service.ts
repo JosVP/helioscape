@@ -246,9 +246,7 @@ export class DataService {
   private async fetchJson<T>(path: string): Promise<T> {
     const response = await fetch(path);
     if (!response.ok) {
-      throw new Error(
-        `DataService: HTTP ${response.status} fetching "${path}"`,
-      );
+      throw new Error(`DataService: HTTP ${response.status} fetching "${path}"`);
     }
     return response.json() as Promise<T>;
   }
