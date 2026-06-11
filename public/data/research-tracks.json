@@ -1,0 +1,122 @@
+[
+  {
+    "id": "moon_low_grav_medicine_track",
+    "displayName": "Low-Gravity Medicine Program",
+    "planet": "moon",
+    "rpCost": 25,
+    "durationYears": 30,
+    "description": "We study how bones, circulation, and development adapt to long-lived human life in one-sixth gravity.",
+    "prerequisiteTech": "earth_launch_mercury_mission",
+    "onCompleteEffects": [
+      { "type": "unlock_tech", "target": "moon_low_gravity_medicine" }
+    ]
+  },
+  {
+    "id": "moon_closed_loop_track",
+    "displayName": "Closed-Loop Habitat Systems",
+    "planet": "moon",
+    "rpCost": 30,
+    "durationYears": 35,
+    "description": "We turn the Moon into a laboratory for sealed life-support cycles that waste almost nothing and fail slowly enough to survive.",
+    "prerequisiteTech": "earth_launch_mercury_mission",
+    "onCompleteEffects": [
+      { "type": "unlock_tech", "target": "moon_closed_loop_life_support" }
+    ]
+  },
+  {
+    "id": "moon_regolith_construction_track",
+    "displayName": "Regolith Construction Methods",
+    "planet": "moon",
+    "rpCost": 20,
+    "durationYears": 25,
+    "description": "We learn how to sinter, print, and shield with lunar soil until local building becomes safer than shipping walls from Earth.",
+    "prerequisiteTech": "earth_launch_mercury_mission",
+    "onCompleteEffects": [
+      { "type": "unlock_tech", "target": "moon_regolith_construction" }
+    ]
+  },
+  {
+    "id": "moon_organism_library_t1_track",
+    "displayName": "Organism Library Tier I",
+    "planet": "moon",
+    "rpCost": 35,
+    "durationYears": 35,
+    "description": "We catalog hardy microbes, lichens, and engineered pioneer ecologies that might someday survive beyond Earth.",
+    "prerequisiteTech": "earth_launch_mercury_mission",
+    "onCompleteEffects": [
+      { "type": "unlock_tech", "target": "moon_organism_library_t1" }
+    ]
+  },
+  {
+    "id": "moon_radiation_resilience_track",
+    "displayName": "Radiation Resilience",
+    "planet": "moon",
+    "rpCost": 30,
+    "durationYears": 30,
+    "description": "We map the slow damage of cosmic exposure and design biological and material countermeasures for lives spent under a thin roof of dust.",
+    "prerequisiteTech": "moon_low_grav_medicine_track",
+    "onCompleteEffects": [
+      { "type": "unlock_tech", "target": "moon_radiation_resilience" }
+    ]
+  },
+  {
+    "id": "moon_isolation_psychology_track",
+    "displayName": "Isolation Psychology",
+    "planet": "moon",
+    "rpCost": 25,
+    "durationYears": 25,
+    "description": "We study what keeps small crews humane, stable, and creatively alive when the horizon never changes and home is a radio delay away.",
+    "prerequisiteTech": "moon_closed_loop_track",
+    "onCompleteEffects": [
+      { "type": "unlock_tech", "target": "moon_isolation_psychology" }
+    ]
+  },
+  {
+    "id": "moon_he3_extraction_track",
+    "displayName": "Helium-3 Extraction",
+    "planet": "moon",
+    "rpCost": 40,
+    "durationYears": 30,
+    "description": "We develop the patient industrial chemistry needed to pull fusion-relevant isotopes out of vast fields of ordinary lunar dust.",
+    "prerequisiteTech": "moon_regolith_construction_track",
+    "onCompleteEffects": [
+      { "type": "unlock_tech", "target": "moon_he3_extraction" }
+    ]
+  },
+  {
+    "id": "moon_organism_library_t2_track",
+    "displayName": "Organism Library Tier II",
+    "planet": "moon",
+    "rpCost": 50,
+    "durationYears": 45,
+    "description": "We expand the library with wet-world ecologies and adaptive biomes informed by the first confirmed signs that open Martian water can hold.",
+    "prerequisiteTech": "moon_organism_library_t1_track",
+    "onCompleteEffects": [
+      { "type": "unlock_tech", "target": "moon_organism_library_t2" }
+    ]
+  },
+  {
+    "id": "earth_deuterium_extraction_track",
+    "displayName": "Deuterium Extraction Theory",
+    "planet": "earth",
+    "rpCost": 40,
+    "durationYears": 30,
+    "description": "We refine the membranes, energy budgets, and industrial flows needed to pull fusion fuel from the oceans at planetary scale.",
+    "prerequisiteTech": "earth_advanced_renewables",
+    "onCompleteEffects": [
+      { "type": "unlock_tech", "target": "earth_deuterium_extraction" }
+    ]
+  },
+  {
+    "id": "earth_fusion_ignition_theory_track",
+    "displayName": "Fusion Ignition Theory Program",
+    "planet": "earth",
+    "rpCost": 50,
+    "durationYears": 40,
+    "description": "We push through the last theoretical barriers between controlled deuterium fuel cycles and a power source robust enough to change civilisation.",
+    "prerequisiteTech": "earth_deuterium_extraction_track",
+    "onCompleteEffects": [
+      { "type": "unlock_tech", "target": "earth_fusion_ignition_theory" }
+    ]
+  }
+]

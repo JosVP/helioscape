@@ -1,6 +1,6 @@
 import type { PlanetState } from './planet.model';
 import type { ActiveResearchTrack } from './tech-tree.model';
-import type { CultureEventEntry } from './culture-event.model';
+import type { CultureEventEntry, CultureEventHistoryEntry } from './culture-event.model';
 
 /**
  * The full serializable game state — what gets saved/loaded.
@@ -105,15 +105,6 @@ export interface BioPhaseState {
   durationYears: number;
   startedYear: number;
   completedYear: number;
-}
-
-/**
- * A record of a culture event that was shown to the player.
- */
-export interface CultureEventHistoryEntry {
-  eventId: string;
-  year: number;
-  planetContext: string;
 }
 
 /**

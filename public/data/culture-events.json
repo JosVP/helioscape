@@ -1,0 +1,214 @@
+[
+  {
+    "id": "ce_mercury_landing",
+    "title": "First Steps on Mercury",
+    "narratorText": "We have touched down on Mercury for the first time. The surface is alien — ancient, scarred, and brutally hot — but it is ours to begin understanding. The real work starts now.",
+    "portrait": "/assets/svg/portraits/ce_mercury_landing.svg",
+    "choices": [],
+    "tags": [],
+    "trigger": { "type": "tech_completed", "techId": "earth_launch_mercury_mission" },
+    "priority": false
+  },
+  {
+    "id": "ce_first_days_on_mercury",
+    "title": "The First Days",
+    "narratorText": "We have been on Mercury long enough now that the crew has stopped calling it an expedition and started calling it home. That shift — small as it sounds — changes everything about how we plan.",
+    "portrait": "/assets/svg/portraits/ce_first_days_on_mercury.svg",
+    "choices": [],
+    "tags": [],
+    "trigger": { "type": "year_reached", "year": 2038 },
+    "priority": false
+  },
+  {
+    "id": "ce_fusion_theory_complete",
+    "title": "The Fire We Have Always Wanted",
+    "narratorText": "We have cracked the last theoretical barrier. Deuterium fusion is no longer a dream on a whiteboard — it is a blueprint waiting for the infrastructure to give it form. The energy age is almost here.",
+    "portrait": "/assets/svg/portraits/ce_fusion_theory_complete.svg",
+    "choices": [],
+    "tags": [],
+    "trigger": { "type": "tech_completed", "techId": "earth_fusion_ignition_theory" },
+    "priority": false
+  },
+  {
+    "id": "ce_type1_reached",
+    "title": "We Are Type I",
+    "narratorText": "We have learned to draw on our star at a planetary scale, and the future now feels like something we can build rather than merely survive. The Dyson array grows daily. Our ambitions grow faster.",
+    "portrait": "/assets/svg/portraits/ce_type1_reached.svg",
+    "choices": [],
+    "tags": [],
+    "trigger": { "type": "milestone_reached", "milestoneId": "type_1" },
+    "priority": true
+  },
+  {
+    "id": "ce_first_era_complete",
+    "title": "The First Era",
+    "narratorText": "We are no longer a species clinging to one wounded cradle. We have made multiple worlds habitable and kept going. The first era of interplanetary civilisation is complete. What comes next is unwritten.",
+    "portrait": "/assets/svg/portraits/ce_first_era_complete.svg",
+    "choices": [],
+    "tags": [],
+    "trigger": { "type": "milestone_reached", "milestoneId": "first_era_complete" },
+    "priority": true
+  },
+  {
+    "id": "ce_type2_reached",
+    "title": "We Are Type II",
+    "narratorText": "We have wrapped our industry around the Sun so completely that the scale of our work is no longer planetary — it is stellar. The Dyson sphere is complete. We are the light-weavers now.",
+    "portrait": "/assets/svg/portraits/ce_type2_reached.svg",
+    "choices": [],
+    "tags": [],
+    "trigger": { "type": "milestone_reached", "milestoneId": "type_2" },
+    "priority": true
+  },
+  {
+    "id": "ce_seed_ship_launched",
+    "title": "Into the Dark Between Stars",
+    "narratorText": "We have not become a galactic civilisation — not yet. But we have sent a living promise beyond the Sun and into the dark between stars. Whatever finds it one day will know we were here.",
+    "portrait": "/assets/svg/portraits/ce_seed_ship_launched.svg",
+    "choices": [],
+    "tags": [],
+    "trigger": { "type": "milestone_reached", "milestoneId": "type_3_gesture" },
+    "priority": true
+  },
+  {
+    "id": "ce_dyson_10_percent",
+    "title": "Ten Percent",
+    "narratorText": "One in ten of the Sun's rays now strikes a panel we built. From here, the growth compounds. We can feel the energy budget of the solar system beginning to tip in our favour.",
+    "portrait": "/assets/svg/portraits/ce_dyson_10_percent.svg",
+    "choices": [],
+    "tags": [],
+    "trigger": { "type": "dyson_percent_reached", "percent": 10 },
+    "priority": false
+  },
+  {
+    "id": "ce_dyson_25_percent",
+    "title": "A Quarter of the Sun",
+    "narratorText": "A quarter of the Sun's output now passes through our hands before it reaches the inner planets. This is not just energy. This is control of a star.",
+    "portrait": "/assets/svg/portraits/ce_dyson_25_percent.svg",
+    "choices": [],
+    "tags": [],
+    "trigger": { "type": "dyson_percent_reached", "percent": 25 },
+    "priority": false
+  },
+  {
+    "id": "ce_dyson_50_percent",
+    "title": "Halfway to the Stars",
+    "narratorText": "We have passed the halfway point. The Sun is half-wrapped in our ambition. Fifty years ago this would have been mythology. Now it is an infrastructure report.",
+    "portrait": "/assets/svg/portraits/ce_dyson_50_percent.svg",
+    "choices": [],
+    "tags": [],
+    "trigger": { "type": "dyson_percent_reached", "percent": 50 },
+    "priority": false
+  },
+  {
+    "id": "ce_mars_first_liquid_water",
+    "title": "The First Ocean",
+    "narratorText": "We have confirmed it. Standing water — persistent, open, real — on the surface of Mars. Every biologist we have is weeping. We understand why.",
+    "portrait": "/assets/svg/portraits/ce_mars_first_liquid_water.svg",
+    "choices": [],
+    "tags": [],
+    "trigger": { "type": "tech_completed", "techId": "mars_ocean_confirmed" },
+    "priority": false
+  },
+  {
+    "id": "ce_moon_first_birthday",
+    "title": "The First Birthday",
+    "narratorText": "Someone on the lunar base turned thirty today — for the first time in their life, away from Earth. There was a cake. They used powdered ingredients and a microwave-adapted heating element. It was, by most accounts, terrible. Everyone ate two slices.",
+    "portrait": "/assets/svg/portraits/ce_moon_first_birthday.svg",
+    "choices": [],
+    "tags": [],
+    "trigger": { "type": "year_reached", "year": 2035 },
+    "priority": false
+  },
+  {
+    "id": "ce_moon_refusing_return",
+    "title": "Those Who Will Not Come Home",
+    "narratorText": "Three crew members have formally requested to remain on the lunar base permanently. They are healthy, productive, and clear-eyed about what they are choosing. They say Earth no longer feels like home. Do we honour that?",
+    "portrait": "/assets/svg/portraits/ce_moon_refusing_return.svg",
+    "choices": [
+      {
+        "id": "respect_the_decision",
+        "label": "Honour their choice. They know what they are.",
+        "tag": "naturalist",
+        "effects": []
+      },
+      {
+        "id": "recall_them",
+        "label": "Recall them. The mission needs rotation discipline.",
+        "tag": "architect",
+        "effects": []
+      }
+    ],
+    "tags": [],
+    "trigger": { "type": "year_reached", "year": 2040 },
+    "priority": false
+  },
+  {
+    "id": "ce_fermi_silence_detected",
+    "title": "The Great Silence",
+    "narratorText": "Our long-range signal arrays have mapped a significant portion of nearby stellar neighbourhood. Nothing. Not a flicker of intentional radio, not a structured pulse, nothing that looks built. We are alone — or the silence is a warning. What do we do with this?",
+    "portrait": "/assets/svg/portraits/ce_fermi_silence_detected.svg",
+    "choices": [
+      {
+        "id": "broadcast",
+        "label": "Broadcast our existence. Let anyone who is listening know we are here.",
+        "tag": "architect",
+        "effects": []
+      },
+      {
+        "id": "go_quiet",
+        "label": "Go quiet. The silence may be a survival strategy.",
+        "tag": "naturalist",
+        "effects": []
+      },
+      {
+        "id": "continue_as_normal",
+        "label": "Continue as normal. The silence changes nothing.",
+        "tag": "",
+        "effects": []
+      }
+    ],
+    "tags": [],
+    "trigger": { "type": "dyson_percent_reached", "percent": 30 },
+    "priority": false
+  },
+  {
+    "id": "ce_venus_cooling_begins",
+    "title": "The Mirror Goes Up",
+    "narratorText": "The first orbital shade mirror is in position. Venus, for the first time in four billion years, is receiving less sunlight than yesterday. We are turning down the heat of a planet. The atmosphere will take centuries to respond. We are patient.",
+    "portrait": "/assets/svg/portraits/ce_venus_cooling_begins.svg",
+    "choices": [],
+    "tags": [],
+    "trigger": { "type": "terraforming_choice_applied", "planet": "venus", "choiceId": "venus_orbital_shade_mirror" },
+    "priority": false
+  },
+  {
+    "id": "ce_mars_polar_detonation",
+    "title": "The Long Explosion",
+    "narratorText": "We have detonated the polar ice cap charges. The shockwave is visible from orbit. The CO2 sublimation curve will run for decades. It is not subtle — but it is fast. The naturalists are already drafting their objections. They are not wrong. We did it anyway.",
+    "portrait": "/assets/svg/portraits/ce_mars_polar_detonation.svg",
+    "choices": [],
+    "tags": ["architect"],
+    "trigger": { "type": "terraforming_choice_applied", "planet": "mars", "choiceId": "mars_polar_detonation" },
+    "priority": false
+  },
+  {
+    "id": "ce_europa_warning",
+    "title": "Something Stirs in the Ice",
+    "narratorText": "Deep-range sonar from the Europa monitoring stations has detected structured pressure waves in the sub-ice ocean. They are not geological. We do not know what they are. We have decided, for now, not to broadcast this.",
+    "portrait": "/assets/svg/portraits/ce_europa_warning.svg",
+    "choices": [],
+    "tags": [],
+    "trigger": { "type": "year_reached", "year": 9999 },
+    "priority": false
+  },
+  {
+    "id": "ce_europa_impact",
+    "title": "We Redirected Europa",
+    "narratorText": "The vote passed by eleven. We have fired the mass drivers and committed Europa to a Venus intercept trajectory. Whatever was in the ocean is now our responsibility. Some things cannot be undone. We voted for this one anyway.",
+    "portrait": "/assets/svg/portraits/ce_europa_impact.svg",
+    "choices": [],
+    "tags": ["architect"],
+    "trigger": { "type": "year_reached", "year": 9999 },
+    "priority": false
+  }
+]

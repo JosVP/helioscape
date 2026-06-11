@@ -284,8 +284,7 @@ describe('PlanetVisualData validation', () => {
   });
 });
 
-describe('PlanetState validation', () => {
-  const validState: PlanetState = {
+const validState: PlanetState = {
     id: 'mars',
     atmospherePressure: 0.008,
     temperatureCelsius: -60,
@@ -311,10 +310,11 @@ describe('PlanetState validation', () => {
       axisSpinSpeed: 0.02,
       cityLightsIntensity: 0,
     },
-    terraformStartYear: 2100,
-    terraformEndYear: 2200,
-  };
+  terraformStartYear: 2100,
+  terraformEndYear: 2200,
+};
 
+describe('PlanetState validation', () => {
   it('should accept valid planet state', () => {
     const result = validatePlanetState(validState);
     expect(result.valid).toBe(true);

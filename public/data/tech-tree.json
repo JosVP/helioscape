@@ -1,0 +1,515 @@
+[
+  {
+    "id": "earth_launch_mercury_mission",
+    "planet": "earth",
+    "displayName": "Launch Mercury Mission",
+    "prerequisites": [],
+    "spilloverPrerequisites": [],
+    "rpCost": 0,
+    "durationYears": 0,
+    "effects": [
+      { "type": "emit_event", "eventId": "ce_mercury_landing" }
+    ]
+  },
+  {
+    "id": "earth_advanced_renewables",
+    "planet": "earth",
+    "displayName": "Advanced Renewables Integration",
+    "prerequisites": ["earth_launch_mercury_mission"],
+    "spilloverPrerequisites": [],
+    "rpCost": 30,
+    "durationYears": 20,
+    "effects": []
+  },
+  {
+    "id": "earth_dome_habitat",
+    "planet": "earth",
+    "displayName": "Dome Habitat Technology",
+    "prerequisites": ["earth_launch_mercury_mission"],
+    "spilloverPrerequisites": [],
+    "rpCost": 30,
+    "durationYears": 20,
+    "effects": []
+  },
+  {
+    "id": "earth_deuterium_extraction",
+    "planet": "earth",
+    "displayName": "Deuterium Extraction From Seawater",
+    "prerequisites": ["earth_advanced_renewables"],
+    "spilloverPrerequisites": [],
+    "rpCost": 40,
+    "durationYears": 30,
+    "effects": []
+  },
+  {
+    "id": "earth_ocean_cleanup",
+    "planet": "earth",
+    "displayName": "Ocean Macro-Plastic Cleanup",
+    "prerequisites": [],
+    "spilloverPrerequisites": ["mercury_phase_1_complete"],
+    "rpCost": 30,
+    "durationYears": 25,
+    "effects": []
+  },
+  {
+    "id": "earth_fusion_ignition_theory",
+    "planet": "earth",
+    "displayName": "Fusion Ignition Theory",
+    "prerequisites": ["earth_deuterium_extraction"],
+    "spilloverPrerequisites": [],
+    "rpCost": 50,
+    "durationYears": 40,
+    "effects": [
+      { "type": "emit_event", "eventId": "ce_fusion_theory_complete" }
+    ]
+  },
+  {
+    "id": "earth_co2_drawdown",
+    "planet": "earth",
+    "displayName": "Atmospheric CO2 Drawdown",
+    "prerequisites": [],
+    "spilloverPrerequisites": ["venus_carbonate_process_started"],
+    "rpCost": 40,
+    "durationYears": 30,
+    "effects": []
+  },
+  {
+    "id": "earth_soil_restoration",
+    "planet": "earth",
+    "displayName": "Soil Restoration Network",
+    "prerequisites": [],
+    "spilloverPrerequisites": ["mars_soil_study_complete"],
+    "rpCost": 40,
+    "durationYears": 30,
+    "effects": []
+  },
+  {
+    "id": "earth_ocean_acidification_reversal",
+    "planet": "earth",
+    "displayName": "Ocean Acidification Reversal",
+    "prerequisites": ["earth_co2_drawdown"],
+    "spilloverPrerequisites": ["venus_carbonate_process_started"],
+    "rpCost": 50,
+    "durationYears": 35,
+    "effects": []
+  },
+  {
+    "id": "earth_rewilding",
+    "planet": "earth",
+    "displayName": "Rewilding At Scale",
+    "prerequisites": ["earth_soil_restoration"],
+    "spilloverPrerequisites": ["mars_coastal_stable"],
+    "rpCost": 50,
+    "durationYears": 40,
+    "effects": []
+  },
+  {
+    "id": "moon_low_gravity_medicine",
+    "planet": "moon",
+    "displayName": "Low-Gravity Medicine",
+    "prerequisites": [],
+    "spilloverPrerequisites": ["earth_launch_mercury_mission"],
+    "rpCost": 25,
+    "durationYears": 30,
+    "effects": []
+  },
+  {
+    "id": "moon_closed_loop_life_support",
+    "planet": "moon",
+    "displayName": "Closed-Loop Life Support",
+    "prerequisites": [],
+    "spilloverPrerequisites": ["earth_launch_mercury_mission"],
+    "rpCost": 30,
+    "durationYears": 35,
+    "effects": []
+  },
+  {
+    "id": "moon_regolith_construction",
+    "planet": "moon",
+    "displayName": "Regolith Construction",
+    "prerequisites": [],
+    "spilloverPrerequisites": ["earth_launch_mercury_mission"],
+    "rpCost": 20,
+    "durationYears": 25,
+    "effects": []
+  },
+  {
+    "id": "moon_organism_library_t1",
+    "planet": "moon",
+    "displayName": "Organism Library Tier 1",
+    "prerequisites": [],
+    "spilloverPrerequisites": ["earth_launch_mercury_mission"],
+    "rpCost": 35,
+    "durationYears": 35,
+    "effects": []
+  },
+  {
+    "id": "moon_radiation_resilience",
+    "planet": "moon",
+    "displayName": "Radiation Resilience",
+    "prerequisites": ["moon_low_gravity_medicine"],
+    "spilloverPrerequisites": [],
+    "rpCost": 30,
+    "durationYears": 30,
+    "effects": []
+  },
+  {
+    "id": "moon_isolation_psychology",
+    "planet": "moon",
+    "displayName": "Isolation Psychology",
+    "prerequisites": ["moon_closed_loop_life_support"],
+    "spilloverPrerequisites": [],
+    "rpCost": 25,
+    "durationYears": 25,
+    "effects": []
+  },
+  {
+    "id": "moon_he3_extraction",
+    "planet": "moon",
+    "displayName": "Early He-3 Extraction",
+    "prerequisites": ["moon_regolith_construction"],
+    "spilloverPrerequisites": [],
+    "rpCost": 40,
+    "durationYears": 30,
+    "effects": []
+  },
+  {
+    "id": "moon_organism_library_t2",
+    "planet": "moon",
+    "displayName": "Organism Library Tier 2",
+    "prerequisites": ["moon_organism_library_t1"],
+    "spilloverPrerequisites": ["mars_ocean_confirmed"],
+    "rpCost": 50,
+    "durationYears": 45,
+    "effects": []
+  },
+  {
+    "id": "mercury_landing_pad",
+    "planet": "mercury",
+    "displayName": "Landing Pad",
+    "prerequisites": [],
+    "spilloverPrerequisites": ["earth_launch_mercury_mission"],
+    "rpCost": 20,
+    "durationYears": 5,
+    "effects": []
+  },
+  {
+    "id": "mercury_power_cell",
+    "planet": "mercury",
+    "displayName": "Power Cell",
+    "prerequisites": [],
+    "spilloverPrerequisites": ["earth_launch_mercury_mission"],
+    "rpCost": 20,
+    "durationYears": 5,
+    "effects": []
+  },
+  {
+    "id": "mercury_mining_facility",
+    "planet": "mercury",
+    "displayName": "Mining Facility",
+    "prerequisites": [],
+    "spilloverPrerequisites": ["earth_launch_mercury_mission"],
+    "rpCost": 20,
+    "durationYears": 5,
+    "effects": []
+  },
+  {
+    "id": "mercury_phase_0_complete",
+    "planet": "mercury",
+    "displayName": "Mercury Phase 0 Complete",
+    "prerequisites": ["mercury_landing_pad", "mercury_power_cell", "mercury_mining_facility"],
+    "spilloverPrerequisites": [],
+    "rpCost": 0,
+    "durationYears": 0,
+    "effects": [
+      { "type": "apply_terraforming_choice", "planet": "mercury", "choiceId": "phase_0", "permanent": true }
+    ]
+  },
+  {
+    "id": "mercury_refinery",
+    "planet": "mercury",
+    "displayName": "Refinery",
+    "prerequisites": ["mercury_phase_0_complete"],
+    "spilloverPrerequisites": [],
+    "rpCost": 30,
+    "durationYears": 10,
+    "effects": []
+  },
+  {
+    "id": "mercury_fabricator",
+    "planet": "mercury",
+    "displayName": "Fabricator",
+    "prerequisites": ["mercury_phase_0_complete"],
+    "spilloverPrerequisites": [],
+    "rpCost": 30,
+    "durationYears": 10,
+    "effects": []
+  },
+  {
+    "id": "mercury_solar_array_expansion",
+    "planet": "mercury",
+    "displayName": "Solar Array Expansion",
+    "prerequisites": ["mercury_phase_0_complete"],
+    "spilloverPrerequisites": [],
+    "rpCost": 30,
+    "durationYears": 10,
+    "effects": []
+  },
+  {
+    "id": "mercury_rare_metals_mining",
+    "planet": "mercury",
+    "displayName": "Rare Metals Mining",
+    "prerequisites": ["mercury_phase_0_complete"],
+    "spilloverPrerequisites": [],
+    "rpCost": 40,
+    "durationYears": 12,
+    "effects": []
+  },
+  {
+    "id": "mercury_phase_1_complete",
+    "planet": "mercury",
+    "displayName": "Mercury Phase 1 Complete",
+    "prerequisites": ["mercury_refinery", "mercury_fabricator", "mercury_solar_array_expansion", "mercury_rare_metals_mining"],
+    "spilloverPrerequisites": [],
+    "rpCost": 0,
+    "durationYears": 0,
+    "effects": [
+      { "type": "apply_terraforming_choice", "planet": "mercury", "choiceId": "phase_1", "permanent": true }
+    ]
+  },
+  {
+    "id": "mercury_mass_driver",
+    "planet": "mercury",
+    "displayName": "Mass Driver",
+    "prerequisites": ["mercury_phase_1_complete"],
+    "spilloverPrerequisites": [],
+    "rpCost": 50,
+    "durationYears": 15,
+    "effects": []
+  },
+  {
+    "id": "mercury_dyson_panel_production",
+    "planet": "mercury",
+    "displayName": "Dyson Panel Production",
+    "prerequisites": ["mercury_phase_1_complete"],
+    "spilloverPrerequisites": [],
+    "rpCost": 60,
+    "durationYears": 18,
+    "effects": []
+  },
+  {
+    "id": "mercury_polar_volatiles_extraction",
+    "planet": "mercury",
+    "displayName": "Polar Volatiles Extraction",
+    "prerequisites": ["mercury_phase_1_complete"],
+    "spilloverPrerequisites": [],
+    "rpCost": 40,
+    "durationYears": 12,
+    "effects": []
+  },
+  {
+    "id": "mercury_phase_2_complete",
+    "planet": "mercury",
+    "displayName": "Mercury Phase 2 Complete",
+    "prerequisites": ["mercury_mass_driver", "mercury_dyson_panel_production", "mercury_polar_volatiles_extraction"],
+    "spilloverPrerequisites": [],
+    "rpCost": 0,
+    "durationYears": 0,
+    "effects": [
+      { "type": "apply_terraforming_choice", "planet": "mercury", "choiceId": "phase_2", "permanent": true }
+    ]
+  },
+  {
+    "id": "mars_polar_detonation",
+    "planet": "mars",
+    "displayName": "Polar Detonation",
+    "prerequisites": [],
+    "spilloverPrerequisites": ["mercury_phase_2_complete"],
+    "rpCost": 60,
+    "durationYears": 20,
+    "effects": [
+      { "type": "apply_terraforming_choice", "planet": "mars", "choiceId": "mars_polar_detonation", "permanent": true },
+      { "type": "tag_decision", "tag": "architect" },
+      { "type": "emit_event", "eventId": "ce_mars_polar_detonation" }
+    ]
+  },
+  {
+    "id": "mars_orbital_mirrors",
+    "planet": "mars",
+    "displayName": "Orbital Mirrors",
+    "prerequisites": [],
+    "spilloverPrerequisites": ["mercury_phase_2_complete"],
+    "rpCost": 50,
+    "durationYears": 35,
+    "effects": [
+      { "type": "apply_terraforming_choice", "planet": "mars", "choiceId": "mars_orbital_mirrors", "permanent": false },
+      { "type": "tag_decision", "tag": "architect" }
+    ]
+  },
+  {
+    "id": "mars_magnetic_umbrella",
+    "planet": "mars",
+    "displayName": "Magnetic Umbrella",
+    "prerequisites": [],
+    "spilloverPrerequisites": ["mercury_phase_2_complete"],
+    "rpCost": 50,
+    "durationYears": 40,
+    "effects": [
+      { "type": "apply_terraforming_choice", "planet": "mars", "choiceId": "mars_magnetic_umbrella", "permanent": false },
+      { "type": "tag_decision", "tag": "naturalist" }
+    ]
+  },
+  {
+    "id": "mars_aerogel_domes",
+    "planet": "mars",
+    "displayName": "Aerogel Domes",
+    "prerequisites": [],
+    "spilloverPrerequisites": ["mercury_phase_2_complete", "earth_dome_habitat"],
+    "rpCost": 30,
+    "durationYears": 20,
+    "effects": [
+      { "type": "apply_terraforming_choice", "planet": "mars", "choiceId": "mars_aerogel_domes", "permanent": false }
+    ]
+  },
+  {
+    "id": "mars_comet_water_delivery",
+    "planet": "mars",
+    "displayName": "Comet Water Delivery",
+    "prerequisites": ["mars_magnetic_umbrella"],
+    "spilloverPrerequisites": ["mercury_phase_2_complete"],
+    "rpCost": 60,
+    "durationYears": 35,
+    "effects": [
+      { "type": "apply_terraforming_choice", "planet": "mars", "choiceId": "mars_comet_water_delivery", "permanent": false }
+    ]
+  },
+  {
+    "id": "mars_ocean_confirmed",
+    "planet": "mars",
+    "displayName": "Mars Ocean Confirmed",
+    "prerequisites": ["mars_comet_water_delivery"],
+    "spilloverPrerequisites": [],
+    "rpCost": 0,
+    "durationYears": 0,
+    "effects": [
+      { "type": "emit_event", "eventId": "ce_mars_first_liquid_water" },
+      { "type": "spillover_unlock", "targetPlanet": "moon", "targetTech": "moon_organism_library_t2" }
+    ]
+  },
+  {
+    "id": "mars_biological_seeding",
+    "planet": "mars",
+    "displayName": "Biological Seeding",
+    "prerequisites": ["mars_ocean_confirmed"],
+    "spilloverPrerequisites": ["moon_organism_library_t1"],
+    "rpCost": 50,
+    "durationYears": 30,
+    "effects": [
+      { "type": "apply_terraforming_choice", "planet": "mars", "choiceId": "mars_biological_seeding", "permanent": false },
+      { "type": "tag_decision", "tag": "naturalist" }
+    ]
+  },
+  {
+    "id": "mars_soil_study_complete",
+    "planet": "mars",
+    "displayName": "Mars Soil Study Complete",
+    "prerequisites": ["mars_biological_seeding"],
+    "spilloverPrerequisites": [],
+    "rpCost": 0,
+    "durationYears": 0,
+    "effects": [
+      { "type": "spillover_unlock", "targetPlanet": "earth", "targetTech": "earth_soil_restoration" }
+    ]
+  },
+  {
+    "id": "mars_coastal_stable",
+    "planet": "mars",
+    "displayName": "Mars Coastal Ecosystems Stable",
+    "prerequisites": ["mars_soil_study_complete"],
+    "spilloverPrerequisites": [],
+    "rpCost": 0,
+    "durationYears": 0,
+    "effects": [
+      { "type": "spillover_unlock", "targetPlanet": "earth", "targetTech": "earth_rewilding" }
+    ]
+  },
+  {
+    "id": "venus_orbital_shade_mirror",
+    "planet": "venus",
+    "displayName": "Orbital Shade Mirror",
+    "prerequisites": [],
+    "spilloverPrerequisites": ["mercury_phase_2_complete"],
+    "rpCost": 60,
+    "durationYears": 40,
+    "effects": [
+      { "type": "apply_terraforming_choice", "planet": "venus", "choiceId": "venus_orbital_shade_mirror", "permanent": false },
+      { "type": "tag_decision", "tag": "architect" },
+      { "type": "emit_event", "eventId": "ce_venus_cooling_begins" }
+    ]
+  },
+  {
+    "id": "venus_carbonate_sequestration",
+    "planet": "venus",
+    "displayName": "Carbonate Sequestration",
+    "prerequisites": ["venus_orbital_shade_mirror"],
+    "spilloverPrerequisites": [],
+    "rpCost": 50,
+    "durationYears": 35,
+    "effects": [
+      { "type": "apply_terraforming_choice", "planet": "venus", "choiceId": "venus_carbonate_sequestration", "permanent": false },
+      { "type": "tag_decision", "tag": "naturalist" }
+    ]
+  },
+  {
+    "id": "venus_carbonate_process_started",
+    "planet": "venus",
+    "displayName": "Venus Carbonate Process Started",
+    "prerequisites": ["venus_carbonate_sequestration"],
+    "spilloverPrerequisites": [],
+    "rpCost": 0,
+    "durationYears": 0,
+    "effects": [
+      { "type": "spillover_unlock", "targetPlanet": "earth", "targetTech": "earth_co2_drawdown" },
+      { "type": "spillover_unlock", "targetPlanet": "earth", "targetTech": "earth_ocean_acidification_reversal" }
+    ]
+  },
+  {
+    "id": "venus_europa_impact",
+    "planet": "venus",
+    "displayName": "Europa Impact",
+    "prerequisites": ["venus_orbital_shade_mirror"],
+    "spilloverPrerequisites": [],
+    "rpCost": 80,
+    "durationYears": 50,
+    "effects": [
+      { "type": "apply_terraforming_choice", "planet": "venus", "choiceId": "venus_europa_impact", "permanent": true },
+      { "type": "tag_decision", "tag": "architect" }
+    ]
+  },
+  {
+    "id": "venus_sky_cities",
+    "planet": "venus",
+    "displayName": "Sky Cities",
+    "prerequisites": ["venus_orbital_shade_mirror"],
+    "spilloverPrerequisites": [],
+    "rpCost": 40,
+    "durationYears": 25,
+    "effects": [
+      { "type": "apply_terraforming_choice", "planet": "venus", "choiceId": "venus_sky_cities", "permanent": false },
+      { "type": "tag_decision", "tag": "naturalist" }
+    ]
+  },
+  {
+    "id": "venus_sky_city_descent",
+    "planet": "venus",
+    "displayName": "Sky City Descent",
+    "prerequisites": ["venus_sky_cities"],
+    "spilloverPrerequisites": [],
+    "rpCost": 50,
+    "durationYears": 30,
+    "effects": [
+      { "type": "apply_terraforming_choice", "planet": "venus", "choiceId": "venus_sky_city_descent", "permanent": false },
+      { "type": "tag_decision", "tag": "architect" }
+    ]
+  }
+]
