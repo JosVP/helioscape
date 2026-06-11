@@ -121,8 +121,7 @@ export class GameStateService {
   readonly mercuryBuildQueue: Signal<MercuryQueueEntry[]> = this._mercuryBuildQueue.asReadonly();
 
   readonly dysonPanelCount: Signal<number> = this._dysonPanelCount.asReadonly();
-  readonly dysonPanelTier: Signal<'basic' | 'mid' | 'hardened'> =
-    this._dysonPanelTier.asReadonly();
+  readonly dysonPanelTier: Signal<'basic' | 'mid' | 'hardened'> = this._dysonPanelTier.asReadonly();
   readonly dysonCoveragePercent: Signal<number> = this._dysonCoveragePercent.asReadonly();
   readonly dysonEnergyWatts: Signal<number> = this._dysonEnergyWatts.asReadonly();
 
@@ -152,7 +151,7 @@ export class GameStateService {
    */
   private readonly rpCapacityBoosts = computed<number>(() => {
     const fromTechs = this._completedTechs()
-      .flatMap(id => this.data.getTechNode(id)?.effects ?? [])
+      .flatMap((id) => this.data.getTechNode(id)?.effects ?? [])
       .filter(
         (e): e is Extract<TechEffect, { type: 'rp_capacity_boost' }> =>
           e.type === 'rp_capacity_boost',
@@ -161,9 +160,9 @@ export class GameStateService {
 
     // MercuryBuildingEffect is a flat interface (not a discriminated union), so no Extract needed.
     const fromBuildings = this._mercuryBuildings()
-      .filter(b => b.status === 'operational')
-      .flatMap(b => this.data.getMercuryBuilding(b.buildingId)?.effects ?? [])
-      .filter(e => e.type === 'rp_capacity_boost')
+      .filter((b) => b.status === 'operational')
+      .flatMap((b) => this.data.getMercuryBuilding(b.buildingId)?.effects ?? [])
+      .filter((e) => e.type === 'rp_capacity_boost')
       .reduce((sum, e) => sum + (e.amount ?? 0), 0);
 
     return fromTechs + fromBuildings;
@@ -175,7 +174,7 @@ export class GameStateService {
   /** Research points currently allocated to running (non-paused) tracks. */
   readonly usedRpCapacity = computed<number>(() =>
     this._activeResearch()
-      .filter(t => !t.isPaused)
+      .filter((t) => !t.isPaused)
       .reduce((sum, t) => sum + (this.data.getResearchTrack(t.trackId)?.rpCost ?? 0), 0),
   );
 
@@ -184,7 +183,7 @@ export class GameStateService {
   // -------------------------------------------------------------------------
 
   advanceYear(): void {
-    this._gameYear.update(y => y + 1);
+    this._gameYear.update((y) => y + 1);
   }
 
   setSpeed(speed: 1 | 4): void {
@@ -192,7 +191,7 @@ export class GameStateService {
   }
 
   togglePause(): void {
-    this._isPaused.update(p => !p);
+    this._isPaused.update((p) => !p);
   }
 
   // -------------------------------------------------------------------------
@@ -201,31 +200,31 @@ export class GameStateService {
 
   /** Adds techId to completedTechs (idempotent). */
   unlockTech(techId: string): void {
-    this._completedTechs.update(techs => (techs.includes(techId) ? techs : [...techs, techId]));
+    this._completedTechs.update((techs) => (techs.includes(techId) ? techs : [...techs, techId]));
   }
 
   startResearch(trackId: string, planetId: string): void {
-    this._activeResearch.update(tracks => [
+    this._activeResearch.update((tracks) => [
       ...tracks,
       { trackId, planetId, progressYears: 0, isPaused: false },
     ]);
   }
 
   pauseResearch(trackId: string): void {
-    this._activeResearch.update(tracks =>
-      tracks.map(t => (t.trackId === trackId ? { ...t, isPaused: true } : t)),
+    this._activeResearch.update((tracks) =>
+      tracks.map((t) => (t.trackId === trackId ? { ...t, isPaused: true } : t)),
     );
   }
 
   resumeResearch(trackId: string): void {
-    this._activeResearch.update(tracks =>
-      tracks.map(t => (t.trackId === trackId ? { ...t, isPaused: false } : t)),
+    this._activeResearch.update((tracks) =>
+      tracks.map((t) => (t.trackId === trackId ? { ...t, isPaused: false } : t)),
     );
   }
 
   advanceResearch(trackId: string, years: number): void {
-    this._activeResearch.update(tracks =>
-      tracks.map(t =>
+    this._activeResearch.update((tracks) =>
+      tracks.map((t) =>
         t.trackId === trackId ? { ...t, progressYears: t.progressYears + years } : t,
       ),
     );
@@ -233,7 +232,7 @@ export class GameStateService {
 
   /** Removes the track from active research and adds its id to completedTechs. */
   completeResearch(trackId: string): void {
-    this._activeResearch.update(tracks => tracks.filter(t => t.trackId !== trackId));
+    this._activeResearch.update((tracks) => tracks.filter((t) => t.trackId !== trackId));
     this.unlockTech(trackId);
   }
 
@@ -258,14 +257,14 @@ export class GameStateService {
     );
     if (!forkEffect) return;
 
-    const choice = forkEffect.choices.find(c => c.id === choiceId);
+    const choice = forkEffect.choices.find((c) => c.id === choiceId);
     if (!choice) return;
 
     // Apply tag from the choice itself before processing effects.
     if (choice.tag === 'naturalist') this.incrementNaturalist();
     else if (choice.tag === 'architect') this.incrementArchitect();
 
-    choice.effects.forEach(effect => this.applyTechEffect(effect));
+    choice.effects.forEach((effect) => this.applyTechEffect(effect));
 
     this._pendingFork.set(null);
   }
@@ -275,7 +274,7 @@ export class GameStateService {
   // -------------------------------------------------------------------------
 
   applyTerraformingChoice(planetId: string, choiceId: string, permanent: boolean): void {
-    this._planets.update(planets => {
+    this._planets.update((planets) => {
       const planet = planets[planetId];
       if (!planet) return planets;
       return {
@@ -296,7 +295,7 @@ export class GameStateService {
   }
 
   updatePlanetVisualParams(planetId: string, params: Partial<PlanetVisualParams>): void {
-    this._planets.update(planets => {
+    this._planets.update((planets) => {
       const planet = planets[planetId];
       if (!planet) return planets;
       return {
@@ -314,7 +313,7 @@ export class GameStateService {
   // -------------------------------------------------------------------------
 
   addToEventQueue(entry: CultureEventEntry): void {
-    this._cultureEventQueue.update(q => [...q, entry]);
+    this._cultureEventQueue.update((q) => [...q, entry]);
   }
 
   /**
@@ -322,7 +321,7 @@ export class GameStateService {
    * If a current event is already showing it is flagged wasInterrupted and moved to index 1.
    */
   addPriorityEvent(eventId: string, queuedAtYear: number): void {
-    this._cultureEventQueue.update(queue => {
+    this._cultureEventQueue.update((queue) => {
       const priorityEntry: CultureEventEntry = {
         eventId,
         queuedAtYear,
@@ -341,7 +340,7 @@ export class GameStateService {
   /** Removes and returns the front of the culture event queue (the current event). */
   shiftEventQueue(): CultureEventEntry | undefined {
     let shifted: CultureEventEntry | undefined;
-    this._cultureEventQueue.update(queue => {
+    this._cultureEventQueue.update((queue) => {
       if (queue.length === 0) return queue;
       const [first, ...tail] = queue;
       shifted = first;
@@ -351,7 +350,7 @@ export class GameStateService {
   }
 
   recordEventHistory(entry: CultureEventHistoryEntry): void {
-    this._cultureEventHistory.update(h => [...h, entry]);
+    this._cultureEventHistory.update((h) => [...h, entry]);
   }
 
   // -------------------------------------------------------------------------
@@ -363,7 +362,7 @@ export class GameStateService {
    * Pass positive values to add, negative values to consume.
    */
   updateMercuryResources(delta: Partial<ResourceStore>): void {
-    this._mercuryResources.update(res => ({
+    this._mercuryResources.update((res) => ({
       commonOre: res.commonOre + (delta.commonOre ?? 0),
       rareMetals: res.rareMetals + (delta.rareMetals ?? 0),
       polarVolatiles: res.polarVolatiles + (delta.polarVolatiles ?? 0),
@@ -371,20 +370,20 @@ export class GameStateService {
   }
 
   placeMercuryBuilding(building: PlacedBuilding): void {
-    this._mercuryBuildings.update(buildings => [...buildings, building]);
+    this._mercuryBuildings.update((buildings) => [...buildings, building]);
   }
 
   /** Updates the status of a building instance by its unique id. */
   updateBuildingStatus(buildingId: string, status: 'building' | 'operational'): void {
-    this._mercuryBuildings.update(buildings =>
-      buildings.map(b => (b.id === buildingId ? { ...b, status } : b)),
+    this._mercuryBuildings.update((buildings) =>
+      buildings.map((b) => (b.id === buildingId ? { ...b, status } : b)),
     );
   }
 
   /** Updates the build progress (years) of a building instance by its unique id. */
   updateBuildingProgress(id: string, progress: number): void {
-    this._mercuryBuildings.update(buildings =>
-      buildings.map(b => (b.id === id ? { ...b, buildProgressYears: progress } : b)),
+    this._mercuryBuildings.update((buildings) =>
+      buildings.map((b) => (b.id === id ? { ...b, buildProgressYears: progress } : b)),
     );
   }
 
@@ -404,9 +403,7 @@ export class GameStateService {
 
   /** Marks a milestone complete (idempotent). */
   completeMilestone(milestoneId: string): void {
-    this._completedMilestones.update(m =>
-      m.includes(milestoneId) ? m : [...m, milestoneId],
-    );
+    this._completedMilestones.update((m) => (m.includes(milestoneId) ? m : [...m, milestoneId]));
   }
 
   // -------------------------------------------------------------------------
@@ -414,19 +411,19 @@ export class GameStateService {
   // -------------------------------------------------------------------------
 
   incrementNaturalist(): void {
-    this._naturalistCount.update(n => n + 1);
+    this._naturalistCount.update((n) => n + 1);
   }
 
   incrementArchitect(): void {
-    this._architectCount.update(n => n + 1);
+    this._architectCount.update((n) => n + 1);
   }
 
   setColonistBonus(bonus: 'denseLiving' | 'openEnvironment', value: boolean): void {
-    this._colonistBonuses.update(b => ({ ...b, [bonus]: value }));
+    this._colonistBonuses.update((b) => ({ ...b, [bonus]: value }));
   }
 
   setEarthFlag(flag: string, value: boolean): void {
-    this._earthFlags.update(flags => ({ ...flags, [flag]: value }));
+    this._earthFlags.update((flags) => ({ ...flags, [flag]: value }));
   }
 
   // -------------------------------------------------------------------------
@@ -434,7 +431,7 @@ export class GameStateService {
   // -------------------------------------------------------------------------
 
   updateBioPhase(planetId: string, phaseIndex: number, update: Partial<BioPhaseState>): void {
-    this._bioPhases.update(bioPhases => {
+    this._bioPhases.update((bioPhases) => {
       const planet = bioPhases[planetId];
       if (!planet) return bioPhases;
       if (phaseIndex < 0 || phaseIndex >= planet.phases.length) return bioPhases;
@@ -450,7 +447,7 @@ export class GameStateService {
   // -------------------------------------------------------------------------
 
   authoriseEuropa(impactYear: number): void {
-    this._europaState.update(s => ({ ...s, missionAuthorised: true, impactYear }));
+    this._europaState.update((s) => ({ ...s, missionAuthorised: true, impactYear }));
   }
 
   // -------------------------------------------------------------------------
