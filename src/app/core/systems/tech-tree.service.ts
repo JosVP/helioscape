@@ -94,7 +94,7 @@ export class TechTreeService {
 
     // Check for a fork effect before completing the tech.
     const forkEffect = node.effects.find(
-      (e): e is Extract<TechEffect, { type: 'present_fork' }> => e.type === 'present_fork',
+      (e): e is Extract<TechEffect, { type: 'present_fork' }> => e.type === 'present_fork'
     );
 
     if (forkEffect) {
@@ -127,7 +127,7 @@ export class TechTreeService {
     if (!node) return;
 
     const forkEffect = node.effects.find(
-      (e): e is Extract<TechEffect, { type: 'present_fork' }> => e.type === 'present_fork',
+      (e): e is Extract<TechEffect, { type: 'present_fork' }> => e.type === 'present_fork'
     );
     if (!forkEffect) return;
 
@@ -186,7 +186,7 @@ export class TechTreeService {
   private _presentFork(
     planetId: string,
     techId: string,
-    forkEffect: Extract<TechEffect, { type: 'present_fork' }>,
+    forkEffect: Extract<TechEffect, { type: 'present_fork' }>
   ): void {
     this.gameState.setPendingFork({
       techId,
@@ -246,7 +246,7 @@ export class TechTreeService {
         // Enable a colonist-lifestyle bonus on the planet.
         this.gameState.setColonistBonus(
           effect.bonus === 'dense_living' ? 'denseLiving' : 'openEnvironment',
-          true,
+          true
         );
         break;
 

@@ -31,11 +31,13 @@ function makeTechNode(overrides: Partial<TechNode> = {}): TechNode {
 // ---------------------------------------------------------------------------
 
 /** Minimal writable signal helpers for GameStateService fake. */
-function makeGameStateFake(opts: {
-  completedTechs?: string[];
-  pendingFork?: PendingFork | null;
-  naturalistCount?: number;
-} = {}) {
+function makeGameStateFake(
+  opts: {
+    completedTechs?: string[];
+    pendingFork?: PendingFork | null;
+    naturalistCount?: number;
+  } = {}
+) {
   const completedTechs = signal<string[]>(opts.completedTechs ?? []);
   const pendingFork = signal<PendingFork | null>(opts.pendingFork ?? null);
   const naturalistCount = signal<number>(opts.naturalistCount ?? 0);
@@ -92,7 +94,7 @@ describe('TechTreeService', () => {
 
   function setup(
     nodes: TechNode[] = [],
-    gameStateOpts: Parameters<typeof makeGameStateFake>[0] = {},
+    gameStateOpts: Parameters<typeof makeGameStateFake>[0] = {}
   ) {
     gameState = makeGameStateFake(gameStateOpts);
     data = makeDataFake(nodes);
@@ -182,7 +184,6 @@ describe('TechTreeService', () => {
       });
       setup([node], { completedTechs: [] });
       expect(service.canUnlock('mars', 'n1')).toBe(false);
-
     });
 
     it('defaults to "all" mode when prerequisiteMode is absent', () => {
@@ -310,7 +311,7 @@ describe('TechTreeService', () => {
 
       // parent and child should both be unlocked.
       const calls = (gameState.unlockTech as ReturnType<typeof vi.fn>).mock.calls.map(
-        (c: unknown[]) => c[0],
+        (c: unknown[]) => c[0]
       );
       expect(calls).toContain('parent');
       expect(calls).toContain('child');
@@ -406,7 +407,7 @@ describe('TechTreeService', () => {
       setupSingleEffectNode({ type: 'emit_event', eventId: 'ce_test' });
       service.unlockTech('mars', 'n1');
       expect(gameState.addToEventQueue).toHaveBeenCalledWith(
-        expect.objectContaining({ eventId: 'ce_test', priority: false }),
+        expect.objectContaining({ eventId: 'ce_test', priority: false })
       );
     });
 
@@ -470,7 +471,7 @@ describe('TechTreeService', () => {
       service.unlockTech('mars', 'n1');
 
       const calls = (gameState.unlockTech as ReturnType<typeof vi.fn>).mock.calls.map(
-        (c: unknown[]) => c[0],
+        (c: unknown[]) => c[0]
       );
       expect(calls).toContain('venus_spill');
     });

@@ -154,7 +154,7 @@ export class GameStateService {
       .flatMap((id) => this.data.getTechNode(id)?.effects ?? [])
       .filter(
         (e): e is Extract<TechEffect, { type: 'rp_capacity_boost' }> =>
-          e.type === 'rp_capacity_boost',
+          e.type === 'rp_capacity_boost'
       )
       .reduce((sum, e) => sum + e.amount, 0);
 
@@ -175,7 +175,7 @@ export class GameStateService {
   readonly usedRpCapacity = computed<number>(() =>
     this._activeResearch()
       .filter((t) => !t.isPaused)
-      .reduce((sum, t) => sum + (this.data.getResearchTrack(t.trackId)?.rpCost ?? 0), 0),
+      .reduce((sum, t) => sum + (this.data.getResearchTrack(t.trackId)?.rpCost ?? 0), 0)
   );
 
   // -------------------------------------------------------------------------
@@ -212,21 +212,21 @@ export class GameStateService {
 
   pauseResearch(trackId: string): void {
     this._activeResearch.update((tracks) =>
-      tracks.map((t) => (t.trackId === trackId ? { ...t, isPaused: true } : t)),
+      tracks.map((t) => (t.trackId === trackId ? { ...t, isPaused: true } : t))
     );
   }
 
   resumeResearch(trackId: string): void {
     this._activeResearch.update((tracks) =>
-      tracks.map((t) => (t.trackId === trackId ? { ...t, isPaused: false } : t)),
+      tracks.map((t) => (t.trackId === trackId ? { ...t, isPaused: false } : t))
     );
   }
 
   advanceResearch(trackId: string, years: number): void {
     this._activeResearch.update((tracks) =>
       tracks.map((t) =>
-        t.trackId === trackId ? { ...t, progressYears: t.progressYears + years } : t,
-      ),
+        t.trackId === trackId ? { ...t, progressYears: t.progressYears + years } : t
+      )
     );
   }
 
@@ -257,7 +257,7 @@ export class GameStateService {
     if (!techNode) return;
 
     const forkEffect = techNode.effects.find(
-      (e): e is Extract<TechEffect, { type: 'present_fork' }> => e.type === 'present_fork',
+      (e): e is Extract<TechEffect, { type: 'present_fork' }> => e.type === 'present_fork'
     );
     if (!forkEffect?.choices.find((c) => c.id === choiceId)) return;
 
@@ -371,14 +371,14 @@ export class GameStateService {
   /** Updates the status of a building instance by its unique id. */
   updateBuildingStatus(buildingId: string, status: 'building' | 'operational'): void {
     this._mercuryBuildings.update((buildings) =>
-      buildings.map((b) => (b.id === buildingId ? { ...b, status } : b)),
+      buildings.map((b) => (b.id === buildingId ? { ...b, status } : b))
     );
   }
 
   /** Updates the build progress (years) of a building instance by its unique id. */
   updateBuildingProgress(id: string, progress: number): void {
     this._mercuryBuildings.update((buildings) =>
-      buildings.map((b) => (b.id === id ? { ...b, buildProgressYears: progress } : b)),
+      buildings.map((b) => (b.id === id ? { ...b, buildProgressYears: progress } : b))
     );
   }
 
@@ -586,9 +586,7 @@ export class GameStateService {
         };
         return acc;
       },
-      {} as Record<string, PlanetState>,
+      {} as Record<string, PlanetState>
     );
   }
-
 }
-
