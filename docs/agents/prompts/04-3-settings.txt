@@ -1,6 +1,6 @@
 Note: code in this prompt is a suggestion and may be incomplete, incorrect or duplicate. Stay critical.
 Note: code in this prompt is a suggestion and may be incomplete, incorrect or duplicate. Stay critical.
-Create a plan for a plan for settings.component.ts for Helioscape.
+Create a plan for settings.component.ts for Helioscape.
 
 Output: closed = output<void>()
 Inject: SettingsService.

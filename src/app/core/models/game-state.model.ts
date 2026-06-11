@@ -116,3 +116,37 @@ export interface EuropaState {
   impacted: boolean;
   lifeConfirmed: boolean;
 }
+
+// ---------------------------------------------------------------------------
+// EventBusService payload types
+// ---------------------------------------------------------------------------
+
+/** Emitted when a tech node is unlocked on a planet. */
+export interface TechUnlockedEvent {
+  planetId: string;
+  nodeId: string;
+}
+
+/** Emitted when a terraforming choice is applied on a planet. */
+export interface TerraformChoiceEvent {
+  planetId: string;
+  choiceId: string;
+}
+
+/** Emitted when a terraforming phase advances on a planet. */
+export interface TerraformPhaseEvent {
+  planetId: string;
+  phase: number;
+}
+
+/** Emitted for bio-phase lifecycle events (started / completed / collapsed). */
+export interface BioPhaseEvent {
+  planetId: string;
+  phaseId: string;
+}
+
+/** Emitted when a fork choice is presented to the player. */
+export interface ForkPresentedEvent {
+  planetId: string;
+  techId: string;
+}
