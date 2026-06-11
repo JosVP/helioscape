@@ -55,7 +55,7 @@ export function getValueAtYear(
   startYear: number,
   endYear: number,
   startValue: number,
-  endValue: number
+  endValue: number,
 ): number {
   if (currentYear <= startYear) return startValue;
   if (currentYear >= endYear) return endValue;
@@ -70,13 +70,13 @@ export function getValueAtYear(
  */
 export function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
   const cleaned = hex.replace('#', '');
-  
+
   if (cleaned.length !== 6) return null;
-  
+
   const num = parseInt(cleaned, 16);
-  
+
   if (isNaN(num)) return null;
-  
+
   return {
     r: (num >> 16) & 255,
     g: (num >> 8) & 255,
@@ -94,15 +94,15 @@ export function hexToRgb(hex: string): { r: number; g: number; b: number } | nul
 export function lerpColor(hexA: string, hexB: string, t: number): string {
   const colorA = hexToRgb(hexA);
   const colorB = hexToRgb(hexB);
-  
+
   if (!colorA || !colorB) return hexA;
-  
+
   const r = Math.round(lerp(colorA.r, colorB.r, t));
   const g = Math.round(lerp(colorA.g, colorB.g, t));
   const b = Math.round(lerp(colorA.b, colorB.b, t));
-  
+
   const toHex = (n: number): string => n.toString(16).padStart(2, '0');
-  
+
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
 
