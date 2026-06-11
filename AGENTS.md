@@ -26,6 +26,21 @@ obey the standards in **this file** and **ARCHITECTURE.md**.
 
 ---
 
+## TODO tracking
+
+Deferred work (features blocked by missing dependencies) is tracked in **`docs/agents/TODO.md`**.
+
+- **lead-developer**: Adds TODOs to the file during planning when a feature depends on something
+  not yet implemented (e.g., AudioService, Tauri APIs). Checks the file at the start of every
+  planning session to see if blocked work is now unblocked.
+- **developer**: Reads the file before implementing to understand what's deferred and why. When
+  implementing deferred work, moves completed TODOs from "Active" to "Completed" section with date.
+
+**Single source of truth**: all TODOs live in TODO.md only. This ensures nothing falls through
+the cracks as the codebase grows.
+
+---
+
 ## Your role
 
 You write production-quality Angular code for a real shipped game. You are not writing tutorials

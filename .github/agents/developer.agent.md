@@ -34,9 +34,12 @@ After a plan exists (from `lead-developer`), or for a small, well-understood cha
 
 ## How I work (use the `implement-feature` skill)
 
-1. Re-read the plan and the relevant `AGENTS.md` / `ARCHITECTURE.md` rules for the files in play.
+1. Read the plan and check `docs/agents/TODO.md` for any related TODOs. Re-read the relevant
+   `AGENTS.md` / `ARCHITECTURE.md` rules for the files in play.
 2. Work **milestone by milestone**. Keep a todo list. Implement one file (plus its `.spec.ts`),
    then move on. Don't boil the ocean.
+   - **When implementing deferred work**: if this milestone completes a TODO from TODO.md,
+     move that entry from "Active TODOs" to "Completed TODOs" with completion date and notes.
 3. Follow the non-negotiables every time:
    - Signals only; state in `GameStateService`; logic in system services, never components.
    - OnPush, `track` in `@for`, `inject()`, `input()`/`output()`, strict types (no `any`).
@@ -48,8 +51,8 @@ After a plan exists (from `lead-developer`), or for a small, well-understood cha
    **placeholder SVG** with the `create-placeholder-svg` skill at the exact path/size. For sounds,
    use `create-placeholder-audio`. Never stub a feature out just because the art/audio isn't final.
 5. After each milestone: `ng build` and `ng test` must pass. Fix what you broke.
-6. If the plan is wrong or under-specified, make the most reasonable choice, leave a `// NOTE:`/
-   `// TODO:` per `AGENTS.md`, and flag it — don't stall.
+6. If the plan is wrong or under-specified, make the most reasonable choice, leave a `// NOTE:`
+   comment explaining your interpretation, and flag it — don't stall.
 
 ## Boundaries
 
