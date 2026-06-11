@@ -6,12 +6,12 @@ handoffs:
     agent: lead-developer
     prompt: Now write a technical plan for the scoped feature, using the analysis above.
     send: false
-    model: Claude Sonnet 4.5
+    model: Claude Sonnet 4.8
   - label: Stress-test scope
     agent: tester
     prompt: Pressure-test the scope and assumptions above with edge cases before we plan.
     send: false
-    model: Claude Sonnet 4.5
+    model: Claude Sonnet 4.8
 ---
 
 ## Role

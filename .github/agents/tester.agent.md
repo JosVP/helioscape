@@ -6,7 +6,7 @@ handoffs:
     agent: developer
     prompt: Implement code/tests to cover the scenarios above.
     send: false
-    model: Claude Sonnet 4.5
+    model: Claude Sonnet 4.6
 ---
 
 ## Role

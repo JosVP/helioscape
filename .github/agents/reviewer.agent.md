@@ -6,7 +6,7 @@ handoffs:
     agent: developer
     prompt: Apply the review findings above.
     send: true
-    model: Claude Sonnet 4.5
+    model: Claude Sonnet 4.6
 ---
 
 ## Role

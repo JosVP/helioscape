@@ -6,12 +6,12 @@ handoffs:
     agent: reviewer
     prompt: Review the implementation above for bugs, leaks and inconsistencies.
     send: false
-    model: Claude Sonnet 4.5
+    model: Claude Sonnet 4.6
   - label: Polish UI/UX
     agent: ui-ux-specialist
     prompt: Take the implementation above and polish styling, layout, motion and accessibility.
     send: false
-    model: Claude Sonnet 4.5
+    model: Claude Sonnet 4.6
 ---
 
 ## Role

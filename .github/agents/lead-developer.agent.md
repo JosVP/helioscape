@@ -6,12 +6,12 @@ handoffs:
     agent: developer
     prompt: Implement the plan above, milestone by milestone.
     send: false
-    model: Claude Sonnet 4.5
+    model: Claude Sonnet 4.6
   - label: Stress-test the plan
     agent: tester
     prompt: Review this plan for missing edge cases, leaks and failure modes before we build.
     send: false
-    model: Claude Sonnet 4.5
+    model: Claude Sonnet 4.6
 ---
 
 ## Role
