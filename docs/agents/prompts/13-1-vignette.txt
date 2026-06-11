@@ -1,4 +1,4 @@
-Note: code in this prompt is a suggestion and may be incomplete, incorrect or duplicate. Stay critical.
+Note: this prompt is a suggestion and may be incomplete, incorrect or duplicate. Stay critical.
 Create a plan for vignette.component.ts for Helioscape.
 This is a placeholder implementation for the playtest build.
 The full vignette system (animated SVG illustrations) is post-playtest.

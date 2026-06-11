@@ -1,4 +1,4 @@
-Note: code in this prompt is a suggestion and may be incomplete, incorrect or duplicate. Stay critical.
+Note: this prompt is a suggestion and may be incomplete, incorrect or duplicate. Stay critical.
 Create a plan for building-selector.component.ts for Helioscape.
 
 Input: terrainType = input.required<'flat' | 'polar' | 'crater_rim'>()

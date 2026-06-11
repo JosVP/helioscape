@@ -1,4 +1,4 @@
-Note: code in this prompt is a suggestion and may be incomplete, incorrect or duplicate. Stay critical.
+Note: this prompt is a suggestion and may be incomplete, incorrect or duplicate. Stay critical.
 Create a plan for src/app/core/systems/research.service.ts for Helioscape.
 
 Read AGENTS.md and ARCHITECTURE.md.

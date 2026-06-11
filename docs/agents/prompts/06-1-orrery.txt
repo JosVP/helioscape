@@ -1,4 +1,4 @@
-Note: code in this prompt is a suggestion and may be incomplete, incorrect or duplicate. Stay critical.
+Note: this prompt is a suggestion and may be incomplete, incorrect or duplicate. Stay critical.
 Create a plan for orrery.component.ts for Helioscape.
 
 Read AGENTS.md and ARCHITECTURE.md carefully. Three.js and Angular integration rules apply.
@@ -22,11 +22,11 @@ Sun:
 
 Planets (4):
   For each planet from DataService.getAllPlanets():
-    Note: code in this prompt is a suggestion and may be incomplete, incorrect or duplicate. Stay critical.
+    Note: this prompt is a suggestion and may be incomplete, incorrect or duplicate. Stay critical.
 Create a plan for SphereGeometry mesh. MeshStandardMaterial with base color from planet data.
-    Note: code in this prompt is a suggestion and may be incomplete, incorrect or duplicate. Stay critical.
+    Note: this prompt is a suggestion and may be incomplete, incorrect or duplicate. Stay critical.
 Create a plan for thin torus ring at orbit radius for orbital path (dim white, low opacity).
-    Note: code in this prompt is a suggestion and may be incomplete, incorrect or duplicate. Stay critical.
+    Note: this prompt is a suggestion and may be incomplete, incorrect or duplicate. Stay critical.
 Create a plan for a visible group: orbit ring (static) + planet mesh (moves).
     Planet mesh has an Area (invisible SphereGeometry slightly larger) for raycasting.
 

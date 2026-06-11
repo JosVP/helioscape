@@ -1,4 +1,4 @@
-Note: code in this prompt is a suggestion and may be incomplete, incorrect or duplicate. Stay critical.
+Note: this prompt is a suggestion and may be incomplete, incorrect or duplicate. Stay critical.
 Create a plan for pause-menu.component.ts for Helioscape.
 
 Inject: GameLoopService, GameStateService, SaveService, Router.
