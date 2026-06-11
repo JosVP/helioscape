@@ -157,6 +157,24 @@ No inline `// TODO:` comments in code - all tracking happens here to avoid dupli
 - **Prompt block**: 14
 - **Added**: 2026-06-11
 
+### BioPhaseService — initNewGame() call site
+
+- **File**: src/app/features/game-shell/game-shell.component.ts (or game init sequence)
+- **Location**: After `gameState.reset()` call when starting a new campaign
+- **TODO**: Call `bioPhaseService.initNewGame()` to seed initial `PlanetBioState` for all bio planets
+- **Depends on**: GameShellComponent implementation
+- **Prompt block**: TBD (Game Shell block)
+- **Added**: 2026-06-11
+
+### BioPhaseService — Mercury orbital component requirements
+
+- **File**: src/app/core/systems/bio-phase.service.ts
+- **Location**: `_isComponentBuilt()` method
+- **TODO**: `PlanetBioState.odnBuilt` / `bioreactorBatchesActive` / `precipitationEnginesBuilt` / `atmosphericCatalystShipsBuilt` are never mutated. Component-gated bio phases (Bio III+ on both planets) will remain locked until MercuryBuildService or an orbital-components service writes to these fields.
+- **Depends on**: MercuryBuildService orbital-component feature
+- **Prompt block**: TBD (Mercury orbitals block)
+- **Added**: 2026-06-11
+
 ---
 
 ## Completed TODOs

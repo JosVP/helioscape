@@ -1,1 +1,112 @@
-{}
+{
+  "mars": [
+    {
+      "id": "mars-bio-1",
+      "displayName": "Pioneer Microbes",
+      "nominalDurationYears": 20,
+      "actions": [
+        "seed_cyanobacteria",
+        "add_perchlorate_reducers",
+        "deploy_iron_oxidisers"
+      ],
+      "requiresComponents": [],
+      "completeCeId": "ce_mars_bio_1_complete"
+    },
+    {
+      "id": "mars-bio-2",
+      "displayName": "Chemolithotrophs & Fixers",
+      "nominalDurationYears": 25,
+      "actions": [
+        "add_nitrogen_fixers",
+        "seed_methanogens",
+        "add_chemolithotrophs",
+        "boost_soil_cycling"
+      ],
+      "requiresComponents": [],
+      "canStartAtPreviousPercent": 0.5,
+      "completeCeId": "ce_mars_bio_2_complete"
+    },
+    {
+      "id": "mars-bio-3",
+      "displayName": "Early Plants & Aquatics",
+      "nominalDurationYears": 30,
+      "actions": [
+        "introduce_mosses",
+        "seed_algae_mats",
+        "add_fungal_networks",
+        "deploy_decomposers"
+      ],
+      "requiresComponents": ["bioreactor"],
+      "spilloverTech": "mars_early_biosphere",
+      "completeCeId": "ce_mars_bio_3_complete"
+    },
+    {
+      "id": "mars-bio-4",
+      "displayName": "Biosphere Stabilisation",
+      "nominalDurationYears": 35,
+      "actions": [
+        "introduce_ferns",
+        "add_pollinators",
+        "complete_food_web",
+        "seed_tundra_package"
+      ],
+      "requiresComponents": ["precipitationEngine"],
+      "completeCeId": "ce_mars_bio_4_complete"
+    }
+  ],
+  "venus": [
+    {
+      "id": "venus-bio-1",
+      "displayName": "Acid Chemistry Reducers",
+      "nominalDurationYears": 25,
+      "actions": [
+        "seed_sulphur_reducers",
+        "add_chemolithotrophs",
+        "deploy_acid_package"
+      ],
+      "requiresComponents": [],
+      "completeCeId": "ce_venus_bio_1_complete"
+    },
+    {
+      "id": "venus-bio-2",
+      "displayName": "Ocean Foundation Microbes",
+      "nominalDurationYears": 30,
+      "actions": [
+        "seed_aquatic_microbes",
+        "add_phytoplankton",
+        "introduce_kelp",
+        "boost_ocean_buffer"
+      ],
+      "requiresComponents": [],
+      "canStartAtPreviousPercent": 0.5,
+      "completeCeId": "ce_venus_bio_2_complete"
+    },
+    {
+      "id": "venus-bio-3",
+      "displayName": "Atmospheric Processors",
+      "nominalDurationYears": 35,
+      "actions": [
+        "add_nitrogen_fixers",
+        "seed_mosses",
+        "deploy_coastal_package",
+        "introduce_lichens"
+      ],
+      "requiresComponents": ["atmosphericCatalystShip"],
+      "spilloverTech": "venus_early_biosphere",
+      "completeCeId": "ce_venus_bio_3_complete"
+    },
+    {
+      "id": "venus-bio-4",
+      "displayName": "Biosphere Emergence",
+      "nominalDurationYears": 40,
+      "actions": [
+        "introduce_ferns",
+        "add_pollinators",
+        "seed_forest_understory",
+        "complete_food_web"
+      ],
+      "requiresComponents": ["atmosphericCatalystShip", "odn"],
+      "completeCeId": "ce_venus_bio_4_complete"
+    }
+  ]
+}

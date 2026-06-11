@@ -278,5 +278,85 @@
     "tags": [],
     "trigger": null,
     "priority": true
+  },
+  {
+    "id": "ce_mars_bio_1_complete",
+    "title": "The First Organisms Take Hold",
+    "narratorText": "The microbial census is in. The pioneer organisms are not just surviving — they are spreading, metabolising, and dying in the right cycles. Mars has never hosted a carbon cycle before. It does now. We are its first biologists and its first gardeners.",
+    "portrait": "/assets/svg/portraits/ce_mars_bio_1_complete.svg",
+    "choices": [],
+    "tags": [],
+    "trigger": { "type": "bio_phase_complete", "planet": "mars", "phase": "mars-bio-1" },
+    "priority": true
+  },
+  {
+    "id": "ce_mars_bio_2_complete",
+    "title": "The Soil Remembers",
+    "narratorText": "Nitrogen is fixing. The chemolithotrophs have built a mineral scaffold the plants will one day inherit. Decades of work and the reward is a thin crust of chemistry that a child could scoop up in a handful. We are proud of every gram of it.",
+    "portrait": "/assets/svg/portraits/ce_mars_bio_2_complete.svg",
+    "choices": [],
+    "tags": [],
+    "trigger": { "type": "bio_phase_complete", "planet": "mars", "phase": "mars-bio-2" },
+    "priority": true
+  },
+  {
+    "id": "ce_mars_bio_3_complete",
+    "title": "Green on Red",
+    "narratorText": "The orbital imaging team flagged it at 0400 and no one went back to sleep. A faint green signature in the equatorial lowlands, spreading slowly outward from the seeded zones. Mars is growing something. We planted it, and it is growing.",
+    "portrait": "/assets/svg/portraits/ce_mars_bio_3_complete.svg",
+    "choices": [],
+    "tags": [],
+    "trigger": { "type": "bio_phase_complete", "planet": "mars", "phase": "mars-bio-3" },
+    "priority": true
+  },
+  {
+    "id": "ce_mars_bio_4_complete",
+    "title": "A Biosphere Confirmed",
+    "narratorText": "The stability models have converged. Mars now maintains a self-reinforcing biological system — organisms decomposing, cycling, reproducing, competing. We did not just seed it. We handed it off. Whatever grows here from now on will not need us to keep it alive.",
+    "portrait": "/assets/svg/portraits/ce_mars_bio_4_complete.svg",
+    "choices": [],
+    "tags": [],
+    "trigger": { "type": "bio_phase_complete", "planet": "mars", "phase": "mars-bio-4" },
+    "priority": true
+  },
+  {
+    "id": "ce_venus_bio_1_complete",
+    "title": "The Acid Recedes",
+    "narratorText": "Sulphuric acid concentrations in the lower atmosphere have dropped below the threshold we set as our first target. The sulphur-reducers did what nothing natural ever managed on this planet. The ocean floor is less hostile today than it was a decade ago. We start again from here.",
+    "portrait": "/assets/svg/portraits/ce_venus_bio_1_complete.svg",
+    "choices": [],
+    "tags": [],
+    "trigger": { "type": "bio_phase_complete", "planet": "venus", "phase": "venus-bio-1" },
+    "priority": true
+  },
+  {
+    "id": "ce_venus_bio_2_complete",
+    "title": "An Ocean Stirs",
+    "narratorText": "The aquatic layer is establishing. Phytoplankton analogues are producing oxygen in quantities the sensors can measure. We have built an ocean from chemistry, patience, and organisms smaller than a human cell. It is the strangest beautiful thing we have ever done.",
+    "portrait": "/assets/svg/portraits/ce_venus_bio_2_complete.svg",
+    "choices": [],
+    "tags": [],
+    "trigger": { "type": "bio_phase_complete", "planet": "venus", "phase": "venus-bio-2" },
+    "priority": true
+  },
+  {
+    "id": "ce_venus_bio_3_complete",
+    "title": "The Atmosphere Answers",
+    "narratorText": "Nitrogen is stabilising. Coastal mosses are filtering air through root mats that, three generations from now, someone might walk over without a suit. We are not done. But we have crossed the line from possible to underway.",
+    "portrait": "/assets/svg/portraits/ce_venus_bio_3_complete.svg",
+    "choices": [],
+    "tags": [],
+    "trigger": { "type": "bio_phase_complete", "planet": "venus", "phase": "venus-bio-3" },
+    "priority": true
+  },
+  {
+    "id": "ce_venus_bio_4_complete",
+    "title": "The Second World Breathes",
+    "narratorText": "The biosphere model has closed. Venus sustains a complete ecological loop — producers, consumers, decomposers, cycling nutrients through soil and water and air. We started with acid rain and a runaway greenhouse. We are ending with a world that breathes. We will allow ourselves, just this once, to call it a miracle.",
+    "portrait": "/assets/svg/portraits/ce_venus_bio_4_complete.svg",
+    "choices": [],
+    "tags": [],
+    "trigger": { "type": "bio_phase_complete", "planet": "venus", "phase": "venus-bio-4" },
+    "priority": true
   }
 ]

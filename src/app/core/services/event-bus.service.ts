@@ -44,6 +44,9 @@ export class EventBusService {
   /** The Dyson sphere energy output has been updated. Payload: watts. */
   readonly dysonEnergyUpdated$ = new Subject<number>();
 
+  /** A bio phase has become available (requirements met) on a planet. */
+  readonly bioPhaseAvailable$ = new Subject<BioPhaseEvent>();
+
   /** A bio phase has started on a planet. */
   readonly bioPhaseStarted$ = new Subject<BioPhaseEvent>();
 

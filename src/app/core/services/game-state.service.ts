@@ -522,6 +522,28 @@ export class GameStateService {
     });
   }
 
+  /**
+   * Replaces the entire bio-phases map.
+   * Used by BioPhaseService.initNewGame() to seed a fresh campaign.
+   * hydrate() already writes _bioPhases directly — this is the equivalent
+   * public method for new-game initialisation.
+   */
+  setBioPhases(phases: Record<string, PlanetBioState>): void {
+    this._bioPhases.set(phases);
+  }
+
+  /** Adds requestId to a planet's requestsSent list (idempotent). */
+  addBioRequest(planetId: string, requestId: string): void {
+    this._bioPhases.update((bioPhases) => {
+      const planet = bioPhases[planetId];
+      if (!planet || planet.requestsSent.includes(requestId)) return bioPhases;
+      return {
+        ...bioPhases,
+        [planetId]: { ...planet, requestsSent: [...planet.requestsSent, requestId] },
+      };
+    });
+  }
+
   // -------------------------------------------------------------------------
   // Europa mutation
   // -------------------------------------------------------------------------
