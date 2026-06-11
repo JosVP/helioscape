@@ -130,6 +130,33 @@ No inline `// TODO:` comments in code - all tracking happens here to avoid dupli
 - **Prompt block**: 03-1 (tech-tree-service)
 - **Added**: 2026-06-11
 
+### KardashevService — interstellar_seed_ship_launched condition
+
+- **File**: src/app/core/systems/kardashev.service.ts
+- **Location**: `_checkCondition()`, `'interstellar_seed_ship_launched'` case
+- **TODO**: Implement when a state flag or tech for interstellar seed ships is added; currently always returns `false`
+- **Depends on**: Late-game interstellar feature (Block TBD)
+- **Prompt block**: TBD
+- **Added**: 2026-06-11
+
+### KardashevService — first_self_sustaining_colony condition
+
+- **File**: src/app/core/systems/kardashev.service.ts
+- **Location**: `_checkCondition()`, `'first_self_sustaining_colony'` case
+- **TODO**: Revisit `SELF_SUSTAINING_POPULATION` threshold once a ColonyManagementService populates `PlanetState.population`; currently always `false` because no service writes to `population`
+- **Depends on**: Colony management system (Block TBD)
+- **Prompt block**: TBD
+- **Added**: 2026-06-11
+
+### KardashevService — eager instantiation in GameShellComponent
+
+- **File**: src/app/features/game-shell/game-shell.component.ts
+- **Location**: Constructor / `inject()` calls
+- **TODO**: Add `inject(KardashevService)` so the service's `effect()` is active during the game
+- **Depends on**: GameShellComponent (Block 14)
+- **Prompt block**: 14
+- **Added**: 2026-06-11
+
 ---
 
 ## Completed TODOs
