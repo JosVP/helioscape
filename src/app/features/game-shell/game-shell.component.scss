@@ -51,8 +51,6 @@ app-culture-event-toast {
   z-index: 20;
 }
 
-app-pause-menu {
-  position: fixed;
-  inset: 0;
-  z-index: 30;
-}
+// NOTE: app-pause-menu positions itself internally as a fixed overlay.
+// Do not apply position/inset here — the stub has an empty template and
+// positioning it from the parent creates an invisible click-blocking overlay.

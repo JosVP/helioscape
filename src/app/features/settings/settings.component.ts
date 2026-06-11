@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, inject, output, signal } from '@angular/core';
-import type { RenderResolution } from '@app/core/services/settings.service';
 import { SettingsService } from '@app/core/services/settings.service';
 
 interface Tab {
@@ -58,8 +57,8 @@ export class SettingsComponent {
     this.settings.set('vsync', (event.target as HTMLInputElement).checked);
   }
 
-  onRenderResolution(event: Event): void {
-    this.settings.set('renderResolution', (event.target as HTMLSelectElement).value as RenderResolution);
+  onUiScale(event: Event): void {
+    this.settings.set('uiScale', +(event.target as HTMLSelectElement).value);
   }
 
   // ─── Accessibility ────────────────────────────────────────────────────────

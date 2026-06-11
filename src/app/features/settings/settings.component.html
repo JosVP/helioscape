@@ -85,22 +85,22 @@
         }
 
         @case ('video') {
-          <!-- Render Resolution -->
+          <!-- UI Scale -->
           <section class="settings__row">
-            <label class="settings__label" for="render-resolution">Render Resolution</label>
+            <label class="settings__label" for="ui-scale">UI Scale</label>
             <select
-              id="render-resolution"
+              id="ui-scale"
               class="settings__select"
-              [value]="settings.renderResolution()"
-              (change)="onRenderResolution($event)"
+              [value]="settings.uiScale()"
+              (change)="onUiScale($event)"
             >
-              <option value="1280x720">Performance — 1280 × 720</option>
-              <option value="1920x1080">Standard — 1920 × 1080</option>
-              <option value="2560x1440">High — 2560 × 1440</option>
+              <option value="1.0">100% — Default</option>
+              <option value="1.25">125% — Large</option>
+              <option value="1.5">150% — Extra Large</option>
+              <option value="2.0">200% — Huge</option>
             </select>
             <p class="settings__description">
-              The logical canvas size. Scaled to fill the screen — lower presets render faster,
-              higher presets give sharper art on large monitors.
+              Scales the entire interface. Applies immediately.
             </p>
           </section>
 

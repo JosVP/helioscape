@@ -125,15 +125,6 @@ No inline `// TODO:` comments in code - all tracking happens here to avoid dupli
 - **Prompt block**: TBD (Tauri integration block)
 - **Added**: 2026-06-11
 
-### AppComponent — applyRenderResolution window sizing (Tauri)
-
-- **File**: src/app/app.ts
-- **Location**: In `computeScale()` — currently uses CSS transform scale
-- **TODO**: When running in Tauri, also call `appWindow.setSize(new LogicalSize(lw, lh))` so the OS window matches the logical resolution rather than relying purely on CSS scaling
-- **Depends on**: Tauri window API integration
-- **Prompt block**: TBD (Tauri integration block)
-- **Added**: 2026-06-11
-
 ### SettingsService — Tauri File Persistence
 
 - **File**: src/app/core/services/settings.service.ts
