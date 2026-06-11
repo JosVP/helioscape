@@ -110,6 +110,15 @@ No inline `// TODO:` comments in code - all tracking happens here to avoid dupli
 - **Prompt block**: TBD (Tauri integration block)
 - **Added**: 2026-06-11
 
+### DysonService — AudioService on CME and tier upgrade
+
+- **File**: src/app/core/systems/dyson.service.ts
+- **Location**: In `processYear()` CME branch and `upgradeTier()` success path
+- **TODO**: Play a sound via AudioService when a CME event fires (dramatic impact sfx) and when a tier upgrade completes (achievement sting). Currently no audio hook.
+- **Depends on**: AudioService (not yet created)
+- **Prompt block**: TBD (audio system block)
+- **Added**: 2026-06-11
+
 ### TechTreeService — TerraformingService integration
 
 - **File**: src/app/core/systems/tech-tree.service.ts

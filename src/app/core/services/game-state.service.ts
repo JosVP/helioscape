@@ -469,6 +469,10 @@ export class GameStateService {
     this._dysonEnergyWatts.set(energyWatts);
   }
 
+  setDysonPanelTier(tier: 'basic' | 'mid' | 'hardened'): void {
+    this._dysonPanelTier.set(tier);
+  }
+
   // -------------------------------------------------------------------------
   // Kardashev / milestone mutations
   // -------------------------------------------------------------------------
