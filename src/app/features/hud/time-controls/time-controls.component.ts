@@ -25,6 +25,9 @@ export class TimeControlsComponent {
   readonly gameSpeed = this.gameState.gameSpeed;
   readonly isFirstPlaythrough = this.gameState.isFirstPlaythrough;
 
+  readonly pauseLabel = computed(() => (this.isPaused() ? '▶' : '⏸'));
+  readonly speedLabel = computed(() => `${this.gameSpeed()}×`);
+
   togglePause(): void {
     if (this.isPaused()) {
       this.gameLoop.resume();
@@ -33,7 +36,7 @@ export class TimeControlsComponent {
     }
   }
 
-  setSpeed(speed: 1 | 4): void {
-    this.gameLoop.setSpeed(speed);
+  toggleSpeed(): void {
+    this.gameLoop.setSpeed(this.gameSpeed() === 1 ? 4 : 1);
   }
 }

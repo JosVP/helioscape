@@ -60,42 +60,44 @@ describe('TimeControlsComponent', () => {
     expect(mockGameLoop.pause).not.toHaveBeenCalled();
   });
 
-  it('clicking 1× calls setSpeed(1)', () => {
-    const fixture = setup();
-    const btns: NodeListOf<HTMLButtonElement> = fixture.nativeElement.querySelectorAll('.time-controls__btn--speed');
-    btns[0].click(); // 1× is always the first speed button
-    expect(mockGameLoop.setSpeed).toHaveBeenCalledWith(1);
-  });
-
-  it('4× button is hidden on first playthrough', () => {
+  it('speed button is absent on first playthrough', () => {
     isFirstPlaythroughSignal.set(true);
     const fixture = setup();
-    const speedBtns: NodeListOf<HTMLButtonElement> = fixture.nativeElement.querySelectorAll('.time-controls__btn--speed');
-    expect(speedBtns.length).toBe(1);
+    const speedBtn = fixture.nativeElement.querySelector('.time-controls__btn--speed');
+    expect(speedBtn).toBeNull();
   });
 
-  it('4× button is visible when not first playthrough', () => {
+  it('speed button is present when not first playthrough', () => {
     isFirstPlaythroughSignal.set(false);
     const fixture = setup();
-    fixture.detectChanges();
-    const speedBtns: NodeListOf<HTMLButtonElement> = fixture.nativeElement.querySelectorAll('.time-controls__btn--speed');
-    expect(speedBtns.length).toBe(2);
+    const speedBtn = fixture.nativeElement.querySelector('.time-controls__btn--speed');
+    expect(speedBtn).not.toBeNull();
   });
 
-  it('4× button click calls setSpeed(4)', () => {
+  it('speed button label reflects current speed', () => {
     isFirstPlaythroughSignal.set(false);
+    gameSpeedSignal.set(4);
     const fixture = setup();
-    fixture.detectChanges();
-    const speedBtns: NodeListOf<HTMLButtonElement> = fixture.nativeElement.querySelectorAll('.time-controls__btn--speed');
-    speedBtns[1].click();
+    const speedBtn: HTMLButtonElement = fixture.nativeElement.querySelector('.time-controls__btn--speed');
+    expect(speedBtn.textContent?.trim()).toBe('4×');
+  });
+
+  it('toggleSpeed flips 1× to 4×', () => {
+    isFirstPlaythroughSignal.set(false);
+    gameSpeedSignal.set(1);
+    const fixture = setup();
+    const speedBtn: HTMLButtonElement = fixture.nativeElement.querySelector('.time-controls__btn--speed');
+    speedBtn.click();
     expect(mockGameLoop.setSpeed).toHaveBeenCalledWith(4);
   });
 
-  it('active speed button has --active class', () => {
-    gameSpeedSignal.set(1);
+  it('toggleSpeed flips 4× to 1×', () => {
+    isFirstPlaythroughSignal.set(false);
+    gameSpeedSignal.set(4);
     const fixture = setup();
-    const speedBtns: NodeListOf<HTMLButtonElement> = fixture.nativeElement.querySelectorAll('.time-controls__btn--speed');
-    expect(speedBtns[0].classList.contains('time-controls__btn--active')).toBe(true);
+    const speedBtn: HTMLButtonElement = fixture.nativeElement.querySelector('.time-controls__btn--speed');
+    speedBtn.click();
+    expect(mockGameLoop.setSpeed).toHaveBeenCalledWith(1);
   });
 
   it('pause button has aria-pressed=true when paused', () => {
