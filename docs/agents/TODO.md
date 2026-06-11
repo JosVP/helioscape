@@ -56,15 +56,6 @@ No inline `// TODO:` comments in code - all tracking happens here to avoid dupli
 - **Prompt block**: TBD (culture event choices block)
 - **Added**: 2026-06-11
 
-### Routes — TitleScreenComponent stub
-
-- **File**: src/app/features/title-screen/title-screen.component.ts
-- **Location**: Whole file
-- **TODO**: Replace stub with real TitleScreenComponent implementation
-- **Depends on**: Title Screen feature block
-- **Prompt block**: TBD (Title Screen block)
-- **Added**: 2026-06-11
-
 ### Routes — GameShellComponent stub
 
 - **File**: src/app/features/game-shell/game-shell.component.ts
@@ -175,6 +166,15 @@ No inline `// TODO:` comments in code - all tracking happens here to avoid dupli
 - **Prompt block**: TBD (Game Shell block)
 - **Added**: 2026-06-11
 
+### GameShellComponent — Read slot query param on new game
+
+- **File**: src/app/features/game-shell/game-shell.component.ts
+- **Location**: Constructor / init sequence
+- **TODO**: Read the `slot` query param from `ActivatedRoute` (passed by TitleScreenComponent or SaveSlotPanelComponent on New Game), initialise fresh game state, and call `saveService.save(slot)` to write the initial save. Defaults to slot 1 if param absent.
+- **Depends on**: GameShellComponent implementation block
+- **Prompt block**: TBD (Game Shell block)
+- **Added**: 2026-06-11
+
 ### BioPhaseService — Mercury orbital component requirements
 
 - **File**: src/app/core/systems/bio-phase.service.ts
@@ -189,6 +189,11 @@ No inline `// TODO:` comments in code - all tracking happens here to avoid dupli
 ## Completed TODOs
 
 _(Moved here when implemented, kept for history)_
+
+### ✅ Routes — TitleScreenComponent stub
+- **Completed**: 2026-06-11
+- **Implemented in**: `src/app/features/title-screen/title-screen.component.ts` (Block 04-1)
+- **Notes**: Full TitleScreen with New Game / Continue / Load Game / Options / Quit, SaveSlotPanelComponent, and SettingsComponent overlay. Plan at `docs/agents/plans/04-1-title-screen.md`.
 
 ### ✅ TechTreeService — TerraformingService integration
 - **Completed**: 2026-06-11

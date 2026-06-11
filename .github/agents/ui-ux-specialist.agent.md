@@ -56,4 +56,17 @@ visual consistency, or improving accessibility.
 - Don't move game logic into components or styles. Visual/interaction concerns only.
 - `ng build` + `ng test` must stay green.
 
+## Validation (mandatory after every SCSS/style change)
+
+After editing any `.scss` file, always run:
+
+```
+npx ng build 2>&1 | grep -E "error|Error"
+```
+
+If the output contains errors, fix them before proceeding. Common SCSS pitfalls:
+- You **cannot** comma-join a selector and an `@media` rule (e.g. `:root.foo, @media (...) { }` is invalid). Keep them as separate blocks.
+- `@media` blocks must be at the top level or nested inside a selector — never in a comma-separated list with a selector.
+- CSS custom property overrides inside `@media` must target an explicit selector (e.g. `:root { --foo: … }`), not float bare inside the `@media`.
+
 Hand off to **reviewer** when polished, or back to **developer** for any remaining wiring.

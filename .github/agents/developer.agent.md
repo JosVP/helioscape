@@ -2,14 +2,14 @@
 name: developer
 description: Implement a Helioscape feature plan — Angular components/services, Three.js orrery, Mercury canvas, JSON data, and placeholder assets
 handoffs:
-  - label: Request Review
-    agent: reviewer
-    prompt: Review the implementation above for bugs, leaks and inconsistencies.
-    send: false
-    model: Claude Sonnet 4.6
   - label: Polish UI/UX
     agent: ui-ux-specialist
     prompt: Take the implementation above and polish styling, layout, motion and accessibility.
+    send: false
+    model: Claude Sonnet 4.6
+  - label: Request Review
+    agent: reviewer
+    prompt: Review the implementation above for bugs, leaks and inconsistencies.
     send: false
     model: Claude Sonnet 4.6
 ---

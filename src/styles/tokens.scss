@@ -49,6 +49,55 @@
   // Borders
   --radius-sm: 4px;
   --radius-md: 8px;
+  --radius-lg: 12px;
   --border-subtle: 1px solid rgba(255, 255, 255, 0.06);
   --border-accent: 1px solid var(--color-accent-dim);
+
+  // Typography — display sizes
+  --text-title: clamp(2rem, 7vw, 4.5rem);
+
+  // Shadows & glows
+  --shadow-title: 0 0 30px rgba(232, 160, 48, 0.6), 0 0 80px rgba(232, 160, 48, 0.15);
+  --shadow-btn-glow: 0 0 18px rgba(232, 160, 48, 0.28);
+  --shadow-panel: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+// ─── Reduced-motion global override ──────────────────────────────────────────
+// Applied when player enables "Reduced Motion" in settings OR the OS media
+// query fires. No component needs its own :root.reduced-motion block.
+
+// In-game toggle (SettingsService adds this class to :root)
+:root.reduced-motion {
+  --transition-tick: none;
+  --transition-ui: none;
+  --transition-panel: none;
+  --transition-initial: none;
+}
+
+:root.reduced-motion *,
+:root.reduced-motion *::before,
+:root.reduced-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  transition-delay: 0ms !important;
+}
+
+// OS-level preference
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --transition-tick: none;
+    --transition-ui: none;
+    --transition-panel: none;
+    --transition-initial: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
 }

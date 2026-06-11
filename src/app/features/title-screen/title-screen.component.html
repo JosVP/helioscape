@@ -1,0 +1,32 @@
+<div class="title-screen" [class.initial-load]="loaded()">
+  <div class="title-screen__content">
+    <h1 class="title-screen__title">HELIOSCAPE</h1>
+    <p class="title-screen__subtitle">Terraform the Solar System</p>
+
+    <nav class="title-screen__buttons" aria-label="Main menu">
+      <button class="title-screen__btn" autofocus (click)="onNewGame()">New Game</button>
+
+      @if (hasSave()) {
+        <div class="title-screen__continue-block">
+          <button class="title-screen__btn" (click)="onContinue()">Continue</button>
+          @if (mostRecentSlot(); as recent) {
+            <p class="title-screen__save-meta">
+              Year {{ recent.info.gameYear }} &middot; K{{ recent.info.kardashevLevel }}
+            </p>
+          }
+        </div>
+      }
+
+      <button class="title-screen__btn" (click)="onLoadGame()">Load Game</button>
+      <button class="title-screen__btn" (click)="onOptions()">Options</button>
+      <button class="title-screen__btn title-screen__btn--quit" (click)="onQuit()">Quit</button>
+    </nav>
+  </div>
+
+  @if (showSavePanel()) {
+    <app-save-slot-panel [mode]="saveMode()" (closed)="onPanelClosed()" />
+  }
+  @if (showSettings()) {
+    <app-settings (closed)="onSettingsClosed()" />
+  }
+</div>

@@ -1,0 +1,90 @@
+<div class="settings__backdrop" (click)="closed.emit()" role="presentation">
+  <div
+    class="settings"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="settings-panel-title"
+    (click)="$event.stopPropagation()"
+  >
+    <h2 class="settings__title" id="settings-panel-title">Options</h2>
+
+    <div class="settings__groups">
+      <!-- Reduced Motion -->
+      <section class="settings__group settings__group--toggle">
+        <label class="settings__label" for="reduced-motion">Reduced Motion</label>
+        <input
+          id="reduced-motion"
+          class="settings__checkbox"
+          type="checkbox"
+          [checked]="settings.reducedMotion()"
+          (change)="onReducedMotion($event)"
+        />
+      </section>
+
+      <!-- Colorblind Mode -->
+      <section class="settings__group settings__group--toggle">
+        <label class="settings__label" for="colorblind">Colorblind Mode</label>
+        <input
+          id="colorblind"
+          class="settings__checkbox"
+          type="checkbox"
+          [checked]="settings.colorblindMode()"
+          (change)="onColorblind($event)"
+        />
+      </section>
+
+      <!-- High Contrast -->
+      <section class="settings__group settings__group--toggle">
+        <label class="settings__label" for="high-contrast">High Contrast</label>
+        <input
+          id="high-contrast"
+          class="settings__checkbox"
+          type="checkbox"
+          [checked]="settings.highContrast()"
+          (change)="onHighContrast($event)"
+        />
+      </section>
+
+      <!-- Autosave Interval -->
+      <section class="settings__group">
+        <label class="settings__label" for="autosave-interval">
+          Autosave Every
+          <span class="settings__value">{{ settings.autosaveIntervalYears() }} years</span>
+        </label>
+        <input
+          id="autosave-interval"
+          class="settings__range"
+          type="range"
+          min="5"
+          max="50"
+          step="5"
+          [value]="settings.autosaveIntervalYears()"
+          (input)="onAutosaveInterval($event)"
+        />
+      </section>
+
+      <!-- Confirm Irreversible Actions -->
+      <section class="settings__group settings__group--toggle">
+        <label class="settings__label" for="confirm-irreversible">
+          Confirm Irreversible Actions
+        </label>
+        <input
+          id="confirm-irreversible"
+          class="settings__checkbox"
+          type="checkbox"
+          [checked]="settings.confirmIrreversible()"
+          (change)="onConfirmIrreversible($event)"
+        />
+      </section>
+
+      <!-- Volume — pending AudioService -->
+      <section class="settings__group settings__group--stub">
+        <p class="settings__stub-note">
+          Volume controls — available after the Audio system is implemented.
+        </p>
+      </section>
+    </div>
+
+    <button class="settings__close" (click)="closed.emit()">Close</button>
+  </div>
+</div>

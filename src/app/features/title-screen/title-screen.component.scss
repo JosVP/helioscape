@@ -1,0 +1,274 @@
+// ─── Entrance keyframes ───────────────────────────────────────────────────────
+
+@keyframes ts-title-in {
+  from {
+    opacity: 0;
+    transform: translateY(-14px);
+    letter-spacing: 0.35em;
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    letter-spacing: 0.2em;
+  }
+}
+
+@keyframes ts-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ─── Title screen ─────────────────────────────────────────────────────────────
+
+.title-screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--color-bg-base);
+
+  // Starfield — 30 percentage-positioned dots; responsive, no JS
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(circle 1.5px at  7%  14%, rgba(255, 255, 255, 0.85) 0%, transparent 100%),
+      radial-gradient(circle  1px at 23%   8%, rgba(255, 255, 255, 0.70) 0%, transparent 100%),
+      radial-gradient(circle  1px at 44%  21%, rgba(255, 255, 255, 0.90) 0%, transparent 100%),
+      radial-gradient(circle 1.5px at 66%   5%, rgba(255, 255, 255, 0.60) 0%, transparent 100%),
+      radial-gradient(circle  1px at 82%  17%, rgba(255, 255, 255, 0.80) 0%, transparent 100%),
+      radial-gradient(circle  1px at 90%   9%, rgba(255, 255, 255, 0.90) 0%, transparent 100%),
+      radial-gradient(circle  1px at 12%  34%, rgba(255, 255, 255, 0.50) 0%, transparent 100%),
+      radial-gradient(circle  1px at 35%  42%, rgba(255, 255, 255, 0.60) 0%, transparent 100%),
+      radial-gradient(circle 1.5px at 55%  38%, rgba(255, 255, 255, 0.70) 0%, transparent 100%),
+      radial-gradient(circle  1px at 74%  27%, rgba(255, 255, 255, 0.50) 0%, transparent 100%),
+      radial-gradient(circle  1px at 88%  44%, rgba(255, 255, 255, 0.80) 0%, transparent 100%),
+      radial-gradient(circle  1px at  4%  54%, rgba(255, 255, 255, 0.60) 0%, transparent 100%),
+      radial-gradient(circle  1px at 17%  61%, rgba(255, 255, 255, 0.40) 0%, transparent 100%),
+      radial-gradient(circle  1px at 39%  69%, rgba(255, 255, 255, 0.50) 0%, transparent 100%),
+      radial-gradient(circle  1px at 61%  57%, rgba(255, 255, 255, 0.60) 0%, transparent 100%),
+      radial-gradient(circle  1px at 77%  64%, rgba(255, 255, 255, 0.40) 0%, transparent 100%),
+      radial-gradient(circle  1px at 95%  71%, rgba(255, 255, 255, 0.70) 0%, transparent 100%),
+      radial-gradient(circle  1px at 28%  79%, rgba(255, 255, 255, 0.35) 0%, transparent 100%),
+      radial-gradient(circle 1.5px at 51%  86%, rgba(255, 255, 255, 0.50) 0%, transparent 100%),
+      radial-gradient(circle  1px at 71%  77%, rgba(255, 255, 255, 0.45) 0%, transparent 100%),
+      radial-gradient(circle  1px at 14%  91%, rgba(255, 255, 255, 0.30) 0%, transparent 100%),
+      radial-gradient(circle  1px at 84%  87%, rgba(255, 255, 255, 0.40) 0%, transparent 100%),
+      radial-gradient(circle  1px at  3%  24%, rgba(255, 255, 255, 0.60) 0%, transparent 100%),
+      radial-gradient(circle  1px at 96%  32%, rgba(255, 255, 255, 0.50) 0%, transparent 100%),
+      radial-gradient(circle  1px at 37%  11%, rgba(255, 255, 255, 0.75) 0%, transparent 100%),
+      radial-gradient(circle  1px at 63%  47%, rgba(255, 255, 255, 0.40) 0%, transparent 100%),
+      radial-gradient(circle  1px at 19%  51%, rgba(255, 255, 255, 0.80) 0%, transparent 100%),
+      radial-gradient(circle  1px at 56%   3%, rgba(255, 255, 255, 0.90) 0%, transparent 100%),
+      radial-gradient(circle  1px at 47%  93%, rgba(255, 255, 255, 0.30) 0%, transparent 100%),
+      radial-gradient(circle  1px at  8%  76%, rgba(255, 255, 255, 0.50) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  // Nebula glow — amber warmth below, cool blue above
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 55% 40% at 50% 115%, rgba(200, 134, 30, 0.14) 0%, transparent 100%),
+      radial-gradient(ellipse 75% 45% at 15%  -5%, rgba(58, 122, 184, 0.07) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 30% at 85%   0%, rgba(100, 80, 160, 0.04) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  // ── Initial-load fade-in (whole screen) ────────────────────────────────────
+  opacity: 0;
+  transition: opacity 0.5s ease-out;
+
+  &.initial-load {
+    opacity: 1;
+  }
+
+  // ── Content container ──────────────────────────────────────────────────────
+  &__content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: var(--space-xl) var(--space-lg);
+  }
+
+  // ── Title ──────────────────────────────────────────────────────────────────
+  &__title {
+    font-family: var(--font-mono);
+    font-size: var(--text-title);
+    color: var(--color-accent-glow);
+    letter-spacing: 0.2em;
+    text-shadow: var(--shadow-title);
+    margin: 0 0 var(--space-md);
+    line-height: 1;
+    opacity: 0; // hidden until entrance animation
+  }
+
+  &.initial-load &__title {
+    animation: ts-title-in 1s ease-out 0.1s both;
+  }
+
+  // ── Subtitle ───────────────────────────────────────────────────────────────
+  &__subtitle {
+    font-size: var(--text-lg);
+    color: var(--color-text-secondary);
+    letter-spacing: 0.1em;
+    margin: 0 0 calc(var(--space-xl) + var(--space-lg));
+    opacity: 0;
+  }
+
+  &.initial-load &__subtitle {
+    animation: ts-fade-up 0.6s ease-out 0.5s both;
+  }
+
+  // ── Button list ────────────────────────────────────────────────────────────
+  &__buttons {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    align-items: center;
+  }
+
+  // All direct children start invisible and stagger in
+  &__buttons > * {
+    opacity: 0;
+  }
+
+  &.initial-load &__buttons > * {
+    animation: ts-fade-up 0.5s ease-out both;
+
+    &:nth-child(1) { animation-delay: 0.65s; }
+    &:nth-child(2) { animation-delay: 0.80s; }
+    &:nth-child(3) { animation-delay: 0.95s; }
+    &:nth-child(4) { animation-delay: 1.10s; }
+    &:nth-child(5) { animation-delay: 1.25s; }
+  }
+
+  // ── Button ─────────────────────────────────────────────────────────────────
+  &__btn {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--color-text-primary);
+    background: transparent;
+    border: var(--border-accent);
+    border-radius: var(--radius-md);
+    padding: var(--space-md) var(--space-xl);
+    cursor: pointer;
+    transition:
+      color 0.2s ease-out,
+      border-color 0.2s ease-out,
+      box-shadow 0.2s ease-out,
+      transform 0.2s ease-out;
+    min-width: 240px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+
+    &:hover {
+      color: var(--color-accent-glow);
+      border-color: var(--color-accent-glow);
+      box-shadow: var(--shadow-btn-glow);
+      transform: translateX(6px);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-accent-glow);
+      outline-offset: 3px;
+      color: var(--color-accent-glow);
+      border-color: var(--color-accent-glow);
+      box-shadow: var(--shadow-btn-glow);
+      transform: translateX(6px);
+    }
+
+    &--quit {
+      color: var(--color-text-secondary);
+      border-color: transparent;
+      margin-top: var(--space-md);
+
+      &:hover {
+        color: var(--color-bad);
+        border-color: transparent;
+        box-shadow: none;
+        transform: translateX(6px);
+      }
+
+      &:focus-visible {
+        color: var(--color-bad);
+        border-color: transparent;
+        box-shadow: none;
+        transform: translateX(6px);
+      }
+    }
+  }
+
+  // ── Continue block (button + save meta) ────────────────────────────────────
+  &__continue-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-xs);
+  }
+
+  &__save-meta {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+    letter-spacing: 0.05em;
+    margin: 0;
+    opacity: 0.8;
+  }
+}
+
+// ─── Reduced-motion overrides ─────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+  .title-screen {
+    opacity: 1 !important;
+    transition: none !important;
+  }
+
+  .title-screen__title,
+  .title-screen__subtitle,
+  .title-screen__buttons > * {
+    opacity: 1 !important;
+    animation: none !important;
+    transform: none !important;
+  }
+
+  .title-screen__btn {
+    transition: none !important;
+  }
+}
+
+:root.reduced-motion {
+  .title-screen {
+    opacity: 1 !important;
+    transition: none !important;
+  }
+
+  .title-screen__title,
+  .title-screen__subtitle,
+  .title-screen__buttons > * {
+    opacity: 1 !important;
+    animation: none !important;
+    transform: none !important;
+  }
+
+  .title-screen__btn {
+    transition: none !important;
+  }
+}

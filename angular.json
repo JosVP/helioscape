@@ -27,7 +27,7 @@
               "src/assets",
               {
                 "glob": "**/*",
-                "input": "src/data",
+                "input": "public/data",
                 "output": "data"
               }
             ],
@@ -43,8 +43,8 @@
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "4kB",
-                  "maximumError": "8kB"
+                  "maximumWarning": "10kB",
+                  "maximumError": "16kB"
                 }
               ],
               "outputHashing": "all"

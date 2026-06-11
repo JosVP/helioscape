@@ -69,7 +69,8 @@ Use the latest stable Angular. All code must use:
   selector: 'app-planet-panel',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `...`,
+  templateUrl: './planet-panel.component.html',
+  styleUrl: './planet-panel.component.scss',
 })
 export class PlanetPanelComponent {
   private gameState = inject(GameStateService);
@@ -80,7 +81,7 @@ export class PlanetPanelComponent {
 ```
 
 Never: `@Input()`/`@Output()` decorators, constructor DI, `any`, `*ngIf`/`*ngFor`, default exports
-(except lazy routes).
+(except lazy routes), inline `template` or `styles` strings.
 
 ---
 
@@ -110,6 +111,8 @@ All services are `providedIn: 'root'` singletons unless explicitly stated otherw
 
 ## CSS standards
 
+- **Separate files** — always use `styleUrl` pointing to a co-located `*.component.scss` file.
+  Never use inline `styles` or `template` strings.
 - **Design tokens only** — reference CSS custom properties from `styles/tokens.scss`; never hardcode
   colours, fonts, spacing, radius or transitions. No magic numbers (reference a token or comment why).
 - **SCSS**, scoped component styles, no deep selectors.

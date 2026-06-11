@@ -1,0 +1,44 @@
+<div class="save-slot-panel__backdrop" (click)="closed.emit()" role="presentation">
+  <div
+    class="save-slot-panel"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="save-slot-panel-title"
+    (click)="$event.stopPropagation()"
+  >
+    <h2 class="save-slot-panel__title" id="save-slot-panel-title">
+      {{ mode() === 'NEW_GAME' ? 'Choose Save Slot' : 'Load Game' }}
+    </h2>
+
+    @if (loading()) {
+      <p class="save-slot-panel__loading">Loading...</p>
+    } @else {
+      <ul class="save-slot-panel__list">
+        @for (pair of slots(); track pair.slot) {
+          <li>
+            <button
+              class="save-slot-panel__card"
+              [class.save-slot-panel__card--occupied]="pair.info.exists"
+              [class.save-slot-panel__card--autosave]="pair.slot === 0"
+              [disabled]="mode() === 'LOAD' && !pair.info.exists"
+              (click)="onSlotClick(pair.slot, pair.info)"
+            >
+              <span class="save-slot-panel__card-label">
+                {{ pair.slot === 0 ? 'Autosave' : 'Slot ' + pair.slot }}
+              </span>
+              @if (pair.info.exists) {
+                <span class="save-slot-panel__card-meta">
+                  Year {{ pair.info.gameYear }} &middot; K{{ pair.info.kardashevLevel }}
+                </span>
+              } @else {
+                <span class="save-slot-panel__card-empty">Empty</span>
+              }
+            </button>
+          </li>
+        }
+      </ul>
+    }
+
+    <button class="save-slot-panel__cancel" (click)="closed.emit()">Cancel</button>
+  </div>
+</div>
