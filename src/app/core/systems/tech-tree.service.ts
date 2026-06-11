@@ -174,6 +174,16 @@ export class TechTreeService {
     return this.data.getTechNodesForPlanet(planetId).filter((node) => done.has(node.id));
   }
 
+  /**
+   * Applies a batch of TechEffects on behalf of another system service
+   * (e.g. ResearchService processing onCompleteEffects).
+   */
+  applyEffects(effects: TechEffect[], planetId: string): void {
+    for (const effect of effects) {
+      this._applyEffect(effect, planetId);
+    }
+  }
+
   // ---------------------------------------------------------------------------
   // Private helpers
   // ---------------------------------------------------------------------------
