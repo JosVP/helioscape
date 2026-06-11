@@ -7,33 +7,78 @@
     (click)="$event.stopPropagation()"
   >
     <h2 class="save-slot-panel__title" id="save-slot-panel-title">
-      {{ mode() === 'NEW_GAME' ? 'Choose Save Slot' : 'Load Game' }}
+      {{ panelTitle() }}
     </h2>
 
     @if (loading()) {
       <p class="save-slot-panel__loading">Loading...</p>
     } @else {
       <ul class="save-slot-panel__list">
-        @for (pair of slots(); track pair.slot) {
+        @for (pair of visibleSlots(); track pair.slot) {
           <li>
-            <button
+            <div
               class="save-slot-panel__card"
               [class.save-slot-panel__card--occupied]="pair.info.exists"
               [class.save-slot-panel__card--autosave]="pair.slot === 0"
-              [disabled]="mode() === 'LOAD' && !pair.info.exists"
-              (click)="onSlotClick(pair.slot, pair.info)"
             >
-              <span class="save-slot-panel__card-label">
-                {{ pair.slot === 0 ? 'Autosave' : 'Slot ' + pair.slot }}
-              </span>
-              @if (pair.info.exists) {
-                <span class="save-slot-panel__card-meta">
-                  Year {{ pair.info.gameYear }} &middot; K{{ pair.info.kardashevLevel }}
+              <div class="save-slot-panel__card-header">
+                <span class="save-slot-panel__card-label">
+                  {{ pair.slot === 0 ? 'Autosave' : 'Slot ' + pair.slot }}
                 </span>
-              } @else {
-                <span class="save-slot-panel__card-empty">Empty</span>
-              }
-            </button>
+                @if (pair.info.exists) {
+                  <span class="save-slot-panel__card-meta">
+                    Year {{ pair.info.gameYear }} &middot; K{{ pair.info.kardashevLevel }}
+                  </span>
+                  <span class="save-slot-panel__card-timestamp">
+                    {{ formatTimestamp(pair.info.saveTimestamp) }}
+                  </span>
+                } @else {
+                  <span class="save-slot-panel__card-empty">Empty</span>
+                }
+              </div>
+
+              <div class="save-slot-panel__card-actions">
+                @if (pendingConfirm()?.slot === pair.slot) {
+                  <!-- Inline confirm row (overwrite or delete) -->
+                  <div class="save-slot-panel__confirm-row">
+                    @if (pendingConfirm()?.type === 'overwrite') {
+                      <button
+                        class="save-slot-panel__confirm-btn save-slot-panel__confirm-btn--yes"
+                        [attr.aria-label]="'Confirm overwrite of Slot ' + pair.slot"
+                        (click)="onConfirmOverwrite(pair.slot)"
+                      >Overwrite</button>
+                    } @else {
+                      <button
+                        class="save-slot-panel__confirm-btn save-slot-panel__confirm-btn--yes"
+                        [attr.aria-label]="'Confirm delete of Slot ' + pair.slot"
+                        (click)="onConfirmDelete(pair.slot)"
+                      >Delete</button>
+                    }
+                    <button
+                      class="save-slot-panel__confirm-btn save-slot-panel__confirm-btn--cancel"
+                      aria-label="Cancel"
+                      (click)="onCancelConfirm()"
+                    >Cancel</button>
+                  </div>
+                } @else {
+                  <!-- Normal action row -->
+                  @if (pair.info.exists || mode() !== 'LOAD') {
+                    <button
+                      class="save-slot-panel__action-btn"
+                      [disabled]="mode() === 'LOAD' && !pair.info.exists"
+                      (click)="onAction(pair.slot, pair.info)"
+                    >{{ actionLabel(pair.slot, pair.info) }}</button>
+                  }
+                  @if (mode() === 'LOAD' && pair.info.exists && pair.slot !== 0) {
+                    <button
+                      class="save-slot-panel__delete-btn"
+                      [attr.aria-label]="'Delete Slot ' + pair.slot"
+                      (click)="onDeleteRequest(pair.slot)"
+                    >Delete</button>
+                  }
+                }
+              </div>
+            </div>
           </li>
         }
       </ul>
