@@ -1,0 +1,31 @@
+Create src/app/core/systems/kardashev.service.ts for Helioscape.
+
+@Injectable({ providedIn: 'root' }).
+Inject: GameStateService, DataService, EventBusService.
+
+Uses effect() to watch dysonCoveragePercent and completedMilestones.
+
+processYear(): void — called via gameYear effect
+  Update kardashevLevel:
+    level = 0.73 + (dysonCoveragePercent / 100.0) * 1.27
+    gameState.setKardashevLevel(level).
+  Check all milestone conditions via _checkMilestones().
+
+_checkMilestones(): void
+  For each milestone in DataService:
+    Skip if already completed.
+    If all conditions met: _completeMilestone(milestone).
+
+_checkCondition(conditionId: string): boolean
+  Match on condition type string:
+    'deuterium_fusion_online': check completedTechs
+    'dyson_15_percent' etc.: check dysonCoveragePercent
+    'two_habitable_worlds': check 2 planets have terraformingPhase >= threshold
+    'first_self_sustaining_colony': check population threshold
+    etc.
+
+_completeMilestone(milestone: KardashevMilestone): void
+  gameState.completeMilestone(milestone.id).
+  Push culture event to queue.
+  eventBus.milestoneReached$.next(milestone.id).
+  Process milestone effects (same as TechEffect — delegate to TechTreeService._applyEffect).

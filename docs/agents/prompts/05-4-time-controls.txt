@@ -1,0 +1,13 @@
+Create time-controls.component.ts for Helioscape.
+
+Inject: GameStateService, GameLoopService.
+
+Pause/Play button toggle.
+Speed button (1× / 4×) — only rendered if !gameState.isFirstPlaythrough().
+  Use @if — the button does not exist in the DOM on first playthrough.
+  No hint that it will ever exist. No greyed-out placeholder.
+
+On pause: GameLoopService.pause().
+On speed: GameLoopService.setSpeed(current === 1 ? 4 : 1).
+
+Sync button labels to GameStateService.isPaused() and gameSpeed() signals via computed.

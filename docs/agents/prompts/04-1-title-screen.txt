@@ -1,0 +1,23 @@
+Create src/app/features/title-screen/title-screen.component.ts for Helioscape.
+
+Read AGENTS.md — standalone, signals, OnPush, new control flow.
+
+Inject: SaveService, Router.
+
+Displays: game title, subtitle, buttons (New Game, Continue, Load Game, Options, Quit).
+Continue only visible if hasSave(). Shows most recent save year + kardashev level below button.
+
+On New Game: if hasSave() open SaveSlotPanelComponent in NEW_GAME mode.
+  Else navigate to '/game' immediately (slot 1).
+On Continue: load most recent slot, navigate to '/game'.
+On Load Game: open SaveSlotPanelComponent in LOAD mode.
+On Options: show SettingsComponent overlay.
+On Quit: window.close() with OS.has_feature check (comment: Tauri provides proper quit).
+
+SaveSlotPanelComponent and SettingsComponent are child components in the template,
+shown via @if with a signal controlling visibility.
+Pass mode as input() to SaveSlotPanelComponent.
+
+Styling: full-screen, dark bg, centred content, warm amber title, button stack with 24px gap.
+Use CSS custom properties from tokens.scss throughout — no hardcoded values.
+Include the initial-load class animation for the title fading in on load.

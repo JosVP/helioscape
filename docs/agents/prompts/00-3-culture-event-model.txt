@@ -1,0 +1,34 @@
+Create src/app/core/models/culture-event.model.ts for Helioscape.
+
+CultureEvent — static data from JSON:
+  id: string
+  title: string
+  narratorText: string         // 1-3 paragraphs, \n\n between paragraphs
+  portrait: string             // SVG asset path
+  choices: CultureEventChoice[]
+  tags: ('naturalist' | 'architect')[]
+  trigger: CultureEventTrigger
+  priority: boolean            // true = displaces current event
+
+CultureEventChoice:
+  id: string
+  label: string
+  tag: 'naturalist' | 'architect' | ''
+  effects: import('./tech-tree.model').TechEffect[]
+
+CultureEventTrigger — discriminated union:
+  | { type: 'tech_completed'; techId: string }
+  | { type: 'milestone_reached'; milestoneId: string }
+  | { type: 'year_reached'; year: number }
+  | { type: 'terraforming_choice_applied'; planet: string; choiceId: string }
+  | { type: 'dyson_percent_reached'; percent: number }
+  | { type: 'bio_phase_complete'; planet: string; phase: string }
+  | { type: 'bio_phase_collapsed'; planet: string }
+
+CultureEventEntry — queue item (serialised in save):
+  eventId: string
+  queuedAtYear: number
+  priority: boolean
+  wasInterrupted: boolean
+
+Export all. No logic.

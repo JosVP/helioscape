@@ -1,0 +1,32 @@
+Create settings.component.ts for Helioscape.
+
+Output: closed = output<void>()
+Inject: SettingsService.
+
+Four tabs: Audio | Video | Accessibility | Gameplay.
+All controls bind directly to SettingsService via get/set methods.
+Changes apply immediately — no Apply button.
+Reset to Defaults button with inline confirm.
+Close button emits closed output.
+
+Audio tab:
+  Three HSlider-style range inputs (0.0–1.0, step 0.05):
+  masterVolume, musicVolume, sfxVolume. Each shows percentage label.
+
+Video tab:
+  Fullscreen toggle (checkbox).
+  VSync toggle (checkbox).
+  UI Scale select: '100%' | '125%' | '150%' | '200%' → 1.0 | 1.25 | 1.5 | 2.0.
+
+Accessibility tab:
+  Text Size select: 'Normal' | 'Large' | 'Extra Large' → 1.0 | 1.25 | 1.5.
+  Colorblind Mode toggle with description.
+  Reduced Motion toggle with description.
+  High Contrast toggle with description.
+
+Gameplay tab:
+  Autosave Interval select: 5 | 10 | 25 | 50 | 0 (off).
+  Confirm Irreversible Actions toggle.
+
+All descriptions from ARCHITECTURE.md copy exactly.
+No pixel filter setting (removed by design).

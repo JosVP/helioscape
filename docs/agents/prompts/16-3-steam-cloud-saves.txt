@@ -1,0 +1,18 @@
+Steam Cloud syncs save files automatically — no code changes to SaveService needed.
+
+In the Steamworks partner portal for your app:
+  Cloud → Add file path:
+    Windows: %APPDATA%\helioscape\helioscape_saves.json
+    Mac: ~/Library/Application Support/helioscape/helioscape_saves.json
+    Linux: ~/.local/share/helioscape/helioscape_saves.json
+
+These paths match where tauri-plugin-store writes files.
+Steam Cloud handles upload/download/conflict resolution automatically.
+
+Quota: set to 10MB (save files are tiny — full game state is ~50KB).
+Enable: check "Enable Steam Cloud" in the portal.
+
+Test by:
+  1. Playing on machine A, saving in slot 1.
+  2. Logging into Steam on machine B.
+  3. Launching Helioscape — save should appear in Load Game.

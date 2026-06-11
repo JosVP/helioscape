@@ -1,0 +1,89 @@
+Create src/app/core/models/game-state.model.ts for Helioscape.
+
+This file defines the shape of the full serialisable game state (what gets saved/loaded).
+
+SerializedGameState:
+  version: number
+  saveTimestamp: number
+  gameYear: number
+  gameSpeed: 1 | 4
+  isPaused: boolean
+  isFirstPlaythrough: boolean
+  planets: Record<string, PlanetState>   // from planet.model.ts
+  completedTechs: string[]
+  activeResearch: ActiveResearchTrack[]  // from tech-tree.model.ts
+  pendingFork: PendingFork | null
+  mercuryResources: ResourceStore
+  mercuryBuildings: PlacedBuilding[]
+  mercuryBuildQueue: MercuryQueueEntry[]
+  dysonPanelCount: number
+  dysonPanelTier: 'basic' | 'mid' | 'hardened'
+  dysonCoveragePercent: number
+  dysonEnergyWatts: number
+  kardashevLevel: number
+  completedMilestones: string[]
+  naturalistCount: number
+  architectCount: number
+  colonistBonuses: { denseLiving: boolean; openEnvironment: boolean }
+  earthFlags: Record<string, boolean>
+  cultureEventQueue: CultureEventEntry[]   // from culture-event.model.ts
+  cultureEventHistory: CultureEventHistoryEntry[]
+  bioPhases: Record<string, PlanetBioState>
+  europaState: EuropaState
+  currentSaveSlot: number
+
+PendingFork:
+  techId: string
+  planetId: string
+  forkId: string
+
+ResourceStore:
+  commonOre: number
+  rareMetals: number
+  polarVolatiles: number
+
+PlacedBuilding:
+  id: string
+  buildingId: string
+  col: number
+  row: number
+  status: 'building' | 'operational'
+  buildProgressYears: number
+  totalBuildYears: number
+
+MercuryQueueEntry:
+  componentId: string
+  targetPlanet: string
+  progressYears: number
+  totalYears: number
+
+PlanetBioState:
+  currentPhaseIndex: number
+  phases: BioPhaseState[]
+  odnBuilt: boolean
+  bioreactorBatchesActive: number
+  precipitationEnginesBuilt: number
+  atmosphericCatalystShipsBuilt: number
+  requestsSent: string[]
+  discoveredOrganisms: string[]
+
+BioPhaseState:
+  status: 'locked' | 'available' | 'running' | 'complete' | 'collapsed'
+  actionsTaken: string[]
+  progressYears: number
+  durationYears: number
+  startedYear: number
+  completedYear: number
+
+CultureEventHistoryEntry:
+  eventId: string
+  year: number
+  planetContext: string
+
+EuropaState:
+  missionAuthorised: boolean
+  impactYear: number
+  impacted: boolean
+  lifeConfirmed: boolean
+
+Export all. No logic.

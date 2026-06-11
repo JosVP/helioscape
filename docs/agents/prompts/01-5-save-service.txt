@@ -1,0 +1,80 @@
+Create src/app/core/services/save.service.ts for Helioscape.
+
+Read AGENTS.md and ARCHITECTURE.md.
+
+@Injectable({ providedIn: 'root' }) singleton.
+
+Responsibility: serialise/deserialise GameStateService to/from persistent storage.
+Uses tauri-plugin-store when running in Tauri, localStorage when running in browser.
+
+Inject: GameStateService, SettingsService.
+Import type { Store } from '@tauri-apps/plugin-store' — lazy import inside methods,
+not at top level, so the module only loads when running in Tauri.
+
+const SAVE_VERSION = 1;
+const MAX_SLOTS = 3;
+const AUTOSAVE_SLOT = 0;
+const STORE_FILE = 'helioscape_saves.json';
+
+private readonly isTauri = '__TAURI__' in window;
+private store: Store | null = null;  // Tauri store instance, null in browser
+
+private async _getStore(): Promise<Store | null>
+  If not isTauri: return null.
+  If store already initialised: return it.
+  const { Store } = await import('@tauri-apps/plugin-store').
+  this.store = new Store(STORE_FILE).
+  Return this.store.
+
+private _getLocalKey(slot: number): string
+  slot === AUTOSAVE_SLOT ? 'helioscape_autosave' : `helioscape_save_${slot}`
+
+save(slot: number): Promise<void>
+  const state = this.gameState.serialise().
+  const payload = { ...state, version: SAVE_VERSION, saveTimestamp: Date.now() }.
+  const store = await this._getStore().
+  if (store) {
+    await store.set(this._getLocalKey(slot), payload).
+    await store.save().
+  } else {
+    localStorage.setItem(this._getLocalKey(slot), JSON.stringify(payload)).
+  }
+  this._autosaveSignal.update(n => n + 1) if slot === AUTOSAVE_SLOT.
+
+load(slot: number): Promise<boolean>
+  const store = await this._getStore().
+  let data: SerializedGameState | null = null.
+  if (store) {
+    data = await store.get<SerializedGameState>(this._getLocalKey(slot)).
+  } else {
+    const raw = localStorage.getItem(this._getLocalKey(slot)).
+    data = raw ? JSON.parse(raw) : null.
+  }
+  If data is null: return false.
+  Check data.version. Call _migrate() if needed.
+  this.gameState.hydrate(data). Return true.
+
+autosave(): Promise<void>
+  await this.save(AUTOSAVE_SLOT).
+
+private _autosaveSignal = signal(0).
+readonly autosaveCompleted = this._autosaveSignal.asReadonly().
+
+getSlotInfo(slot: number): Promise<SlotInfo>
+  interface SlotInfo: { exists: boolean, gameYear?: number,
+    kardashevLevel?: number, saveTimestamp?: number, isAutosave: boolean }
+  Read only top-level metadata — do not full-deserialise.
+  
+getAllSlotInfos(): Promise<SlotInfo[]>
+
+hasSave(): Promise<boolean>
+
+delete(slot: number): Promise<void>
+  Tauri: await store.delete(key), await store.save().
+  Browser: localStorage.removeItem(key).
+
+private _migrate(data: any, fromVersion: number): SerializedGameState
+  Stub with comment about version-keyed migration.
+
+All Tauri calls wrapped in try/catch — log errors, never crash.
+Methods are async — callers must await them.

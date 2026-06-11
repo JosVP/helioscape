@@ -1,0 +1,17 @@
+Create culture-event-toast.component.ts for Helioscape.
+
+Inject: CultureEventService, DataService.
+
+Bell icon with unread count badge. Fixed bottom-left position.
+Unread count: gameState.cultureEventQueue().length.
+
+On new event queued: show a toast notification.
+  Toast: slides in from left, shows event title, stays 8s, fades out.
+  Toast is clickable: calls CultureEventService._tryShowNext() to display immediately.
+  Multiple toasts stack vertically.
+
+Bell icon click: toggles a small dropdown list of queued event titles.
+Each list item: clickable, triggers that event immediately.
+
+Toast animation: CSS translateX(-100%) to translateX(0) on appear, opacity 0 to 0 on disappear.
+Use @if with CSS transition for enter/leave. (Angular animations optional — CSS is fine.)

@@ -1,0 +1,24 @@
+Create src/app/core/systems/dyson.service.ts for Helioscape.
+
+@Injectable({ providedIn: 'root' }).
+Inject: GameStateService, EventBusService, DataService.
+
+Uses effect() to react to gameYear.
+
+Constants:
+  ENERGY_PER_BASIC_PANEL = 1e12
+  ENERGY_PER_MID_PANEL = 2.5e12
+  ENERGY_PER_HARDENED_PANEL = 5e12
+  TOTAL_PANELS_FOR_100_PERCENT = 1000
+  BASE_PANELS_PER_YEAR = 2
+
+processYear(): void
+  Add panels from base rate + building bonus from gameState.
+  Check ore availability, deduct cost.
+  Recompute total energy from panel count × energy per panel (by tier).
+  Update GameStateService via setDysonState().
+  Emit eventBus.dysonEnergyUpdated$.next(watts).
+  Check milestone thresholds (10, 25, 50, 100%). Push culture events if newly crossed.
+  CME event: 0.5% chance per year (basic tier only), destroys 2% of panels.
+
+upgradeTier(tier: 'mid' | 'hardened'): void

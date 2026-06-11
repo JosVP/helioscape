@@ -1,0 +1,54 @@
+Create src/app/core/systems/tech-tree.service.ts for Helioscape.
+
+Read AGENTS.md and ARCHITECTURE.md.
+
+@Injectable({ providedIn: 'root' }).
+Inject: GameStateService, DataService, EventBusService.
+
+Responsibility: tech node prerequisite checking, unlocking, fork handling, effect processing.
+Never holds state — reads from and writes to GameStateService only.
+
+canUnlock(planetId: string, nodeId: string): boolean
+  Load tech node from DataService.
+  Check all prerequisites in gameState.completedTechs().
+  Check prerequisiteMode ('all' | 'any').
+  Check spilloverPrerequisites.
+  Check spilloverGate if present (naturalistCount >= gate.count).
+  Return false if pendingFork is not null (must resolve fork before unlocking more).
+
+unlockTech(planetId: string, nodeId: string): void
+  Guard: if not canUnlock, return.
+  If node has 'present_fork' effect: call _presentFork(), return without completing.
+  Otherwise: gameState.unlockTech(nodeId).
+  Process all effects via _applyEffect().
+  Emit eventBus.techUnlocked$.next({ planetId, nodeId }).
+
+completeForkChoice(planetId: string, techId: string, choiceId: string): void
+  Get fork data from tech node.
+  Apply chosen fork's effects via _applyEffect().
+  gameState.completeFork(techId, choiceId).
+  Emit techUnlocked$.
+
+private _presentFork(planetId: string, techId: string, forkData: ForkEffect): void
+  gameState.setPendingFork({ techId, planetId, forkId: forkData.forkId }).
+  eventBus.forkPresented$.next({ planetId, techId }).
+
+private _applyEffect(effect: TechEffect, planetId: string): void
+  Handle all TechEffect discriminated union types:
+  - unlock_tech: recursively call unlockTech
+  - emit_event: gameState.addToEventQueue(...)
+  - apply_terraforming_choice: import and call TerraformingService.applyChoice()
+    (use inject() lazily to avoid circular dep)
+  - tag_decision: gameState.incrementNaturalist/Architect
+  - apply_colonist_bonus: gameState.setColonistBonus()
+  - rp_capacity_boost: note this is handled via computed in GameStateService
+    (store boosts in a separate signal array)
+  - set_flag: gameState.setEarthFlag()
+  - spillover_unlock: gameState.unlockTech() for target
+  Comment each case.
+
+getAvailableTechs(planetId: string): TechNode[]
+  All nodes for this planet where canUnlock() is true.
+
+getCompletedTechs(planetId: string): TechNode[]
+  All nodes for this planet in completedTechs signal.

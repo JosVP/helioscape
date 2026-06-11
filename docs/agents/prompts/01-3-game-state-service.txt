@@ -1,0 +1,77 @@
+Create src/app/core/services/game-state.service.ts for Helioscape.
+
+Read AGENTS.md and ARCHITECTURE.md carefully — this is the most important service.
+
+@Injectable({ providedIn: 'root' }) singleton.
+Import all types from '@app/core/models'.
+
+Responsibility: single source of truth for all mutable runtime game state.
+Holds private writable signals, exposes public readonly signals.
+Provides typed mutation methods — no other service mutates state directly.
+
+Private signals (all typed):
+  _gameYear, _gameSpeed, _isPaused, _isFirstPlaythrough, _currentSaveSlot
+  _planets (Record<string, PlanetState>)
+  _completedTechs (string[])
+  _activeResearch (ActiveResearchTrack[])
+  _pendingFork (PendingFork | null)
+  _mercuryResources (ResourceStore)
+  _mercuryBuildings (PlacedBuilding[])
+  _mercuryBuildQueue (MercuryQueueEntry[])
+  _dysonPanelCount, _dysonPanelTier, _dysonCoveragePercent, _dysonEnergyWatts
+  _kardashevLevel, _completedMilestones
+  _naturalistCount, _architectCount
+  _colonistBonuses, _earthFlags
+  _cultureEventQueue (CultureEventEntry[])
+  _cultureEventHistory (CultureEventHistoryEntry[])
+  _bioPhases (Record<string, PlanetBioState>)
+  _europaState (EuropaState)
+
+Public readonly signals via .asReadonly() on each private signal.
+
+Computed signals (public):
+  totalRpCapacity = computed(() => 60 + this.rpCapacityBoosts())
+  usedRpCapacity = computed(() =>
+    this._activeResearch().filter(t => !t.isPaused).reduce((sum, t) => sum + ..., 0)
+  )
+  — compute rp cost from DataService injected here
+
+Mutation methods (one per logical operation — not setters for every field):
+  advanceYear(): void — increments _gameYear by 1
+  setSpeed(speed: 1 | 4): void
+  togglePause(): void
+  unlockTech(techId: string): void — adds to _completedTechs
+  startResearch(trackId: string, planetId: string): void
+  pauseResearch(trackId: string): void
+  resumeResearch(trackId: string): void
+  advanceResearch(trackId: string, years: number): void — increments progress
+  completeResearch(trackId: string): void — removes from active, adds to completedTechs
+  applyTerraformingChoice(planetId: string, choiceId: string, permanent: boolean): void
+  updatePlanetVisualParams(planetId: string, params: Partial<PlanetVisualParams>): void
+  addToEventQueue(entry: CultureEventEntry): void
+  addPriorityEvent(eventId: string, queuedAtYear: number): void
+    — if currentEvent exists, re-queue it at index 0 with wasInterrupted: true
+    — then push priority event as current
+  shiftEventQueue(): CultureEventEntry | undefined
+  recordEventHistory(entry: CultureEventHistoryEntry): void
+  setPendingFork(fork: PendingFork | null): void
+  completeFork(techId: string, choiceId: string): void
+  updateMercuryResources(delta: Partial<ResourceStore>): void
+  placeMercuryBuilding(building: PlacedBuilding): void
+  updateBuildingStatus(buildingId: string, status: 'building' | 'operational'): void
+  updateBuildingProgress(id: string, progress: number): void
+  setDysonState(panelCount: number, coveragePercent: number, energyWatts: number): void
+  setKardashevLevel(level: number): void
+  completeMilestone(milestoneId: string): void
+  incrementNaturalist(): void
+  incrementArchitect(): void
+  setColonistBonus(bonus: 'denseLiving' | 'openEnvironment', value: boolean): void
+  setEarthFlag(flag: string, value: boolean): void
+  updateBioPhase(planetId: string, phaseIndex: number, update: Partial<BioPhaseState>): void
+  authoriseEuropa(impactYear: number): void
+
+reset(): void — resets all signals to initial values (new game).
+  Do NOT reset currentSaveSlot.
+
+hydrate(state: SerializedGameState): void — restores all signals from a loaded save.
+serialise(): SerializedGameState — snapshot all signal values into a plain object.

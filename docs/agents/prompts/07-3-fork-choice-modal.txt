@@ -1,0 +1,16 @@
+Create fork-choice-modal.component.ts for Helioscape.
+
+Input: fork = input.required<PendingFork>()
+Inject: TechTreeService, DataService.
+
+Fullscreen overlay within the planet panel (not a full app overlay).
+Shows the fork prompt: tech name, description of the fork, two choice buttons.
+
+Each choice button shows: label, tag (naturalist leaf / architect gear), effect summary.
+
+On choice click:
+  TechTreeService.completeForkChoice(fork().planetId, fork().techId, choiceId).
+  No cancel button — fork must be resolved.
+  Comment: this is intentional — the tech has completed, a choice must be made.
+
+This modal blocks interaction with the rest of the tech tree while visible.

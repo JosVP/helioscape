@@ -1,0 +1,29 @@
+Open src/app/core/services/data.service.ts.
+
+Add a verify() method that checks all required data loaded correctly
+and logs a summary. Call this at the end of loadAll():
+
+verify(): void {
+  const planets = this.getAllPlanets();
+  const techs = Object.values(this.techTree).flat();
+  const events = this.getAllCultureEvents();
+  
+  console.group('DataService loaded:');
+  console.log(`Planets: ${planets.length}`);
+  console.log(`Tech nodes: ${techs.length}`);
+  console.log(`Culture events: ${events.length}`);
+  console.log(`Milestones: ${this.getAllMilestones().length}`);
+  console.log(`Mercury buildings: ${this.getAllMercuryBuildings().length}`);
+  console.groupEnd();
+  
+  // Warn about missing required data
+  const required = ['earth', 'mercury', 'mars', 'venus'];
+  for (const id of required) {
+    if (!this.getPlanet(id)) {
+      console.error(`Missing required planet: ${id}`);
+    }
+  }
+}
+
+This runs automatically in development and helps verify JSON files
+loaded correctly before any game logic runs.

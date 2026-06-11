@@ -1,0 +1,16 @@
+Create kardashev.pipe.ts for Helioscape.
+
+@Pipe({ name: 'kardashev', standalone: true, pure: true })
+
+transform(level: number, format: 'label' | 'description' = 'label'): string
+
+label format: 'K {level.toFixed(2)}'  e.g. 'K 0.73', 'K 1.24'
+
+description format — map ranges to strings:
+  < 0.80: 'Pre-Fusion Era'
+  0.80–0.95: 'Fusion Age Beginning'
+  0.95–1.05: 'Type I Civilisation'
+  1.05–1.40: 'Solar System Expansion'
+  1.40–1.60: 'First Era Complete'
+  1.60–1.95: 'Dyson Age'
+  >= 1.95: 'Type II Civilisation'

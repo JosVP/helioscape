@@ -1,0 +1,50 @@
+Create mercury-grid.component.ts for Helioscape.
+
+Read AGENTS.md and ARCHITECTURE.md (Mercury isometric coordinate reference).
+
+Owns a <canvas #mercuryCanvas> element.
+Inject: GameStateService, DataService, MercuryBuildService, EventBusService.
+
+RAF loop for animations (worker movement, building construction pulses).
+Cancel RAF on destroy.
+
+Constants (at top of file):
+  TILE_W = 64, TILE_H = 32
+  GRID_COLS = 12, GRID_ROWS = 10
+  ORIGIN_X = canvas.width / 2, ORIGIN_Y = 60
+
+Tile terrain map: hardcoded 2D array.
+  Rows 0-1: 'polar', rows 2-7: 'flat', rows 8-9: 'crater_rim'.
+
+Pure isometric utility functions (local, or import from mercury-isometric.utils.ts):
+  toScreen(col, row): { x, y }
+  toGrid(screenX, screenY): { col, row }
+
+Draw each frame:
+  1. Clear canvas.
+  2. Sort tiles by (col + row) ascending.
+  3. For each tile: drawTile(col, row, terrain, building).
+  4. For each worker/vehicle: drawWorker (placeholder — coloured dot).
+  5. Draw hover preview if selectedBuilding is set.
+
+drawTile(col, row, terrain, building):
+  const { x, y } = toScreen(col, row).
+  Draw diamond shape (4-point polygon) with terrain colour.
+  If building placed: draw SVG/image at centre of tile, offset upward by building height.
+    Load SVG via Image element, drawImage on canvas. Cache loaded images.
+    If image not yet loaded: show placeholder coloured rect.
+  If status === 'building': show construction progress overlay (striped rect).
+
+Hover preview:
+  On mousemove: toGrid(mouseX, mouseY), check if valid placement.
+  Draw preview tile in green (valid) or red (invalid) with 60% opacity.
+
+Click:
+  toGrid(click coords).
+  If building placed: show building info in parent component via output signal.
+  If empty and selectedBuilding: place building via GameStateService.
+
+Output signals:
+  tileClicked = output<{ col: number; row: number; hasBuilding: boolean }>()
+  
+Parent (MercuryComponent) handles the building selector and info panel.

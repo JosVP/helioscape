@@ -1,0 +1,11 @@
+Create game-year.pipe.ts for Helioscape.
+
+@Pipe({ name: 'gameYear', standalone: true, pure: true })
+
+transform(year: number, format: 'full' | 'short' | 'year-only' = 'full'): string
+  full: 'Year 2087'
+  short: '2087'
+  year-only: same as short (alias)
+
+Usage in template: {{ gameState.gameYear() | gameYear }}
+              or: {{ gameState.gameYear() | gameYear:'short' }}

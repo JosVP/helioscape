@@ -1,0 +1,69 @@
+Create src/app/core/systems/culture-event.service.ts for Helioscape.
+
+Read AGENTS.md and ARCHITECTURE.md.
+
+@Injectable({ providedIn: 'root' }).
+Inject: GameStateService, DataService, EventBusService.
+
+readonly BREATHER_MS = 1500;
+readonly INTERRUPTED_BREATHER_MS = 750;
+
+readonly currentEvent = signal<CultureEventEntry | null>(null);
+readonly isDisplayingEvent = computed(() => this.currentEvent() !== null);
+
+Uses effect() to watch gameYear and check time-based triggers.
+Uses takeUntilDestroyed subscriptions for eventBus$ subjects.
+
+constructor() {
+  effect(() => {
+    const year = this.gameState.gameYear();
+    untracked(() => {
+      this._checkYearTriggers(year);
+      this._checkEuropaTrigger(year);
+    });
+  });
+  
+  // Subscribe to all event bus subjects
+  this.eventBus.techUnlocked$
+    .pipe(takeUntilDestroyed())
+    .subscribe(({ nodeId }) => this._checkTechTriggers(nodeId));
+  
+  // etc. for milestones, bio phases, dyson, terraforming choices
+}
+
+queueEvent(eventId: string, priority: boolean = false): void
+  Load event from DataService. If not found, warn and return.
+  If priority: gameState.addPriorityEvent(eventId, currentYear).
+    — If currentEvent() is not null, it gets re-queued with wasInterrupted: true.
+    — Show the priority event immediately (call _displayEvent).
+  Else: gameState.addToEventQueue({ eventId, queuedAtYear, priority: false, wasInterrupted: false }).
+  If no event currently displayed, call _tryShowNext().
+
+closeCurrentEvent(): void
+  If currentEvent() is null, return.
+  gameState.shiftEventQueue() — removes first from unread array.
+  this.currentEvent.set(null).
+  const delay = lastWasInterrupted ? INTERRUPTED_BREATHER_MS : BREATHER_MS.
+  setTimeout(() => this._tryShowNext(), delay).
+
+_tryShowNext(): void
+  const next = gameState.cultureEventQueue()[0].
+  If exists: _displayEvent(next).
+
+_displayEvent(entry: CultureEventEntry): void
+  this.currentEvent.set(entry).
+  gameState.recordEventHistory({ eventId: entry.eventId, year: currentYear, planetContext: ... }).
+  eventBus.cultureEventTriggered$.next(entry.eventId).
+
+_checkTechTriggers(nodeId: string): void
+  Scan all culture events for { type: 'tech_completed', techId: nodeId }.
+  queueEvent(matching event ids).
+
+_checkYearTriggers(year: number): void
+  Scan all culture events for { type: 'year_reached', year }.
+  Check not already in history.
+
+_checkEuropaTrigger(year: number): void
+  If europaState.missionAuthorised and not impacted:
+    If (impactYear - year) <= 15 and > 14: queueEvent('ce_europa_warning', false).
+    If year >= impactYear: gameState impact event, queueEvent priority.

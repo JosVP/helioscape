@@ -1,0 +1,25 @@
+Before running the app for the first time after all prompts:
+
+1. Verify all data JSON files are in src/data/ and angular.json assets config
+   copies them to /data/ at build time.
+
+2. Run ng build — fix any TypeScript errors before running.
+   Common issues: missing imports, interface mismatches between model files
+   and what services expect.
+
+3. Run ng serve and open browser console.
+   Check for: DataService loaded summary, 'Helioscape debug console active' message.
+   If DataService fails: check the JSON file paths and angular.json assets config.
+
+4. Type helioscape.help() in the browser console to verify debug service works.
+
+5. Type helioscape.setYear(2100) and verify HUD year label updates.
+
+6. Type helioscape.completeTech('earth', 'earth_launch_mercury_mission')
+   and verify Mercury appears as unlocked in the planets panel.
+
+7. Type helioscape.triggerEvent('ce_mercury_landing')
+   and verify a culture event card appears.
+
+If all seven pass: the core architecture is wired correctly.
+Proceed to playtesting.

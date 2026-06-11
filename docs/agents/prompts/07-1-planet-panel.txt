@@ -1,0 +1,24 @@
+Create planet-panel.component.ts for Helioscape.
+
+Input: planetId = input<string | null>(null)
+Inject: GameStateService, DataService.
+
+Slides in from right when planetId() is not null.
+CSS transform transition: translateX(100%) when null, translateX(0) when set.
+Class binding: [class.is-open]="planetId() !== null"
+
+.planet-panel { transform: translateX(100%); transition: transform 0.25s ease-in-out; }
+.planet-panel.is-open { transform: translateX(0); }
+
+On open: adds 'initial-load' class, removes after 800ms.
+(initial-load class makes atmosphere bars ease-out on first render.)
+
+Shows: planet name, current phase display name, phase description.
+Tabs: Tech Tree | Research | Bio Phases | Overview.
+Moon tab added for Earth (shows research tracks).
+
+Passes planetId to child tab components.
+If planet is locked: shows locked message, no tabs.
+
+Back/close button: sets selectedPlanetId to null in GameShellComponent.
+Emits via output() or EventBus as appropriate.

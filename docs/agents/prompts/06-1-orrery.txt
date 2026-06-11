@@ -1,0 +1,53 @@
+Create orrery.component.ts for Helioscape.
+
+Read AGENTS.md and ARCHITECTURE.md carefully. Three.js and Angular integration rules apply.
+
+Inject: GameStateService, GameLoopService, DataService, EventBusService.
+Import * as THREE from 'three'.
+
+Owns its <canvas> element entirely (template: single <canvas #orreryCanvas>).
+Initialises Three.js WebGLRenderer in ngAfterViewInit.
+Cancels RAF in ngOnDestroy. Disposes renderer on destroy.
+
+Scene setup:
+  PerspectiveCamera, fixed position above ecliptic plane looking at origin.
+  No OrbitControls — camera does not move except for planet zoom transition.
+  AmbientLight (dim, 0.05 intensity) + DirectionalLight from sun position.
+
+Sun:
+  SphereGeometry mesh at origin. MeshStandardMaterial, emissive warm yellow.
+  A second slightly-larger sphere for the Dyson swarm visual (transparent,
+  no shader yet — just a placeholder comment: TODO DysonSwarm shader).
+
+Planets (4):
+  For each planet from DataService.getAllPlanets():
+    Create SphereGeometry mesh. MeshStandardMaterial with base color from planet data.
+    Create thin torus ring at orbit radius for orbital path (dim white, low opacity).
+    Create a visible group: orbit ring (static) + planet mesh (moves).
+    Planet mesh has an Area (invisible SphereGeometry slightly larger) for raycasting.
+
+Orbital animation (in RAF loop — continuous, smooth, independent of game year):
+  Each planet advances its angle by angularVelocity per frame.
+  angularVelocity is proportional to 1/orbitalPeriod.
+  Planet position: x = cos(angle) * radius, z = sin(angle) * radius, y = 0.
+  This is VISUAL ONLY — not tied to gameYear.
+
+Visual state updates (also in RAF, reads signals):
+  Read planets() signal. For each planet, read visualParams.
+  Update mesh material color from atmosphereColor.
+  Comment: TODO update ShaderMaterial uniforms when planet surface shaders are added.
+
+Click detection (Raycaster):
+  On canvas click: cast ray against all planet meshes + orbit ring meshes.
+  On hit: EventBus.planetSelected$.next(planetId).
+
+Zoom (no cinematic transition for playtest build):
+  On EventBus.planetSelected$: no camera animation. Planet panel opens immediately.
+  Comment: TODO smooth camera zoom transition post-playtest.
+
+RAF loop structure (from ARCHITECTURE.md):
+  Read all signals into local variables at top of animate() — never mid-render.
+  Update orbit angles. Update planet positions. Update visual state. Render.
+
+Locked planets: orbit ring rendered dim/dashed (lower opacity material).
+  Planet mesh: grey material. No raycasting interaction.

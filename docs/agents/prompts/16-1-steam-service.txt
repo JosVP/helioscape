@@ -1,0 +1,73 @@
+Create src/app/core/services/steam.service.ts for Helioscape.
+
+Read AGENTS.md. @Injectable({ providedIn: 'root' }).
+
+Responsibility: all Steam SDK calls. Achievements, stats, overlay detection.
+All methods silently no-op when not running inside Steam.
+No other service or component touches Steam APIs directly.
+
+private readonly isSteam: boolean = typeof window !== 'undefined' &&
+  '__TAURI__' in window && /* check for steam_appid.txt presence */ true.
+  Comment: refine this check once steamworks.js Tauri integration is set up.
+
+private client: any = null.
+  Comment: type as SteamworksClient once steamworks.js types are available.
+
+async initialise(): Promise<void>
+  if (!isSteam) return.
+  try {
+    const steamworks = await import('steamworks.js').
+    this.client = steamworks.init(YOUR_APP_ID).
+    this._setupOverlayDetection().
+    console.log('Steam initialised. User:', this.client.localplayer.getName()).
+  } catch (e) {
+    console.warn('Steam init failed (expected outside Steam):', e).
+    // Not an error — game runs fine without Steam.
+  }
+
+unlockAchievement(id: SteamAchievement): void
+  if (!client) return.
+  try { this.client.achievement.activate(id). }
+  catch (e) { console.warn('Achievement error:', e). }
+
+setStat(id: SteamStat, value: number): void
+  if (!client) return.
+  try { this.client.stats.setInt(id, value). this.client.stats.storeStats(). }
+  catch (e) { console.warn('Stat error:', e). }
+
+private _setupOverlayDetection(): void
+  if (!client) return.
+  this.client.callback.register(
+    this.client.steam_api.ECallbackType.GameOverlayActivated,
+    (result: { active: boolean }) => {
+      inject(GameLoopService)[result.active ? 'pause' : 'resume']().
+    }
+  ).
+  Comment: Valve requires games to pause when Steam overlay activates.
+
+Define typed achievement IDs as a const enum — prevents typos:
+
+export const SteamAchievement = {
+  MERCURY_LANDING:          'MERCURY_LANDING',
+  FIRST_TECH_UNLOCKED:      'FIRST_TECH_UNLOCKED',
+  TYPE_1_CIVILISATION:      'TYPE_1_CIVILISATION',
+  FIRST_ERA_COMPLETE:       'FIRST_ERA_COMPLETE',
+  TYPE_2_CIVILISATION:      'TYPE_2_CIVILISATION',
+  FIRST_BIO_PHASE:          'FIRST_BIO_PHASE',
+  MARS_LIVING_WORLD:        'MARS_LIVING_WORLD',
+  VENUS_SECOND_EARTH:       'VENUS_SECOND_EARTH',
+  EUROPA_IMPACT:            'EUROPA_IMPACT',
+  POLAR_DETONATION:         'POLAR_DETONATION',
+  FIRST_EMERGENT_DISCOVERY: 'FIRST_EMERGENT_DISCOVERY',
+  SEED_SHIP_LAUNCHED:       'SEED_SHIP_LAUNCHED',
+} as const.
+export type SteamAchievement = typeof SteamAchievement[keyof typeof SteamAchievement].
+
+export const SteamStat = {
+  GAME_YEARS_PLAYED:   'game_years_played',
+  TECHS_UNLOCKED:      'techs_unlocked',
+  CULTURE_EVENTS_READ: 'culture_events_read',
+} as const.
+export type SteamStat = typeof SteamStat[keyof typeof SteamStat].
+
+These IDs must be registered in the Steamworks partner portal exactly as written here.

@@ -1,0 +1,39 @@
+After SteamService exists, add these calls to the relevant system services.
+These are small additions — one line each where the relevant event fires.
+
+In KardashevService._completeMilestone():
+  inject(SteamService).unlockAchievement(SteamAchievement.TYPE_1_CIVILISATION)
+    // only when milestone.id === 'type_1'
+  inject(SteamService).unlockAchievement(SteamAchievement.FIRST_ERA_COMPLETE)
+    // only when milestone.id === 'first_era_complete'
+  inject(SteamService).unlockAchievement(SteamAchievement.TYPE_2_CIVILISATION)
+    // only when milestone.id === 'type_2'
+
+In TerraformingService.applyChoice():
+  inject(SteamService).unlockAchievement(SteamAchievement.EUROPA_IMPACT)
+    // when choiceId === 'venus_europa_impact'
+  inject(SteamService).unlockAchievement(SteamAchievement.POLAR_DETONATION)
+    // when choiceId === 'mars_polar_detonation'
+
+In BioPhaseService._completePhase():
+  inject(SteamService).unlockAchievement(SteamAchievement.FIRST_BIO_PHASE)
+    // first time any phase completes (check if no other phases complete in history)
+
+In CultureEventService on first tech unlock:
+  inject(SteamService).unlockAchievement(SteamAchievement.MERCURY_LANDING)
+    // when event ce_mercury_landing fires
+
+In GameLoopService or GameStateService, each year tick:
+  inject(SteamService).setStat(SteamStat.GAME_YEARS_PLAYED,
+    this.gameYear() - 2033)  // years elapsed since game start
+
+In CultureEventService.closeCurrentEvent():
+  inject(SteamService).setStat(SteamStat.CULTURE_EVENTS_READ,
+    this.gameState.cultureEventHistory().length)
+
+Add these as small focused additions to the existing service files —
+not rewrites of the whole file. Tell the agent: "Add Steam achievement
+calls to [service file]. Here is the existing file: [paste file].
+Add only what is specified, change nothing else."
+
+Register all achievement IDs in the Steamworks partner portal before testing.

@@ -1,0 +1,13 @@
+Create src/app/app.config.ts for Helioscape.
+
+Use Angular's ApplicationConfig with provideRouter and APP_INITIALIZER.
+
+Routes:
+  '' → TitleScreenComponent (lazy: () => import('./features/title-screen/...'))
+  'game' → GameShellComponent (lazy: () => import('./features/game-shell/...'))
+
+APP_INITIALIZER: calls DataService.loadAll() before the app bootstraps.
+  Use inject(DataService).loadAll() in the factory function.
+  multi: true, useFactory pattern.
+
+Also provide: provideHttpClient() for any future HTTP needs.

@@ -1,0 +1,23 @@
+Create building-selector.component.ts for Helioscape.
+
+Input: terrainType = input.required<'flat' | 'polar' | 'crater_rim'>()
+Input: targetCol = input.required<number>()
+Input: targetRow = input.required<number>()
+Output: buildingPlaced = output<{ buildingId: string; col: number; row: number }>()
+Output: cancelled = output<void>()
+
+Inject: GameStateService, DataService.
+
+Shows scrollable list of buildings valid for this terrain.
+Filter: placementRule matches terrainType OR 'any', unlockCondition met, maxInstances not exceeded.
+
+Each card: name, description, cost (red if cannot afford), build time, effect summary.
+'Place' button: disabled if cannot afford or max exceeded. Tooltip explains why.
+
+On place: deduct costs via GameStateService.updateMercuryResources(), 
+  add PlacedBuilding to gameState, emit buildingPlaced output.
+  Building starts with status 'building', buildProgressYears 0.
+
+Empty state: "No buildings available for {terrainType} terrain."
+
+Close button emits cancelled.

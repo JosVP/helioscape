@@ -1,0 +1,13 @@
+Create confirm-dialog.component.ts for Helioscape.
+
+Input: message = input.required<string>()
+Input: isDestructive = input<boolean>(false)
+Output: confirmed = output<void>()
+Output: cancelled = output<void>()
+
+Tiny inline component (not a modal overlay — renders inside parent).
+Shows message text + two buttons: Confirm (destructive style if isDestructive) + Cancel.
+If isDestructive: shows 'This cannot be undone.' in var(--color-bad) beneath message.
+
+On confirm: emit confirmed.
+On cancel: emit cancelled.

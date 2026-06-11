@@ -1,0 +1,6 @@
+Create src/app/core/models/index.ts.
+Re-export everything from all model files in this folder:
+  export * from './planet.model';
+  export * from './tech-tree.model';
+  export * from './culture-event.model';
+  export * from './game-state.model';

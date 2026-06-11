@@ -1,0 +1,21 @@
+Create save-slot-panel.component.ts for Helioscape.
+
+Input: mode = input.required<'NEW_GAME' | 'LOAD' | 'SAVE'>()
+Output: slotSelected = output<number>()
+Output: closed = output<void>()
+
+Inject: SaveService, Router, GameStateService.
+
+Show all slots (0 = autosave, 1-3 = manual).
+Each slot card shows: slot label, game year, kardashev level, formatted timestamp, action button.
+Autosave slot: only shown in LOAD mode.
+Empty slot: show action button only in NEW_GAME/SAVE mode.
+Delete button on occupied manual slots in LOAD mode with inline confirm.
+
+On slot action:
+  NEW_GAME: if occupied show overwrite confirm, then emit slotSelected and navigate '/game'.
+  LOAD: SaveService.load(slot), navigate '/game'.
+  SAVE: SaveService.save(slot), emit slotSelected, emit closed.
+
+Overwrite confirm and delete confirm use a shared inline confirm pattern —
+two small buttons replacing the main button temporarily.

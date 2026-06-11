@@ -1,0 +1,31 @@
+Create src/app/core/systems/mercury-build.service.ts for Helioscape.
+
+@Injectable({ providedIn: 'root' }).
+Inject: GameStateService, DataService, EventBusService.
+
+Uses effect() to react to gameYear.
+
+Manages Mercury component build queue (ODN, engines, catalyst ships etc. —
+the Mercury orbital component queue, separate from the grid building placement).
+
+processYear(): void — via effect()
+  If queue is empty, return.
+  Increment first item's progressYears.
+  If complete: _completeBuild(entry), remove from queue.
+
+queueComponent(componentId: string, targetPlanet: string): boolean
+  Validate component exists, unlock condition met, max instances not exceeded.
+  Deduct resource costs. If insufficient: return false.
+  Push to mercuryBuildQueue via gameState.
+  Return true.
+
+_completeBuild(entry: MercuryQueueEntry): void
+  Apply component arrival effects to bioPhases state (ODN built, engines built etc.).
+  eventBus.mercuryBuildCompleted$.next(entry.componentId).
+
+_unlockConditionMet(condition: string): boolean
+  Check against completedTechs and earthFlags.
+
+_deductCosts(cost: ResourceStore): boolean
+  Check all resources sufficient before deducting.
+  Return false if insufficient.

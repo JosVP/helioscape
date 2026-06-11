@@ -1,0 +1,33 @@
+Create progress-bar.component.ts for Helioscape.
+
+Read AGENTS.md — standalone, OnPush, signals, new control flow.
+
+Inputs:
+  value = input.required<number>()        // 0.0–1.0
+  label = input<string>('')
+  variant = input<'default' | 'stability' | 'kardashev'>('default')
+  animated = input<boolean>(true)         // false = no transition (for initial render)
+  showPercent = input<boolean>(false)
+
+The bar fill width is driven by a CSS custom property set in an effect():
+  effect(() => {
+    const pct = clamp(this.value() * 100, 0, 100);
+    this.el.nativeElement.style.setProperty('--bar-fill', `${pct}%`);
+  });
+
+Variants:
+  default: accent colour fill
+  stability: colour transitions based on value
+    < 0.4 → var(--color-bad)
+    0.4–0.75 → var(--color-warn)
+    > 0.75 → var(--color-good)
+    Implemented as CSS: colour is a CSS custom property also set in the effect.
+  kardashev: accent fill with milestone markers
+
+CSS:
+  .progress-bar__track: full width, bg-elevated, height 8px, border-radius 4px
+  .progress-bar__fill: width var(--bar-fill, 0%), height 100%, border-radius 4px
+    transition: width 1s linear (tick-driven)
+  .progress-bar--no-animation .progress-bar__fill: transition: none
+
+When animated() is false: add no-animation class to host.

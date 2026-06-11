@@ -1,0 +1,24 @@
+Create tech-tree.component.ts for Helioscape.
+
+Input: planetId = input.required<string>()
+Inject: GameStateService, DataService, TechTreeService, EventBusService.
+
+Displays tech tree for the planet. Nodes are visual elements.
+Layout: left-to-right timeline with thematic swim lanes (one per branch).
+
+For each tech node for this planet (DataService.getTechNodesForPlanet()):
+  Determine visual state:
+    completed: full colour (accent)
+    available (canUnlock() true): full colour, clickable, hover highlight
+    one prereq away: muted (text-secondary colour)
+    two prereqs away: silhouette (text-disabled, no details)
+    further: hidden
+
+On node click:
+  If canUnlock(): TechTreeService.unlockTech(planetId, nodeId).
+  Show tooltip with prerequisites (green if met, red if not), cost, duration.
+
+If gameState.pendingFork() is not null and pendingFork.planetId === planetId:
+  Show fork choice modal (see 7.3).
+
+Refresh on EventBus.techUnlocked$ (filter by planetId).

@@ -1,0 +1,41 @@
+Create src/app/core/services/settings.service.ts for Helioscape.
+
+Read AGENTS.md and ARCHITECTURE.md before implementing.
+
+@Injectable({ providedIn: 'root' }) singleton.
+
+Responsibility: load, persist, and apply all player settings.
+Settings are stored separately from game saves — they persist across all sessions.
+Storage: localStorage key 'helioscape_settings' (JSON).
+Tauri: when window.__TAURI__ is defined, additionally write to a settings file
+via @tauri-apps/plugin-fs. For now, implement localStorage fallback only with
+a comment marking where Tauri file write should be added.
+
+Default settings object (typed as SettingsValues interface — define it in this file):
+  masterVolume: number = 0.8
+  musicVolume: number = 0.8
+  sfxVolume: number = 0.8
+  fullscreen: boolean = false
+  vsync: boolean = true
+  uiScale: number = 1.0      // 1.0 | 1.25 | 1.5 | 2.0
+  textSizeMultiplier: number = 1.0
+  colorblindMode: boolean = false
+  reducedMotion: boolean = false
+  highContrast: boolean = false
+  autosaveIntervalYears: number = 10
+  confirmIrreversible: boolean = true
+
+Private writable signals, public readonly signals (pattern from ARCHITECTURE.md).
+Expose a get(key) method and a set(key, value) method.
+set() applies the setting immediately AND persists to storage.
+
+Apply methods (called in constructor after loading):
+  applyUiScale(scale): document.documentElement.style.setProperty('--ui-scale', scale.toString())
+  applyReducedMotion(reduced): document.documentElement.classList.toggle('reduced-motion', reduced)
+  applyColorblind(on): document.documentElement.classList.toggle('colorblind', on)
+  applyHighContrast(on): document.documentElement.classList.toggle('high-contrast', on)
+  Volume/audio applies: comment as TODO — AudioService not yet implemented.
+
+resetToDefaults(): restores all settings to defaults and persists.
+
+Export SettingsValues interface separately for use in settings component.

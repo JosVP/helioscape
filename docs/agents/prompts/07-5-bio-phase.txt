@@ -1,0 +1,23 @@
+Create bio-phase.component.ts for Helioscape.
+
+Input: planetId = input.required<string>()
+Inject: GameStateService, DataService, BioPhaseService.
+
+Shows all four bio phases as a scrollable list of cards (always visible).
+
+Each card:
+LOCKED: phase name (dim), status 'Locked', unmet requirements list.
+AVAILABLE: phase name, status 'Ready', action buttons, request buttons.
+RUNNING: phase name, progress bar, actions taken (ticked), remaining action buttons.
+  Progress bar: tick-driven linear transition.
+  Tooltip on action buttons: "Reduces phase duration by ~8%".
+COMPLETE: phase name in green, 'Complete — Year {year}', actions taken list.
+
+Action buttons call BioPhaseService.applyAction(planetId, phaseIndex, actionId).
+Request buttons call BioPhaseService.sendRequest(planetId, requestId).
+
+Requirement display:
+  '🔴 ODN not built — queue in Mercury panel' (unmet)
+  '🟢 Previous phase 50% complete' (met)
+
+Refresh on game year tick (progress bar updates) and bio phase signals.

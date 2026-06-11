@@ -1,0 +1,17 @@
+Create kardashev-bar.component.ts for Helioscape.
+
+Inject: GameStateService, EventBusService.
+
+Displays a continuous progress bar from K0.73 to K2.0+.
+Bar fill is a CSS custom property driven by a computed signal:
+  barPercent = computed(() => ((kardashevLevel() - 0.73) / (2.0 - 0.73)) * 100)
+
+Three milestone markers at K1.0 (Type I), K1.5 (First Era), K2.0 (Type II).
+Marker positions are fixed percentages on the bar.
+On milestone reached (EventBus.milestoneReached$): add 'milestone-pulse' CSS class
+to that marker, remove after 2s.
+
+Label: "K {level.toFixed(2)}" using MONO font.
+
+Styling: amber fill on dark background. Marker dots pulse warm white on reach.
+Use CSS custom property for bar width — linear transition for smooth tick-driven updates.

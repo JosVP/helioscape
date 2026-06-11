@@ -1,0 +1,21 @@
+Create research.component.ts for Helioscape.
+
+Input: planetId = input.required<string>()
+Inject: GameStateService, DataService, ResearchService.
+
+Shows RP capacity bar: usedRpCapacity / totalRpCapacity.
+
+Lists all research tracks for the planet in groups:
+  Running (not paused): progress bar, ~years remaining, Pause button.
+  Paused: frozen progress bar, progress %, Resume button (disabled if no RP capacity).
+  Available (can start): Start button, rp cost, duration, description.
+  Completed: greyed, completion year.
+
+On start: ResearchService.startTrack(trackId, planetId).
+On pause: ResearchService.pauseTrack(trackId).
+On resume: ResearchService.resumeTrack(trackId).
+
+Progress bars use tick-driven linear transition (var(--transition-tick)).
+Years remaining: computed from progressYears / durationYears.
+
+Refresh on EventBus.researchCompleted$ and on each game tick (update progress bars).

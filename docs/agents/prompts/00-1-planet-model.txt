@@ -1,0 +1,65 @@
+Create src/app/core/models/planet.model.ts for Helioscape.
+
+Define these exported interfaces:
+
+PlanetId = 'earth' | 'mercury' | 'mars' | 'venus'
+
+PlanetData — static data loaded from planets.json:
+  id: PlanetId
+  displayName: string
+  unlockCondition: string | null   // null = always unlocked (Earth)
+  initialState: PlanetInitialState
+  visual: PlanetVisualData
+
+PlanetInitialState:
+  atmospherePressure: number
+  temperatureCelsius: number
+  terraformingPhase: number
+  axisSpinSpeed: number
+  cloudRotationSpeed: number
+  atmosphereColor: string          // hex
+  atmosphereDensity: number
+
+PlanetVisualData:
+  baseColor: string
+  layerTextures: Record<string, string>   // layer name → asset path
+  waterSpotUvs: [number, number][]
+  greenSpotUvs: [number, number][]
+  lavaSpotUvs?: [number, number][]        // mars only
+  lavaHueData?: { hotHue: number; cooledHue: number }  // mars only
+  cityLightsTexture?: string              // earth only
+
+PlanetState — mutable runtime state stored in GameStateService:
+  id: PlanetId
+  atmospherePressure: number
+  temperatureCelsius: number
+  terraformingPhase: number
+  terraformingProgress: number        // 0.0-1.0 within current phase
+  terraformingChoices: Record<string, TerraformingChoice>
+  lockedOutChoices: string[]
+  population: number
+  hasBiodome: boolean
+  visualParams: PlanetVisualParams    // current computed shader/CSS values
+  terraformStartYear: number          // for getValueAtYear() pattern
+  terraformEndYear: number
+
+TerraformingChoice:
+  active: boolean
+  startedYear: number
+  permanent: boolean
+
+PlanetVisualParams:
+  waterGrowthRadius: number
+  waterOpacity: number
+  greenGrowthRadius: number
+  greenOpacity: number
+  lavaOpacity: number
+  lavaHueShift: number               // 0 = hot red, 1 = cooled black
+  cloudOpacity: number
+  atmosphereDensity: number
+  atmosphereColor: string            // hex, changes as planet transforms
+  cloudRotationSpeed: number
+  axisSpinSpeed: number
+  cityLightsIntensity: number        // earth only
+
+Export all interfaces. No classes, no logic.

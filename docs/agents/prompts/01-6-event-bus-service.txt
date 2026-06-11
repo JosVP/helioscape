@@ -1,0 +1,28 @@
+Create src/app/core/services/event-bus.service.ts for Helioscape.
+
+@Injectable({ providedIn: 'root' }) singleton.
+
+Thin typed event emitter using RxJS Subject.
+Does NOT hold state — that is GameStateService's job.
+Use for cross-feature events where a signal is insufficient
+(e.g. one-shot notifications, events with payload that must be reacted to once).
+
+Import { Subject } from 'rxjs'.
+
+Subjects (all typed):
+  readonly techUnlocked$ = new Subject<{ planetId: string; nodeId: string }>();
+  readonly researchCompleted$ = new Subject<string>();  // trackId
+  readonly terraformingChoiceApplied$ = new Subject<{ planetId: string; choiceId: string }>();
+  readonly terraformingPhaseChanged$ = new Subject<{ planetId: string; phase: number }>();
+  readonly cultureEventTriggered$ = new Subject<string>();  // eventId
+  readonly milestoneReached$ = new Subject<string>();  // milestoneId
+  readonly dysonEnergyUpdated$ = new Subject<number>();  // watts
+  readonly bioPhaseStarted$ = new Subject<{ planetId: string; phaseId: string }>();
+  readonly bioPhaseCompleted$ = new Subject<{ planetId: string; phaseId: string }>();
+  readonly bioPhaseCollapsed$ = new Subject<{ planetId: string; phaseId: string }>();
+  readonly mercuryBuildCompleted$ = new Subject<string>();  // componentId
+  readonly planetSelected$ = new Subject<string>();  // planetId
+  readonly forkPresented$ = new Subject<{ planetId: string; techId: string }>();
+  readonly autosaveCompleted$ = new Subject<void>();
+
+No other logic. No state. No methods beyond emitting via .next().

@@ -1,0 +1,28 @@
+Create status-tag.component.ts for Helioscape.
+
+Inputs:
+  status = input.required<'good' | 'warn' | 'bad' | 'neutral' | 'locked'>()
+  label = input.required<string>()
+  icon = input<boolean>(true)   // when colorblind mode: always show icon regardless
+
+Small pill-shaped tag. Status maps to colour + icon:
+  good → var(--color-good) + ✓ icon (when icon() or colorblind mode)
+  warn → var(--color-warn) + ⚠ icon
+  bad → var(--color-bad) + ✗ icon
+  neutral → var(--color-neutral) + • icon
+  locked → var(--color-text-disabled) + 🔒 icon
+
+Inject SettingsService to read colorblindMode setting.
+When colorblind mode: always show icon, regardless of icon() input.
+
+Template:
+  <span class="status-tag status-tag--{{ status() }}">
+    @if (showIcon()) { <span class="status-tag__icon">{{ iconChar() }}</span> }
+    {{ label() }}
+  </span>
+
+Computed:
+  showIcon = computed(() => this.icon() || this.settings.get('colorblindMode'))
+  iconChar = computed(() => map status to character)
+
+SCSS: pill shape, 4px radius, 4px h-padding, 2px v-padding, text-xs, uppercase.

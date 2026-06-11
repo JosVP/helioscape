@@ -1,0 +1,49 @@
+Create src/app/core/systems/bio-phase.service.ts for Helioscape.
+This is the simplified bio phase service for the playtest build.
+
+@Injectable({ providedIn: 'root' }).
+Inject: GameStateService, DataService, EventBusService.
+
+Uses effect() to react to gameYear.
+
+Phase definitions as a typed constant — same structure as the GDD design:
+  4 phases per planet (mars and venus), each with:
+  id, displayName, durationYears, actions (string[]),
+  requiresComponents (string[]), requiresRequest?, canStartAtPreviousPercent?,
+  spilloverTech?, completeCeId.
+
+readonly PHASE_DEFINITIONS — define as a constant Record<string, BioPhaseDef[]>
+matching the structure in DataService (use DataService if loaded, else fallback const).
+
+processYear(year: number): void — via effect()
+  For each planet: _checkAvailability(), _tickRunningPhases().
+
+_checkAvailability(planetId: string): void
+  For each phase in locked state:
+    Check requirements met via _requirementsMet().
+    If met: update status to 'available', emit bio phase available event.
+
+_requirementsMet(planetId: string, phaseIndex: number): boolean
+  Check previous phase progress/completion.
+  Check components built from bioPhases state.
+  Check requests sent.
+
+applyAction(planetId: string, phaseIndex: number, actionId: string): void
+  Called by UI. Validates phase is available or running.
+  Adds actionId to actionsTaken.
+  If first action: starts the phase (status → running, startedYear = currentYear).
+  Emits bioPhaseStarted$ if newly started.
+
+sendRequest(planetId: string, requestId: string): void
+
+_tickRunningPhases(planetId: string, year: number): void
+  For each running phase:
+    Increment progressYears.
+    Compute effectiveDuration = durationYears * (1 - (actionCount - 1) * 0.08) clamped to 60%.
+    If progress >= effectiveDuration: _completePhase().
+
+_completePhase(planetId: string, phaseIndex: number): void
+  Update status to complete. Set completedYear.
+  If spilloverTech: gameState.unlockTech(spilloverTech).
+  Push complete CE to queue.
+  eventBus.bioPhaseCompleted$.next({ planetId, phaseId }).

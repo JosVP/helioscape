@@ -1,0 +1,51 @@
+Create src/app/core/services/debug.service.ts for Helioscape.
+
+@Injectable({ providedIn: 'root' }).
+Only active when isDevMode() returns true.
+In production builds: all methods are no-ops.
+
+Inject: GameStateService, GameLoopService, TechTreeService,
+TerraformingService, CultureEventService, DysonService.
+
+Expose on window.helioscape in development for browser console access:
+
+In constructor, if isDevMode():
+  (window as any).helioscape = {
+    setYear: (y: number) => this.gameState.setYear(y),
+    setSpeed: (s: 1 | 4) => this.gameLoop.setSpeed(s),
+    completeTech: (planet: string, id: string) =>
+      this.techTree.unlockTech(planet, id),
+    setDyson: (pct: number) => {
+      const panels = Math.round((pct / 100) * 1000);
+      this.gameState.setDysonState(panels, pct, panels * 1e12);
+    },
+    triggerEvent: (id: string) =>
+      this.cultureEvents.queueEvent(id, false),
+    triggerPriorityEvent: (id: string) =>
+      this.cultureEvents.queueEvent(id, true),
+    setResources: (ore: number, rare: number, vol: number) =>
+      this.gameState.updateMercuryResources({ commonOre: ore, rareMetals: rare, polarVolatiles: vol }),
+    setBioPhase: (planet: string, phase: number, status: string) => {
+      this.gameState.updateBioPhase(planet, phase, { status: status as any });
+    },
+    getState: () => this.gameState.serialise(),
+    printState: () => console.log(JSON.stringify(this.gameState.serialise(), null, 2)),
+    help: () => console.log(
+      'Available commands:\n' +
+      '  helioscape.setYear(2150)\n' +
+      '  helioscape.setSpeed(4)\n' +
+      '  helioscape.completeTech("earth", "earth_fusion_ignition_theory")\n' +
+      '  helioscape.setDyson(80)  // 80% coverage\n' +
+      '  helioscape.triggerEvent("ce_mars_first_liquid_water")\n' +
+      '  helioscape.setResources(9999, 9999, 9999)\n' +
+      '  helioscape.setBioPhase("mars", 1, "available")\n' +
+      '  helioscape.getState()  // returns full game state object\n' +
+      '  helioscape.printState()  // logs formatted game state'
+    )
+  };
+  
+  console.log('%c Helioscape debug console active. Type helioscape.help() to start.',
+    'color: #c8861e; font-weight: bold;');
+
+Inject DebugService eagerly in AppComponent (same pattern as system services)
+so the console is available immediately.

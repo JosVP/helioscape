@@ -1,0 +1,21 @@
+Create planets-panel.component.ts for Helioscape.
+
+Inject: GameStateService, DataService, EventBusService.
+
+Always visible left-side panel listing all planets + Moon.
+Display order: Earth → Moon (indented under Earth) → Mercury → Mars → Venus.
+
+Each row shows: planet name, current phase name (from PlanetState), status icon.
+Status icon: locked (dim), active (accent dot), flourishing (green dot).
+
+Locked planets: dim text, still clickable — clicking emits planetSelected$ to zoom
+orrery to orbit, but PlanetPanel will show locked message.
+
+Moon row: clicking emits planetSelected('earth') and sets a signal that Earth panel
+should open at the Moon/research tab.
+
+On click: EventBus.planetSelected$.next(planetId).
+Highlight selected planet (reactive to a selectedPlanetId signal passed as input or
+read from GameStateService).
+
+Each row: phase name updates reactively when TerraformingPhaseChanged$ fires.

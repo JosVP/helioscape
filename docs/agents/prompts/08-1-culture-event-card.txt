@@ -1,0 +1,25 @@
+Create culture-event-card.component.ts for Helioscape.
+
+Inject: CultureEventService, DataService, GameStateService.
+
+Reads CultureEventService.currentEvent() signal.
+When not null: displays the event.
+When null: hidden (not destroyed — keeps transition smooth).
+
+Layout: fixed overlay (not fullscreen — centred card, 600px max width, 80vh max height).
+Semi-transparent bg-overlay backdrop behind card.
+Left side (35% width): portrait rectangle (ColorRect placeholder for now — accent colour).
+Right side: title (MONO xl), narrator text (BODY md, RichTextLabel equivalent — use
+  <p> tags per paragraph, split on '\n\n'), choices.
+
+Typewriter effect on narrator text:
+  On event open: set text character reveal via CSS animation or character-by-character
+  append in a setInterval. Click anywhere on card skips to full text immediately.
+
+No choices: show 'Continue' button.
+With choices: show one button per choice (label, tag icon).
+
+On continue/choice click: CultureEventService.closeCurrentEvent().
+On choice: also dispatch tag effect (naturalist/architect increment).
+
+Keyboard: Enter/Space = confirm/continue. Tab = cycle choices.

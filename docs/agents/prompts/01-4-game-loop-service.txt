@@ -1,0 +1,37 @@
+Create src/app/core/services/game-loop.service.ts for Helioscape.
+
+Read AGENTS.md and ARCHITECTURE.md.
+
+@Injectable({ providedIn: 'root' }) singleton.
+
+Responsibility: the single game clock. Advances gameYear via GameStateService.
+Uses setInterval — NOT requestAnimationFrame.
+All visual animation happens in component RAF loops independently.
+
+Inject: GameStateService, inject(DestroyRef).
+
+Private state (not signals — internal only):
+  private intervalId: ReturnType<typeof setInterval> | null = null
+  private remainingMs: number = 0   // for clean pause/resume
+
+Computed tick interval:
+  readonly tickMs = computed(() =>
+    this.gameState.gameSpeed() === 4 ? 500 : 1000
+  );
+
+Methods:
+  start(): void — starts the interval, sets intervalId
+  stop(): void — clears interval, stores remainingMs for resume
+  pause(): void — same as stop but sets gameState.isPaused
+  resume(): void — restarts interval, uses remainingMs to avoid losing partial tick
+  setSpeed(speed: 1 | 4): void — restarts interval with new tickMs
+
+On each tick:
+  if (!this.gameState.isPaused()) {
+    this.gameState.advanceYear();
+    // GameLoop does NOT process year events — system services use effect() to react
+  }
+
+Watch gameSpeed changes with effect() — when speed changes, restart the interval.
+
+Call stop() in a destroy hook (inject DestroyRef, use takeUntilDestroyed pattern).

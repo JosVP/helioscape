@@ -1,0 +1,47 @@
+Create src/app/core/services/data.service.ts for Helioscape.
+
+Read AGENTS.md and ARCHITECTURE.md.
+
+@Injectable({ providedIn: 'root' }) singleton.
+
+Responsibility: load all JSON data files at startup. Provide typed synchronous accessors.
+Data is immutable after load — never modified at runtime.
+
+Import types from '@app/core/models'.
+
+Files to load (all from /data/ path):
+  planets.json → Record<string, PlanetData>, keyed by planet id
+  tech-tree.json → TechNode[]
+  research-tracks.json → ResearchTrack[]
+  culture-events.json → CultureEvent[]
+  kardashev-milestones.json → KardashevMilestone[] (define this interface inline)
+  resources.json → ResourceData[] (define inline)
+  mercury-buildings.json → MercuryBuilding[] (define inline)
+  bio-phases.json → Record<string, BioPhaseDef[]> (define inline)
+
+KardashevMilestone: id, displayName, description, conditions: string[], approximateYearRange: string, effects: TechEffect[]
+ResourceData: id, displayName, description, rarity, baseAccumulationRate, color
+MercuryBuilding: id, displayName, description, category, cost: ResourceStore, energyDrawGw, buildTimeYears, repeatable, maxInstances, unlockCondition, placementRule, effects: MercuryBuildingEffect[]
+MercuryBuildingEffect: type ('resource_rate'|'dyson_panels_per_year'|'rp_capacity_boost'), resourceId?, rate?, amount?
+BioPhaseDef: id, displayName, nominalDurationYears, actions: string[], requiresComponents: string[], requiresRequest?: string, canStartAtPreviousPercent?: number, spilloverTech?: string, completeCeId: string
+
+loadAll(): Promise<void>
+  Fetches all files in parallel with Promise.all.
+  Parses JSON and stores in private class fields.
+  Call this from the APP_INITIALIZER token in app.config.ts.
+  Log a console.error and throw if any file fails to load.
+
+Typed accessors:
+  getPlanet(id: string): PlanetData
+  getAllPlanets(): PlanetData[]
+  getTechNode(id: string): TechNode | undefined
+  getTechNodesForPlanet(planetId: string): TechNode[]
+  getResearchTrack(id: string): ResearchTrack | undefined
+  getResearchTracksForPlanet(planetId: string): ResearchTrack[]
+  getCultureEvent(id: string): CultureEvent | undefined
+  getAllCultureEvents(): CultureEvent[]
+  getMilestone(id: string): KardashevMilestone | undefined
+  getAllMilestones(): KardashevMilestone[]
+  getMercuryBuilding(id: string): MercuryBuilding | undefined
+  getAllMercuryBuildings(): MercuryBuilding[]
+  getBioPhases(planetId: string): BioPhaseDef[]

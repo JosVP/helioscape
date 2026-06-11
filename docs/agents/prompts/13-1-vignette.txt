@@ -1,0 +1,41 @@
+Create vignette.component.ts for Helioscape.
+This is a placeholder implementation for the playtest build.
+The full vignette system (animated SVG illustrations) is post-playtest.
+
+Input: planetId = input.required<string>()
+Inject: GameStateService, DataService.
+
+Displays: planet current phase description as text.
+A placeholder coloured rectangle (planet accent colour) where the illustration will go.
+Phase name as a heading. One-paragraph description from the planet service equivalent.
+
+Layout: illustration placeholder (aspect ratio 3:4, planet accent colour background,
+'Illustration coming soon' text centred).
+Below: phase name (MONO lg), description (BODY md).
+
+Phase descriptions are hardcoded in this component for now as a Record<string, string[]>
+keyed by planetId then phase index. Use narrator voice (first person plural, present tense).
+
+Mars descriptions:
+  0: "The surface is unchanged. Red and cold and still."
+  1: "Something is happening in the atmosphere. We can measure it now."
+  2: "The first readings we dared hope for."
+  3: "The coast holds something we didn't plant."
+  4: "It spreads inland without us."
+
+Venus descriptions:
+  0: "465 degrees. 92 atmospheres. We study it from orbit."
+  1: "The cooling has begun. Slowly."
+  2: "The clouds are different now. Lighter."
+  3: "The sky cities are holding."
+  4: "We can stand on the surface."
+
+Earth descriptions (phase irrelevant — show civilisation state based on kardashev level):
+  < 1.0: "Home. Still healing. Still hopeful."
+  >= 1.0: "The planet runs on fusion now. The transformation is visible from orbit."
+  >= 1.5: "Earth as designed. What we do with that is still being decided."
+
+Mercury descriptions:
+  phase 0: "The crater rim base. Forty people and a lot of machinery."
+  phase 1: "The mass drivers are running. Panels reach orbit every week."
+  phase 2: "Mercury doesn't sleep. Neither do we."

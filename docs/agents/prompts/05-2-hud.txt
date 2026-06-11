@@ -1,0 +1,13 @@
+Create hud.component.ts for Helioscape.
+
+Inject: GameStateService, GameLoopService, SaveService, EventBusService.
+
+Template: top bar spanning full viewport width. Dark surface background.
+Contains:
+  Left: year display (YearLabel component — simple span, MONO 2xl, "Year 2087")
+  Centre: KardashevBarComponent
+  Right: TimeControlsComponent
+
+Autosave indicator: small "Autosaved ✓" label top-right, fades in/out.
+  Listen to SaveService.autosaveCompleted signal changes.
+  On change: add CSS class 'visible', remove after 2.5s.

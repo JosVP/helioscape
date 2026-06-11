@@ -1,0 +1,40 @@
+Create game-shell.component.ts for Helioscape.
+
+Root in-game layout. All in-game UI lives here.
+
+Inject: GameLoopService, GameStateService, EventBusService.
+
+Calls GameLoopService.start() in ngOnInit.
+Calls GameLoopService.stop() in ngOnDestroy.
+
+Template layout (CSS Grid):
+  Full viewport. Three regions:
+  - Left: PlanetsPanelComponent (always visible, fixed width ~220px)
+  - Centre: OrreryComponent (fills remaining space)
+  - Planet detail overlay: PlanetPanelComponent (slides in from right when a planet is selected)
+  - Top bar: HudComponent (spans full width, above everything)
+  - Culture event overlays: CultureEventCardComponent, CultureEventToastComponent
+  - Pause menu overlay: PauseMenuComponent (shown via signal)
+
+Signals:
+  readonly selectedPlanetId = signal<string | null>(null)
+  readonly isPauseMenuOpen = signal(false)
+
+On EventBus.planetSelected$: set selectedPlanetId.
+On Escape key (HostListener): toggle pause menu.
+
+The PlanetPanelComponent slides in with CSS transform transition.
+The panel is in the DOM always (not @if) so transition works — visibility toggled by signal.
+
+Add a one-time user interaction handler for audio initialisation:
+
+private audioInitialised = false;
+private audioService = inject(AudioService);
+
+@HostListener('click')
+@HostListener('keydown')
+onFirstInteraction(): void {
+  if (this.audioInitialised) return;
+  this.audioInitialised = true;
+  this.audioService.initialise();
+}

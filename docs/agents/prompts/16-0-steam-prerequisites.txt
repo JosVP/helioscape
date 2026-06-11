@@ -1,0 +1,21 @@
+Before implementing Steam integration:
+
+1. Register at https://partner.steamgames.com ($100 one-time fee per app)
+2. Create your app in the Steamworks portal — you'll receive an AppID
+3. Create a steam_appid.txt file in src-tauri/ containing just your AppID:
+   echo "YOUR_APP_ID" > src-tauri/steam_appid.txt
+   Add this file to .gitignore — it's machine-specific.
+
+4. Install steamworks.js:
+   npm install steamworks.js
+
+5. For Tauri specifically, steamworks.js requires a native sidecar.
+   Follow the steamworks.js Tauri integration guide at:
+   https://github.com/ceifa/steamworks.js
+
+   The short version: steamworks.js runs as a Rust sidecar that your
+   Tauri app communicates with via IPC. This requires adding it to
+   src-tauri/tauri.conf.json and Cargo.toml.
+   
+   Comment in code wherever Steam is called: these calls silently no-op
+   when Steam is not running (dev mode). Safe to leave in production builds.

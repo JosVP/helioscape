@@ -1,0 +1,20 @@
+Create pause-menu.component.ts for Helioscape.
+
+Inject: GameLoopService, GameStateService, SaveService, Router.
+
+Full-screen overlay with semi-transparent backdrop.
+Centred panel (400px wide), dark bg-surface, border-accent.
+
+Buttons: Resume | Save Game | Load Game | Options | Return to Title | Quit to Desktop.
+Quit button: @if (!isTauri) hidden. Comment: Tauri provides proper quit, browser builds hide it.
+
+On Resume: close menu, GameLoopService.resume().
+On Save Game: open SaveSlotPanelComponent in SAVE mode (game stays paused).
+On Load Game: show overwrite warning, then SaveSlotPanelComponent in LOAD mode.
+On Options: show SettingsComponent.
+On Return to Title: confirm dialog, then Router.navigate(['/']).
+On Quit: confirm dialog, then (comment: tauri invoke 'quit' — implement when Tauri integrated).
+
+Confirm dialogs are inline within the panel using the shared ConfirmDialogComponent.
+
+Keyboard: Escape closes pause menu (returns to game).

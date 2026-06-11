@@ -1,0 +1,43 @@
+Create src/app/core/systems/research.service.ts for Helioscape.
+
+Read AGENTS.md and ARCHITECTURE.md.
+
+@Injectable({ providedIn: 'root' }).
+Inject: GameStateService, DataService, EventBusService, TechTreeService.
+
+Uses effect() to react to game year ticks.
+
+constructor() {
+  effect(() => {
+    const year = inject(GameStateService).gameYear();
+    untracked(() => this.processYear(year));
+  });
+}
+
+processYear(year: number): void
+  For each active (not paused) research track:
+    gameState.advanceResearch(trackId, 1).
+    Check if progressYears >= track.durationYears.
+    If complete: _completeTrack(trackId).
+
+_completeTrack(trackId: string): void
+  gameState.completeResearch(trackId).
+  Process onCompleteEffects via TechTreeService._applyEffect.
+  eventBus.researchCompleted$.next(trackId).
+
+canStartTrack(trackId: string): boolean
+  prerequisiteTech is in completedTechs.
+  Track not already active or completed.
+  usedRpCapacity + track.rpCost <= totalRpCapacity.
+
+startTrack(trackId: string, planetId: string): void
+  Check if already in activeResearch with isPaused — resume instead.
+  Else add new entry. gameState.startResearch().
+
+pauseTrack(trackId: string): void
+  gameState.pauseResearch(trackId).
+  Frees RP capacity (handled by GameStateService.usedRpCapacity computed).
+
+resumeTrack(trackId: string): void
+  Guard: enough RP capacity available.
+  gameState.resumeResearch(trackId).

@@ -1,0 +1,30 @@
+Create src/app/shared/utils/math.utils.ts for Helioscape.
+
+Export these pure utility functions, all statically typed, with JSDoc comments:
+
+clamp(value: number, min: number, max: number): number
+lerp(start: number, end: number, t: number): number
+  // t is clamped to 0-1 internally
+inverseLerp(start: number, end: number, value: number): number
+  // returns 0-1 indicating where value falls between start and end
+
+getValueAtYear(
+  currentYear: number,
+  startYear: number,
+  endYear: number,
+  startValue: number,
+  endValue: number
+): number
+  // Core pattern for all time-based value interpolation.
+  // Uses clamp internally so values before startYear return startValue
+  // and values after endYear return endValue.
+  // Comment: this is the primary tool for safe save/load of visual transitions.
+
+hexToRgb(hex: string): { r: number; g: number; b: number } | null
+lerpColor(hexA: string, hexB: string, t: number): string
+  // Lerps between two hex colours, returns hex string
+
+radToDeg(rad: number): number
+degToRad(deg: number): number
+
+No imports. No side effects. Pure functions only.

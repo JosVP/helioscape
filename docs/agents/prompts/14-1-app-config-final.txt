@@ -1,0 +1,37 @@
+Create the final src/app/app.config.ts for Helioscape.
+
+This wires everything together. Read AGENTS.md and ARCHITECTURE.md.
+
+ApplicationConfig with:
+
+1. provideRouter with routes:
+   { path: '', loadComponent: () => import('./features/title-screen/...') }
+   { path: 'game', loadComponent: () => import('./features/game-shell/...') }
+
+2. APP_INITIALIZER that calls DataService.loadAll():
+   {
+     provide: APP_INITIALIZER,
+     useFactory: (data: DataService) => () => data.loadAll(),
+     deps: [DataService],
+     multi: true
+   }
+
+3. provideHttpClient()
+
+4. provideAnimations() — for any Angular animations used in transitions.
+
+Also ensure all system services are eager-loaded (not lazy) by injecting them
+in AppComponent or GameShellComponent constructor:
+  inject(TerraformingService)
+  inject(TechTreeService)
+  inject(ResearchService)
+  inject(DysonService)
+  inject(KardashevService)
+  inject(CultureEventService)
+  inject(BioPhaseService)
+  inject(MercuryBuildService)
+
+Comment: services with effect() need to be instantiated to start reacting.
+Angular only creates 'providedIn: root' services lazily (on first inject).
+Eagerly injecting them in GameShellComponent ensures their effects run
+as soon as the game starts.
