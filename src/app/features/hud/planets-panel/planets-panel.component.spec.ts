@@ -92,7 +92,8 @@ const mockData = {
 
 const planetSelected$ = new Subject<string>();
 const moonTabRequested$ = new Subject<void>();
-const mockEventBus = { planetSelected$, moonTabRequested$ };
+const planetHovered$ = new Subject<string | null>();
+const mockEventBus = { planetSelected$, moonTabRequested$, planetHovered$ };
 
 // ---------------------------------------------------------------------------
 // Setup

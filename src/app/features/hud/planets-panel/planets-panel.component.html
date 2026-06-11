@@ -5,11 +5,14 @@
       [class.planets-panel__row--indented]="row.isIndented"
       [class.planets-panel__row--selected]="row.isSelected"
       [class.planets-panel__row--locked]="row.status === 'locked'"
+      [class.planets-panel__row--hovered]="hoveredPlanetId() === row.id || (row.id === 'moon' && hoveredPlanetId() === 'earth')"
       [attr.data-planet]="row.id"
       [attr.aria-pressed]="row.isSelected"
       [attr.aria-label]="row.displayName + ', ' + row.phaseName + (row.status === 'locked' ? ', locked' : '')"
       [attr.aria-disabled]="row.status === 'locked' ? true : null"
       (click)="onRowClick(row.id)"
+      (mouseenter)="onRowMouseEnter(row.id)"
+      (mouseleave)="onRowMouseLeave()"
       type="button"
     >
       <span class="planets-panel__avatar" aria-hidden="true">

@@ -56,14 +56,11 @@ No inline `// TODO:` comments in code - all tracking happens here to avoid dupli
 - **Prompt block**: TBD (culture event choices block)
 - **Added**: 2026-06-11
 
-### OrreryComponent — Three.js orrery implementation
+### OrreryComponent — Three.js orrery implementation ✓ DONE 2026-06-11
 
 - **File**: src/app/features/orrery/orrery.component.ts
-- **Location**: Whole file (currently a stub)
-- **TODO**: Implement Three.js scene (sun, planet meshes, orbit rings), RAF loop, raycasting for planet selection, reads gameYear/planets signals
-- **Depends on**: GameShellComponent (done)
-- **Prompt block**: TBD (Orrery block)
-- **Added**: 2026-06-11
+- **Completed**: Full Three.js scene (sun, 4 planet meshes, orbit rings), RAF loop, raycasting,
+  hover cross-talk via EventBus.planetHovered$, IntersectionObserver + ResizeObserver cleanup.
 
 ### PlanetsPanelComponent — planet list panel
 

@@ -62,6 +62,13 @@ export class EventBusService {
   /** The active planet selection has changed. Payload: planetId. */
   readonly planetSelected$ = new Subject<string>();
 
+  /**
+   * A planet is being hovered (in the orrery canvas or the planets panel).
+   * Payload: planetId, or null when the cursor leaves all planets.
+   * Both OrreryComponent and PlanetsPanelComponent emit and subscribe to this.
+   */
+  readonly planetHovered$ = new Subject<string | null>();
+
   /** Player clicked the Moon row — open Earth panel at Moon/research tab. */
   readonly moonTabRequested$ = new Subject<void>();
 

@@ -1,10 +1,13 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   computed,
   inject,
   input,
+  signal,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import type { PlanetState } from '@app/core/models';
 import { DataService } from '@app/core/services/data.service';
 import { EventBusService } from '@app/core/services/event-bus.service';
@@ -30,14 +33,25 @@ const DISPLAY_ORDER = ['earth', 'moon', 'mercury', 'mars', 'venus'] as const;
   styleUrl: './planets-panel.component.scss',
 })
 export class PlanetsPanelComponent {
-  private readonly gameState = inject(GameStateService);
-  private readonly data = inject(DataService);
-  private readonly eventBus = inject(EventBusService);
+  private readonly gameState  = inject(GameStateService);
+  private readonly data       = inject(DataService);
+  private readonly eventBus   = inject(EventBusService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly selectedPlanetId = input<string | null>(null);
 
+  /** Planet currently highlighted via external hover (from orrery or this panel). */
+  readonly hoveredPlanetId = signal<string | null>(null);
+
+  constructor() {
+    // Orrery hovered a planet \u2192 highlight matching row in this panel.
+    this.eventBus.planetHovered$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((id) => this.hoveredPlanetId.set(id));
+  }
+
   readonly rows = computed<PlanetRow[]>(() => {
-    const planets = this.gameState.planets();
+    const planets  = this.gameState.planets();
     const selected = this.selectedPlanetId();
     return DISPLAY_ORDER.map((id) => this._buildRow(id, planets, selected));
   });
@@ -49,6 +63,16 @@ export class PlanetsPanelComponent {
     } else {
       this.eventBus.planetSelected$.next(id);
     }
+  }
+
+  onRowMouseEnter(id: string): void {
+    // Moon row represents Earth in the orrery.
+    const effectiveId = id === 'moon' ? 'earth' : id;
+    this.eventBus.planetHovered$.next(effectiveId);
+  }
+
+  onRowMouseLeave(): void {
+    this.eventBus.planetHovered$.next(null);
   }
 
   private _buildRow(
