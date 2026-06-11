@@ -100,9 +100,9 @@ No inline `// TODO:` comments in code - all tracking happens here to avoid dupli
 
 _(Moved here when implemented, kept for history)_
 
-<!-- Example format:
-### ✅ SettingsService — Audio Volume Integration
-- **Completed**: 2026-06-15
-- **Implemented in**: AudioService.applyVolume()
-- **Notes**: Integrated with Web Audio API gain nodes
--->
+### ✅ TechTreeService — TerraformingService integration
+- **Completed**: 2026-06-11
+- **Implemented in**: `TerraformingService.applyChoice()` + `TechTreeService._applyEffect()`
+- **Notes**: `_applyEffect` now delegates `apply_terraforming_choice` to `terraformingService.applyChoice()`.
+  TerraformingService handles validation, state write, special-case side effects (polar detonation,
+  Europa impact), and `terraformingChoiceApplied$` emission.

@@ -3,6 +3,7 @@ import type { TechNode, TechEffect, ForkChoice } from '@app/core/models';
 import { DataService } from '@app/core/services/data.service';
 import { GameStateService } from '@app/core/services/game-state.service';
 import { EventBusService } from '@app/core/services/event-bus.service';
+import { TerraformingService } from './terraforming.service';
 
 /**
  * TechTreeService — pure system service.
@@ -23,6 +24,7 @@ export class TechTreeService {
   private readonly data = inject(DataService);
   private readonly gameState = inject(GameStateService);
   private readonly eventBus = inject(EventBusService);
+  private readonly terraformingService = inject(TerraformingService);
 
   // ---------------------------------------------------------------------------
   // Public API
@@ -214,10 +216,8 @@ export class TechTreeService {
    * the total RP capacity via a computed signal from completedTechs, so the boost
    * is reflected automatically once the associated tech is in completedTechs.
    *
-   * NOTE: apply_terraforming_choice calls gameState.applyTerraformingChoice()
-   * directly for now. When TerraformingService is implemented, also call
-   * terraformingService.applyChoice() if additional reactive logic is needed.
-   * See docs/agents/TODO.md — TechTreeService — TerraformingService integration.
+   * apply_terraforming_choice delegates to TerraformingService.applyChoice() which
+   * handles validation, state writes, special-case side effects, and event emission.
    */
   private _applyEffect(effect: TechEffect, planetId: string): void {
     switch (effect.type) {
@@ -238,9 +238,10 @@ export class TechTreeService {
         break;
 
       case 'apply_terraforming_choice':
-        // Apply a terraforming path choice on the specified planet.
+        // Delegates to TerraformingService which handles choice validation,
+        // state write, special-case side effects (radiation, Europa), and event emission.
         // NOTE: effect.planet may differ from the calling planetId (cross-planet effects).
-        this.gameState.applyTerraformingChoice(effect.planet, effect.choiceId, effect.permanent);
+        this.terraformingService.applyChoice(effect.planet, effect.choiceId, effect.permanent);
         break;
 
       case 'tag_decision':

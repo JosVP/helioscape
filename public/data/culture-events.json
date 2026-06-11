@@ -218,5 +218,65 @@
     "tags": ["architect"],
     "trigger": { "type": "year_reached", "year": 9999 },
     "priority": false
+  },
+  {
+    "id": "ce_mars_phase_1",
+    "title": "The Atmosphere Stirs",
+    "narratorText": "The instruments do not lie, but they still surprise us. Carbon dioxide concentrations on Mars are measurably higher than when we arrived. The pressure curve is tiny — fractions of a millibar — but it is rising. We are doing this. We are actually doing this.",
+    "portrait": "/assets/svg/portraits/ce_mars_phase_1.svg",
+    "choices": [],
+    "tags": [],
+    "trigger": null,
+    "priority": true
+  },
+  {
+    "id": "ce_mars_phase_2",
+    "title": "First Frost, First Rain",
+    "narratorText": "A field team at the northern basin has reported something the geologists are calling provisional precipitation — water ice, cycling through a short melt each morning and refreezing by noon. It is not a river. It is barely a puddle. We are celebrating anyway.",
+    "portrait": "/assets/svg/portraits/ce_mars_phase_2.svg",
+    "choices": [],
+    "tags": [],
+    "trigger": null,
+    "priority": true
+  },
+  {
+    "id": "ce_mars_phase_3",
+    "title": "The Red Gives Way",
+    "narratorText": "The orbital imaging team has flagged something in the equatorial highlands: a faint but consistent green signature, spreading slowly outward from the seeded zones. We have been staring at the images for hours. Mars is growing something. We planted it, and it is growing.",
+    "portrait": "/assets/svg/portraits/ce_mars_phase_3.svg",
+    "choices": [],
+    "tags": [],
+    "trigger": null,
+    "priority": true
+  },
+  {
+    "id": "ce_venus_phase_1",
+    "title": "The Long Shadow",
+    "narratorText": "The shade mirror array is fully operational and Venus is, for the first time in four billion years, receiving less solar energy than the day before. The atmosphere will take generations to respond. We are not building this for ourselves. We are building it for whoever comes next.",
+    "portrait": "/assets/svg/portraits/ce_venus_phase_1.svg",
+    "choices": [],
+    "tags": [],
+    "trigger": null,
+    "priority": true
+  },
+  {
+    "id": "ce_venus_phase_2",
+    "title": "The Skies Thin",
+    "narratorText": "Spectroscopic data confirms what we hoped: the upper sulphuric acid cloud layer has thinned by forty percent. For the first time since we began, an observer on the surface could theoretically see a dim outline of the sun through the overcast. The surface is still lethal. But the sky is changing.",
+    "portrait": "/assets/svg/portraits/ce_venus_phase_2.svg",
+    "choices": [],
+    "tags": [],
+    "trigger": null,
+    "priority": true
+  },
+  {
+    "id": "ce_venus_phase_3",
+    "title": "A Second Spring",
+    "narratorText": "Surface thermometers are reading below sixty degrees Celsius for the first time. The pressure is still three atmospheres — no one is breathing this yet — but the models now show a stable equilibrium approaching. We may live to see this planet become something a person could stand on without dying. That is not a small thing.",
+    "portrait": "/assets/svg/portraits/ce_venus_phase_3.svg",
+    "choices": [],
+    "tags": [],
+    "trigger": null,
+    "priority": true
   }
 ]

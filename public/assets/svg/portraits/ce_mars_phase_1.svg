@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <!-- PLACEHOLDER: replace with final art -->
+  <!-- Mars Phase 1: The Atmosphere Stirs -->
+  <rect width="256" height="256" fill="#1a0800"/>
+  <!-- planet surface -->
+  <rect x="0" y="180" width="256" height="76" fill="#8b3a1a"/>
+  <!-- faint atmosphere haze -->
+  <ellipse cx="128" cy="180" rx="160" ry="22" fill="#c1440e" opacity="0.35"/>
+  <!-- Mars disc in sky -->
+  <circle cx="128" cy="90" r="52" fill="#c1440e"/>
+  <!-- thin atmosphere rim -->
+  <circle cx="128" cy="90" r="58" fill="none" stroke="#d4633a" stroke-width="6" opacity="0.5"/>
+  <!-- CO2 wisps -->
+  <path d="M70,130 Q90,118 110,126 Q130,112 150,124 Q170,114 190,128" fill="none" stroke="#d4844e" stroke-width="2" opacity="0.6"/>
+  <path d="M60,144 Q85,133 105,140 Q125,128 148,138 Q168,126 196,140" fill="none" stroke="#d4844e" stroke-width="1.5" opacity="0.4"/>
+  <!-- pressure gauge hint -->
+  <rect x="16" y="16" width="80" height="24" rx="4" fill="#333" opacity="0.8"/>
+  <rect x="20" y="20" width="24" height="16" rx="2" fill="#c1440e"/>
+  <rect x="48" y="20" width="4" height="16" rx="1" fill="#d4633a"/>
+  <!-- dashed border -->
+  <rect x="2" y="2" width="252" height="252" fill="none" stroke="#c1440e" stroke-width="2" stroke-dasharray="8 4" opacity="0.6"/>
+  <text x="128" y="248" font-family="monospace" font-size="9" fill="#c1440e" text-anchor="middle" opacity="0.7">PLACEHOLDER · ce_mars_phase_1</text>
+</svg>

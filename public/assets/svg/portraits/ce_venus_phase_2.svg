@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <!-- PLACEHOLDER: replace with final art -->
+  <!-- Venus Phase 2: The Skies Thin -->
+  <rect width="256" height="256" fill="#16100a"/>
+  <!-- Venus with thinning clouds -->
+  <circle cx="128" cy="128" r="72" fill="#a87c1c"/>
+  <!-- sparse cloud bands — less dense than phase 1 -->
+  <ellipse cx="128" cy="108" rx="72" ry="8" fill="#c9a227" opacity="0.4"/>
+  <ellipse cx="128" cy="140" rx="72" ry="7" fill="#c9a227" opacity="0.35"/>
+  <!-- gaps in clouds — surface hint -->
+  <path d="M80,120 Q95,115 110,122 Q125,115 140,121 Q158,113 175,120" fill="none" stroke="#7a5510" stroke-width="3" opacity="0.5"/>
+  <!-- faint sun outline through overcast -->
+  <circle cx="128" cy="128" r="78" fill="none" stroke="#e8c040" stroke-width="5" opacity="0.2"/>
+  <!-- spectrometer readout hint -->
+  <rect x="16" y="16" width="90" height="30" rx="4" fill="#222" opacity="0.85"/>
+  <rect x="20" y="22" width="12" height="18" rx="1" fill="#c9a227" opacity="0.9"/>
+  <rect x="36" y="28" width="8" height="12" rx="1" fill="#c9a227" opacity="0.6"/>
+  <rect x="48" y="25" width="10" height="15" rx="1" fill="#8c7a4e" opacity="0.7"/>
+  <rect x="62" y="30" width="6" height="10" rx="1" fill="#8c7a4e" opacity="0.5"/>
+  <!-- dashed border -->
+  <rect x="2" y="2" width="252" height="252" fill="none" stroke="#a87c1c" stroke-width="2" stroke-dasharray="8 4" opacity="0.6"/>
+  <text x="128" y="248" font-family="monospace" font-size="9" fill="#a87c1c" text-anchor="middle" opacity="0.7">PLACEHOLDER · ce_venus_phase_2</text>
+</svg>

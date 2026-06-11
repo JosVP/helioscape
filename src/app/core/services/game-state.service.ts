@@ -303,6 +303,87 @@ export class GameStateService {
     });
   }
 
+  /** Applies atmosphere deltas from one year of active choices. Pressure is clamped >= 0. */
+  updatePlanetAtmosphere(planetId: string, pressureDelta: number, tempDelta: number): void {
+    this._planets.update((planets) => {
+      const planet = planets[planetId];
+      if (!planet) return planets;
+      return {
+        ...planets,
+        [planetId]: {
+          ...planet,
+          atmospherePressure: Math.max(0, planet.atmospherePressure + pressureDelta),
+          temperatureCelsius: planet.temperatureCelsius + tempDelta,
+        },
+      };
+    });
+  }
+
+  /** Directly sets terraforming progress [0–1]. Use to avoid float drift from incremental updates. */
+  setTerraformingProgress(planetId: string, progress: number): void {
+    this._planets.update((planets) => {
+      const planet = planets[planetId];
+      if (!planet) return planets;
+      return {
+        ...planets,
+        [planetId]: { ...planet, terraformingProgress: progress },
+      };
+    });
+  }
+
+  /** Increments terraformingPhase by 1 and resets progress to 0. */
+  advanceTerraformingPhase(planetId: string): void {
+    this._planets.update((planets) => {
+      const planet = planets[planetId];
+      if (!planet) return planets;
+      return {
+        ...planets,
+        [planetId]: {
+          ...planet,
+          terraformingPhase: planet.terraformingPhase + 1,
+          terraformingProgress: 0,
+        },
+      };
+    });
+  }
+
+  /** Extends lockedOutChoices with new IDs (deduplicates). */
+  lockOutTerraformingChoices(planetId: string, choiceIds: string[]): void {
+    this._planets.update((planets) => {
+      const planet = planets[planetId];
+      if (!planet) return planets;
+      const merged = [...new Set([...planet.lockedOutChoices, ...choiceIds])];
+      return {
+        ...planets,
+        [planetId]: { ...planet, lockedOutChoices: merged },
+      };
+    });
+  }
+
+  /** Sets the visual transition window. Call on phase advance: startYear=now, endYear=now+N. */
+  setTerraformTransitionYears(planetId: string, startYear: number, endYear: number): void {
+    this._planets.update((planets) => {
+      const planet = planets[planetId];
+      if (!planet) return planets;
+      return {
+        ...planets,
+        [planetId]: { ...planet, terraformStartYear: startYear, terraformEndYear: endYear },
+      };
+    });
+  }
+
+  /** Sets Mars radiation clear year (0 = no active hazard). */
+  setMarsRadiationClearYear(planetId: string, year: number): void {
+    this._planets.update((planets) => {
+      const planet = planets[planetId];
+      if (!planet) return planets;
+      return {
+        ...planets,
+        [planetId]: { ...planet, marsRadiationClearYear: year },
+      };
+    });
+  }
+
   // -------------------------------------------------------------------------
   // Culture event mutations
   // -------------------------------------------------------------------------
@@ -583,6 +664,7 @@ export class GameStateService {
           },
           terraformStartYear: INITIAL_YEAR,
           terraformEndYear: INITIAL_YEAR,
+          marsRadiationClearYear: 0,
         };
         return acc;
       },

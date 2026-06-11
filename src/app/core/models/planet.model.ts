@@ -93,6 +93,8 @@ export interface PlanetState {
   terraformStartYear: number;
   /** Year when current terraforming transition ends. Used by getValueAtYear() pattern. */
   terraformEndYear: number;
+  /** Mars only: game year when polar-detonation radiation hazard clears. 0 = no active hazard. */
+  marsRadiationClearYear?: number;
 }
 
 /**

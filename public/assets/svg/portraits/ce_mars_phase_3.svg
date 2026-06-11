@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <!-- PLACEHOLDER: replace with final art -->
+  <!-- Mars Phase 3: The Red Gives Way -->
+  <rect width="256" height="256" fill="#1c2a10"/>
+  <!-- sky — reddish-brown turning bluish -->
+  <rect x="0" y="0" width="256" height="150" fill="#5a3a28"/>
+  <!-- ground with green patches -->
+  <rect x="0" y="150" width="256" height="106" fill="#7a3820"/>
+  <!-- green vegetation zones -->
+  <ellipse cx="80" cy="160" rx="55" ry="20" fill="#3a6b20" opacity="0.85"/>
+  <ellipse cx="190" cy="168" rx="45" ry="16" fill="#3a6b20" opacity="0.75"/>
+  <ellipse cx="135" cy="175" rx="35" ry="12" fill="#4a7a28" opacity="0.7"/>
+  <!-- orbital view hint — small circle top-right -->
+  <circle cx="210" cy="36" r="30" fill="#c1440e"/>
+  <ellipse cx="210" cy="52" rx="22" ry="7" fill="#3a6b20" opacity="0.7"/>
+  <ellipse cx="198" cy="30" rx="12" ry="8" fill="#3a6b20" opacity="0.5"/>
+  <!-- atmosphere rim on orbital circle -->
+  <circle cx="210" cy="36" r="34" fill="none" stroke="#7fa8cc" stroke-width="4" opacity="0.4"/>
+  <!-- dashed border -->
+  <rect x="2" y="2" width="252" height="252" fill="none" stroke="#4a8a30" stroke-width="2" stroke-dasharray="8 4" opacity="0.6"/>
+  <text x="128" y="248" font-family="monospace" font-size="9" fill="#4a8a30" text-anchor="middle" opacity="0.7">PLACEHOLDER · ce_mars_phase_3</text>
+</svg>

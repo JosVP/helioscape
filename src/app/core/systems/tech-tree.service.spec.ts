@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TechTreeService } from './tech-tree.service';
+import { TerraformingService } from './terraforming.service';
 import { DataService } from '@app/core/services/data.service';
 import { GameStateService } from '@app/core/services/game-state.service';
 import { EventBusService } from '@app/core/services/event-bus.service';
@@ -82,6 +83,12 @@ function makeEventBusFake() {
   };
 }
 
+function makeTerraformingServiceFake() {
+  return {
+    applyChoice: vi.fn(),
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Test suite
 // ---------------------------------------------------------------------------
@@ -91,6 +98,7 @@ describe('TechTreeService', () => {
   let gameState: ReturnType<typeof makeGameStateFake>;
   let data: ReturnType<typeof makeDataFake>;
   let eventBus: ReturnType<typeof makeEventBusFake>;
+  let terraformingService: ReturnType<typeof makeTerraformingServiceFake>;
 
   function setup(
     nodes: TechNode[] = [],
@@ -99,6 +107,7 @@ describe('TechTreeService', () => {
     gameState = makeGameStateFake(gameStateOpts);
     data = makeDataFake(nodes);
     eventBus = makeEventBusFake();
+    terraformingService = makeTerraformingServiceFake();
 
     TestBed.configureTestingModule({
       providers: [
@@ -106,6 +115,7 @@ describe('TechTreeService', () => {
         { provide: DataService, useValue: data },
         { provide: GameStateService, useValue: gameState },
         { provide: EventBusService, useValue: eventBus },
+        { provide: TerraformingService, useValue: terraformingService },
       ],
     });
 
@@ -411,7 +421,7 @@ describe('TechTreeService', () => {
       );
     });
 
-    it('apply_terraforming_choice: calls applyTerraformingChoice', () => {
+    it('apply_terraforming_choice: delegates to TerraformingService.applyChoice', () => {
       setupSingleEffectNode({
         type: 'apply_terraforming_choice',
         planet: 'mars',
@@ -419,7 +429,7 @@ describe('TechTreeService', () => {
         permanent: true,
       });
       service.unlockTech('mars', 'n1');
-      expect(gameState.applyTerraformingChoice).toHaveBeenCalledWith('mars', 'polar_melt', true);
+      expect(terraformingService.applyChoice).toHaveBeenCalledWith('mars', 'polar_melt', true);
     });
 
     it('tag_decision naturalist: calls incrementNaturalist', () => {
