@@ -245,8 +245,12 @@ export class GameStateService {
   }
 
   /**
-   * Applies a fork choice's effects to game state and clears the pending fork.
-   * Looks up the tech node via DataService to find the fork effect and the choice.
+   * Validates that the techId/choiceId pair is known, then clears the pending fork.
+   *
+   * NOTE: Effect processing (tag, choice effects, unlockTech) is owned by
+   * TechTreeService.completeForkChoice() — this method is a pure state-clear.
+   * TechTreeService calls this AFTER applying all effects so that the pendingFork
+   * gate in canUnlock() is still active while effects are being processed.
    */
   completeFork(techId: string, choiceId: string): void {
     const techNode = this.data.getTechNode(techId);
@@ -255,16 +259,7 @@ export class GameStateService {
     const forkEffect = techNode.effects.find(
       (e): e is Extract<TechEffect, { type: 'present_fork' }> => e.type === 'present_fork',
     );
-    if (!forkEffect) return;
-
-    const choice = forkEffect.choices.find((c) => c.id === choiceId);
-    if (!choice) return;
-
-    // Apply tag from the choice itself before processing effects.
-    if (choice.tag === 'naturalist') this.incrementNaturalist();
-    else if (choice.tag === 'architect') this.incrementArchitect();
-
-    choice.effects.forEach((effect) => this.applyTechEffect(effect));
+    if (!forkEffect?.choices.find((c) => c.id === choiceId)) return;
 
     this._pendingFork.set(null);
   }
@@ -595,51 +590,5 @@ export class GameStateService {
     );
   }
 
-  /**
-   * Applies a single TechEffect directly to game state.
-   * Used by completeFork for fork-choice effects.
-   *
-   * NOTE: rp_capacity_boost is a computed signal derived from completedTechs —
-   * no direct state write is needed; the boost is picked up automatically once
-   * the associated tech is in completedTechs.
-   */
-  private applyTechEffect(effect: TechEffect): void {
-    switch (effect.type) {
-      case 'unlock_tech':
-        this.unlockTech(effect.target);
-        break;
-      case 'spillover_unlock':
-        this.unlockTech(effect.targetTech);
-        break;
-      case 'tag_decision':
-        if (effect.tag === 'naturalist') this.incrementNaturalist();
-        else this.incrementArchitect();
-        break;
-      case 'apply_colonist_bonus': {
-        const bonus = effect.bonus === 'dense_living' ? 'denseLiving' : 'openEnvironment';
-        this.setColonistBonus(bonus, true);
-        break;
-      }
-      case 'apply_terraforming_choice':
-        this.applyTerraformingChoice(effect.planet, effect.choiceId, effect.permanent);
-        break;
-      case 'emit_event':
-        this.addToEventQueue({
-          eventId: effect.eventId,
-          queuedAtYear: this._gameYear(),
-          priority: false,
-          wasInterrupted: false,
-        });
-        break;
-      case 'set_flag':
-        this.setEarthFlag(effect.flag, true);
-        break;
-      case 'rp_capacity_boost':
-        // Handled by the rpCapacityBoosts computed — no direct mutation needed.
-        break;
-      case 'present_fork':
-        // Nested forks are not supported in this iteration.
-        break;
-    }
-  }
 }
+

@@ -83,6 +83,17 @@ No inline `// TODO:` comments in code - all tracking happens here to avoid dupli
 - **Prompt block**: TBD (Tauri integration block)
 - **Added**: 2026-06-11
 
+### TechTreeService — TerraformingService integration
+
+- **File**: src/app/core/systems/tech-tree.service.ts
+- **Location**: `_applyEffect`, `apply_terraforming_choice` case
+- **TODO**: When TerraformingService is implemented, inject it and call
+  `terraformingService.applyChoice()` if it needs logic beyond
+  `gameState.applyTerraformingChoice()`.
+- **Depends on**: TerraformingService (Block TBD)
+- **Prompt block**: 03-1 (tech-tree-service)
+- **Added**: 2026-06-11
+
 ---
 
 ## Completed TODOs
