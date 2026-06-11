@@ -65,15 +65,6 @@ No inline `// TODO:` comments in code - all tracking happens here to avoid dupli
 - **Prompt block**: TBD (Orrery block)
 - **Added**: 2026-06-11
 
-### HudComponent — full HUD implementation
-
-- **File**: src/app/features/hud/hud.component.ts
-- **Location**: Whole file (currently a stub)
-- **TODO**: Game year display, speed controls (1×/4×), Kardashev bar, autosave indicator
-- **Depends on**: GameShellComponent (done)
-- **Prompt block**: TBD (HUD block)
-- **Added**: 2026-06-11
-
 ### PlanetsPanelComponent — planet list panel
 
 - **File**: src/app/features/hud/planets-panel/planets-panel.component.ts
@@ -244,6 +235,14 @@ No inline `// TODO:` comments in code - all tracking happens here to avoid dupli
 ## Completed TODOs
 
 _(Moved here when implemented, kept for history)_
+
+### ✅ HudComponent — full HUD implementation
+- **Completed**: 2026-06-11
+- **Implemented in**: `src/app/features/hud/hud.component.ts` + sub-components (Prompt 05-2)
+- **Notes**: YearLabelComponent (MONO 2xl), KardashevBarComponent (tick-driven fill bar, Kardashev
+  level 0.73–2.0), TimeControlsComponent (pause/resume, 1×/4× speed, 4× hidden on first playthrough).
+  Autosave indicator uses `effect()` + `lastAutosaveCount` guard to skip initial run.
+  `GameYearPipe` added to `src/app/shared/pipes/`. EventBusService injected for future milestone toasts.
 
 ### ✅ Routes — TitleScreenComponent stub
 - **Completed**: 2026-06-11

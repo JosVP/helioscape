@@ -1,0 +1,14 @@
+<div class="hud__left">
+  <app-year-label />
+</div>
+
+<div class="hud__centre">
+  <app-kardashev-bar />
+</div>
+
+<div class="hud__right">
+  <app-time-controls />
+  <span class="hud__autosave" [class.hud__autosave--visible]="showAutosave()">
+    Autosaved ✓
+  </span>
+</div>
