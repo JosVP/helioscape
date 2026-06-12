@@ -77,4 +77,7 @@ export class EventBusService {
 
   /** An autosave has completed. */
   readonly autosaveCompleted$ = new Subject<void>();
+
+  /** The player has requested to open the Research Hub overlay. */
+  readonly researchHubRequested$ = new Subject<void>();
 }

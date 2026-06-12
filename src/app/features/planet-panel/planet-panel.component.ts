@@ -12,19 +12,19 @@ import {
   untracked,
 } from '@angular/core';
 import { DataService } from '@app/core/services/data.service';
+import { EventBusService } from '@app/core/services/event-bus.service';
 import { GameStateService } from '@app/core/services/game-state.service';
 import { BioPhaseComponent } from './bio-phase/bio-phase.component';
 import { PlanetOverviewComponent } from './overview/overview.component';
 import { ResearchComponent } from './research/research.component';
-import { TechTreeComponent } from './tech-tree/tech-tree.component';
 
-export type PlanetPanelTab = 'tech-tree' | 'research' | 'bio-phases' | 'overview';
+export type PlanetPanelTab = 'research' | 'bio-phases' | 'overview';
 
 @Component({
   selector: 'app-planet-panel',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TechTreeComponent, ResearchComponent, BioPhaseComponent, PlanetOverviewComponent],
+  imports: [ResearchComponent, BioPhaseComponent, PlanetOverviewComponent],
   host: {
     '[class.is-open]': 'isOpen()',
     '[class.initial-load]': 'initialLoad()',
@@ -35,6 +35,7 @@ export type PlanetPanelTab = 'tech-tree' | 'research' | 'bio-phases' | 'overview
 export class PlanetPanelComponent implements OnDestroy {
   private readonly gameState = inject(GameStateService);
   private readonly data = inject(DataService);
+  private readonly eventBus = inject(EventBusService);
   private readonly destroyRef = inject(DestroyRef);
 
   // ---------------------------------------------------------------------------
@@ -49,7 +50,7 @@ export class PlanetPanelComponent implements OnDestroy {
   // Local UI state
   // ---------------------------------------------------------------------------
 
-  readonly activeTab = signal<PlanetPanelTab>('tech-tree');
+  readonly activeTab = signal<PlanetPanelTab>('overview');
 
   /** True while the `initial-load` CSS class is active (first 800ms after open). */
   readonly initialLoad = signal(false);
@@ -135,6 +136,10 @@ export class PlanetPanelComponent implements OnDestroy {
 
   close(): void {
     this.closed.emit();
+  }
+
+  openResearchHub(): void {
+    this.eventBus.researchHubRequested$.next();
   }
 
   setTab(tab: PlanetPanelTab): void {

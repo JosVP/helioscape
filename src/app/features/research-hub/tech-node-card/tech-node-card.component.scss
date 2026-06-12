@@ -1,0 +1,331 @@
+// Animated gradient-border angle — drives the spinning conic-gradient on --new cards.
+// Using @property so the angle can be transitioned/animated natively by the browser
+// without needing to rotate a pseudo-element (which would overflow the card bounds).
+@property --tech-node-spin-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes hint-pulse {
+  0%, 100% { opacity: 0.45; }
+  50%       { opacity: 0.65; }
+}
+
+@keyframes new-badge-pop {
+  0%   { transform: scale(0.6); opacity: 0; }
+  70%  { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+@keyframes gradient-spin {
+  to { --tech-node-spin-angle: 360deg; }
+}
+
+:host {
+  display: contents; // let the grid layout control the card
+}
+
+// ---------------------------------------------------------------------------
+// Base card
+// ---------------------------------------------------------------------------
+
+.tech-node {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm);
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  background: var(--color-bg-elevated);
+  cursor: default;
+  user-select: none;
+  transition:
+    border-color 0.2s ease-out,
+    box-shadow 0.2s ease-out,
+    transform 0.15s ease-out,
+    opacity 0.2s ease-out;
+  width: 88px;
+  min-height: 80px;
+  text-align: center;
+  outline: none;
+  z-index: 0; // stacking context for ::before pseudo-element
+
+  // ---------------------------------------------------------------------------
+  // Visibility variants
+  // ---------------------------------------------------------------------------
+
+  &--completed {
+    border-color: var(--color-accent-dim);
+    background: color-mix(in srgb, var(--color-accent-dim) 10%, var(--color-bg-elevated));
+    opacity: 0.78;
+
+    .tech-node__name { color: var(--color-text-primary); }
+    .tech-node__meta { color: var(--color-text-secondary); }
+
+    // Subtle checkmark in top-left corner
+    &::after {
+      content: '✓';
+      position: absolute;
+      top: 3px;
+      left: 5px;
+      font-family: system-ui, sans-serif; // avoid pixel font at this size
+      font-size: 9px;
+      color: var(--color-accent-dim);
+      pointer-events: none;
+    }
+  }
+
+  &--available {
+    border-color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 8%, var(--color-bg-elevated));
+
+    .tech-node__name { color: var(--color-text-primary); }
+  }
+
+  &--hint {
+    border-color: var(--color-bg-elevated);
+    background: var(--color-bg-surface);
+    pointer-events: none;
+    animation: hint-pulse 2.4s ease-in-out infinite;
+
+    .tech-node__name { color: var(--color-text-disabled); }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Interactive state (available + interactive input true)
+  // ---------------------------------------------------------------------------
+
+  &--interactive {
+    cursor: pointer;
+
+    &:hover {
+      border-color: var(--color-accent-glow);
+      box-shadow: 0 0 12px 0 color-mix(in srgb, var(--color-accent-glow) 35%, transparent),
+                  inset 0 1px 0 color-mix(in srgb, var(--color-accent-glow) 15%, transparent);
+      transform: translateY(-2px);
+    }
+
+    &:active {
+      transform: scale(0.96) translateY(0);
+      transition-duration: 0.08s;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-accent);
+      outline-offset: 3px;
+      box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-accent) 20%, transparent);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // "New" animated border — spinning conic-gradient as a background-clip border.
+  // Uses @property --tech-node-spin-angle so the gradient rotates without a
+  // pseudo-element extending outside the card (avoids overflow into adjacent tiles).
+  // ---------------------------------------------------------------------------
+
+  &--new {
+    // Two-layer background: gradient fills the border area, solid fill covers the inside.
+    // --card-bg mirrors the active visibility variant's background colour so the inner
+    // fill stays visually correct regardless of which visibility state is combined with --new.
+    --card-bg: var(--color-bg-elevated);
+    border: 2px solid transparent;
+    background-image:
+      conic-gradient(
+        from var(--tech-node-spin-angle),
+        var(--color-accent-glow),
+        var(--color-accent-dim) 40%,
+        transparent 60%,
+        var(--color-accent-glow)
+      ),
+      linear-gradient(var(--card-bg), var(--card-bg));
+    background-clip: border-box, padding-box;
+    background-origin: border-box;
+    animation: gradient-spin 1.2s linear infinite;
+
+    // Override --card-bg for each visibility variant so the inner fill stays consistent
+    &.tech-node--available { --card-bg: color-mix(in srgb, var(--color-accent) 8%, var(--color-bg-elevated)); }
+    &.tech-node--completed { --card-bg: color-mix(in srgb, var(--color-accent-dim) 10%, var(--color-bg-elevated)); }
+    &.tech-node--hint      { --card-bg: var(--color-bg-surface); }
+
+    // Remove the old pseudo-element approach (no longer needed)
+    &::before { display: none; }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// New badge
+// ---------------------------------------------------------------------------
+
+.tech-node__new-badge {
+  position: absolute;
+  top: -9px;
+  right: -9px;
+  background: var(--color-accent-glow);
+  color: var(--color-bg-base);
+  font-family: var(--font-mono);
+  font-size: 8px;
+  line-height: 1;
+  padding: 2px 5px;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  pointer-events: none;
+  z-index: 2;
+  animation: new-badge-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+// ---------------------------------------------------------------------------
+// Icon
+// ---------------------------------------------------------------------------
+
+.tech-node__icon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  // Icon fades in slightly for available nodes via the card's opacity transition
+}
+
+// ---------------------------------------------------------------------------
+// Body
+// ---------------------------------------------------------------------------
+
+.tech-node__body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 100%;
+}
+
+.tech-node__name {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  line-height: 1.3;
+  word-break: break-word;
+  hyphens: auto;
+  color: var(--color-text-secondary);
+
+  .tech-node--available &,
+  .tech-node--completed & {
+    color: var(--color-text-primary);
+  }
+}
+
+.tech-node__meta {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  display: flex;
+  gap: 3px;
+  align-items: center;
+}
+
+.tech-node__cost {
+  color: var(--color-accent-dim);
+  font-family: var(--font-mono);
+}
+
+.tech-node__duration {
+  color: var(--color-text-disabled);
+  font-size: 9px;
+}
+
+.tech-node__branch-tag {
+  font-size: 8px;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 1px 4px;
+  border-radius: var(--radius-sm);
+
+  &--naturalist {
+    background: color-mix(in srgb, var(--color-tag-naturalist) 18%, transparent);
+    color: var(--color-tag-naturalist);
+    border: 1px solid color-mix(in srgb, var(--color-tag-naturalist) 60%, transparent);
+  }
+
+  &--architect {
+    background: color-mix(in srgb, var(--color-tag-architect) 18%, transparent);
+    color: var(--color-tag-architect);
+    border: 1px solid color-mix(in srgb, var(--color-tag-architect) 60%, transparent);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Tooltip — fade transition via visibility+opacity (accessible, animatable)
+// ---------------------------------------------------------------------------
+
+.tech-node__tooltip {
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  background: color-mix(in srgb, var(--color-bg-base) 95%, transparent);
+  backdrop-filter: blur(6px);
+  border: 1px solid var(--color-bg-elevated);
+  border-radius: var(--radius-sm);
+  padding: var(--space-sm);
+  min-width: 160px;
+  max-width: 240px;
+  z-index: 20;
+  pointer-events: none;
+  white-space: normal;
+  transition:
+    opacity 0.15s ease-out,
+    transform 0.15s ease-out,
+    visibility 0s linear 0.15s;
+}
+
+.tech-node:hover .tech-node__tooltip,
+.tech-node:focus-visible .tech-node__tooltip {
+  visibility: visible;
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  transition:
+    opacity 0.15s ease-out,
+    transform 0.15s ease-out,
+    visibility 0s linear 0s;
+}
+
+.tech-node__tooltip-title {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--color-text-disabled);
+  margin-bottom: var(--space-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.tech-node__tooltip-prereq {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-xs);
+  font-size: var(--text-xs);
+  padding: 2px 0;
+  line-height: 1.4;
+
+  &--met   { color: var(--color-good); }
+  &--unmet { color: var(--color-bad); }
+}
+
+.tech-node__tooltip-prereq-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 3px; // align with first line of text
+
+  .tech-node__tooltip-prereq--met &   { background: var(--color-good); }
+  .tech-node__tooltip-prereq--unmet & { background: var(--color-bad); }
+}
+
+.tech-node__tooltip-spillover {
+  display: block;
+  color: var(--color-text-disabled);
+  font-size: 8px;
+  margin-top: 1px;
+}

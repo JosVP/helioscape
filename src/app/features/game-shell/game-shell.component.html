@@ -17,3 +17,7 @@
   [isOpen]="isPauseMenuOpen()"
   (closed)="isPauseMenuOpen.set(false)"
 />
+
+@if (isResearchHubOpen()) {
+  <app-research-hub (closed)="closeResearchHub()" />
+}

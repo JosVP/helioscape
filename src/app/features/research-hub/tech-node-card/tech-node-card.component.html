@@ -1,0 +1,76 @@
+<div
+  class="tech-node"
+  [class]="'tech-node--' + visibility()"
+  [class.tech-node--new]="isNew()"
+  [class.tech-node--interactive]="interactive() && visibility() !== 'completed'"
+  [attr.data-node-id]="node().id"
+  [attr.tabindex]="interactive() && visibility() === 'available' ? 0 : null"
+  [attr.role]="interactive() && visibility() === 'available' ? 'button' : null"
+  [attr.aria-label]="interactive() && visibility() === 'available' ? 'Unlock ' + node().displayName : null"
+  (click)="onClick()"
+  (keydown.enter)="onClick()"
+  (keydown.space)="onClick()"
+>
+  @if (isNew()) {
+    <span class="tech-node__new-badge" aria-label="Newly unlocked">New</span>
+  }
+
+  <div class="tech-node__icon" aria-hidden="true">
+    @if (visibility() === 'hint') {
+      <!-- Silhouette placeholder for hint nodes -->
+      <svg viewBox="0 0 40 40" width="40" height="40">
+        <circle cx="20" cy="20" r="18" fill="var(--color-text-disabled)" opacity="0.5" />
+        <text x="20" y="26" text-anchor="middle" font-size="18" fill="var(--color-bg-base)">?</text>
+      </svg>
+    } @else {
+      <svg viewBox="0 0 40 40" width="40" height="40">
+        <circle cx="20" cy="20" r="18"
+          [attr.fill]="'var(--color-' + planetId() + ', var(--color-accent))'"
+          opacity="0.25"
+        />
+        <circle cx="20" cy="20" r="10"
+          [attr.fill]="'var(--color-' + planetId() + ', var(--color-accent))'"
+          opacity="0.6"
+        />
+      </svg>
+    }
+  </div>
+
+  <div class="tech-node__body">
+    <div class="tech-node__name">{{ displayName() }}</div>
+
+    @if (showDetails()) {
+      <div class="tech-node__meta">
+        <span class="tech-node__cost">{{ node().rpCost }} RP</span>
+        @if (node().durationYears > 0) {
+          <span class="tech-node__duration">· {{ node().durationYears }}yr</span>
+        }
+      </div>
+
+      @if (branchTag()) {
+        <span class="tech-node__branch-tag tech-node__branch-tag--{{ branchTag() }}">
+          {{ branchTag() }}
+        </span>
+      }
+    }
+  </div>
+
+  <!-- Tooltip (only for nodes with prereqs) -->
+  @if (showTooltip()) {
+    <div class="tech-node__tooltip" role="tooltip">
+      <div class="tech-node__tooltip-title">Prerequisites</div>
+      @for (prereq of prereqSummary(); track prereq.id) {
+        <div class="tech-node__tooltip-prereq"
+          [class.tech-node__tooltip-prereq--met]="prereq.met"
+          [class.tech-node__tooltip-prereq--unmet]="!prereq.met"
+        >
+          <span class="tech-node__tooltip-prereq-dot"></span>
+          <span>{{ prereq.label }}</span>
+          @if (prereq.isSpillover) {
+            <span class="tech-node__tooltip-spillover">↗ spillover</span>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

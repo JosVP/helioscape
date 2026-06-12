@@ -94,6 +94,30 @@
   }
 }
 
+.planet-panel__hub-btn {
+  grid-column: 1 / -1;
+  margin-top: var(--space-xs);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  background: transparent;
+  border: 1px solid var(--planet-accent, var(--color-accent));
+  border-radius: var(--radius-sm);
+  color: var(--planet-accent, var(--color-accent));
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: var(--transition-ui);
+  align-self: start;
+  width: fit-content;
+
+  &:hover,
+  &:focus-visible {
+    background: color-mix(in srgb, var(--planet-accent, var(--color-accent)) 12%, transparent);
+  }
+}
+
 .planet-panel__name {
   grid-area: name;
   font-family: var(--font-mono);

@@ -22,9 +22,11 @@
   --color-mercury: #8a7a5a;
   --color-mars: #b84a2a;
   --color-venus: #c8a030;
+  --color-moon: #5a5a6a;
 
   // Typography
   --font-mono: 'Press Start 2P', 'Courier New', monospace;
+  --font-display: var(--font-mono); // alias — swap for a different display face if desired
   --font-body: 'YourBodyFont', system-ui, sans-serif;
   --text-xs: 11px;
   --text-sm: 13px;
@@ -45,6 +47,7 @@
   --transition-ui: all 0.25s ease-out; // UI interactions
   --transition-panel: transform 0.25s ease-in-out; // panel slide
   --transition-initial: all 0.8s ease-out; // initial-load state
+  --transition-reveal: 0.4s cubic-bezier(0.16, 1, 0.3, 1); // overlay spring entrance
 
   // Borders
   --radius-sm: 4px;

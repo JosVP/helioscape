@@ -1,0 +1,175 @@
+<!-- Backdrop -->
+<div class="research-hub__backdrop" (click)="close()" aria-hidden="true"></div>
+
+<!-- Panel -->
+<div class="research-hub__panel" role="dialog" aria-modal="true" aria-labelledby="research-hub-title">
+
+  <!-- Header -->
+  <div class="research-hub__header">
+    <div class="research-hub__header-text">
+      <h2 class="research-hub__title" id="research-hub-title">Research Hub</h2>
+      <p class="research-hub__subtitle">
+        Every idea that has carried us further began here.
+        Expand what we know, and open new paths for the worlds we are building.
+      </p>
+    </div>
+
+    <div class="research-hub__vignette" aria-hidden="true">
+      <img
+        src="/assets/svg/vignettes/research-hub.svg"
+        alt=""
+        width="200"
+        height="150"
+      />
+    </div>
+
+    <button
+      #closeBtn
+      class="research-hub__close"
+      aria-label="Close Research Hub"
+      (click)="close()"
+    >✕</button>
+  </div>
+
+  <!-- Three-column grid -->
+  <div class="research-hub__grid" #gridContainer>
+
+    <!-- SVG line overlay -->
+    <svg class="research-hub__lines" #svgOverlay aria-hidden="true"></svg>
+
+    <!-- Mars column (read-only spillover display) -->
+    <div class="research-hub__column research-hub__column--mars">
+      <div class="research-hub__column-header">
+        <img
+          src="/assets/svg/planets/mars.svg"
+          class="research-hub__planet-icon"
+          alt=""
+          aria-hidden="true"
+          width="32"
+          height="32"
+        />
+        <span class="research-hub__column-name">Mars</span>
+        <span class="research-hub__column-subtitle">Terraforming milestones</span>
+      </div>
+
+      <div class="research-hub__nodes">
+        @for (row of marsTierRows(); track $index) {
+          <div class="research-hub__tier-row">
+            @for (entry of row; track entry.node.id) {
+              <app-tech-node-card
+                [node]="entry.node"
+                [visibility]="entry.visibility"
+                [interactive]="false"
+                [isNew]="newlyUnlockedIds().has(entry.node.id)"
+                planetId="mars"
+              />
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Earth + Moon column (interactive) -->
+    <div class="research-hub__column research-hub__column--earth">
+      <div class="research-hub__column-header">
+        <img
+          src="/assets/svg/planets/earth.svg"
+          class="research-hub__planet-icon"
+          alt=""
+          aria-hidden="true"
+          width="32"
+          height="32"
+        />
+        <span class="research-hub__column-name">Earth</span>
+        <span class="research-hub__column-subtitle">Research &amp; technology</span>
+      </div>
+
+      <div class="research-hub__nodes">
+        @for (row of earthTierRows(); track $index) {
+          <div class="research-hub__tier-row">
+            @for (entry of row; track entry.node.id) {
+              <app-tech-node-card
+                [node]="entry.node"
+                [visibility]="entry.visibility"
+                [interactive]="entry.interactive"
+                [isNew]="newlyUnlockedIds().has(entry.node.id)"
+                planetId="earth"
+                (nodeClicked)="onNodeClick($event, 'earth')"
+              />
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Moon sub-section -->
+      <div class="research-hub__moon-header">
+        <img
+          src="/assets/svg/planets/moon.svg"
+          class="research-hub__planet-icon research-hub__planet-icon--small"
+          alt=""
+          aria-hidden="true"
+          width="24"
+          height="24"
+        />
+        <span class="research-hub__column-name research-hub__column-name--small">Moon</span>
+        <span class="research-hub__column-subtitle">Research outpost</span>
+      </div>
+
+      <div class="research-hub__nodes">
+        @for (row of moonTierRows(); track $index) {
+          <div class="research-hub__tier-row">
+            @for (entry of row; track entry.node.id) {
+              <app-tech-node-card
+                [node]="entry.node"
+                [visibility]="entry.visibility"
+                [interactive]="entry.interactive"
+                [isNew]="newlyUnlockedIds().has(entry.node.id)"
+                planetId="moon"
+                (nodeClicked)="onNodeClick($event, 'moon')"
+              />
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Venus column (read-only spillover display) -->
+    <div class="research-hub__column research-hub__column--venus">
+      <div class="research-hub__column-header">
+        <img
+          src="/assets/svg/planets/venus.svg"
+          class="research-hub__planet-icon"
+          alt=""
+          aria-hidden="true"
+          width="32"
+          height="32"
+        />
+        <span class="research-hub__column-name">Venus</span>
+        <span class="research-hub__column-subtitle">Terraforming milestones</span>
+      </div>
+
+      <div class="research-hub__nodes">
+        @for (row of venusTierRows(); track $index) {
+          <div class="research-hub__tier-row">
+            @for (entry of row; track entry.node.id) {
+              <app-tech-node-card
+                [node]="entry.node"
+                [visibility]="entry.visibility"
+                [interactive]="false"
+                [isNew]="newlyUnlockedIds().has(entry.node.id)"
+                planetId="venus"
+              />
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+  </div><!-- /.research-hub__grid -->
+
+  <!-- Fork choice modal (Block 7.3 stub) -->
+  @if (showForkModal() && pendingFork() !== null) {
+    <app-fork-choice-modal [fork]="pendingFork()!" />
+  }
+
+</div><!-- /.research-hub__panel -->

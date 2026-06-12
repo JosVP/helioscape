@@ -49,6 +49,10 @@ export class HudComponent {
 
   readonly showAutosave = signal(false);
 
+  openResearchHub(): void {
+    this.eventBus.researchHubRequested$.next();
+  }
+
   private autosaveTimer: ReturnType<typeof setTimeout> | null = null;
   /**
    * Captures the initial autosaveCompleted counter value so the effect can

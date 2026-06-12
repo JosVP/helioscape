@@ -56,6 +56,16 @@ No inline `// TODO:` comments in code - all tracking happens here to avoid dupli
 - **Prompt block**: TBD (culture event choices block)
 - **Added**: 2026-06-11
 
+### PlanetPanelComponent — Orbit view + city lights (Earth, Mars, Venus)
+
+- **File**: src/app/features/planet-panel/planet-panel.component.ts (and orrery)
+- **Location**: Planet panel when Earth / Mars / Venus selected
+- **TODO**: Show a zoomed "from orbit" view of the selected planet inside the orrery (between the planets-menu and the planet-panel). Earth shows city lights on the dark side driven by `cityLightsIntensity` from `PlanetVisualParams`. Mars/Venus show atmospheric state visually. The orrery camera should zoom toward the selected planet so it fills the viewport between the two side panels.
+- **Depends on**: OrreryComponent camera zoom (currently has a TODO comment for this), PlanetVisualParams city lights shader uniform on Earth mesh
+- **Prompt block**: TBD (planet visual polish block)
+- **Added**: 2026-06-12
+
+
 ### OrreryComponent — Three.js orrery implementation ✓ DONE 2026-06-11
 
 - **File**: src/app/features/orrery/orrery.component.ts

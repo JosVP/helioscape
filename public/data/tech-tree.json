@@ -97,7 +97,138 @@
     "spilloverPrerequisites": ["mars_coastal_stable"],
     "rpCost": 50,
     "durationYears": 40,
-    "effects": []
+    "effects": [{ "type": "tag_decision", "tag": "naturalist" }]
+  },
+  {
+    "id": "earth_automated_food_systems",
+    "planet": "earth",
+    "displayName": "Automated Food Systems",
+    "prerequisites": ["earth_advanced_renewables"],
+    "prerequisiteMode": "any",
+    "spilloverPrerequisites": [],
+    "rpCost": 35,
+    "durationYears": 25,
+    "effects": [
+      {
+        "type": "present_fork",
+        "forkId": "food_systems_fork",
+        "choices": [
+          {
+            "id": "rewild_freed_land",
+            "label": "Rewild the freed land",
+            "tag": "naturalist",
+            "effects": [
+              { "type": "emit_event", "eventId": "ce_food_fork_naturalist" },
+              { "type": "tag_decision", "tag": "naturalist" }
+            ]
+          },
+          {
+            "id": "develop_freed_land",
+            "label": "Develop the freed land",
+            "tag": "architect",
+            "effects": [
+              { "type": "emit_event", "eventId": "ce_food_fork_architect" },
+              { "type": "tag_decision", "tag": "architect" },
+              { "type": "rp_capacity_boost", "amount": 10 }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "earth_vertical_megacity",
+    "planet": "earth",
+    "displayName": "Vertical Megacity Initiative",
+    "prerequisites": ["earth_advanced_renewables"],
+    "spilloverPrerequisites": [],
+    "rpCost": 35,
+    "durationYears": 30,
+    "effects": [
+      { "type": "tag_decision", "tag": "architect" },
+      { "type": "rp_capacity_boost", "amount": 15 },
+      { "type": "emit_event", "eventId": "ce_megacity_50m" }
+    ]
+  },
+  {
+    "id": "earth_arcology_framework",
+    "planet": "earth",
+    "displayName": "Arcology Framework",
+    "prerequisites": ["earth_vertical_megacity"],
+    "spilloverPrerequisites": [],
+    "rpCost": 45,
+    "durationYears": 35,
+    "effects": [
+      { "type": "tag_decision", "tag": "architect" },
+      { "type": "apply_colonist_bonus", "bonus": "dense_living" }
+    ]
+  },
+  {
+    "id": "earth_subsurface_city",
+    "planet": "earth",
+    "displayName": "Subsurface City Expansion",
+    "prerequisites": ["earth_arcology_framework"],
+    "spilloverPrerequisites": [],
+    "rpCost": 50,
+    "durationYears": 40,
+    "effects": [
+      { "type": "tag_decision", "tag": "architect" },
+      { "type": "emit_event", "eventId": "ce_underground_people" }
+    ]
+  },
+  {
+    "id": "earth_planetary_resource_grid",
+    "planet": "earth",
+    "displayName": "Planetary Resource Grid",
+    "prerequisites": ["earth_arcology_framework"],
+    "spilloverPrerequisites": [],
+    "rpCost": 55,
+    "durationYears": 40,
+    "effects": [
+      { "type": "tag_decision", "tag": "architect" },
+      { "type": "rp_capacity_boost", "amount": 10 },
+      { "type": "emit_event", "eventId": "ce_grid_prevents_famine" }
+    ]
+  },
+  {
+    "id": "earth_geoengineering_bureau",
+    "planet": "earth",
+    "displayName": "Geoengineering Coordination Bureau",
+    "prerequisites": ["earth_planetary_resource_grid"],
+    "spilloverPrerequisites": [],
+    "rpCost": 55,
+    "durationYears": 45,
+    "effects": [
+      { "type": "tag_decision", "tag": "architect" }
+    ]
+  },
+  {
+    "id": "earth_neural_digital_integration",
+    "planet": "earth",
+    "displayName": "Neural-Digital Integration Research",
+    "prerequisites": ["earth_planetary_resource_grid", "earth_fusion_ignition_theory"],
+    "spilloverPrerequisites": [],
+    "rpCost": 70,
+    "durationYears": 60,
+    "effects": [
+      { "type": "tag_decision", "tag": "architect" },
+      { "type": "rp_capacity_boost", "amount": 20 },
+      { "type": "emit_event", "eventId": "ce_neural_digital_debate" }
+    ]
+  },
+  {
+    "id": "earth_planetary_coordination_network",
+    "planet": "earth",
+    "displayName": "Planetary Coordination Network",
+    "prerequisites": ["earth_neural_digital_integration"],
+    "spilloverPrerequisites": [],
+    "rpCost": 80,
+    "durationYears": 70,
+    "effects": [
+      { "type": "tag_decision", "tag": "architect" },
+      { "type": "rp_capacity_boost", "amount": 30 },
+      { "type": "emit_event", "eventId": "ce_automation_what_do_humans_do" }
+    ]
   },
   {
     "id": "moon_low_gravity_medicine",

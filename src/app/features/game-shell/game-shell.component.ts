@@ -20,6 +20,7 @@ import { PlanetsPanelComponent } from '@app/features/hud/planets-panel/planets-p
 import { OrreryComponent } from '@app/features/orrery/orrery.component';
 import { PauseMenuComponent } from '@app/features/pause-menu/pause-menu.component';
 import { PlanetPanelComponent } from '@app/features/planet-panel/planet-panel.component';
+import { ResearchHubComponent } from '@app/features/research-hub/research-hub.component';
 
 @Component({
   selector: 'app-game-shell',
@@ -33,6 +34,7 @@ import { PlanetPanelComponent } from '@app/features/planet-panel/planet-panel.co
     CultureEventCardComponent,
     CultureEventToastComponent,
     PauseMenuComponent,
+    ResearchHubComponent,
   ],
   templateUrl: './game-shell.component.html',
   styleUrl: './game-shell.component.scss',
@@ -51,6 +53,7 @@ export class GameShellComponent implements OnInit, OnDestroy {
 
   readonly selectedPlanetId = signal<string | null>(null);
   readonly isPauseMenuOpen = signal(false);
+  readonly isResearchHubOpen = signal(false);
   /** Set to true when the player clicks the Moon row; signals PlanetPanel to open at the Moon/research tab. */
   readonly moonTabActive = signal(false);
 
@@ -70,6 +73,10 @@ export class GameShellComponent implements OnInit, OnDestroy {
     this.eventBus.moonTabRequested$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.moonTabActive.set(true));
+
+    this.eventBus.researchHubRequested$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.isResearchHubOpen.set(true));
   }
 
   ngOnDestroy(): void {
@@ -80,9 +87,10 @@ export class GameShellComponent implements OnInit, OnDestroy {
   // Host listeners
   // ---------------------------------------------------------------------------
 
-  /** Toggle pause menu on Escape, regardless of current focus target. */
+  /** Toggle pause menu on Escape, unless another overlay (Research Hub) is already open. */
   @HostListener('document:keydown.escape')
   onEscape(): void {
+    if (this.isResearchHubOpen()) return; // ResearchHub handles its own Escape
     this.isPauseMenuOpen.update((v) => !v);
   }
 
@@ -106,6 +114,10 @@ export class GameShellComponent implements OnInit, OnDestroy {
 
   closePlanetPanel(): void {
     this.selectedPlanetId.set(null);
+  }
+
+  closeResearchHub(): void {
+    this.isResearchHubOpen.set(false);
   }
 }
 

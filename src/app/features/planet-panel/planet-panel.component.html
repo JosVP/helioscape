@@ -12,6 +12,13 @@
     <h2 class="planet-panel__name">{{ planetData()?.displayName }}</h2>
     <span class="planet-panel__phase-name">{{ phaseName() }}</span>
 
+    <button
+      class="planet-panel__hub-btn"
+      title="Open Research Hub"
+      aria-label="Open Research Hub"
+      (click)="openResearchHub()"
+    >⚗ Research Hub</button>
+
     @if (phaseDescription()) {
       <p class="planet-panel__phase-desc">{{ phaseDescription() }}</p>
     }
@@ -28,15 +35,6 @@
       aria-label="Planet sections"
       [style.--planet-accent]="'var(--color-' + id + ', var(--color-accent))'"
     >
-      <button
-        id="tab-tech-tree"
-        role="tab"
-        [attr.aria-selected]="activeTab() === 'tech-tree'"
-        [attr.aria-controls]="'tabpanel-' + id"
-        [class.is-active]="activeTab() === 'tech-tree'"
-        (click)="setTab('tech-tree')"
-      >Tech Tree</button>
-
       <button
         id="tab-research"
         role="tab"
@@ -83,9 +81,6 @@
       [attr.aria-labelledby]="activeTabId()"
     >
       @switch (activeTab()) {
-        @case ('tech-tree') {
-          <app-tech-tree [planetId]="id" />
-        }
         @case ('research') {
           <app-research [planetId]="id" [moonTabActive]="moonTabActive()" />
         }
