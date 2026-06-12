@@ -1,0 +1,102 @@
+@if (planetId(); as id) {
+  <header
+    class="planet-panel__header"
+    [style.--planet-accent]="'var(--color-' + id + ', var(--color-accent))'"
+  >
+    <button
+      class="planet-panel__close"
+      aria-label="Close planet panel"
+      (click)="close()"
+    >←</button>
+
+    <h2 class="planet-panel__name">{{ planetData()?.displayName }}</h2>
+    <span class="planet-panel__phase-name">{{ phaseName() }}</span>
+
+    @if (phaseDescription()) {
+      <p class="planet-panel__phase-desc">{{ phaseDescription() }}</p>
+    }
+  </header>
+
+  @if (isLocked()) {
+    <div class="planet-panel__locked" role="status" aria-live="polite">
+      <p>This world is not yet within our reach.</p>
+    </div>
+  } @else {
+    <nav
+      class="planet-panel__tabs"
+      role="tablist"
+      aria-label="Planet sections"
+      [style.--planet-accent]="'var(--color-' + id + ', var(--color-accent))'"
+    >
+      <button
+        id="tab-tech-tree"
+        role="tab"
+        [attr.aria-selected]="activeTab() === 'tech-tree'"
+        [attr.aria-controls]="'tabpanel-' + id"
+        [class.is-active]="activeTab() === 'tech-tree'"
+        (click)="setTab('tech-tree')"
+      >Tech Tree</button>
+
+      <button
+        id="tab-research"
+        role="tab"
+        [attr.aria-selected]="activeTab() === 'research' && !isActiveMoonTab()"
+        [attr.aria-controls]="'tabpanel-' + id"
+        [class.is-active]="activeTab() === 'research' && !isActiveMoonTab()"
+        (click)="setTab('research')"
+      >Research</button>
+
+      @if (isEarth()) {
+        <button
+          id="tab-moon"
+          role="tab"
+          [attr.aria-selected]="isActiveMoonTab()"
+          [attr.aria-controls]="'tabpanel-' + id"
+          [class.is-active]="isActiveMoonTab()"
+          (click)="setTab('research')"
+        >Moon</button>
+      }
+
+      <button
+        id="tab-bio-phases"
+        role="tab"
+        [attr.aria-selected]="activeTab() === 'bio-phases'"
+        [attr.aria-controls]="'tabpanel-' + id"
+        [class.is-active]="activeTab() === 'bio-phases'"
+        (click)="setTab('bio-phases')"
+      >Bio Phases</button>
+
+      <button
+        id="tab-overview"
+        role="tab"
+        [attr.aria-selected]="activeTab() === 'overview'"
+        [attr.aria-controls]="'tabpanel-' + id"
+        [class.is-active]="activeTab() === 'overview'"
+        (click)="setTab('overview')"
+      >Overview</button>
+    </nav>
+
+    <div
+      class="planet-panel__content"
+      role="tabpanel"
+      [id]="'tabpanel-' + id"
+      [attr.aria-labelledby]="activeTabId()"
+    >
+      @switch (activeTab()) {
+        @case ('tech-tree') {
+          <app-tech-tree [planetId]="id" />
+        }
+        @case ('research') {
+          <app-research [planetId]="id" [moonTabActive]="moonTabActive()" />
+        }
+        @case ('bio-phases') {
+          <app-bio-phase [planetId]="id" />
+        }
+        @case ('overview') {
+          <app-planet-overview [planetId]="id" />
+        }
+      }
+    </div>
+  }
+}
+

@@ -1,0 +1,18 @@
+@if (planet(); as p) {
+  <dl class="planet-overview">
+    <div class="planet-overview__stat">
+      <dt>Atmosphere</dt>
+      <dd>{{ p.atmospherePressure | number:'1.2-2' }} <span class="planet-overview__unit">atm</span></dd>
+    </div>
+    <div class="planet-overview__stat">
+      <dt>Temperature</dt>
+      <dd>{{ p.temperatureCelsius | number:'1.0-0' }} <span class="planet-overview__unit">°C</span></dd>
+    </div>
+    <div class="planet-overview__stat">
+      <dt>Population</dt>
+      <dd>{{ p.population | number }}</dd>
+    </div>
+  </dl>
+} @else {
+  <p class="planet-overview__empty">No data available.</p>
+}

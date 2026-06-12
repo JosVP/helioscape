@@ -1,0 +1,224 @@
+// Planet panel — slides in from the right as an absolute overlay over the orrery.
+// The host element IS the sliding panel; no inner wrapper div needed.
+
+:host {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 420px;
+  height: 100%;
+  z-index: 15;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg-surface);
+  box-shadow: var(--shadow-panel);
+
+  transform: translateX(100%);
+  transition: var(--transition-panel);
+  overflow: hidden;
+
+  // Planet-accent colour injected by the header's [style] binding via --planet-accent
+  --planet-accent: var(--color-accent);
+
+  &.is-open {
+    transform: translateX(0);
+  }
+}
+
+// ─── Accent stripe ────────────────────────────────────────────────────────────
+// 3px left border that takes the planet's accent colour.
+
+:host::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  background: var(--planet-accent);
+  opacity: 0;
+  transition: opacity 0.4s ease-out;
+  pointer-events: none;
+}
+
+:host.is-open::before {
+  opacity: 1;
+}
+
+// ─── Header ──────────────────────────────────────────────────────────────────
+
+.planet-panel__header {
+  display: grid;
+  grid-template:
+    'close name'   auto
+    '.     phase'  auto
+    '.     desc'   auto
+    / 36px  1fr;
+  align-items: start;
+  gap: var(--space-xs) var(--space-sm);
+  padding: var(--space-md) var(--space-md) var(--space-sm) var(--space-md);
+  border-bottom: var(--border-subtle);
+  flex-shrink: 0;
+}
+
+.planet-panel__close {
+  grid-area: close;
+  // Align with the first text line
+  margin-top: 2px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: var(--border-subtle);
+  color: var(--color-text-secondary);
+  font-size: var(--text-md);
+  cursor: pointer;
+  transition:
+    color 0.2s ease-out,
+    background 0.2s ease-out,
+    border-color 0.2s ease-out;
+
+  &:hover {
+    color: var(--color-text-primary);
+    background: var(--color-bg-elevated);
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+}
+
+.planet-panel__name {
+  grid-area: name;
+  font-family: var(--font-mono);
+  font-size: var(--text-lg);
+  color: var(--color-text-primary);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.planet-panel__phase-name {
+  grid-area: phase;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--planet-accent);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.planet-panel__phase-desc {
+  grid-area: desc;
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.6;
+}
+
+// ─── Locked state ────────────────────────────────────────────────────────────
+
+.planet-panel__locked {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: var(--space-xl);
+
+  &::before {
+    content: '🔒';
+    font-size: 32px;
+    opacity: 0.3;
+    filter: grayscale(1);
+  }
+
+  p {
+    color: var(--color-text-disabled);
+    font-size: var(--text-xs);
+    font-family: var(--font-mono);
+    text-align: center;
+    line-height: 1.8;
+    max-width: 240px;
+  }
+}
+
+// ─── Tab bar ─────────────────────────────────────────────────────────────────
+
+.planet-panel__tabs {
+  display: flex;
+  gap: 0;
+  // Indent slightly to clear the accent stripe
+  padding: 0 var(--space-sm) 0 calc(var(--space-sm) + 3px);
+  border-bottom: var(--border-subtle);
+  flex-shrink: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar { display: none; }
+
+  button {
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--color-text-disabled);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    padding: var(--space-sm) var(--space-sm);
+    cursor: pointer;
+    transition:
+      color 0.2s ease-out,
+      border-bottom-color 0.2s ease-out;
+    white-space: nowrap;
+    // Overlap the bottom border of the nav container so the active underline sits flush
+    margin-bottom: -1px;
+
+    &:hover:not(.is-active) {
+      color: var(--color-text-secondary);
+    }
+
+    &.is-active {
+      color: var(--color-text-primary);
+      border-bottom-color: var(--planet-accent);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-accent);
+      outline-offset: -3px;
+    }
+  }
+}
+
+// ─── Tab content ─────────────────────────────────────────────────────────────
+
+.planet-panel__content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  // Slim scrollbar matching the panels-panel pattern
+  &::-webkit-scrollbar       { width: 3px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+  }
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+// ─── Initial-load atmosphere bar animation ───────────────────────────────────
+// When :host has .initial-load, any .atmosphere-bar inside uses ease-out.
+// This class is present for 800ms after the panel opens — see PlanetPanelComponent.
+
+:host.initial-load .atmosphere-bar {
+  transition: var(--transition-initial);
+}
+

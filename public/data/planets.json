@@ -25,8 +25,8 @@
       "cityLightsTexture": "/assets/textures/planets/earth_city_lights.png"
     },
     "phases": [
-      { "displayName": "Industrial Age" },
-      { "displayName": "Space Age" }
+      { "displayName": "Industrial Age", "description": "We are mastering the fundamentals of civilisation — energy, industry, and the first reach toward the stars." },
+      { "displayName": "Space Age", "description": "We have broken free of gravity's cradle and turned our gaze to the solar system we now call home." }
     ]
   },
   {
@@ -51,9 +51,9 @@
       "greenSpotUvs": []
     },
     "phases": [
-      { "displayName": "Operational Base" },
-      { "displayName": "Industrial Hub" },
-      { "displayName": "Ring City" }
+      { "displayName": "Operational Base", "description": "A foothold on the scorched rock — our first permanent presence in the inner solar system." },
+      { "displayName": "Industrial Hub", "description": "Mercury's resources flow outward, fuelling the civilisation we are building across the planets." },
+      { "displayName": "Ring City", "description": "We have tamed the closest world to our star and raised a city that encircles it in steel and light." }
     ]
   },
   {
@@ -99,11 +99,11 @@
       "lavaHueData": { "hotHue": 0.0, "cooledHue": 0.72 }
     },
     "phases": [
-      { "displayName": "Barren" },
-      { "displayName": "Thin Atmosphere" },
-      { "displayName": "Warming" },
-      { "displayName": "Wetting" },
-      { "displayName": "Flourishing" }
+      { "displayName": "Barren", "description": "Mars is a frozen desert — thin air, a cold sun, and no life. We are here to change all of that." },
+      { "displayName": "Thin Atmosphere", "description": "The first gases fill the sky. Pressure is rising, and the long work of transformation has begun." },
+      { "displayName": "Warming", "description": "Heat returns to the red plains. We watch the permafrost retreat and imagine the oceans beneath." },
+      { "displayName": "Wetting", "description": "Liquid water flows again on Mars for the first time in billions of years. The planet is waking." },
+      { "displayName": "Flourishing", "description": "Life takes root in the rust. What was once a tomb for dreams is now a second cradle of humanity." }
     ]
   },
   {
@@ -135,11 +135,11 @@
       ]
     },
     "phases": [
-      { "displayName": "Hellish" },
-      { "displayName": "Cooling" },
-      { "displayName": "Thinning" },
-      { "displayName": "Temperate" },
-      { "displayName": "Flourishing" }
+      { "displayName": "Hellish", "description": "Venus boils under a crushing sky of acid. Every hour of survival here is a triumph of engineering." },
+      { "displayName": "Cooling", "description": "We are pulling heat from the atmosphere. The planet resists, but our resolve is stronger." },
+      { "displayName": "Thinning", "description": "The dense clouds are breaking. For the first time in four billion years, sunlight reaches the surface." },
+      { "displayName": "Temperate", "description": "Breathable air sweeps across the highlands. Venus is no longer a warning — it is a promise." },
+      { "displayName": "Flourishing", "description": "The twin of Earth has earned its name. Life flourishes under a gentler sun on our second home." }
     ]
   }
 ]

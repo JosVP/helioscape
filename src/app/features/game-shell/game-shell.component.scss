@@ -28,23 +28,6 @@ app-orrery {
   overflow: hidden;
 }
 
-// Planet panel slides in from the right as an absolute overlay over the orrery area.
-// Always in the DOM so the CSS transform transition works correctly.
-.planet-panel-overlay {
-  position: absolute;
-  top: 0;
-  right: 0;
-  height: 100%;
-  width: 420px;
-  z-index: 15;
-  transform: translateX(100%);
-  transition: var(--transition-panel);
-
-  &.is-open {
-    transform: translateX(0);
-  }
-}
-
 app-culture-event-card,
 app-culture-event-toast {
   position: absolute;

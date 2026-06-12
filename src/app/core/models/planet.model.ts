@@ -13,6 +13,8 @@ export type PlanetId = 'earth' | 'mercury' | 'mars' | 'venus';
 export interface PlanetPhase {
   /** Human-readable phase name shown in the planets panel (e.g. "Barren", "Thin Atmosphere"). */
   displayName: string;
+  /** One-sentence description of this phase, shown in the planet panel header. */
+  description: string;
 }
 
 export interface PlanetData {

@@ -5,9 +5,9 @@
 <app-orrery />
 
 <app-planet-panel
-  class="planet-panel-overlay"
-  [class.is-open]="selectedPlanetId() !== null"
   [planetId]="selectedPlanetId()"
+  [moonTabActive]="moonTabActive()"
+  (closed)="closePlanetPanel()"
 />
 
 <app-culture-event-card />
