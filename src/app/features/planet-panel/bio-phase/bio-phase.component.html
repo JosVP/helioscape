@@ -1,0 +1,118 @@
+<div class="bio-phases">
+  @for (vm of phaseVMs(); track vm.index) {
+    <div class="bio-phases__card" [attr.data-status]="vm.state.status">
+
+      <!-- ── Header ──────────────────────────────────────────────────────── -->
+      <div class="bio-phases__card-header">
+        <span class="bio-phases__phase-name">{{ vm.def.displayName }}</span>
+
+        @switch (vm.state.status) {
+          @case ('locked') {
+            <span class="bio-phases__status-badge bio-phases__status-badge--locked">Locked</span>
+          }
+          @case ('available') {
+            <span class="bio-phases__status-badge bio-phases__status-badge--available">Ready</span>
+          }
+          @case ('running') {
+            <span class="bio-phases__status-badge bio-phases__status-badge--running">
+              {{ vm.progressPercent | number:'1.0-0' }}%
+            </span>
+          }
+          @case ('complete') {
+            <span class="bio-phases__status-badge bio-phases__status-badge--complete">Complete</span>
+          }
+        }
+      </div>
+
+      <!-- ── Body ────────────────────────────────────────────────────────── -->
+      @switch (vm.state.status) {
+
+        <!-- LOCKED: requirement checklist -->
+        @case ('locked') {
+          <ul class="bio-phases__requirements">
+            @for (req of vm.metRequirements; track req) {
+              <li class="bio-phases__req bio-phases__req--met">🟢 {{ req }}</li>
+            }
+            @for (req of vm.unmetRequirements; track req) {
+              <li class="bio-phases__req bio-phases__req--unmet">🔴 {{ req }}</li>
+            }
+          </ul>
+        }
+
+        <!-- AVAILABLE: action buttons + optional request button -->
+        @case ('available') {
+          <div class="bio-phases__actions">
+            @for (actionId of vm.def.actions; track actionId) {
+              <button
+                type="button"
+                class="bio-phases__action-btn"
+                title="Reduces phase duration by ~8%"
+                (click)="applyAction(vm.index, actionId)"
+              >{{ formatActionLabel(actionId) }}</button>
+            }
+            @if (vm.def.requiresRequest) {
+              <button
+                type="button"
+                class="bio-phases__request-btn"
+                (click)="sendRequest(vm.def.requiresRequest!)"
+              >Send Request</button>
+            }
+          </div>
+        }
+
+        <!-- RUNNING: progress bar, actions taken, remaining action buttons -->
+        @case ('running') {
+          <div
+            class="bio-phases__bar-track"
+            role="progressbar"
+            [attr.aria-valuenow]="vm.progressPercent | number:'1.0-0'"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            [attr.aria-label]="vm.def.displayName + ' progress'"
+          >
+            <div
+              class="bio-phases__bar-fill"
+              [style.--bar-width.%]="vm.progressPercent"
+            ></div>
+          </div>
+
+          @if (vm.state.actionsTaken.length) {
+            <ul class="bio-phases__actions-taken">
+              @for (actionId of vm.state.actionsTaken; track actionId) {
+                <li class="bio-phases__action-taken">✓ {{ formatActionLabel(actionId) }}</li>
+              }
+            </ul>
+          }
+
+          @if (vm.remainingActions.length) {
+            <div class="bio-phases__actions">
+              @for (actionId of vm.remainingActions; track actionId) {
+                <button
+                  type="button"
+                  class="bio-phases__action-btn"
+                  title="Reduces phase duration by ~8%"
+                  (click)="applyAction(vm.index, actionId)"
+                >{{ formatActionLabel(actionId) }}</button>
+              }
+            </div>
+          }
+        }
+
+        <!-- COMPLETE: green name (via CSS), completion year, actions taken -->
+        @case ('complete') {
+          <p class="bio-phases__complete-label">
+            Complete — Year {{ vm.state.completedYear }}
+          </p>
+          @if (vm.state.actionsTaken.length) {
+            <ul class="bio-phases__actions-taken">
+              @for (actionId of vm.state.actionsTaken; track actionId) {
+                <li class="bio-phases__action-taken">✓ {{ formatActionLabel(actionId) }}</li>
+              }
+            </ul>
+          }
+        }
+
+      }
+    </div>
+  }
+</div>

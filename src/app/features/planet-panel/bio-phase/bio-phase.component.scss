@@ -1,0 +1,199 @@
+:host {
+  display: block;
+}
+
+// ── Scrollable container ─────────────────────────────────────────────────────
+
+.bio-phases {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  overflow-y: auto;
+  padding: var(--space-md);
+  // Allow the list to scroll within its parent panel tab content area.
+  max-height: 100%;
+}
+
+// ── Phase card ───────────────────────────────────────────────────────────────
+
+.bio-phases__card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-bg-elevated);
+  border-radius: var(--radius-md);
+  border: var(--border-subtle);
+  transition: border-color var(--transition-ui);
+
+  // ── Status variants ──────────────────────────────────────────────────────
+
+  &[data-status='locked'] {
+    opacity: 0.55;
+  }
+
+  &[data-status='complete'] {
+    border-color: rgba(90, 158, 90, 0.3);
+
+    .bio-phases__phase-name {
+      color: var(--color-good);
+    }
+  }
+
+  &[data-status='running'] {
+    border-color: var(--color-accent-dim);
+  }
+}
+
+// ── Card header ──────────────────────────────────────────────────────────────
+
+.bio-phases__card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.bio-phases__phase-name {
+  flex: 1;
+  font-size: var(--text-sm);
+  font-family: var(--font-body);
+  color: var(--color-text-primary);
+  line-height: 1.4;
+}
+
+// ── Status badge ─────────────────────────────────────────────────────────────
+
+.bio-phases__status-badge {
+  flex-shrink: 0;
+  font-size: var(--text-xs);
+  font-family: var(--font-mono);
+  white-space: nowrap;
+  color: var(--color-text-secondary);
+
+  &--available {
+    color: var(--color-accent);
+  }
+
+  &--running {
+    color: var(--color-accent-glow);
+  }
+
+  &--complete {
+    color: var(--color-good);
+  }
+}
+
+// ── Requirement list (LOCKED) ────────────────────────────────────────────────
+
+.bio-phases__requirements {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.bio-phases__req {
+  font-size: var(--text-xs);
+  font-family: var(--font-body);
+  line-height: 1.5;
+
+  &--met {
+    color: var(--color-good);
+  }
+
+  &--unmet {
+    color: var(--color-bad);
+  }
+}
+
+// ── Progress bar (RUNNING) ───────────────────────────────────────────────────
+
+.bio-phases__bar-track {
+  height: 4px;
+  background: var(--color-bg-surface);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.bio-phases__bar-fill {
+  height: 100%;
+  width: calc(var(--bar-width, 0) * 1%);
+  background: var(--color-accent);
+  border-radius: var(--radius-sm);
+  // Tick-driven visual value pattern — must use 1s linear per AGENTS.md.
+  transition: var(--transition-tick);
+}
+
+// ── Actions taken list (RUNNING + COMPLETE) ──────────────────────────────────
+
+.bio-phases__actions-taken {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bio-phases__action-taken {
+  font-size: var(--text-xs);
+  font-family: var(--font-body);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+// ── Completion label (COMPLETE) ──────────────────────────────────────────────
+
+.bio-phases__complete-label {
+  margin: 0;
+  font-size: var(--text-xs);
+  font-family: var(--font-mono);
+  color: var(--color-good);
+}
+
+// ── Action buttons (AVAILABLE + remaining in RUNNING) ────────────────────────
+
+.bio-phases__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  margin-top: var(--space-xs);
+}
+
+.bio-phases__action-btn {
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  border: var(--border-accent);
+  background: transparent;
+  font-size: var(--text-xs);
+  font-family: var(--font-mono);
+  color: var(--color-accent);
+  cursor: pointer;
+  transition: var(--transition-ui);
+
+  &:hover {
+    background: rgba(200, 134, 30, 0.12);
+  }
+
+  &:active {
+    background: rgba(200, 134, 30, 0.2);
+  }
+}
+
+.bio-phases__request-btn {
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-neutral);
+  background: transparent;
+  font-size: var(--text-xs);
+  font-family: var(--font-mono);
+  color: var(--color-neutral);
+  cursor: pointer;
+  transition: var(--transition-ui);
+
+  &:hover {
+    background: rgba(74, 106, 138, 0.15);
+  }
+}
