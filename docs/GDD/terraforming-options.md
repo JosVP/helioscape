@@ -53,11 +53,18 @@ To shade Venus, panels repositioned from Mercury orbit (0.39 AU) to Sun-Venus L1
 
 Three Galilean moons available as major strategic resources. Titan is NOT moved — too massive, resource profile doesn't justify inner-system transit. Titan stays at Saturn; nitrogen extracted there in place via automated factories.
 
-**Moon assignment (one per planet maximum):**
-- **Europa** → Venus crash only (spin-up + water, moon destroyed)
-- **Ganymede or Callisto** → Mars orbit (player chooses; captured, permanent sky moon, water extracted gradually)
-- **Remaining Ganymede/Callisto** → Venus orbit (only if Wild Venus chosen — no Europa crash; captured, sky moon, water extracted)
-- Mutual exclusion: Europa to Venus = cannot go to Mars. Ganymede to Mars = Callisto available for Venus or untouched.
+**Moon assignment:**
+- **Europa** → Venus crash only (Phase 3 Choice B), moon destroyed. Not available for Mars.
+- **Callisto** → Venus crash (Choice C only, sequential with Europa, moon destroyed) OR Mars orbit (captured, permanent sky moon, water extracted gradually).
+- **Ganymede** → Mars orbit (captured, permanent sky moon, water extracted gradually) OR Venus orbit (Wild Venus / Phase 3 Choice A only — no crashes; captured, sky moon, water extracted gradually).
+
+**Choice C constraint (Callisto + Europa both to Venus):** Mars loses access to both Europa and Callisto. Mars water delivery must use Ganymede (if player still wants a sky moon) or asteroid belt only. No captured sky moon remains available for Venus — both moons destroyed.
+
+**Mutual exclusions summary:**
+- Europa to Venus (B or C) → Europa unavailable for Mars.
+- Callisto to Venus (C only) → only Ganymede available for Mars orbit.
+- Ganymede to Mars → Callisto available for Venus Choice A (captured sky moon) or untouched.
+- Venus Choice C → no captured moon for Venus; both moons destroyed.
 
 **Transit timing — critical mechanic:**
 Redirecting a Jovian moon takes 20–40 years from commit to arrival (gravity assist to escape Jupiter + interplanetary transit + orbital capture). **Commit decision must be made during the previous phase** so the moon is in transit while that phase runs, arriving ready for water phase.
@@ -124,7 +131,12 @@ High-altitude thermonuclear detonations above poles. Fast atmospheric shock trig
 **BOOSTS — Phase 1**
 
 *Super Greenhouse Gas Factories (SGGF)*
-Manufacture CF₄, SF₆ on Mars surface. 10,000–23,000× warming power vs CO₂. Most energy-efficient warming method in scientific literature. Dyson-powered; Mercury surface components. 10–20yr acceleration on reaching target temperature. Compatible with all paths. Reversible: factories shut down, gases dissipate over centuries.
+Two sub-options, both Dyson-powered with Mercury-built surface components. Compatible with all paths. Can run both variants simultaneously.
+
+- **Long-lived (CF₄ / SF₆):** 10,000–23,000× warming power vs CO₂. Most effective per unit of production. **Effectively permanent commitment** — CF₄ atmospheric lifetime ~50,000yr, SF₆ ~3,200yr. Shutting down the factories does not meaningfully reduce atmospheric concentration on any human-relevant timescale. Architect tag.
+- **Short-lived (Methane / N₂O):** 20–300× warming power vs CO₂. Continuous factory operation required to maintain effect. Gases dissipate within decades after shutdown. Genuinely reversible. Naturalist tag.
+
+Both variants: 10–20yr acceleration on reaching target temperature.
 
 *Polar Albedo Darkening*
 Spread dark particulate (carbon black) on polar ice. Lowers reflectivity, accelerates sublimation. Low Mercury cost. 5–10yr acceleration on warming start. Only useful with A or B — irrelevant for C.
@@ -155,7 +167,7 @@ Seismic or drilling data reveals large subsurface CO₂/water reservoir. Option:
 *Goal: dilute ~100% O₂ atmosphere with N₂ toward 21% O₂ / 79% N₂.*
 
 **CHOICE A — Titan Nitrogen Strip** *(irreversible)*
-Titan stays at Saturn — it is NOT moved. Automated factories launched from Mercury as unmanned component packages (~7–10yr transit). Factories + mass driver on Titan compress and launch nitrogen tanks toward Mars (~3–4yr transit per package). Pipeline takes time to establish; once running it is continuous. Powered by Dyson long-range beaming (viable at ~5%+) or local solar collectors on Titan.
+Titan stays at Saturn — it is NOT moved. Automated factories launched from Mercury as unmanned component packages (~7–10yr transit). Factories + mass driver on Titan compress and launch nitrogen tanks toward Mars (~3–4yr transit per package). Pipeline takes time to establish; once running it is continuous. Powered by Dyson long-range beaming only — solar flux at Saturn (~14 W/m²) is insufficient for industrial-scale operations. Requires a **Dyson relay station**: a dedicated Mercury-built orbital component (~5yr build, moderate rare metals cost) that must be queued before factory transit begins. The relay station establishes the microwave transmission link from the inner swarm to Titan range.
 
 If Phase 1 Choice A (laser arrays) used: arrays can be redeployed to power Titan factories, shortening Phase 2 timeline by ~10–20yr.
 
@@ -292,9 +304,50 @@ Water accumulates in a previously uncharted low terrain basin, forming an unexpe
 
 ---
 
+### OPENING DECISION — SPIN CHOICE (Venus Unlock, ~Year 20)
+
+*Made immediately when Venus unlocks. Binding. Europa window closes Year 100.*
+
+Before any cooling infrastructure is queued, the player chooses Venus's long-term rotational identity. This cannot be changed once impacts are authorised.
+
+**Choice A — Wild Venus:** no spin-up. Proceed to Phase 1 immediately at standard starting temperature.
+
+**Choice B — Europa Impact:** authorise Europa redirect. Mercury queues impactor package + solar sail tugs (~6 units). Transit 20–40yr. Europa impacts Venus approximately 20–40 years from authorisation. **Phase 1 cannot begin until the impact plume settles (~5–10yr post-impact).** The impact adds enormous heat (~60–120°C above standard Venus baseline) — Phase 1 starts from a hotter planet, extended by ~20–30yr vs Wild Venus. Water and spin are delivered as a single event. The shade mirror is deployed in parallel with the transit but active cooling begins after impact.
+
+*Spin direction: retrograde (adds to Venus's existing backwards rotation rather than fighting it). Venus already spins backwards at 243 days. Adding retrograde angular momentum compounds with the existing spin instead of cancelling it first. A prograde impactor of equal mass would need to spend roughly half its angular momentum budget just cancelling the existing rotation before building any forward spin — retrograde is significantly more efficient. The sun still rises in the west on Venus. Nothing changes about that.*
+
+**Choice C — Callisto + Europa Sequential:** authorise both redirects. Mercury queues two impactor packages. Callisto arrives first (~30–50yr from commit), Europa follows (~20–40yr after Callisto impact). Phase 1 begins only after both impacts settle. Extended Phase 1 by ~40–60yr vs Wild Venus. Both commitments must be placed before Year 100. Callisto commit must precede Europa by at least 10yr.
+
+*Same retrograde direction as Choice B. Two retrograde additions compound with each other and with the existing rotation. Because no angular momentum is wasted, the combined result is substantially shorter than any prograde approach could achieve with the same impactor mass.*
+
+*Why impacts must precede cooling, not follow it:* a moon impact converts an enormous quantity of kinetic energy to heat on impact — enough to partially melt Venus's crust and drive a supercritical steam/CO₂ atmosphere. Cooling a Venus and then crashing a moon into it would be self-defeating. The correct sequence is always: impact → then begin the long cooling project. The cooling is starting from a harder position but with water and spin already delivered.
+
+---
+
+### VENUS — WATER AND OCEAN COVERAGE TIERS
+
+Three distinctly different end-state ocean coverages, visible from orbit as different planet textures:
+
+| Path | Water source | Ocean coverage | Landscape character |
+|---|---|---|---|
+| Wild Venus (or Managed) | Asteroid belt only | ~10–20% | Mostly rocky. Inland seas, no global ocean. | ~117 Earth days (unchanged) |
+| Europa only (Path B) | Europa impact (retrograde) | ~35–50% | Earth-like land/ocean mix. Large seas, significant continents. | ~30–40 Earth days |
+| Callisto + Europa (Path C) | Two moon impacts (retrograde) | ~55–65% | Ocean-rich, abundant land. Not a water planet. Archipelago character. | ~10–15 Earth days |
+
+Retention rates differ: larger impacts vaporise and eject more material, so Callisto delivers ~40× Europa's water by volume but the retention efficiency is much lower (~5–10%). Net delivered water follows the above tier pattern, not a simple mass ratio.
+
+All three are habitable. Path C's ocean coverage is somewhat higher than Earth (~71%) but with shallower average depth because Venus has no deep trench basins — the water spreads more widely rather than pooling. The result is abundant shallow-to-moderate seas, broad continental shelves, and no Pacific-scale abyss. Different from Earth, not inferior to it.
+
+---
+
 ### PHASE 1 — COOLING
 
-*Goal: reduce surface from 460°C to below ~30°C (CO₂ liquefaction point at high pressure). No other phase can begin until sub-100°C. Must block incoming solar energy.*
+*Goal: reduce Venus surface temperature to below ~30°C (CO₂ liquefaction point at high pressure). No other phase can begin until sub-100°C. Must block incoming solar energy.*
+
+*Starting temperature varies by Opening Decision:*
+- *Wild Venus / Choice A:* standard 460°C
+- *Europa Impact / Choice B:* ~520–580°C (impact heating redistributed over atmosphere). Phase extended ~20–30yr.
+- *Callisto + Europa / Choice C:* ~600–700°C after sequential impacts. Phase extended ~40–60yr. Two impact plumes must fully settle before shade infrastructure is effective.
 
 **CHOICE A — Dedicated Shade Mirror**
 Segmented foil mirror structure deployed to Sun-Venus L1. Built at Mercury, mass-driver launched. No Dyson output cost. Segments modular — can be modulated later for day/night illumination (see Always Available). Major upfront Mercury component investment.
@@ -397,31 +450,44 @@ Atmospheric chemistry separates nitrogen from remaining CO₂ compounds faster t
 
 ---
 
-### PHASE 3 — ROTATION / SPIN DECISION
+### PHASE 3 — SPIN OUTCOME / COLONISATION INFRASTRUCTURE
 
-*Must commit BEFORE water delivery phase. Once oceans form, no spin-up option is viable — impactors through ocean water cause catastrophic global tsunamis. Decision window: Phase 2 start through Phase 4 start.*
+*For Choice B and C: this phase records the rotational result achieved by the earlier impacts. No spin decision is made here — it was locked in at Venus Unlock. The phase triggers when cooling is sufficiently advanced for the day-length effects to be felt by colonists and planning infrastructure.*
 
-*If Choice B (Europa): commit during Phase 2 or early Phase 3. Transit 20–40yr. Europa arrives as spin phase settles.*
+*For Choice A: this phase is when Wild Venus colonisation infrastructure (rail city, terminator zone habitation) first becomes available.*
 
-**CHOICE A — Wild Venus (No spin-up)**
-Accept ~243-day slow rotation. Terminator zone habitation. Moving rail cities or stationary terminator infrastructure. Sunny side: hot but manageable with shade management. Dark side: frozen. Terminator band: the liveable strip. Day/night orbital mirrors always addable later.
+---
 
-- No infrastructure cost for this phase
+**CHOICE A — Wild Venus colonisation**
+Accept ~243-day retrograde rotation. Terminator zone habitation. Moving rail cities or stationary terminator infrastructure. Sunny side: hot but manageable with shade management. Dark side: frozen. Terminator band: the liveable strip. Day/night orbital mirrors always addable later.
+
 - CEs: Cities of the Terminator, Two-Year Rail Journey, The Light at the Edge
 
-**CHOICE B — Europa Impact** *(irreversible)*
-Europa redirected from Jupiter via gravity assist. Commit during Phase 2 or early Phase 3 — transit 20–40yr. Arrives during Phase 3.
+---
 
-- Result: Venus day improves from ~243-day retrograde to roughly 15–40 Earth day equivalent. Not Earth-like, but dramatic improvement. Terminator still exists but moves faster.
-- Spin direction: prograde impact geometry gives forward rotation. Forwards vs. backwards spin: mostly aesthetic — Coriolis reverses, sun rises from different direction. No major gameplay impact.
-- Water: Europa delivers enormous volume. Phase 4 water delivery bundled — no separate water phase needed for Europa path.
-- Must commit before Year 100 (geometry window closes permanently).
-- Irreversible: redirect commit. Ice shell removal exposes subsurface ocean. Hunt for Life consequence — player may never learn what was there. Ambiguity is intentional.
-- Moon destroyed — no Europa sky moon for Venus. No mutual use with Mars water path.
+**CHOICE B — Europa spin result**
+Day length: **~30–40 Earth day solar day (retrograde).** Retrograde direction means both the existing spin and the impactor's angular momentum add together rather than cancel. A prograde Europa impact of equal mass would yield ~60–80 days; retrograde roughly halves that. The sun still rises in the west — it always did on Venus. A 30–40 day cycle is within agricultural and circadian norms without orbital mirrors, though mirrors improve comfort.
+
+Debris halo: Europa's impact left a transient debris halo visible from orbit. Not Saturn-like rings — those form from tidal disruption at the Roche limit. This is a fast-fading rubble cloud. Most material reaccretes on Venus or escapes within **50–100 game years.** Visible in the orrery during early Phase 3, then fades to clear sky. No gameplay impact beyond the visual.
+
+CE: *"The New Day"* — first full day-night cycle detected at the planned colony latitude. Not yet liveable, but the rhythm exists. Scientists calculate the first sunrise.
+
+---
+
+**CHOICE C — Callisto + Europa spin result**
+Day length: **~10–15 Earth day solar day (retrograde).** Two retrograde additions compound with the existing retrograde rotation — no angular momentum is wasted cancelling anything. Prograde equivalents cannot achieve this. Colonists wake with the sunrise. Plants grow under natural light. Orbital mirrors are optional luxuries rather than necessities. This is the path where Venus becomes a planet people can simply move to and live on.
+
+Debris halo: two successive impacts produce a more substantial halo than the single-Europa path. Debris fades more slowly — **~100–200 game years** before the debris cloud has largely settled. Visible in the orrery as a distinct visual ring-like halo during the first portion of Phase 3, gradually clearing. At peak (first decades post-impact) it is noticeable from Venus's surface as a glowing belt at night.
+
+CE: *"Two New Moons Gone"* — does not celebrate. Records. The skies will clear. The day will move. The Hunt for Life is closed on two fronts forever.
+
+Both Europa AND Callisto committed. Mars loses access to both — must use Ganymede (sky moon) or asteroid belt only (water). Irreversible. Hunt for Life: Callisto (low probability), Europa (highest moral weight) — both unresolvable in this playthrough.
 
 ---
 
 **EVENT POOL — Phase 3**
+
+*Note: Choice B and C events are in the Opening Decision / pre-Phase 1 window since impacts happen there. Phase 3 event pool is for Wild Venus path only and for mid-phase colonisation events shared across paths.*
 
 *[A] Terminator Storm Surge (negative)*
 Atmospheric pressure gradient between hemisphere extremes creates a violent storm front at the terminator band. Temperature differential larger than modelled. Rail city infrastructure (if already established) takes damage. Options: reinforce rail structures (Mercury components) / temporarily reduce colony footprint (lower colonist capacity, no cost) / accept damage (ongoing maintenance cost for that city). Unique to Wild Venus path — the terminator is always a contested environment.
@@ -435,11 +501,17 @@ Mid-transit: gravitational interactions with asteroid belt or other Jovian moons
 *[A/B] Atmospheric Stabilisation Ahead of Schedule (positive)*
 Venus's atmosphere, now mostly nitrogen with trace compounds, reaches a stable equilibrium state earlier than projected. Phase transition is cleaner; certain Phase 4 preparation steps can begin earlier. Small bonus to Phase 4 starting conditions regardless of which path was chosen.
 
+*[C] Sequential Impact Geological Recovery (negative)*
+Two successive mega-impacts within decades produce compounding tectonic and volcanic reactivation. Volcanic SO₂ and dust loads delay surface stabilisation beyond the single-impact timeline. Options: accept extended geological recovery (colonisation window delayed 20–30yr, surface operations restricted to orbital/sky platforms during this period) / deploy additional atmospheric scrubbing from Mercury (component cost, reduces delay to 10–15yr). One-time event; surface stabilises permanently after recovery.
+
+*[C] Hunt for Life — Callisto (forced CE, fires on Callisto impact)*
+Callisto's ice shell is penetrated by the impact. Callisto sits outside Jupiter's main radiation belts and its deep ice may not harbour liquid water — Hunt for Life probability is low. CE fires as uncertainty rather than conclusion. The game acknowledges it doesn't know, and neither does the player. Second CE fires years later on Europa impact (see main Europa CE chain).
+
 ---
 
 ### PHASE 4 — WATER DELIVERY
 
-*Choice B (Europa impact) players: water delivery bundled with Phase 3. This phase applies only to Choice A (Wild Venus) players.*
+*Choice B and C (impact paths): water delivery bundled with Opening Decision impacts, which occurred before Phase 1. This phase applies only to Choice A (Wild Venus) players.*
 
 **CHOICE A — Captured Jovian Moon (Ganymede or Callisto)**
 If committed during Phase 2 window, moon is in Venus orbit when this phase begins. Mass driver on moon mines ice and launches packages toward Venus. Venus's nitrogen atmosphere (~3 bar by this phase) causes complete ablation before surface — ice becomes atmospheric water vapour naturally. No surface impacts needed. Gradual, controlled. Moon stays permanently.
@@ -485,15 +557,54 @@ Deep ice mining on the captured moon reveals a subsurface layer of unusually pur
 
 ---
 
+## VENUS SKY CITIES
+
+Available from: ~50% of Venus Phase 1 complete (upper atmosphere at ~50km confirmed stable), or earlier if the *Unexpected Thermal Stratification* positive event fires. Available on all Venus paths — sky cities are independent of the Phase 3 spin-up decision.
+
+### Establishment and Cost
+
+Sky cities are high-altitude habitat platforms at ~50km altitude. At this elevation Venus provides ~1 atm pressure and ~75°C — tolerable with insulation, near Earth-like in pressure, breathable oxygen partial pressure inside. Each city queued via Mercury build queue: 3 components (structural frame, life support module, power cell). Build time per city: ~8–12yr.
+
+Maximum: 5 sky cities. Each provides ~50,000 colonist capacity and +8 RP capacity. Cultural CEs fire over each city's lifetime.
+
+### Buoyancy and the Descent Decision
+
+As CO₂ is removed during Phase 2, atmospheric density at ~50km gradually drops. Cities lose buoyancy over ~30–50yr. Player receives a warning CE when density approaches the critical threshold. At 30% density reduction: an event fires with two outcomes.
+
+- **Ground the city** *(Naturalist)*: lower the city as the atmosphere becomes hospitable, rebuild it as surface habitat using the existing structure. Going with Venus's flow — the atmosphere made it possible, and now the city descends to join the planet it helped build. CE: *"Landing the Cities"* — people who spent their entire lives in the sky touching ground for the first time. Colony transitions to surface.
+- **Active lift** *(Architect, ongoing)*: Dyson-powered electromagnetic buoyancy sustains the city indefinitely. Cost: 60 GW continuous per city. Fully reversible at any time. CEs: people who refuse to descend, children who have never touched the ground, the city's centennial celebrations. A cluster of floating cities above a terraformed ocean is one of the most striking visual moments in the late game — the player built this, and it exists because they chose to keep it.
+
+Two branches, two tags. The choice is about relationship to Venus: accept what the planet has become, or remain above it on human terms.
+
+### Terminator Rail Cities (Wild Venus / Phase 3 Choice A Only)
+
+Different structure. Ground-level vehicle-cities running on rails along the terminator band at the moving boundary between Venus's hot day side and frozen night side. Available once Wild Venus is committed (Phase 3 Choice A). Requires Mercury-built rail infrastructure components queued via Mercury build queue. Build time: ~20yr.
+
+Stats: ~200,000 colonist capacity, +15 RP capacity. One rail city maximum per playthrough — it is a civilisation-scale engineering project, not a repeatable build.
+
+CEs: *Cities of the Terminator, Two-Year Rail Journey, The Light at the Edge.*
+
+**Terminator Rail Failure** (one-time narrative event, fires once): Three outcomes — replace the damaged rail section (Mercury ore cost, city continues) / convert to stationary city at failure site / decommission with heritage CE. Stopping a moving city while the Venus surface is still hostile outside the terminator band is not survivable — decommission is only available after surface conditions elsewhere become tolerable.
+
+**Path A → B pivot** (always available, never locked): Once player adds orbital mirrors post-Phase 3, the terminator city becomes optional. Player can continue / convert to stationary / decommission. CE acknowledges the pivot honestly, not triumphantly: the civilisation built something that worked, and now has the freedom to stop if it chooses.
+
+---
+
 ## EUROPA — VENUS IMPACT DETAILS
 
-*Applies only if Venus Phase 3 Choice B taken.*
+*Applies to Venus Opening Decision Choice B. Impact occurs before Phase 1 cooling begins.*
 
 Europa diameter: 3,122 km (~46% of Mars diameter, ~90% of Earth's Moon).
 Europa albedo: 0.67 — 5.5× more reflective than our Moon but Mars receives 43% of Earth's solar flux; net brightness from Venus at similar distances is ~2.4× our Moon.
 Water content: ~2× Earth's total ocean volume.
 
-Impact delivers: angular momentum (partial Venus spin-up, ~15–40 Earth day equivalent) + enormous water volume distributed globally. Some water lost to space during impact; majority retained and rains out over subsequent decades. Moon destroyed. No Europa sky moon for Venus. Hunt for Life consequence unresolved in-game. Ambiguity intentional — player may never know what was in the ocean. Confirmed or denied only by community discovery or second playthrough.
+Impact sequence: occurs at the end of the transit period, before Phase 1 cooling begins. The kinetic energy release temporarily raises Venus surface temperature by ~60–120°C above its already-extreme 460°C baseline. This hotter starting point is why Phase 1 takes ~20–30yr longer on this path than Wild Venus.
+
+Spin direction: retrograde (same as Venus's existing rotation). Venus already spins backwards at a 243-day sidereal period (solar day ~117 Earth days). Adding retrograde angular momentum compounds with the existing spin rather than cancelling it first. A prograde impactor of equal mass would spend roughly half its angular momentum budget cancelling the existing retrograde rotation before building any forward spin. Retrograde avoids this entirely. Result for Europa alone: **~30–40 Earth day solar day.**
+
+Impact delivers: angular momentum (retrograde Venus spin-up to ~30–40 Earth day solar day) + water equivalent to ~35–50% global ocean coverage once retained water settles. Some water is lost to space during impact; much remains atmospheric or supercritical during early Phase 1, eventually raining out over the cooling period. Moon destroyed. No Europa sky moon for Venus. Hunt for Life consequence unresolved in-game. Ambiguity intentional — player may never know what was in the ocean. Confirmed or denied only by community discovery or second playthrough.
+
+Debris: impact ejecta creates a transient halo in Venus orbit. Not stable rings — most material reaccretes within 50–100 game years. Visible in orrery during early phases, fading as cooling progresses.
 
 ---
 
@@ -567,7 +678,7 @@ Unlocked by Deep Core Reading event (Mars Phase 3 positive event). Deep borehole
 | Carbonate byproduct | Venus Phase 2A | Mars rocket fuel / construction | Choice A commit → player routes |
 | Stored CO₂ tanks | Venus Phase 2B depot | Mars atmospheric supplement / propellant | Player routes from depot UI |
 | Titan nitrogen | Titan in-place strip | Mars Phase 2 Choice A | Choice A commitment |
-| Europa water + spin | Europa crash | Venus Phase 3B + Phase 4 (bundled) | Phase 3B commit |
+| Europa water + spin | Europa crash | Venus Opening Decision B + Phase 4 (bundled) | Venus Unlock (Year 20), before Year 100 |
 | Ganymede/Callisto water | Captured moon orbit | Mars Phase 4A or Venus Phase 4A | Phase 2 commit window |
 | Laser arrays | Mars Phase 1A | Titan nitrogen extraction speed | After Phase 1A complete |
 | Electrochemical O₂ | Venus Phase 2 boost | Early Venus atmospheric O₂ seeding | Boost active during Phase 2 |
@@ -581,7 +692,7 @@ Unlocked by Deep Core Reading event (Mars Phase 3 positive event). Deep borehole
 |---|---|---|
 | Europa crash commit — Venus | Yes | Moon destroyed. Hunt for Life unresolvable. Spin-up + water delivered. |
 | Ganymede redirect commit — Mars | Yes | Moon in transit. Cannot recall. Arrives guaranteed. |
-| Callisto redirect commit — Venus | Yes | Same. |
+| Callisto redirect commit — Venus | Yes | Same. Callisto must precede Europa by ≥10yr. |
 | Titan nitrogen strip | Yes | Titan atmosphere permanently removed. Titan terraforming locked forever. |
 | Mars polar detonations | Yes | 100–150yr polar lockout. Fallout CE chain. |
 | CO₂ carbonate seeding (ongoing) | Soft | Carbonates stable; cannot recover CO₂. Rate can be slowed or stopped. |

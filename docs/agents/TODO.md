@@ -29,6 +29,52 @@ No inline `// TODO:` comments in code - all tracking happens here to avoid dupli
 
 ## Active TODOs
 
+### GameStateModel — New fields for Jovian moons, phase events, infra health
+
+- **File**: `src/app/core/models/game-state.model.ts`
+- **Location**: `SerializedGameState` and supporting interfaces
+- **TODO**: Add `JovianMoonState` (moonId, which moon assigned to which planet, commitment year, arrival year, extraction rate slider 0–1, status: `'uncommitted' | 'in_transit_to_mars' | 'in_transit_to_venus' | 'captured_mars' | 'captured_venus' | 'destroyed'`, targetPlanetId, isImpact: boolean), `PhaseEventState` (which event fired per phase per planet, response taken, outcome), `waterDeliveryRate` (slider 0–1 per planet), `infraHealth` (effectiveness 0–100 per infra type keyed by id), `powerBalanceGw`, `dysonShadeAllocation` (% panels redirected to Venus), `venusSpinPath` ('none' | 'europa_only_retrograde' | 'callisto_europa_retrograde'). Add `ProbeMissionState` (probeId, targetPlanetId, status: `'in_transit_outbound' | 'at_target' | 'in_transit_return' | 'complete'`, launchYear, arrivalYear) and `probeMissions: Record<string, ProbeMissionState>`. The orrery moon-transit visualisation reads both JovianMoonState and ProbeMissionState directly.
+- **Depends on**: Nothing — precedes all future model-dependent blocks
+- **Prompt block**: Amendment to Block 0.4
+- **Added**: 2026-06-12
+
+### TerraformingService — Rewrite for new phase structure and choice IDs
+
+- **File**: `src/app/core/systems/terraforming.service.ts`
+- **Location**: Whole service
+- **TODO**: The `CHOICE_RATES` constant uses stale flat choice IDs. New system is per-planet, per-phase: `mars_p1_{orbital_laser | mirror_array | nuclear_detonation}`, `mars_p2_{titan_nitrogen | venus_nitrogen | regolith}`, `mars_p3_{l1_shield | equatorial_ring}`, `mars_p4_{jovian_moon | asteroid_belt}` and Venus equivalents. Phase event RNG (65–70% chance per phase, percentage-based impact) needs a dedicated method. Jovian moon transit tracking must feed from `JovianMoonState`. SGGF boost needs two sub-options (long-lived CF₄/SF₆ = permanent, short-lived methane/N₂O = reversible). Titan strip must require Dyson relay station to be queued first.
+- **Depends on**: GameStateModel amendment above
+- **Prompt block**: Rewrite of Block 3.3
+- **Added**: 2026-06-12
+
+### ProbeMissions — New mechanic
+
+- **File**: New `src/app/core/systems/probe.service.ts` + `public/data/probe-missions.json`
+- **Location**: New feature
+- **TODO**: Unmanned probes to Mars, Venus, Europa. Each has transit time (~3–4yr each way), optional. Returns a data bonus applied to the player's chosen terraforming path on that planet. Needs: `probe-missions.json` data file, `ProbeService`, UI affordance in planet panel for sending/tracking probe, `probeMissions` state in GameStateService.
+- **Depends on**: GameStateModel amendment
+- **Prompt block**: New block ~07-6 (after planet panel, before Mercury grid)
+- **Added**: 2026-06-12
+
+### VenusSkyCity — Prompt block needed
+### OrreryComponent — Moon transit and probe visualisation (patch to Block 6.1)
+
+- **File**: `src/app/features/orrery/orrery.component.ts`
+- **Location**: Patch to existing component — preserve all existing behaviour
+- **TODO**: Add CSS2DRenderer for floating labels alongside existing WebGLRenderer. Show in-transit Jovian moons as coloured dots (blue-white for capture, amber for impact paths) travelling along Bezier arcs from Jupiter position toward target planet. Short trailing line behind each dot showing recent path. Floating persistent label showing moon name, destination, ETA, and IMPACT tag where applicable. Show captured moons as small orbiting dots near target planet (no label). Show probes as smaller grey-white dots with similar labels. Jupiter not rendered as mesh but used as Bezier P0 positional reference. Full cleanup on destroy. Full design spec in prompt file `06-1b-orrery-moon-transits.txt`.
+- **Depends on**: `JovianMoonState` and `ProbeMissionState` in GameStateModel (see TODO above); `jovianMoons()` and `probeMissions()` signals on GameStateService
+- **Prompt block**: Block 06-1b (patch prompt, run after Block 06-1 is confirmed working)
+- **Added**: 2026-06-13
+
+### VenusSkyCity — Prompt block needed
+
+- **File**: New component in `src/app/features/planet-panel/`, new Mercury queue entries
+- **Location**: New feature
+- **TODO**: Venus sky cities design is complete in `terraforming-options.md § VENUS SKY CITIES`. Needs: sky city state in `GameStateService`, `SkyCityPanelComponent` or tab in planet panel, Mercury build queue entries for the 3-component city build, buoyancy loss trigger at Phase 2 ~30% density reduction, descent/conversion/active-lift Pause-and-present. Terminator rail city (Wild Venus only) is a separate larger queue item. Design doc: `terraforming-options.md`.
+- **Depends on**: TerraformingService rewrite, GameStateModel amendment
+- **Prompt block**: New block, Venus-specific, after core planet panel work
+- **Added**: 2026-06-12
+
 ### CultureEventService — AudioService on event display
 
 - **File**: src/app/core/systems/culture-event.service.ts

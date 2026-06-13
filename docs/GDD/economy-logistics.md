@@ -67,7 +67,9 @@ Existing panels not retrofitted — degrade naturally, replaced at current tier.
 | Magnetic umbrella coil segment (per unit, ~8 for full array) | 400 | 600 | 80 | Most R-intensive V1 component. Superconducting coil reqs. |
 | Skyhook (per planet) | 1500 | 400 | 100 | Built in orbit from segments. First unit rocket-bootstrapped. |
 | Venus vortex engine (per unit, ~4 needed) | 500 | 300 | 40 | Assembled in upper atmosphere by orbital robots. No sky cities required. |
+| Dyson relay station | 900 | 350 | 60 | Deep-space power-beaming relay. Required for Titan nitrogen strip and any other outer-system high-power industrial site. |
 | Europa impactor package | 800 | 400 | 200 | Path C Venus only. One-time cost. |
+| Callisto impactor package | 1100 | 450 | 250 | Venus Phase 3 Choice C only. Larger steering and braking package than Europa. |
 | Solar sail tug (per unit, ~6 for Europa redirect) | 600 | 100 | 0 | Mostly C, thin sail structure. |
 
 ### Rocket Propellant
@@ -116,7 +118,7 @@ Each infra tier makes next tier cheaper. Player feels this progression — early
 Used for: first Mercury skyhook construction, first planetary skyhooks at Mars/Venus, crew transfers throughout game, precision cargo. Consume volatiles as propellant. Once mass driver operational, rockets reserved for these specific uses only. Nuclear thermal rockets not separate transport era — four-era transport table is canonical.
 
 **Mass driver (after Mercury Phase 2)**
-Launches small-to-medium components to Mercury orbit: Dyson panels, orbital laser satellites, mirror segments, solar sail tugs, Europa impactor packages, maintenance craft. Cannot launch components too heavy/dense to survive acceleration profile (superconducting coil segments, large machinery). Ion drive tugs carry mass-driver-launched components from Mercury orbit to destination over months to years.
+Launches small-to-medium components to Mercury orbit: Dyson panels, orbital laser satellites, mirror segments, solar sail tugs, Dyson relay station modules, Europa impactor packages, Callisto impactor packages, maintenance craft. Cannot launch components too heavy/dense to survive acceleration profile (superconducting coil segments, large machinery). Ion drive tugs carry mass-driver-launched components from Mercury orbit to destination over months to years.
 
 **Mercury skyhook (rocket-bootstrapped, mid-game)**
 Lifts heavy components Mercury surface → Mercury orbit: magnetic umbrella coil segments, vortex engine sections, anything too dense for mass driver. One-time expensive rocket-bootstrapped construction. After it exists, all subsequent heavy lift from Mercury surface is cheap. Bootstrapping cost = single largest one-time Mercury investment in game.

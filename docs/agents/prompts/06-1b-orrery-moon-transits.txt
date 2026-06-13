@@ -1,0 +1,193 @@
+Note: this is a PATCH prompt. It extends the already-implemented orrery.component.ts.
+Read the existing file before making any changes. Preserve all existing behaviour.
+
+Read AGENTS.md and ARCHITECTURE.md before implementing.
+
+---
+
+## FEATURE: Jovian Moon Transit Visualisation in Orrery
+
+Add visual representation of in-transit Jovian moons (and probes) to OrreryComponent.
+These are large-scale, dramatic events that should feel significant in the orrery.
+
+### Data source
+
+Read `GameStateService.jovianMoons()` — a `Record<string, JovianMoonState>` signal.
+Each entry has:
+  moonId: 'europa' | 'ganymede' | 'callisto'
+  status: 'uncommitted' | 'in_transit_to_mars' | 'in_transit_to_venus' |
+          'captured_mars' | 'captured_venus' | 'destroyed'
+  commitYear: number
+  arrivalYear: number
+  targetPlanetId: 'mars' | 'venus'
+  isImpact: boolean   // true = crash path, false = capture path
+
+Also read `GameStateService.probeMissions()` — `Record<string, ProbeMissionState>`:
+  probeId: string
+  targetPlanetId: string
+  status: 'in_transit_outbound' | 'at_target' | 'in_transit_return' | 'complete'
+  launchYear: number
+  arrivalYear: number
+
+---
+
+### Moon transit dots
+
+For each moon with status 'in_transit_to_mars' or 'in_transit_to_venus':
+
+  Create a THREE.Points mesh (or small SphereGeometry, radius ~0.04 in scene units).
+  Position: interpolate along a curved path from Jupiter's current orbital position
+    toward the target planet's current orbital position.
+    Use a simple quadratic Bezier curve:
+      P0 = Jupiter position
+      P1 = control point = midpoint lifted 15–20% toward the Sun (slight inward arc)
+      P2 = target planet position
+    t = clamp((currentYear - commitYear) / (arrivalYear - commitYear), 0, 1)
+    Position = bezierPoint(P0, P1, P2, t)
+  This is a simplified arc — not realistic orbital mechanics. Matches existing orrery philosophy.
+
+  Color:
+    Capture path (isImpact: false): cool blue-white (matches ice world aesthetic)
+    Impact path (isImpact: true): warm amber-orange (danger, weight, irreversibility)
+
+  Trail:
+    Add a short trailing line (THREE.Line) behind the dot showing the last 10–15% of
+    the path already travelled. Use the same Bezier, sample 8 points from (t-0.12) to t.
+    Trail opacity fades toward the older end (linearly from 0.8 to 0.0).
+    Same color as the dot.
+
+  Label:
+    Attach a CSS2DObject (from THREE/examples/jsm/renderers/CSS2DRenderer) showing the
+    moon name and ETA.
+    Text: "EUROPA → VENUS" or "GANYMEDE → MARS" etc.
+    Below the text, smaller: "arrives ~YR {arrivalYear}"
+    Impact path: add a small "IMPACT" tag in amber below the name.
+    Capture path: no extra tag.
+    CSS class: `.moon-transit-label` — style in orrery SCSS.
+    Always faces camera. Offset: slightly above the dot mesh.
+
+  On arrival (status changes away from 'in_transit'):
+    Remove the dot, trail, and label from the scene.
+    Dispose geometry and material.
+    Captured moon: if not isImpact, add a tiny orbiting dot near the target planet
+      (same color, no label, small slow orbit) to represent the captured moon ongoing.
+
+---
+
+### Captured moon (ongoing)
+
+For each moon with status 'captured_mars' or 'captured_venus':
+  Small orbiting dot near the target planet at ~0.06 scene units from planet surface.
+  Orbits at a fixed slow angular velocity (visual only, not tied to any physics).
+  Cool blue-white color. No label. No trail.
+  Disposed on destroy.
+
+---
+
+### Probe dots
+
+For each probe with status 'in_transit_outbound' or 'in_transit_return':
+  Same Bezier path approach as moon transits.
+  Much smaller dot (radius ~0.015).
+  Color: neutral grey-white.
+  Trail: 5-point, short.
+  Label: "{PROBE NAME} → {TARGET}" or "{PROBE NAME} ← {TARGET}" for return.
+    Smaller font than moon labels. CSS class: `.probe-label`.
+  No impact styling.
+
+---
+
+### CSS2DRenderer setup
+
+OrreryComponent already owns the WebGLRenderer. Add a CSS2DRenderer alongside it:
+  this.labelRenderer = new CSS2DRenderer();
+  this.labelRenderer.setSize(canvas.clientWidth, canvas.clientHeight);
+  this.labelRenderer.domElement.style.position = 'absolute';
+  this.labelRenderer.domElement.style.top = '0';
+  this.labelRenderer.domElement.style.pointerEvents = 'none';
+  Append labelRenderer.domElement as a sibling of the canvas (inside the same host element).
+  Call this.labelRenderer.render(this.scene, this.camera) at the end of each RAF frame.
+  On resize: update labelRenderer.setSize.
+  On destroy: remove labelRenderer.domElement from DOM.
+
+Import CSS2DObject and CSS2DRenderer from 'three/addons/renderers/CSS2DRenderer.js'.
+
+---
+
+### SCSS additions (orrery.component.scss)
+
+.moon-transit-label {
+  font-family: var(--font-mono);
+  font-size: 0.65em;
+  color: var(--color-text-primary);
+  background: rgba(0, 0, 0, 0.55);
+  padding: 2px 5px;
+  border-radius: 2px;
+  pointer-events: none;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+.moon-transit-label .impact-tag {
+  color: var(--color-accent);
+  font-size: 0.8em;
+  display: block;
+}
+.probe-label {
+  /* same as moon-transit-label but smaller and lower opacity */
+  font-family: var(--font-mono);
+  font-size: 0.55em;
+  color: var(--color-text-secondary);
+  background: rgba(0, 0, 0, 0.4);
+  padding: 1px 4px;
+  border-radius: 2px;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+---
+
+### State reactivity
+
+Read jovianMoons() and probeMissions() signals once into local variables at the TOP
+of the RAF callback — never inside the rendering loop body.
+Do NOT use effect() for label updates — all updates happen inside the RAF loop.
+Create/remove Three.js objects only when status changes (compare to previous frame's
+status stored in a private Map<moonId, string>).
+
+---
+
+### Cleanup
+
+On ngOnDestroy:
+  Dispose all moon dot geometries, materials, trail geometries, trail materials.
+  Remove all CSS2DObject labels.
+  Remove labelRenderer.domElement from DOM.
+  All existing cleanup (RAF cancel, renderer.dispose) must remain in place.
+
+---
+
+### Jupiter position (for Bezier P0)
+
+Jupiter is not a rendered planet in the orrery. Derive its position from a fixed
+orbital radius constant:
+
+  const JUPITER_ORBIT_RADIUS = 5.2; // AU, in scene units (adjust to match orrery scale)
+  // Jupiter advances at its own angular rate — use a separate running angle
+  // stored as private jupiterAngle = 0
+  // Update per frame: this.jupiterAngle += JUPITER_ANGULAR_VELOCITY_PER_FRAME
+  // Position: { x: cos(jupiterAngle) * JUPITER_ORBIT_RADIUS, z: sin(...) }
+  // Jupiter is NOT rendered as a mesh — it is only a positional reference for transit paths.
+
+---
+
+### Travel path visual note (for lead-developer context)
+
+Real Jovian moon redirects use complex multi-year gravity assist trajectories.
+For orrery purposes: a simple inward Bezier arc from Jupiter toward the inner solar
+system is sufficient and matches the existing "ships as dots" philosophy from the GDD.
+The arc should look like the object is falling inward through space, not teleporting
+in a straight line. The control point pulled slightly toward the Sun achieves this
+with minimal complexity.
+
+The visual result should feel like watching something enormous slowly cross the solar
+system — deliberate, irreversible, dramatic.

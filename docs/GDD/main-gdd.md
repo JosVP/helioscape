@@ -220,34 +220,23 @@ Sub-planet bodies affecting Mars:
 ## VENUS
 Role: second terraforming planet. Harder emotional sell. Longer arc. More alien end state.
 
-Shade mirror is MANDATORY — not a path choice. Prerequisite for all Venus terraforming, deploys automatically on Venus unlock.
+Shade mirror is MANDATORY — not a path choice. Prerequisite for all Venus cooling, deploys in parallel with moon transits.
 
-Vortex engines = optional accelerant (not path alternative). Redistribute atmospheric heat to speed CO₂ removal. Mercury-built optional component queued during Step 2.
+Venus spin-up decision is made ON VENUS UNLOCK (~Year 20), not mid-game. Must be finalised before Year 100. Impacts happen BEFORE Phase 1 cooling, not after — a moon impact is a planetary heat event, so the correct sequence is always crash first, then begin the long cooling project from a hotter but already-watered starting point.
 
-Corrected step sequence:
-1. Hell Planet → shade mirror deploys automatically (mandatory)
-2. Cooling Venus (shade mirror active, 100yr) → choose CO₂ removal:
-   - Path A: Carbonate catalyst seeding — CO₂ precipitates as limestone, byproduct exported to Mars as rocket fuel
-   - Path B: CO₂ mass driver export — faster removal, higher energy cost, no byproduct
-   - Vortex engines available as optional Mercury-built accelerant during this phase (both paths)
-3. Thinning Venus (CO₂ removal, 80yr) → choose water delivery [venus_carbonate spillover fires here]
-4. Water Venus → Bio I begins
-5. Bio I — Ocean Microbe Seeding (35yr)
-6. Bio II — Atmospheric Oxygen (30yr)
-7. Bio III — Coastal Ecosystems (25yr)
-8. Bio IV — Inland Colonisation (40yr) → declare self-sustaining
-9. Living Venus — complete
+Terraforming paths (opening decision on Venus unlock):
+- Path A — Wild Venus: no spin-up. Terminator zone habitation, rail cities. Proceed immediately to cooling. ~400–600yr.
+- Path B — Europa Spin-up: Europa crash before Phase 1. ~60–80 Earth day result. ~35–50% ocean coverage. Phase 1 extended ~20–30yr from impact heat. ~500–700yr.
+- Path B — Europa Spin-up: Europa crash before Phase 1 (retrograde direction). ~30–40 Earth day solar day result. ~35–50% ocean coverage. Phase 1 extended ~20–30yr from impact heat. ~500–700yr.
+- Path C — Callisto + Europa: sequential crashes before Phase 1 (retrograde). ~10–15 Earth day solar day result. ~55–65% ocean coverage, abundant land. Phase 1 extended ~40–60yr. Highest moral weight (two Hunt for Life closures). ~600–800yr.
 
-Spillover: Step 2→3: venus_carbonate → unlocks Earth CO₂ Drawdown + Earth Ocean Acidification Reversal.
+Ocean coverage differs visibly by path (planet texture in orrery): Path A/Managed — mostly rocky, inland seas; Path B — Earth-like mix; Path C — ocean-rich but not a water world.
 
-Terraforming paths (chosen at start):
-- Path A — Wild Venus: atmospheric terraforming only. Slow rotation accepted. Climate bands, terminator zone cities, moving cities on rail loops. ~400-600yr.
-- Path B — Managed Venus: orbital mirror array for artificial day/night. Most Earth-like climate without spin-up. Ongoing mirror maintenance permanent. ~450-650yr.
-- Path C — Spun Venus: Europa impact for angular momentum + water. Must decide before Year 100 or option closes permanently. ~700-1000yr. Moral weight: may have destroyed life on Europa.
+Spillover: venus_carbonate (CO₂ removal phase) → unlocks Earth CO₂ Drawdown + Earth Ocean Acidification Reversal.
 
 Key CEs: The Long Cooling, Carbonate Rain Begins, Below 200°C threshold, First Rain on Venus (not acid — confirmed), Cities of the Terminator, First Green Shore, They Had Been Venusians (two generations before anyone stood on surface).
 
-Sky cities: early colonisation at 50km altitude (near Earth-like conditions). As atmosphere thins, cities lose buoyancy. Player decision: controlled descent / structural conversion / preserve as heritage with active lift (Dyson power, expensive, beloved by Terraformers). Not fusion-dependent.
+Sky cities: early colonisation at 50km altitude (near Earth-like conditions). As atmosphere thins, cities lose buoyancy. Player decision: ground the city and repurpose it as surface habitat (Naturalist), or preserve it aloft with active lift (Architect — Dyson power, expensive, beloved by Terraformers). Not fusion-dependent.
 
 Path A → Path B mid-game pivot: permitted. Triggered by CE when railed city reaches certain age + player has sufficient Dyson capacity. Costs significant Mercury production. Once mirrors create artificial day/night, railed city becomes optional — player continues/converts/decommissions. CE acknowledges pivot honestly, not triumphantly.
 
@@ -299,7 +288,7 @@ Cross-planet flows:
 
 When short on resources: phase never reverts. Dialog shows current vs required + shortcut to Mercury queue. Resources visible in HUD once cross-planet flows begin.
 
-Material sourcing choice (Terraformer/Builder tension): at each major construction commit — recycled Earth legacy materials (cheaper, slower, Terraformer CE, Earth restoration bonus) OR fresh asteroid resources (faster, more Mercury capacity, Builder CE, efficiency bonus). ~15-20 times per playthrough. Pattern shapes CEs + late-game options.
+Material sourcing: the per-construction binary choice (Earth legacy materials vs. fresh asteroid resources) is retired — all manufacturing is Mercury-based and geological resource scarcity is not a constraint within V1's scope. Earth's sustainability arc is handled instead via the **Advanced Circular Economy** tech node (Naturalist branch, mid-late game): fusion-powered atomic sorting turns Earth's industrial junkyards into refined material streams. Passive permanent bonus once researched. Not a recurring player decision — see `earth-tech-tree-options.md` for full node spec.
 
 Entropy: Dyson panels accumulate micrometeorite damage. Processors fail. Orbital structures drift. Does NOT apply to terraformed planets. Mercury maintenance = late-game tension.
 
@@ -340,16 +329,16 @@ Not whether to terraform (everyone terraforming) — approach to natural process
 
 Tagging system, not resource mechanic. Each major decision auto-tagged by what player chose. No mechanical penalty/bonus. No repeated binary choices. At First Era Complete: summary shows ratio descriptively — "your civilisation leaned Naturalist — 11 of 17 major decisions favoured natural processes." Valid at any ratio.
 
-Tagged examples: Path A Mars warming = Naturalist. Mirror Mars = Architect. Wild Venus end state = Naturalist. Managed Venus = Architect. Sky city preservation = Naturalist. Sky city descent = Architect. Europa preservation = Naturalist. Europa crash = Architect. Heritage materials = Naturalist. Fresh asteroid resources = Architect.
+Tagged examples: Path A Mars warming = Naturalist. Mirror Mars = Architect. Wild Venus end state = Naturalist. Managed Venus = Architect. Sky city preservation = Naturalist. Sky city descent = Architect. Europa preservation = Naturalist. Europa crash = Architect. Callisto + Europa sequential = Architect. Advanced Circular Economy research = Naturalist.
 
 ---
 
 ## EUROPA DECISION
-Game's most morally complex moment. Path C Venus requires Europa impact for spin-up. Decision window closes Year 100 (game Year 100 = 2133). Justification in-game: multi-decade gravity assist sequence becomes geometrically unfeasible after this point.
+Game's most morally complex moment. Paths B and C Venus require Jovian moon impacts. Decision window closes Year 100 (game Year 100 = 2133) — the required multi-decade gravity assist sequence becomes geometrically unfeasible after this point. Decision is made on Venus Unlock (~Year 20); impacts arrive 20–50 years later and precede Phase 1 cooling.
 
 At decision time: Europa biological status formally unknown (Clipper data: organic chemistry, no definitive biosignatures).
 
-Europa redirect + shade mirror deployment are parallel early-game activities, not sequential. Player authorises Europa mission early → Mercury queues impactor packages + solar sail tugs → shade mirror proceeds in parallel → Europa impact arrives as dramatic mid-game event decades later.
+Europa redirect + shade mirror deployment are parallel early-game activities, not sequential. Player authorises the Europa mission at Venus Unlock → Mercury queues impactor packages + solar sail tugs → shade mirror proceeds in parallel → Europa impacts Venus 20–40 years later, before Phase 1 cooling begins. If Callisto + Europa path chosen, both are authorised on the same early-game horizon and Callisto arrives first.
 
 CE fires in two parts: warning 10-15yr before impact → impact event. Gap is where moral complexity lives.
 

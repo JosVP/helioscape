@@ -26,6 +26,7 @@ high enough to fill both. Tagging tracks ratio at First Era Complete.
 - Ocean Acidification Reversal — req: venus_carbonate
   + CO₂ Drawdown done
 - Rewilding at Scale — req: mars_coastal + Soil done
+- Advanced Circular Economy — req: Rewilding at Scale + Fusion Ignition Theory done (mid-late game). Earth's decommissioned industrial zones, waste streams, and junkyard infrastructure processed via fusion-powered atomic sorting systems. All Earth-based construction from this point uses 90%+ recycled material — passive permanent bonus, not a recurring player decision. CE: *"The Last Quarry"* — the final virgin extraction site on Earth is closed; a narrator note about what it feels like when the last wound closes. Small RP capacity boost + minor organism quality bonus for seeding (Earth ecosystems visibly recovering from centuries of extractive industry). Naturalist tag.
 
 Cascade: better pioneer organism candidates for Mars/Venus
 seeding. Colonist psychological baseline improved for
