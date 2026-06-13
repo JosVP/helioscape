@@ -279,6 +279,18 @@ No inline `// TODO:` comments in code - all tracking happens here to avoid dupli
 - **Prompt block**: TBD (Mercury orbitals block)
 - **Added**: 2026-06-11
 
+### MercuryGridComponent — Worker/vehicle rendering
+
+- **File**: `src/app/features/mercury/mercury-grid/mercury-grid.component.ts`
+- **Location**: `drawWorkers()` stub method
+- **TODO**: Implement worker movement animations. Requires a `mercuryWorkers` signal in
+  GameStateService. Workers should move between tiles over time (path-following), rendered as
+  coloured moving dots in the RAF loop. Shade-aware: workers in crater tiles should tint darker.
+- **Depends on**: `mercuryWorkers: Signal<MercuryWorker[]>` added to GameStateService and
+  serialized in SaveService
+- **Prompt block**: TBD (post-Block 9)
+- **Added**: 2026-06-13
+
 ---
 
 ## Completed TODOs

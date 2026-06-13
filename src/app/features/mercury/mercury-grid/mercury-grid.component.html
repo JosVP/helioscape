@@ -1,0 +1,70 @@
+<div class="mercury-grid">
+
+  <!-- Canvas viewport — horizontally scrollable on small screens -->
+  <div class="mercury-grid__viewport">
+    <canvas
+      #mercuryCanvas
+      class="mercury-grid__canvas"
+      [width]="canvasWidth"
+      [height]="canvasHeight"
+      role="application"
+      [attr.aria-label]="canvasAriaLabel()"
+      tabindex="0"
+    ></canvas>
+  </div>
+
+  <!-- Status bar — shows terrain type and building name for the hovered tile -->
+  <div class="mercury-grid__status" aria-live="off" role="status">
+    @if (hoveredTileInfo(); as info) {
+      <span class="mercury-grid__status-terrain">
+        <span
+          class="mercury-grid__status-dot"
+          [class]="'mercury-grid__status-dot--' + info.terrain"
+          aria-hidden="true"
+        ></span>
+        {{ terrainLabel(info.terrain) }}
+      </span>
+      @if (info.buildingName) {
+        <span class="mercury-grid__status-sep" aria-hidden="true">&mdash;</span>
+        <span class="mercury-grid__status-building">{{ info.buildingName }}</span>
+      }
+      <span class="mercury-grid__status-coords" aria-label="Column {{ info.col + 1 }}, row {{ info.row + 1 }}">
+        {{ info.col + 1 }}, {{ info.row + 1 }}
+      </span>
+    } @else {
+      <span class="mercury-grid__status-hint">
+        @if (selectedBuildingId()) {
+          Hover or use arrow keys to preview placement.
+        } @else {
+          Select a building to begin placing.
+        }
+      </span>
+    }
+  </div>
+
+  <!-- Terrain legend -->
+  <div class="mercury-grid__legend" role="list" aria-label="Terrain type legend">
+    <span class="mercury-grid__legend-item" role="listitem">
+      <span class="mercury-grid__legend-dot mercury-grid__legend-dot--polar" aria-hidden="true"></span>
+      Polar Ice
+    </span>
+    <span class="mercury-grid__legend-item" role="listitem">
+      <span class="mercury-grid__legend-dot mercury-grid__legend-dot--flat" aria-hidden="true"></span>
+      Sunlit Plains
+    </span>
+    <span class="mercury-grid__legend-item" role="listitem">
+      <span class="mercury-grid__legend-dot mercury-grid__legend-dot--crater_rim" aria-hidden="true"></span>
+      Crater Rim
+    </span>
+    <span class="mercury-grid__legend-item" role="listitem">
+      <span class="mercury-grid__legend-dot mercury-grid__legend-dot--crater" aria-hidden="true"></span>
+      Deep Crater
+    </span>
+  </div>
+
+  <!-- ARIA live region — announces building placements to screen readers -->
+  <div aria-live="polite" aria-atomic="true" class="mercury-grid__sr-only">
+    {{ announcementText() }}
+  </div>
+
+</div>

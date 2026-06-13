@@ -1,0 +1,19 @@
+<!-- PLACEHOLDER: fusion-reactor.svg — swap with final art -->
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="64" viewBox="0 0 48 64">
+  <!-- Reactor vessel -->
+  <rect x="10" y="24" width="28" height="32" rx="4" fill="#1a2a40" stroke="#4080ff" stroke-width="2" stroke-dasharray="3 2"/>
+  <!-- Plasma core glow -->
+  <ellipse cx="24" cy="40" rx="9" ry="9" fill="#2040a0" opacity="0.8"/>
+  <ellipse cx="24" cy="40" rx="5" ry="5" fill="#80b0ff" opacity="0.9"/>
+  <!-- Magnetic coils -->
+  <rect x="8" y="28" width="4" height="6" rx="1" fill="#4060c0"/>
+  <rect x="36" y="28" width="4" height="6" rx="1" fill="#4060c0"/>
+  <rect x="8" y="38" width="4" height="6" rx="1" fill="#4060c0"/>
+  <rect x="36" y="38" width="4" height="6" rx="1" fill="#4060c0"/>
+  <!-- Top chimney -->
+  <rect x="20" y="14" width="8" height="12" rx="1" fill="#2a3a50" stroke="#4080ff" stroke-width="1"/>
+  <!-- Energy symbol -->
+  <polygon points="24,32 20,42 23,42 22,50 28,38 25,38 27,32" fill="#c0d8ff"/>
+  <!-- Label -->
+  <text x="24" y="10" text-anchor="middle" font-family="monospace" font-size="5" fill="#4080ff">FUSION</text>
+</svg>

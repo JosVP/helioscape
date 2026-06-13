@@ -1,0 +1,15 @@
+<!-- PLACEHOLDER: volatiles-extractor.svg — swap with final art -->
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="64" viewBox="0 0 48 64">
+  <!-- Base dome -->
+  <ellipse cx="24" cy="44" rx="18" ry="10" fill="#4a6a8a" stroke="#8ac8ff" stroke-width="1.5" stroke-dasharray="3 2"/>
+  <!-- Dome cap -->
+  <path d="M6,44 Q24,20 42,44" fill="#3a5a7a" stroke="#8ac8ff" stroke-width="1.5"/>
+  <!-- Pipes -->
+  <rect x="10" y="38" width="4" height="20" rx="1" fill="#6090b0"/>
+  <rect x="34" y="38" width="4" height="20" rx="1" fill="#6090b0"/>
+  <!-- Ice crystals -->
+  <polygon points="22,30 24,24 26,30" fill="#c8e8ff"/>
+  <polygon points="19,33 21,27 23,33" fill="#c8e8ff"/>
+  <!-- Label -->
+  <text x="24" y="10" text-anchor="middle" font-family="monospace" font-size="5" fill="#8ac8ff">VOLAT</text>
+</svg>

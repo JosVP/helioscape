@@ -1,1 +1,72 @@
-[]
+[
+  {
+    "id": "mining_outpost",
+    "displayName": "Mining Outpost",
+    "description": "We extract common ore from Mercury's iron-rich sunlit plains.",
+    "category": "extraction",
+    "cost": { "commonOre": 0, "rareMetals": 10, "polarVolatiles": 0 },
+    "energyDrawGw": 2,
+    "buildTimeYears": 3,
+    "repeatable": true,
+    "maxInstances": null,
+    "unlockCondition": null,
+    "placementRule": "flat",
+    "effects": [{ "type": "resource_rate", "resourceId": "commonOre", "rate": 5 }]
+  },
+  {
+    "id": "volatiles_extractor",
+    "displayName": "Volatiles Extractor",
+    "description": "We harvest polar ice volatiles for export to the inner planets.",
+    "category": "extraction",
+    "cost": { "commonOre": 20, "rareMetals": 15, "polarVolatiles": 0 },
+    "energyDrawGw": 3,
+    "buildTimeYears": 4,
+    "repeatable": true,
+    "maxInstances": 4,
+    "unlockCondition": null,
+    "placementRule": "polar",
+    "effects": [{ "type": "resource_rate", "resourceId": "polarVolatiles", "rate": 3 }]
+  },
+  {
+    "id": "fusion_reactor",
+    "displayName": "Fusion Reactor",
+    "description": "We operate a sustained fusion plant in the permanently shadowed crater basin — perpetual darkness becomes perpetual power.",
+    "category": "power",
+    "cost": { "commonOre": 40, "rareMetals": 60, "polarVolatiles": 10 },
+    "energyDrawGw": -50,
+    "buildTimeYears": 8,
+    "repeatable": false,
+    "maxInstances": 1,
+    "unlockCondition": "earth_fusion_power",
+    "placementRule": "crater",
+    "effects": [{ "type": "dyson_panels_per_year", "amount": 0 }]
+  },
+  {
+    "id": "solar_array",
+    "displayName": "Solar Array",
+    "description": "We deploy dense photovoltaic panels on the sunlit plains, exploiting Mercury's intense solar flux.",
+    "category": "power",
+    "cost": { "commonOre": 15, "rareMetals": 5, "polarVolatiles": 0 },
+    "energyDrawGw": -8,
+    "buildTimeYears": 2,
+    "repeatable": true,
+    "maxInstances": null,
+    "unlockCondition": null,
+    "placementRule": "flat",
+    "effects": [{ "type": "dyson_panels_per_year", "amount": 1 }]
+  },
+  {
+    "id": "rare_metals_refinery",
+    "displayName": "Rare Metals Refinery",
+    "description": "We refine rare metal ore at the crater rim where partial shade keeps temperatures manageable.",
+    "category": "extraction",
+    "cost": { "commonOre": 30, "rareMetals": 5, "polarVolatiles": 0 },
+    "energyDrawGw": 4,
+    "buildTimeYears": 5,
+    "repeatable": true,
+    "maxInstances": 3,
+    "unlockCondition": null,
+    "placementRule": "crater_rim",
+    "effects": [{ "type": "resource_rate", "resourceId": "rareMetals", "rate": 4 }]
+  }
+]
