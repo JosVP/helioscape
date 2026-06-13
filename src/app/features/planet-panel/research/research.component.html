@@ -1,0 +1,64 @@
+<div class="research">
+  <!-- RP capacity bar -->
+  <div class="research__capacity">
+    <div class="research__capacity-header">
+      <span class="research__capacity-label">Research Points</span>
+      <span class="research__capacity-value">{{ rpUsed() }} / {{ rpTotal() }} RP</span>
+    </div>
+    <div class="research__capacity-track" role="progressbar"
+         [attr.aria-valuenow]="rpUsed()"
+         [attr.aria-valuemax]="rpTotal()"
+         aria-label="Research point capacity">
+      <div class="research__capacity-fill" [style.--bar-width.%]="rpBarPercent()"></div>
+    </div>
+  </div>
+
+  <!-- Running group -->
+  @if (runningTracks().length) {
+    <section class="research__group research__group--running">
+      <h3 class="research__group-heading">Running</h3>
+      @for (t of runningTracks(); track t.def.id) {
+        <app-research-track-item
+          [vm]="t"
+          (pause)="pause($event)"
+        />
+      }
+    </section>
+  }
+
+  <!-- Paused group -->
+  @if (pausedTracks().length) {
+    <section class="research__group research__group--paused">
+      <h3 class="research__group-heading">Paused</h3>
+      @for (t of pausedTracks(); track t.def.id) {
+        <app-research-track-item
+          [vm]="t"
+          (resume)="resume($event)"
+        />
+      }
+    </section>
+  }
+
+  <!-- Available group -->
+  @if (availableTracks().length) {
+    <section class="research__group research__group--available">
+      <h3 class="research__group-heading">Available</h3>
+      @for (t of availableTracks(); track t.def.id) {
+        <app-research-track-item
+          [vm]="t"
+          (start)="start($event)"
+        />
+      }
+    </section>
+  }
+
+  <!-- Completed group -->
+  @if (completedTracks().length) {
+    <section class="research__group research__group--completed">
+      <h3 class="research__group-heading">Completed</h3>
+      @for (t of completedTracks(); track t.def.id) {
+        <app-research-track-item [vm]="t" />
+      }
+    </section>
+  }
+</div>

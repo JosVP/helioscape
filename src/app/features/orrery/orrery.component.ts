@@ -58,7 +58,7 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
   // ── Interaction state ──────────────────────────────────────────────────────
   /** Planet hovered by moving the mouse over the orrery canvas. */
   private _hoveredPlanetId: string | null = null;
-  /** Planet hovered externally from PlanetsPanelComponent via EventBus. */
+  /** Planet hovered externally from PlanetsMenuComponent via EventBus. */
   private _externalHoveredPlanetId: string | null = null;
 
   // ── Platform observers ─────────────────────────────────────────────────────
@@ -149,7 +149,7 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
   }
 
   private _setupBusSubscriptions(): void {
-    // PlanetsPanelComponent hovered a row → highlight matching planet in orrery.
+    // PlanetsMenuComponent hovered a row → highlight matching planet in orrery.
     this._eventBus.planetHovered$
       .pipe(takeUntilDestroyed(this._destroyRef))
       .subscribe((id) => { this._externalHoveredPlanetId = id; });

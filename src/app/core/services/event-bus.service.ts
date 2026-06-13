@@ -65,7 +65,7 @@ export class EventBusService {
   /**
    * A planet is being hovered (in the orrery canvas or the planets panel).
    * Payload: planetId, or null when the cursor leaves all planets.
-   * Both OrreryComponent and PlanetsPanelComponent emit and subscribe to this.
+   * Both OrreryComponent and PlanetsMenuComponent emit and subscribe to this.
    */
   readonly planetHovered$ = new Subject<string | null>();
 

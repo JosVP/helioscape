@@ -1,0 +1,36 @@
+<nav class="planets-menu" aria-label="Planet navigation">
+  @for (row of rows(); track row.id) {
+    <button
+      class="planets-menu__row"
+      [class.planets-menu__row--indented]="row.isIndented"
+      [class.planets-menu__row--selected]="row.isSelected"
+      [class.planets-menu__row--locked]="row.status === 'locked'"
+      [class.planets-menu__row--hovered]="hoveredPlanetId() === row.id || (row.id === 'moon' && hoveredPlanetId() === 'earth')"
+      [attr.data-planet]="row.id"
+      [attr.aria-pressed]="row.isSelected"
+      [attr.aria-label]="row.displayName + ', ' + row.phaseName + (row.status === 'locked' ? ', locked' : '')"
+      [attr.aria-disabled]="row.status === 'locked' ? true : null"
+      (click)="onRowClick(row.id)"
+      (mouseenter)="onRowMouseEnter(row.id)"
+      (mouseleave)="onRowMouseLeave()"
+      type="button"
+    >
+      <span class="planets-menu__avatar" aria-hidden="true">
+        <img
+          class="planets-menu__avatar-img"
+          [src]="row.avatarPath"
+          alt=""
+          width="80"
+          height="80"
+        >
+        <span
+          class="planets-menu__status"
+          [class.planets-menu__status--active]="row.status === 'active'"
+          [class.planets-menu__status--flourishing]="row.status === 'flourishing'"
+        ></span>
+      </span>
+      <span class="planets-menu__name">{{ row.displayName }}</span>
+      <span class="planets-menu__phase">{{ row.phaseName }}</span>
+    </button>
+  }
+</nav>

@@ -11,7 +11,7 @@
   50%       { opacity: 0.4; }
 }
 
-.planets-panel {
+.planets-menu {
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -65,7 +65,7 @@
       background: var(--color-bg-elevated);
       border-left-color: var(--planet-accent, var(--color-accent-dim));
 
-      .planets-panel__avatar {
+      .planets-menu__avatar {
         box-shadow: 0 0 0 1px var(--planet-accent, var(--color-accent-dim));
       }
     }
@@ -80,7 +80,7 @@
       border-left-color: var(--planet-accent, var(--color-accent));
       background: var(--color-bg-elevated);
 
-      .planets-panel__avatar {
+      .planets-menu__avatar {
         box-shadow:
           0 0 0 2px var(--planet-accent, var(--color-accent)),
           0 0 12px var(--planet-accent, var(--color-accent));
@@ -95,7 +95,7 @@
 
     // Moon: indented feel via reduced avatar size only, not horizontal offset,
     // since the layout is now centred-vertical
-    &--indented .planets-panel__avatar {
+    &--indented .planets-menu__avatar {
       width: 70px;
       height: 70px;
     }
@@ -162,7 +162,7 @@
     width: 100%;
     line-height: 1.3;
 
-    .planets-panel__row--locked & {
+    .planets-menu__row--locked & {
       color: var(--color-text-disabled);
     }
   }
@@ -175,7 +175,7 @@
   50%       { opacity: 0.45; }
 }
 
-.planets-panel {
+.planets-menu {
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -231,7 +231,7 @@
       border-left-color: var(--planet-accent, var(--color-accent));
       background: var(--color-bg-elevated);
 
-      .planets-panel__avatar {
+      .planets-menu__avatar {
         box-shadow:
           0 0 0 1.5px var(--planet-accent, var(--color-accent)),
           0 0 8px var(--planet-accent, var(--color-accent));
@@ -317,7 +317,7 @@
     text-overflow: ellipsis;
     line-height: 1.2;
 
-    .planets-panel__row--locked & {
+    .planets-menu__row--locked & {
       color: var(--color-text-disabled);
     }
   }

@@ -1,0 +1,76 @@
+:host {
+  display: block;
+  padding: var(--space-md);
+  overflow-y: auto;
+  height: 100%;
+}
+
+// ── RP capacity bar ──────────────────────────────────────────────────────────
+
+.research {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+
+  &__capacity {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+
+  &__capacity-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+
+  &__capacity-label {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    font-family: var(--font-body);
+  }
+
+  &__capacity-value {
+    font-size: var(--text-sm);
+    color: var(--color-text-primary);
+    font-family: var(--font-mono);
+  }
+
+  &__capacity-track {
+    height: 6px;
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-base);
+    border: var(--border-subtle);
+    overflow: hidden;
+  }
+
+  &__capacity-fill {
+    height: 100%;
+    width: var(--bar-width, 0%);
+    background: var(--color-accent);
+    border-radius: var(--radius-sm);
+    transition: var(--transition-tick);
+  }
+
+  // ── Groups ────────────────────────────────────────────────────────────────
+
+  &__group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  &__group-heading {
+    font-size: var(--text-xs);
+    font-family: var(--font-mono);
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 0 0 var(--space-xs);
+  }
+
+  &__group--completed {
+    opacity: 0.45;
+    pointer-events: none;
+  }
+}

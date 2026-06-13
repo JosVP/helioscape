@@ -26,13 +26,13 @@ interface PlanetRow {
 const DISPLAY_ORDER = ['earth', 'moon', 'mercury', 'mars', 'venus'] as const;
 
 @Component({
-  selector: 'app-planets-panel',
+  selector: 'app-planets-menu',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './planets-panel.component.html',
-  styleUrl: './planets-panel.component.scss',
+  templateUrl: './planets-menu.component.html',
+  styleUrl: './planets-menu.component.scss',
 })
-export class PlanetsPanelComponent {
+export class PlanetsMenuComponent {
   private readonly gameState  = inject(GameStateService);
   private readonly data       = inject(DataService);
   private readonly eventBus   = inject(EventBusService);

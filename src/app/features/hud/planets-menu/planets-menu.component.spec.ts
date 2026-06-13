@@ -2,7 +2,7 @@ import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { Subject } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { PlanetsPanelComponent } from './planets-panel.component';
+import { PlanetsMenuComponent } from './planets-menu.component';
 import { GameStateService } from '@app/core/services/game-state.service';
 import { DataService } from '@app/core/services/data.service';
 import { EventBusService } from '@app/core/services/event-bus.service';
@@ -99,16 +99,16 @@ const mockEventBus = { planetSelected$, moonTabRequested$, planetHovered$ };
 // Setup
 // ---------------------------------------------------------------------------
 
-function setup(): ComponentFixture<PlanetsPanelComponent> {
+function setup(): ComponentFixture<PlanetsMenuComponent> {
   TestBed.configureTestingModule({
-    imports: [PlanetsPanelComponent],
+    imports: [PlanetsMenuComponent],
     providers: [
       { provide: GameStateService, useValue: mockGameState },
       { provide: DataService, useValue: mockData },
       { provide: EventBusService, useValue: mockEventBus },
     ],
   });
-  const fixture = TestBed.createComponent(PlanetsPanelComponent);
+  const fixture = TestBed.createComponent(PlanetsMenuComponent);
   fixture.detectChanges();
   return fixture;
 }
@@ -122,7 +122,7 @@ beforeEach(() => {
 // Tests
 // ---------------------------------------------------------------------------
 
-describe('PlanetsPanelComponent', () => {
+describe('PlanetsMenuComponent', () => {
   it('renders 5 rows in correct order (earth, moon, mercury, mars, venus)', () => {
     const fixture = setup();
     const rows = fixture.componentInstance.rows();

@@ -16,7 +16,7 @@ import { GameStateService } from '@app/core/services/game-state.service';
 import { CultureEventCardComponent } from '@app/features/culture-events/culture-event-card/culture-event-card.component';
 import { CultureEventToastComponent } from '@app/features/culture-events/culture-event-toast/culture-event-toast.component';
 import { HudComponent } from '@app/features/hud/hud.component';
-import { PlanetsPanelComponent } from '@app/features/hud/planets-panel/planets-panel.component';
+import { PlanetsMenuComponent } from '@app/features/hud/planets-menu/planets-menu.component';
 import { OrreryComponent } from '@app/features/orrery/orrery.component';
 import { PauseMenuComponent } from '@app/features/pause-menu/pause-menu.component';
 import { PlanetPanelComponent } from '@app/features/planet-panel/planet-panel.component';
@@ -28,7 +28,7 @@ import { ResearchHubComponent } from '@app/features/research-hub/research-hub.co
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     HudComponent,
-    PlanetsPanelComponent,
+    PlanetsMenuComponent,
     OrreryComponent,
     PlanetPanelComponent,
     CultureEventCardComponent,
