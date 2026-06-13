@@ -1,0 +1,54 @@
+<!-- Fork-choice overlay — covers the full research hub panel, blocks all background interaction. -->
+<div
+  class="fork-choice-modal__overlay"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="fork-modal-title"
+  aria-describedby="fork-modal-desc"
+>
+  <div class="fork-choice-modal__card">
+
+    <!-- Header -->
+    <header class="fork-choice-modal__header">
+      <span class="fork-choice-modal__eyebrow">A decision has been reached</span>
+      <h3 class="fork-choice-modal__tech-name" id="fork-modal-title">{{ techDisplayName() }}</h3>
+      <p class="fork-choice-modal__description" id="fork-modal-desc">
+        This research has reached a crossroads.
+        One path must be chosen before we can proceed — this choice is final.
+      </p>
+    </header>
+
+    <!-- Choices -->
+    <div class="fork-choice-modal__choices">
+      @for (choice of enrichedChoices(); track choice.id) {
+        <button
+          class="fork-choice-modal__choice"
+          [class.fork-choice-modal__choice--naturalist]="choice.tag === 'naturalist'"
+          [class.fork-choice-modal__choice--architect]="choice.tag === 'architect'"
+          (click)="choose(choice.id)"
+        >
+          <span class="fork-choice-modal__choice-label">{{ choice.label }}</span>
+
+          @if (choice.tag) {
+            <span
+              class="fork-choice-modal__tag"
+              [class.fork-choice-modal__tag--naturalist]="choice.tag === 'naturalist'"
+              [class.fork-choice-modal__tag--architect]="choice.tag === 'architect'"
+            >{{ tagLabel(choice.tag) }}</span>
+          }
+
+          @if (choice.effectSummary.length > 0) {
+            <ul class="fork-choice-modal__effects" aria-label="Effects">
+              @for (line of choice.effectSummary; track $index) {
+                <li class="fork-choice-modal__effect">{{ line }}</li>
+              }
+            </ul>
+          }
+        </button>
+      }
+    </div>
+
+    <!-- No cancel button — this is intentional: the tech has completed, a choice must be made. -->
+
+  </div>
+</div>

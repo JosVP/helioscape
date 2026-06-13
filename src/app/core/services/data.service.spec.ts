@@ -26,7 +26,7 @@ const fakePlanets: PlanetData[] = [
       waterSpotUvs: [],
       greenSpotUvs: [],
     },
-    phases: [{ displayName: 'Industrial Age' }, { displayName: 'Space Age' }],
+    phases: [{ displayName: 'Industrial Age', description: '' }, { displayName: 'Space Age', description: '' }],
   },
   {
     id: 'mars',
@@ -47,7 +47,7 @@ const fakePlanets: PlanetData[] = [
       waterSpotUvs: [],
       greenSpotUvs: [],
     },
-    phases: [{ displayName: 'Barren' }, { displayName: 'Flourishing' }],
+    phases: [{ displayName: 'Barren', description: '' }, { displayName: 'Flourishing', description: '' }],
   },
 ];
 

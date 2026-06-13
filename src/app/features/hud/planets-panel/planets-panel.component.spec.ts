@@ -38,7 +38,7 @@ function makePlanetState(overrides: Partial<PlanetState> = {}): PlanetState {
   } as PlanetState;
 }
 
-function makePlanetData(id: string, phases: { displayName: string }[]): PlanetData {
+function makePlanetData(id: string, phases: { displayName: string; description: string }[]): PlanetData {
   return {
     id: id as PlanetData['id'],
     displayName: id.charAt(0).toUpperCase() + id.slice(1),
@@ -72,10 +72,10 @@ const planetsSignal = signal<Record<string, PlanetState>>({
 const selectedSignal = signal<string | null>(null);
 
 const planetDataMap: Record<string, PlanetData> = {
-  earth:   makePlanetData('earth',   [{ displayName: 'Industrial Age' }, { displayName: 'Space Age' }]),
-  mercury: makePlanetData('mercury', [{ displayName: 'Operational Base' }, { displayName: 'Industrial Hub' }, { displayName: 'Ring City' }]),
-  mars:    makePlanetData('mars',    [{ displayName: 'Barren' }, { displayName: 'Thin Atmosphere' }, { displayName: 'Warming' }, { displayName: 'Wetting' }, { displayName: 'Flourishing' }]),
-  venus:   makePlanetData('venus',   [{ displayName: 'Hellish' }, { displayName: 'Cooling' }, { displayName: 'Thinning' }, { displayName: 'Temperate' }, { displayName: 'Flourishing' }]),
+  earth:   makePlanetData('earth',   [{ displayName: 'Industrial Age', description: '' }, { displayName: 'Space Age', description: '' }]),
+  mercury: makePlanetData('mercury', [{ displayName: 'Operational Base', description: '' }, { displayName: 'Industrial Hub', description: '' }, { displayName: 'Ring City', description: '' }]),
+  mars:    makePlanetData('mars',    [{ displayName: 'Barren', description: '' }, { displayName: 'Thin Atmosphere', description: '' }, { displayName: 'Warming', description: '' }, { displayName: 'Wetting', description: '' }, { displayName: 'Flourishing', description: '' }]),
+  venus:   makePlanetData('venus',   [{ displayName: 'Hellish', description: '' }, { displayName: 'Cooling', description: '' }, { displayName: 'Thinning', description: '' }, { displayName: 'Temperate', description: '' }, { displayName: 'Flourishing', description: '' }]),
 };
 
 const mockGameState = {

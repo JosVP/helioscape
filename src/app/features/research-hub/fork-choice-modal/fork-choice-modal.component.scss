@@ -1,0 +1,232 @@
+// ---------------------------------------------------------------------------
+// Fork-choice modal — panel-scoped full-cover overlay
+//
+// The host element is a direct child of .research-hub__panel (position: fixed),
+// so `position: absolute; inset: 0` covers the entire panel without escaping
+// the viewport edge that the panel provides.
+// ---------------------------------------------------------------------------
+
+:host {
+  position: absolute;
+  inset: 0;
+  z-index: 10; // above node cards (z-index: 2) and SVG lines (z-index: 1)
+  display: block;
+}
+
+// ---------------------------------------------------------------------------
+// Overlay backdrop — semi-transparent blur over the tech-tree grid
+// ---------------------------------------------------------------------------
+
+.fork-choice-modal__overlay {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--color-bg-base) 80%, transparent);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-lg);
+  animation: fcm-fade-in 0.2s ease-out both;
+}
+
+@keyframes fcm-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+// ---------------------------------------------------------------------------
+// Card — centred decision panel
+// ---------------------------------------------------------------------------
+
+.fork-choice-modal__card {
+  width: 100%;
+  max-width: 620px;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-accent-dim);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-panel), 0 0 0 1px color-mix(in srgb, var(--color-accent) 12%, transparent);
+  padding: var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  animation: fcm-slide-up 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes fcm-slide-up {
+  from { transform: translateY(24px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+// ---------------------------------------------------------------------------
+// Header
+// ---------------------------------------------------------------------------
+
+.fork-choice-modal__header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.fork-choice-modal__eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-accent-dim);
+}
+
+.fork-choice-modal__tech-name {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  color: var(--color-accent-glow);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0;
+  text-shadow: 0 0 12px color-mix(in srgb, var(--color-accent-glow) 30%, transparent);
+}
+
+.fork-choice-modal__description {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.6;
+  font-style: italic;
+}
+
+// ---------------------------------------------------------------------------
+// Choices row
+// ---------------------------------------------------------------------------
+
+.fork-choice-modal__choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+}
+
+// ---------------------------------------------------------------------------
+// Individual choice button
+// ---------------------------------------------------------------------------
+
+.fork-choice-modal__choice {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-bg-elevated);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  text-align: left;
+  transition: var(--transition-ui);
+  color: var(--color-text-primary);
+
+  &:hover,
+  &:focus-visible {
+    background: color-mix(in srgb, var(--color-accent) 8%, var(--color-bg-elevated));
+    border-color: var(--color-accent-dim);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  // Naturalist tint
+  &--naturalist {
+    &:hover,
+    &:focus-visible {
+      background: color-mix(in srgb, var(--color-tag-naturalist) 10%, var(--color-bg-elevated));
+      border-color: var(--color-tag-naturalist);
+    }
+  }
+
+  // Architect tint
+  &--architect {
+    &:hover,
+    &:focus-visible {
+      background: color-mix(in srgb, var(--color-tag-architect) 10%, var(--color-bg-elevated));
+      border-color: var(--color-tag-architect);
+    }
+  }
+}
+
+.fork-choice-modal__choice-label {
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 1.4;
+  color: var(--color-text-primary);
+}
+
+// ---------------------------------------------------------------------------
+// Tag chip — naturalist / architect indicator
+// ---------------------------------------------------------------------------
+
+.fork-choice-modal__tag {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  padding: 2px var(--space-xs);
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+
+  &--naturalist {
+    color: var(--color-tag-naturalist);
+    border-color: var(--color-tag-naturalist);
+    background: color-mix(in srgb, var(--color-tag-naturalist) 12%, transparent);
+  }
+
+  &--architect {
+    color: var(--color-tag-architect);
+    border-color: var(--color-tag-architect);
+    background: color-mix(in srgb, var(--color-tag-architect) 12%, transparent);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Effect summary list
+// ---------------------------------------------------------------------------
+
+.fork-choice-modal__effects {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: var(--space-xs);
+  padding-top: var(--space-xs);
+  border-top: 1px solid var(--color-bg-elevated);
+  width: 100%;
+}
+
+.fork-choice-modal__effect {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+
+  &::before {
+    content: '+ ';
+    color: var(--color-good);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Reduced-motion overrides
+// ---------------------------------------------------------------------------
+
+:root.reduced-motion & {
+  .fork-choice-modal__overlay,
+  .fork-choice-modal__card {
+    animation: none;
+  }
+}

@@ -1,55 +1,115 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import type { PendingFork } from '@app/core/models';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import type { ForkChoice, PendingFork, TechEffect } from '@app/core/models';
+import { DataService } from '@app/core/services/data.service';
+import { TechTreeService } from '@app/core/systems/tech-tree.service';
 
-// NOTE: Stub — full fork-choice modal implementation is deferred to Block 7.3.
-// This component must accept the PendingFork input so ResearchHubComponent compiles.
+/** A ForkChoice annotated with pre-computed human-readable effect lines. */
+export interface EnrichedChoice {
+  readonly id: string;
+  readonly label: string;
+  readonly tag: ForkChoice['tag'];
+  readonly effectSummary: readonly string[];
+}
+
 @Component({
   selector: 'app-fork-choice-modal',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  // NOTE: Stub — renders a small non-blocking toast instead of a full overlay.
-  // Full fork-choice UI is implemented in Block 7.3.
-  template: `
-    <div class="fork-modal-stub" role="status" aria-live="polite">
-      <span class="fork-modal-stub__label">🔀 Fork choice needed</span>
-      <small class="fork-modal-stub__id">{{ fork().techId }} — coming in Block 7.3</small>
-    </div>
-  `,
-  styles: [
-    `
-      .fork-modal-stub {
-        position: absolute;
-        bottom: var(--space-md, 16px);
-        left: 50%;
-        transform: translateX(-50%);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 4px;
-        padding: var(--space-sm, 8px) var(--space-md, 16px);
-        background: var(--color-bg-elevated, #1e2030);
-        border: 1px solid var(--color-accent-dim, #4a5568);
-        border-radius: var(--radius-md, 6px);
-        box-shadow: var(--shadow-panel, 0 8px 32px rgba(0,0,0,0.4));
-        z-index: 202;
-        white-space: nowrap;
-        pointer-events: none;
-      }
-
-      .fork-modal-stub__label {
-        color: var(--color-text-primary, #e2e8f0);
-        font-family: var(--font-mono, monospace);
-        font-size: var(--text-sm, 0.875rem);
-      }
-
-      .fork-modal-stub__id {
-        color: var(--color-text-disabled, #718096);
-        font-family: var(--font-mono, monospace);
-        font-size: var(--text-xs, 0.75rem);
-      }
-    `,
-  ],
+  templateUrl: './fork-choice-modal.component.html',
+  styleUrl: './fork-choice-modal.component.scss',
 })
 export class ForkChoiceModalComponent {
+  private readonly techTreeService = inject(TechTreeService);
+  private readonly data = inject(DataService);
+
   readonly fork = input.required<PendingFork>();
+
+  // ---------------------------------------------------------------------------
+  // Derived data
+  // ---------------------------------------------------------------------------
+
+  readonly techNode = computed(() => this.data.getTechNode(this.fork().techId));
+
+  readonly techDisplayName = computed(() => this.techNode()?.displayName ?? this.fork().techId);
+
+  readonly enrichedChoices = computed<EnrichedChoice[]>(() => {
+    const node = this.techNode();
+    if (!node) return [];
+
+    const forkEffect = node.effects.find(
+      (e): e is Extract<TechEffect, { type: 'present_fork' }> => e.type === 'present_fork',
+    );
+    if (!forkEffect) return [];
+
+    return forkEffect.choices.map((choice) => ({
+      id: choice.id,
+      label: choice.label,
+      tag: choice.tag,
+      effectSummary: this._summariseEffects(choice.effects),
+    }));
+  });
+
+  // ---------------------------------------------------------------------------
+  // Template helpers
+  // ---------------------------------------------------------------------------
+
+  tagLabel(tag: ForkChoice['tag']): string {
+    if (tag === 'naturalist') return '🌿 Naturalist';
+    if (tag === 'architect') return '⚙ Architect';
+    return '';
+  }
+
+  // ---------------------------------------------------------------------------
+  // Actions
+  // ---------------------------------------------------------------------------
+
+  // No cancel action — this is intentional: the tech has completed, a choice must be made.
+  choose(choiceId: string): void {
+    const f = this.fork();
+    this.techTreeService.completeForkChoice(f.planetId, f.techId, choiceId);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Private
+  // ---------------------------------------------------------------------------
+
+  private _summariseEffects(effects: TechEffect[]): string[] {
+    const summary: string[] = [];
+    for (const effect of effects) {
+      switch (effect.type) {
+        case 'rp_capacity_boost':
+          summary.push(`+${effect.amount} RP capacity`);
+          break;
+        case 'unlock_tech': {
+          const node = this.data.getTechNode(effect.target);
+          summary.push(`Unlocks: ${node?.displayName ?? effect.target}`);
+          break;
+        }
+        case 'apply_terraforming_choice':
+          summary.push('Applies a terraforming path choice');
+          break;
+        case 'apply_colonist_bonus':
+          summary.push(
+            effect.bonus === 'dense_living'
+              ? 'Enables dense living bonus'
+              : 'Enables open environment bonus',
+          );
+          break;
+        case 'spillover_unlock':
+          summary.push(`Unlocks a tech on ${effect.targetPlanet}`);
+          break;
+        // tag_decision is communicated through the tag chip — not surfaced here.
+        // emit_event and set_flag are internal — not meaningful to the player here.
+        // present_fork: nested forks are not supported.
+        case 'tag_decision':
+        case 'emit_event':
+        case 'set_flag':
+        case 'present_fork':
+          break;
+        default:
+          break;
+      }
+    }
+    return summary;
+  }
 }
