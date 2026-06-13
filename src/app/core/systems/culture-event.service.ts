@@ -79,6 +79,16 @@ export class CultureEventService {
     () => this._currentEntry() !== null,
   );
 
+  /**
+   * Queue entries that are NOT auto-show (text-only, non-priority).
+   * These stay queued silently; the bell badge reflects their count.
+   * Auto-show events (priority or has choices) are excluded — they are
+   * displayed immediately as cards.
+   */
+  readonly notificationQueue: Signal<CultureEventEntry[]> = computed(() =>
+    this.gameState.cultureEventQueue().filter((e) => !this._isAutoShow(e)),
+  );
+
   // -------------------------------------------------------------------------
   // Constructor
   // -------------------------------------------------------------------------
@@ -173,8 +183,11 @@ export class CultureEventService {
         wasInterrupted: false,
       });
 
-      // Only auto-advance if nothing is currently on screen.
-      if (!this._currentEntry()) {
+      // Auto-advance only for events that should auto-show (has choices or
+      // is priority). Pure text-only notifications sit in the queue silently
+      // and are surfaced via the bell badge + notificationQueue signal.
+      const isAutoShow = eventDef.priority || eventDef.choices.length > 0;
+      if (isAutoShow && !this._currentEntry()) {
         this._tryShowNext();
       }
     }
@@ -192,7 +205,9 @@ export class CultureEventService {
     // Capture before nulling so the breather delay is correct.
     const wasInterrupted = entry.wasInterrupted;
 
-    this.gameState.shiftEventQueue();
+    // Use removeEventFromQueue so we find the entry by id regardless of its
+    // position — priority re-ordering can shift entries around.
+    this.gameState.removeEventFromQueue(entry.eventId);
     this._currentEntry.set(null);
 
     // NOTE: setTimeout in a service is acceptable here — this is a short UI
@@ -228,15 +243,47 @@ export class CultureEventService {
     }
   }
 
+  /**
+   * Triggers the next auto-show event from the queue.
+   * No-op when the queue is empty or an event is already displaying.
+   */
+  showNextEvent(): void {
+    this._tryShowNext();
+  }
+
+  /**
+   * Opens a specific notification event by id (called from the bell dropdown).
+   * No-op if the event is not in the queue or a card is already showing.
+   */
+  showEvent(eventId: string): void {
+    if (this._currentEntry()) return;
+    const entry = this.gameState.cultureEventQueue().find((e) => e.eventId === eventId);
+    if (!entry) return;
+    this._displayEvent(entry);
+  }
+
   // -------------------------------------------------------------------------
   // Private display helpers
   // -------------------------------------------------------------------------
 
   private _tryShowNext(): void {
-    const next = this.gameState.cultureEventQueue()[0];
+    if (this._currentEntry()) return;
+    // Skip notification-only entries — they are surfaced via the bell,
+    // not auto-displayed as cards.
+    const next = this.gameState.cultureEventQueue().find((e) => this._isAutoShow(e));
     if (next) {
       this._displayEvent(next);
     }
+  }
+
+  /**
+   * Returns true when an event should auto-display as a card.
+   * Events with choices always interrupt the player (they require a decision).
+   * Priority events do too. Pure text-only events are notifications.
+   */
+  private _isAutoShow(entry: CultureEventEntry): boolean {
+    const def = this.data.getCultureEvent(entry.eventId);
+    return !!def && (entry.priority || def.choices.length > 0);
   }
 
   private _displayEvent(entry: CultureEventEntry): void {

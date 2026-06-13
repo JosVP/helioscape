@@ -143,15 +143,13 @@ No inline `// TODO:` comments in code - all tracking happens here to avoid dupli
 - **Prompt block**: TBD (Planet Panel block)
 - **Added**: 2026-06-11
 
-### CultureEventCardComponent — DONE 2026-06-13 / CultureEventToastComponent — stub
+### CultureEventCardComponent — DONE 2026-06-13 / CultureEventToastComponent — DONE 2026-06-13
 
 - **File**: src/app/features/culture-events/culture-event-card/culture-event-card.component.ts ✓ DONE
-- **File**: src/app/features/culture-events/culture-event-toast/culture-event-toast.component.ts (stub, pending)
-- **Location**: Toast is still a stub
-- **TODO**: Implement CultureEventToastComponent (non-priority events)
-- **Depends on**: GameShellComponent (done), CultureEventService
-- **Prompt block**: TBD (Culture Events UI block)
-- **Added**: 2026-06-11 | **Card completed**: 2026-06-13
+- **File**: src/app/features/culture-events/culture-event-toast/culture-event-toast.component.ts ✓ DONE
+- **Completed**: Bell icon + badge in HudComponent hud__right (between research btn and time-controls), position:fixed toast stack bottom-left, dropdown, `CultureEventService.showNextEvent()` public wrapper. Component moved from GameShellComponent to HudComponent.
+- **Prompt block**: 08-2
+- **Added**: 2026-06-11 | **Card completed**: 2026-06-13 | **Toast completed**: 2026-06-13
 
 ### PauseMenuComponent — pause menu overlay
 

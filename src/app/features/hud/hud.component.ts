@@ -11,6 +11,7 @@ import { EventBusService } from '@app/core/services/event-bus.service';
 import { GameLoopService } from '@app/core/services/game-loop.service';
 import { GameStateService } from '@app/core/services/game-state.service';
 import { SaveService } from '@app/core/services/save.service';
+import { CultureEventBellComponent } from '@app/features/culture-events/culture-event-bell/culture-event-bell.component';
 import { KardashevBarComponent } from './kardashev-bar/kardashev-bar.component';
 import { TimeControlsComponent } from './time-controls/time-controls.component';
 import { YearLabelComponent } from './year-label/year-label.component';
@@ -34,7 +35,7 @@ const AUTOSAVE_VISIBLE_MS = 2500;
   selector: 'app-hud',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [YearLabelComponent, KardashevBarComponent, TimeControlsComponent],
+  imports: [YearLabelComponent, KardashevBarComponent, TimeControlsComponent, CultureEventBellComponent],
   templateUrl: './hud.component.html',
   styleUrl: './hud.component.scss',
 })

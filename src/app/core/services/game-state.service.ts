@@ -425,6 +425,15 @@ export class GameStateService {
     return shifted;
   }
 
+  /** Removes the first queue entry whose eventId matches. No-op if not found. */
+  removeEventFromQueue(eventId: string): void {
+    this._cultureEventQueue.update((q) => {
+      const idx = q.findIndex((e) => e.eventId === eventId);
+      if (idx === -1) return q;
+      return [...q.slice(0, idx), ...q.slice(idx + 1)];
+    });
+  }
+
   recordEventHistory(entry: CultureEventHistoryEntry): void {
     this._cultureEventHistory.update((h) => [...h, entry]);
   }

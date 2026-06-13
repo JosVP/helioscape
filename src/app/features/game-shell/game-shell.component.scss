@@ -28,10 +28,15 @@ app-orrery {
   overflow: hidden;
 }
 
-app-culture-event-card,
-app-culture-event-toast {
+app-culture-event-card {
   position: absolute;
   z-index: 20;
+}
+
+// app-culture-event-toast: host is display:contents; the inner .toast__stack
+// is position:fixed with z-index:200 — no positioning needed at this level.
+app-culture-event-toast {
+  display: contents;
 }
 
 // NOTE: app-pause-menu positions itself internally as a fixed overlay.

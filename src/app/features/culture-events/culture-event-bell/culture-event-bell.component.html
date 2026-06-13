@@ -1,0 +1,71 @@
+<!-- Bell button + unread badge — wrapper provides anchor for absolute panel -->
+<div class="bell__wrap">
+  <button
+    class="bell__btn"
+    type="button"
+    [class.bell__btn--active]="_dropdownOpen()"
+    [attr.aria-expanded]="_dropdownOpen()"
+    aria-haspopup="true"
+    aria-label="Culture event notifications"
+    (click)="onBellClick()"
+  >
+    <span class="bell__icon" aria-hidden="true">🔔</span>
+    @if (unreadCount() > 0) {
+      <span class="bell__badge" [attr.aria-label]="unreadCount() + ' unread events'">
+        {{ unreadCount() }}
+      </span>
+    }
+  </button>
+
+  @if (_dropdownOpen()) {
+    <div
+      class="bell__panel"
+      role="dialog"
+      aria-label="Culture event notifications"
+    >
+      <!-- Toolbar: toggle unread / all -->
+      <div class="bell__toolbar">
+        <span class="bell__toolbar-title">Notifications</span>
+        <button
+          class="bell__toggle"
+          type="button"
+          (click)="onToggleFilter()"
+        >
+          {{ _showOnlyUnread() ? 'Show all' : 'Show unread only' }}
+        </button>
+      </div>
+
+      @if (!hasItems()) {
+        <p class="bell__empty">
+          {{ _showOnlyUnread() ? 'No unread events' : 'No events yet' }}
+        </p>
+      }
+
+      @if (hasItems()) {
+        <ul class="bell__list" role="list">
+          @for (item of displayedItems(); track item.eventId) {
+            <li
+              class="bell__item"
+              [class.bell__item--read]="item.read"
+            >
+              @if (!item.read) {
+                <button
+                  class="bell__item-btn"
+                  type="button"
+                  (click)="onItemClick(item.eventId)"
+                >
+                  <span class="bell__unread-dot" aria-hidden="true"></span>
+                  <span class="bell__item-label">{{ item.title }}</span>
+                </button>
+              } @else {
+                <div class="bell__item-static">
+                  <span class="bell__item-label">{{ item.title }}</span>
+                </div>
+              }
+            </li>
+          }
+        </ul>
+      }
+    </div>
+  }
+</div>

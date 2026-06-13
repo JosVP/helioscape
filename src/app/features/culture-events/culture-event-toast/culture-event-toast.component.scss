@@ -1,0 +1,97 @@
+// CultureEventToastComponent styles
+// ---------------------------------------------------------------------------
+// Toast stack only. The bell icon lives in CultureEventBellComponent (in HUD).
+// This component is placed in game-shell to escape the HUD stacking context,
+// ensuring toasts always appear above all overlays including the culture card.
+// ---------------------------------------------------------------------------
+
+:host {
+  display: contents;
+}
+
+// ---------------------------------------------------------------------------
+// Toast stack — fixed, bottom-left
+// ---------------------------------------------------------------------------
+
+.toast__stack {
+  position: fixed;
+  bottom: var(--space-lg);
+  left: var(--space-lg);
+  z-index: 200;
+  display: flex;
+  flex-direction: column-reverse; // newest toast at bottom
+  pointer-events: none; // allow click-through when empty
+}
+
+// ---------------------------------------------------------------------------
+// Collapse wrapper — drives the smooth height-collapse on dismiss.
+// Uses grid-template-rows trick: 1fr → 0fr shrinks the content to zero
+// height while keeping layout flow. Siblings above glide down naturally.
+// ---------------------------------------------------------------------------
+
+.toast__collapse-wrap {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 350ms ease;
+
+  // Add vertical gap between toasts via padding-bottom on each wrapper
+  // (gap on the flex parent would also collapse, but this is simpler).
+  padding-bottom: var(--space-sm);
+
+  &--dismissing {
+    grid-template-rows: 0fr;
+    padding-bottom: 0;
+    transition:
+      grid-template-rows 350ms ease,
+      padding-bottom 350ms ease;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Individual toast
+// ---------------------------------------------------------------------------
+
+.toast__item {
+  // Required for grid-row collapse to fully hide content.
+  min-height: 0;
+  overflow: hidden;
+
+  max-width: 280px;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-bg-elevated);
+  border: var(--border-subtle);
+  border-left: 3px solid var(--color-accent);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-panel);
+  cursor: pointer;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  // Base (hidden) state: opacity only — no translateX so sibling reflow is clean.
+  opacity: 0;
+  transition: opacity 0.3s ease-out;
+
+  &--visible {
+    opacity: 1;
+  }
+
+  &:hover {
+    border-left-color: var(--color-accent-glow);
+    box-shadow: var(--shadow-panel), 0 0 8px 0 color-mix(in srgb, var(--color-accent-glow) 20%, transparent);
+  }
+}
+
+.toast__item-title {
+  font-size: var(--text-xs);
+  font-family: var(--font-mono);
+  color: var(--color-text-primary);
+  line-height: 1.4;
+}
+
+.toast__item-hint {
+  font-size: 10px;
+  color: var(--color-text-secondary);
+  font-family: var(--font-mono);
+}

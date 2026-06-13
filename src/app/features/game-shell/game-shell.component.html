@@ -11,6 +11,9 @@
 />
 
 <app-culture-event-card />
+
+<!-- Toast stack lives here (outside app-hud) so position:fixed is not
+     confined by app-hud's stacking context. z-index: 200 in toast SCSS. -->
 <app-culture-event-toast />
 
 <app-pause-menu

@@ -1,0 +1,21 @@
+<!-- Toast stack — position: fixed, bottom-left of viewport -->
+<!-- Placed in game-shell (outside app-hud) so position:fixed is not confined -->
+<!-- by the HUD's stacking context. -->
+<div class="toast__stack" aria-live="polite" aria-atomic="false">
+  @for (toast of _toasts(); track toast.id) {
+    <div
+      class="toast__collapse-wrap"
+      [class.toast__collapse-wrap--dismissing]="toast.dismissing"
+    >
+      <div
+        class="toast__item"
+        [class.toast__item--visible]="toast.visible"
+        role="alert"
+        (click)="onToastClick(toast.id, toast.eventId)"
+      >
+        <span class="toast__item-title">{{ toast.title }}</span>
+        <span class="toast__item-hint" aria-hidden="true">Click to open</span>
+      </div>
+    </div>
+  }
+</div>
