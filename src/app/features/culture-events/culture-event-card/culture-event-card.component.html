@@ -1,0 +1,68 @@
+<div
+  class="card-overlay"
+  [class.card-overlay--visible]="isVisible()"
+  role="dialog"
+  aria-modal="true"
+  [attr.aria-labelledby]="isVisible() ? 'event-card-title' : null"
+>
+  <div
+    class="card-overlay__backdrop"
+    aria-hidden="true"
+    (click)="onContinue()"
+  ></div>
+
+  <div class="card-overlay__card" tabindex="-1">
+    <div class="card-overlay__portrait" aria-hidden="true">
+      @if (event(); as ev) {
+        <img [src]="ev.portrait" [alt]="" />
+      }
+    </div>
+
+    <div class="card-overlay__content" aria-live="polite" aria-atomic="true">
+      @if (event(); as ev) {
+        <h2 class="card-overlay__title" id="event-card-title">{{ ev.title }}</h2>
+
+        <div class="card-overlay__narrator">
+          @for (para of paragraphs(); track para) {
+            <p>{{ para }}</p>
+          }
+        </div>
+
+        <div class="card-overlay__actions">
+          @if (ev.choices.length === 0) {
+            <button
+              type="button"
+              class="card-overlay__btn card-overlay__btn--continue"
+              (click)="onContinue()"
+            >
+              Continue
+            </button>
+          } @else {
+            @for (choice of ev.choices; track choice.id; let i = $index) {
+              <button
+                type="button"
+                class="card-overlay__btn"
+                [class.card-overlay__btn--focused]="focusedChoiceIndex() === i"
+                [class.card-overlay__btn--naturalist]="choice.tag === 'naturalist'"
+                [class.card-overlay__btn--architect]="choice.tag === 'architect'"
+                (click)="onChoice(choice)"
+              >
+                @if (choice.tag) {
+                  <span
+                    class="card-overlay__tag-icon card-overlay__tag-icon--{{ choice.tag }}"
+                    aria-hidden="true"
+                  ></span>
+                }
+                <span class="card-overlay__btn-label">{{ choice.label }}</span>
+                @if (choice.tag) {
+                  <span class="sr-only">({{ choice.tag }})</span>
+                }
+              </button>
+            }
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>
+

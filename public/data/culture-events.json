@@ -226,7 +226,7 @@
     "portrait": "/assets/svg/portraits/ce_mars_phase_1.svg",
     "choices": [],
     "tags": [],
-    "trigger": null,
+    "trigger": { "type": "terraforming_phase_complete", "planet": "mars", "phase": 1 },
     "priority": true
   },
   {
@@ -236,7 +236,7 @@
     "portrait": "/assets/svg/portraits/ce_mars_phase_2.svg",
     "choices": [],
     "tags": [],
-    "trigger": null,
+    "trigger": { "type": "terraforming_phase_complete", "planet": "mars", "phase": 2 },
     "priority": true
   },
   {
@@ -246,7 +246,7 @@
     "portrait": "/assets/svg/portraits/ce_mars_phase_3.svg",
     "choices": [],
     "tags": [],
-    "trigger": null,
+    "trigger": { "type": "terraforming_phase_complete", "planet": "mars", "phase": 3 },
     "priority": true
   },
   {
@@ -256,7 +256,7 @@
     "portrait": "/assets/svg/portraits/ce_venus_phase_1.svg",
     "choices": [],
     "tags": [],
-    "trigger": null,
+    "trigger": { "type": "terraforming_phase_complete", "planet": "venus", "phase": 1 },
     "priority": true
   },
   {
@@ -266,7 +266,7 @@
     "portrait": "/assets/svg/portraits/ce_venus_phase_2.svg",
     "choices": [],
     "tags": [],
-    "trigger": null,
+    "trigger": { "type": "terraforming_phase_complete", "planet": "venus", "phase": 2 },
     "priority": true
   },
   {
@@ -276,11 +276,10 @@
     "portrait": "/assets/svg/portraits/ce_venus_phase_3.svg",
     "choices": [],
     "tags": [],
-    "trigger": null,
+    "trigger": { "type": "terraforming_phase_complete", "planet": "venus", "phase": 3 },
     "priority": true
   },
-  {
-    "id": "ce_mars_bio_1_complete",
+  {,
     "title": "The First Organisms Take Hold",
     "narratorText": "The microbial census is in. The pioneer organisms are not just surviving — they are spreading, metabolising, and dying in the right cycles. Mars has never hosted a carbon cycle before. It does now. We are its first biologists and its first gardeners.",
     "portrait": "/assets/svg/portraits/ce_mars_bio_1_complete.svg",

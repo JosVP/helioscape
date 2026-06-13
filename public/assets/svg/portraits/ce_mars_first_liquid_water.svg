@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <!-- PLACEHOLDER: replace with final art -->
+  <!-- Mars first liquid water: small puddle on rust plain -->
+  <rect width="256" height="256" fill="#1a0800"/>
+  <rect x="0" y="155" width="256" height="101" fill="#5a2a18"/>
+  <rect x="0" y="145" width="256" height="18" fill="#b86030" opacity="0.3"/>
+  <!-- water pool -->
+  <ellipse cx="128" cy="168" rx="55" ry="18" fill="#2a5a8a" opacity="0.9"/>
+  <ellipse cx="128" cy="168" rx="55" ry="18" fill="none" stroke="#6aaad8" stroke-width="2" opacity="0.6"/>
+  <!-- reflection sparkle -->
+  <line x1="110" y1="162" x2="114" y2="166" stroke="#c8e8f8" stroke-width="1.5" opacity="0.8"/>
+  <line x1="140" y1="165" x2="144" y2="169" stroke="#c8e8f8" stroke-width="1.5" opacity="0.8"/>
+  <rect x="1" y="1" width="254" height="254" fill="none" stroke="#2a5a8a" stroke-opacity="0.3" stroke-dasharray="8 6"/>
+  <text x="128" y="218" fill="#2a5a8a" fill-opacity="0.6" font-family="monospace" font-size="9" text-anchor="middle">mars liquid water — placeholder</text>
+</svg>

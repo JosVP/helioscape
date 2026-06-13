@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <!-- PLACEHOLDER: replace with final art -->
+  <rect width="256" height="256" fill="#080c10"/>
+  <!-- Deep space background stars -->
+  <circle cx="40" cy="30" r="1.5" fill="#e8e0d4" opacity="0.7"/>
+  <circle cx="90" cy="60" r="1" fill="#e8e0d4" opacity="0.5"/>
+  <circle cx="200" cy="40" r="1.5" fill="#e8e0d4" opacity="0.6"/>
+  <circle cx="220" cy="90" r="1" fill="#e8e0d4" opacity="0.4"/>
+  <circle cx="30" cy="150" r="1" fill="#e8e0d4" opacity="0.5"/>
+  <!-- Question mark / silence symbol -->
+  <text x="128" y="145" fill="#4a6a8a" font-family="monospace" font-size="80" text-anchor="middle" opacity="0.6">?</text>
+  <rect x="1" y="1" width="254" height="254" fill="none" stroke="#4a6a8a" stroke-opacity="0.3" stroke-dasharray="8 6"/>
+  <text x="128" y="220" fill="#4a6a8a" fill-opacity="0.6" font-family="monospace" font-size="9" text-anchor="middle">fermi silence — placeholder</text>
+</svg>

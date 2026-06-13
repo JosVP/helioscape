@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <!-- PLACEHOLDER: replace with final art -->
+  <rect width="256" height="256" fill="#1a0800"/>
+  <!-- Mercury surface with habitat dome -->
+  <rect x="0" y="170" width="256" height="86" fill="#3a3428"/>
+  <ellipse cx="128" cy="170" rx="55" ry="30" fill="#2a3a4a" opacity="0.9"/>
+  <ellipse cx="128" cy="170" rx="55" ry="30" fill="none" stroke="#4a7a9a" stroke-width="2"/>
+  <!-- small window lights -->
+  <circle cx="105" cy="165" r="5" fill="#e8d080" opacity="0.8"/>
+  <circle cx="128" cy="160" r="5" fill="#e8d080" opacity="0.8"/>
+  <circle cx="151" cy="165" r="5" fill="#e8d080" opacity="0.8"/>
+  <rect x="1" y="1" width="254" height="254" fill="none" stroke="#8a7a5a" stroke-opacity="0.3" stroke-dasharray="8 6"/>
+  <text x="128" y="236" fill="#8a7a5a" fill-opacity="0.6" font-family="monospace" font-size="9" text-anchor="middle">first days mercury — placeholder</text>
+</svg>

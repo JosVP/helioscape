@@ -1,0 +1,369 @@
+// ---------------------------------------------------------------------------
+// CultureEventCardComponent
+//
+// The card is always in the DOM — visibility is driven by opacity +
+// pointer-events via .card-overlay--visible, never @if. This keeps
+// CSS transitions smooth across open ↔ close.
+//
+// z-index ladder:
+//   orrery      0  |  hud    10  |  panels 20
+//   pause-menu 50  |  toasts 90  |  this  100
+// ---------------------------------------------------------------------------
+
+// ─── Screen-reader-only utility ──────────────────────────────────────────────
+// Provides accessible text for tag labels without affecting visual layout.
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+// ─── Host ────────────────────────────────────────────────────────────────────
+
+:host {
+  display: contents;
+}
+
+// ─── Overlay wrapper ─────────────────────────────────────────────────────────
+
+.card-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  // Overlay fade uses the spring easing so backdrop blur blends in together
+  transition: opacity var(--transition-reveal);
+
+  &--visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+// ─── Frosted-glass backdrop ──────────────────────────────────────────────────
+
+.card-overlay__backdrop {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--color-bg-base) 72%, transparent);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  cursor: default;
+}
+
+// ─── Card container ──────────────────────────────────────────────────────────
+
+.card-overlay__card {
+  position: relative; // above backdrop
+  display: flex;
+  flex-direction: row;
+  width: min(600px, 95vw);
+  min-height: 280px;
+  max-height: 80vh;
+  background: var(--color-bg-elevated);
+  // Double border: accent outer + subtle inner shine
+  border: var(--border-accent);
+  border-radius: var(--radius-lg);
+  box-shadow:
+    var(--shadow-panel),
+    0 0 0 1px color-mix(in srgb, var(--color-accent) 14%, transparent),
+    0 0 32px color-mix(in srgb, var(--color-accent) 6%, transparent);
+  overflow: hidden;
+
+  // Entrance spring — card travels up from below as overlay fades in
+  transform: translateY(20px) scale(0.96);
+  opacity: 0;
+  transition:
+    transform var(--transition-reveal),
+    opacity var(--transition-reveal);
+
+  .card-overlay--visible & {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+
+  // Native focus outline on the card element (for screen-reader / assistive tech)
+  &:focus-visible {
+    outline: none; // card has no visible focus ring; focus is managed programmatically
+  }
+}
+
+// ─── Left side: portrait ─────────────────────────────────────────────────────
+
+.card-overlay__portrait {
+  width: 35%;
+  flex-shrink: 0;
+  background: var(--color-accent-dim); // accent fill while image loads
+  border-right: var(--border-subtle);
+  overflow: hidden;
+  // Subtle inner vignette at right edge so portrait bleeds into content
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to right, transparent 60%, var(--color-bg-elevated) 100%);
+    pointer-events: none;
+  }
+
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top; // keep faces / key elements in frame
+  }
+}
+
+// ─── Right side: content ─────────────────────────────────────────────────────
+
+.card-overlay__content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: var(--space-xl) var(--space-lg) var(--space-lg);
+  overflow-y: auto;
+  min-height: 0;
+
+  // Slightly-delayed entrance so content fades in after the card shell lands
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity 0.3s ease-out 0.15s,
+    transform 0.3s ease-out 0.15s;
+
+  .card-overlay--visible & {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  // Thin custom scrollbar — stays out of the way
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-accent-dim) transparent;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--color-accent-dim);
+    border-radius: 2px;
+  }
+}
+
+// ─── Title ───────────────────────────────────────────────────────────────────
+
+.card-overlay__title {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-lg); // --text-xl is too large for Press Start 2P pixel font
+  line-height: 1.5;
+  color: var(--color-accent-glow);
+  word-break: break-word;
+  // Subtle text glow to give the headline extra weight
+  text-shadow: 0 0 24px color-mix(in srgb, var(--color-accent-glow) 40%, transparent);
+}
+
+// ─── Narrator text ───────────────────────────────────────────────────────────
+
+.card-overlay__narrator {
+  flex: 1;
+  overflow-y: auto;
+  // Gradient hint when text overflows (above the actions row)
+  mask-image: linear-gradient(to bottom, black calc(100% - 24px), transparent 100%);
+
+  p {
+    margin: 0 0 var(--space-sm);
+    font-family: var(--font-body);
+    font-size: var(--text-md);
+    line-height: 1.7;
+    color: var(--color-text-primary);
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  // Thin scrollbar matching content panel
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-accent-dim) transparent;
+
+  &::-webkit-scrollbar {
+    width: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--color-accent-dim);
+    border-radius: 2px;
+  }
+}
+
+// ─── Action row ──────────────────────────────────────────────────────────────
+
+.card-overlay__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-top: auto;
+  padding-top: var(--space-md);
+  // Separator line above actions
+  border-top: var(--border-subtle);
+}
+
+// ─── Buttons ─────────────────────────────────────────────────────────────────
+
+.card-overlay__btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  text-align: left;
+  transition: var(--transition-ui);
+  // Prevent layout shift on transform
+  will-change: transform;
+
+  &:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent-glow);
+    background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &--focused {
+    border-color: var(--color-accent);
+    color: var(--color-accent-glow);
+    background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  // Continue: right-aligned, visually distinct
+  &--continue {
+    align-self: flex-end;
+    border-color: var(--color-accent-dim);
+    color: var(--color-text-primary);
+    padding-right: var(--space-lg);
+    padding-left: var(--space-lg);
+
+    &:hover {
+      background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+    }
+  }
+
+  // Naturalist choices
+  &--naturalist {
+    border-color: color-mix(in srgb, var(--color-tag-naturalist) 50%, transparent);
+
+    &:hover,
+    &.card-overlay__btn--focused {
+      border-color: var(--color-tag-naturalist);
+      color: var(--color-tag-naturalist);
+      background: color-mix(in srgb, var(--color-tag-naturalist) 10%, transparent);
+    }
+
+    &:focus-visible {
+      outline-color: var(--color-tag-naturalist);
+    }
+  }
+
+  // Architect choices
+  &--architect {
+    border-color: color-mix(in srgb, var(--color-tag-architect) 50%, transparent);
+
+    &:hover,
+    &.card-overlay__btn--focused {
+      border-color: var(--color-tag-architect);
+      color: var(--color-tag-architect);
+      background: color-mix(in srgb, var(--color-tag-architect) 10%, transparent);
+    }
+
+    &:focus-visible {
+      outline-color: var(--color-tag-architect);
+    }
+  }
+}
+
+.card-overlay__btn-label {
+  flex: 1;
+}
+
+// ─── Tag dot ─────────────────────────────────────────────────────────────────
+
+.card-overlay__tag-icon {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  // Soft border so the dot is visible against dark button backgrounds
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4);
+
+  &--naturalist {
+    background: var(--color-tag-naturalist);
+  }
+
+  &--architect {
+    background: var(--color-tag-architect);
+    // Architect: diamond shape (rotated square) instead of circle
+    border-radius: 2px;
+    transform: rotate(45deg);
+  }
+}
+
+// ─── Responsive — portrait stacks above content on narrow viewports ──────────
+
+@media (max-width: 480px) {
+  .card-overlay__card {
+    flex-direction: column;
+    max-height: 90vh;
+  }
+
+  .card-overlay__portrait {
+    width: 100%;
+    height: 160px;
+    border-right: none;
+    border-bottom: var(--border-subtle);
+    flex-shrink: 0;
+
+    &::after {
+      background: linear-gradient(to bottom, transparent 60%, var(--color-bg-elevated) 100%);
+    }
+  }
+
+  .card-overlay__content {
+    padding: var(--space-lg) var(--space-md) var(--space-md);
+  }
+}
+

@@ -38,6 +38,7 @@ export type CultureEventTrigger =
   | { type: 'milestone_reached'; milestoneId: string }
   | { type: 'year_reached'; year: number }
   | { type: 'terraforming_choice_applied'; planet: string; choiceId: string }
+  | { type: 'terraforming_phase_complete'; planet: string; phase: number }
   | { type: 'dyson_percent_reached'; percent: number }
   | { type: 'bio_phase_complete'; planet: string; phase: string }
   | { type: 'bio_phase_collapsed'; planet: string };

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <!-- PLACEHOLDER: replace with final art -->
+  <!-- Moon refusing return: figure looking out at Earth from lunar base -->
+  <rect width="256" height="256" fill="#060810"/>
+  <rect x="0" y="170" width="256" height="86" fill="#4a4850"/>
+  <!-- viewport frame -->
+  <rect x="70" y="60" width="116" height="90" rx="8" fill="#1a2030" stroke="#6a6a8a" stroke-width="3"/>
+  <!-- Earth through viewport -->
+  <circle cx="128" cy="105" r="30" fill="#3a7ab8"/>
+  <ellipse cx="120" cy="98" rx="12" ry="8" fill="#3f7d3f"/>
+  <!-- silhouette figure -->
+  <ellipse cx="128" cy="168" rx="12" ry="6" fill="#2a2a38"/>
+  <rect x="122" y="140" width="12" height="30" fill="#2a2a38"/>
+  <circle cx="128" cy="132" r="10" fill="#2a2a38"/>
+  <rect x="1" y="1" width="254" height="254" fill="none" stroke="#5a5a6a" stroke-opacity="0.3" stroke-dasharray="8 6"/>
+  <text x="128" y="236" fill="#5a5a6a" fill-opacity="0.6" font-family="monospace" font-size="9" text-anchor="middle">moon refusing return — placeholder</text>
+</svg>

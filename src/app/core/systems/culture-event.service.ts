@@ -3,6 +3,7 @@ import type { Signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import type {
   CultureEvent,
+  CultureEventChoice,
   CultureEventEntry,
   CultureEventHistoryEntry,
 } from '@app/core/models';
@@ -123,6 +124,12 @@ export class CultureEventService {
     this.eventBus.bioPhaseCollapsed$
       .pipe(takeUntilDestroyed())
       .subscribe(({ planetId }) => this._checkBioCollapseTriggers(planetId));
+
+    this.eventBus.terraformingPhaseChanged$
+      .pipe(takeUntilDestroyed())
+      .subscribe(({ planetId, phase }) =>
+        this._checkTerraformingPhaseTriggers(planetId, phase),
+      );
   }
 
   // -------------------------------------------------------------------------
@@ -195,6 +202,21 @@ export class CultureEventService {
   }
 
   /**
+   * Applies the tag effect of a choice and closes the current event.
+   *
+   * NOTE: choice.effects[] (tech unlocks, resource bonuses, etc.) are not yet applied —
+   * pending JSON population and TechTreeService integration. See TODO.md.
+   */
+  applyChoice(choice: CultureEventChoice): void {
+    if (choice.tag === 'naturalist') {
+      this.gameState.incrementNaturalist();
+    } else if (choice.tag === 'architect') {
+      this.gameState.incrementArchitect();
+    }
+    this.closeCurrentEvent();
+  }
+
+  /**
    * Call after SaveService.hydrate() to resume a persisted event queue.
    * `_currentEntry` resets to null on every app boot; this restores the display
    * state from the restored queue.
@@ -249,6 +271,7 @@ export class CultureEventService {
     const t = eventDef.trigger;
     switch (t.type) {
       case 'terraforming_choice_applied':
+      case 'terraforming_phase_complete':
       case 'bio_phase_complete':
       case 'bio_phase_collapsed':
         return t.planet;
@@ -279,6 +302,7 @@ export class CultureEventService {
       .getAllCultureEvents()
       .filter(
         (e) =>
+          e.trigger != null &&
           e.trigger.type === 'tech_completed' &&
           e.trigger.techId === nodeId &&
           !this._isAlreadyFired(e.id),
@@ -291,6 +315,7 @@ export class CultureEventService {
       .getAllCultureEvents()
       .filter(
         (e) =>
+          e.trigger != null &&
           e.trigger.type === 'milestone_reached' &&
           e.trigger.milestoneId === milestoneId &&
           !this._isAlreadyFired(e.id),
@@ -303,6 +328,7 @@ export class CultureEventService {
       .getAllCultureEvents()
       .filter(
         (e) =>
+          e.trigger != null &&
           e.trigger.type === 'year_reached' &&
           e.trigger.year === year &&
           !this._isAlreadyFired(e.id),
@@ -319,6 +345,7 @@ export class CultureEventService {
       .getAllCultureEvents()
       .filter(
         (e) =>
+          e.trigger != null &&
           e.trigger.type === 'dyson_percent_reached' &&
           coverage >= e.trigger.percent &&
           !this._isAlreadyFired(e.id),
@@ -335,6 +362,7 @@ export class CultureEventService {
       .getAllCultureEvents()
       .filter(
         (e) =>
+          e.trigger != null &&
           e.trigger.type === 'terraforming_choice_applied' &&
           e.trigger.planet === planetId &&
           e.trigger.choiceId === choiceId &&
@@ -352,6 +380,7 @@ export class CultureEventService {
       .getAllCultureEvents()
       .filter(
         (e) =>
+          e.trigger != null &&
           e.trigger.type === 'bio_phase_complete' &&
           e.trigger.planet === planetId &&
           e.trigger.phase === phaseId &&
@@ -365,8 +394,23 @@ export class CultureEventService {
       .getAllCultureEvents()
       .filter(
         (e) =>
+          e.trigger != null &&
           e.trigger.type === 'bio_phase_collapsed' &&
           e.trigger.planet === planetId &&
+          !this._isAlreadyFired(e.id),
+      )
+      .forEach((e) => this.queueEvent(e.id, e.priority));
+  }
+
+  private _checkTerraformingPhaseTriggers(planetId: string, phase: number): void {
+    this.data
+      .getAllCultureEvents()
+      .filter(
+        (e) =>
+          e.trigger != null &&
+          e.trigger.type === 'terraforming_phase_complete' &&
+          e.trigger.planet === planetId &&
+          e.trigger.phase === phase &&
           !this._isAlreadyFired(e.id),
       )
       .forEach((e) => this.queueEvent(e.id, e.priority));

@@ -1642,9 +1642,7 @@ Left side (35% width): portrait rectangle (ColorRect placeholder for now — acc
 Right side: title (MONO xl), narrator text (BODY md, RichTextLabel equivalent — use
   <p> tags per paragraph, split on '\n\n'), choices.
 
-Typewriter effect on narrator text:
-  On event open: set text character reveal via CSS animation or character-by-character
-  append in a setInterval. Click anywhere on card skips to full text immediately.
+No Typewriter effect.
 
 No choices: show 'Continue' button.
 With choices: show one button per choice (label, tag icon).

@@ -97,6 +97,8 @@ function makeGameStateFake(opts: {
     recordEventHistory: vi.fn((entry: CultureEventHistoryEntry) => {
       historySignal.update((h) => [...h, entry]);
     }),
+    incrementNaturalist: vi.fn(),
+    incrementArchitect: vi.fn(),
   };
 }
 
@@ -695,6 +697,59 @@ describe('CultureEventService', () => {
       (service as any)._displayEvent(entry);
 
       expect(service.currentEvent()).toEqual(event);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // applyChoice
+  // -------------------------------------------------------------------------
+
+  describe('applyChoice', () => {
+    function makeChoice(tag: 'naturalist' | 'architect' | ''): import('@app/core/models').CultureEventChoice {
+      return { id: 'c1', label: 'Test', tag, effects: [] };
+    }
+
+    it('calls incrementNaturalist and closes when tag is naturalist', () => {
+      const event = makeCultureEvent({ id: 'ce_a' });
+      const entry = makeCultureEventEntry({ eventId: 'ce_a' });
+      const { service, gameState } = setup({ gameYear: 2040, queue: [entry] }, [event]);
+      const incrementNaturalistSpy = vi.spyOn(gameState, 'incrementNaturalist' as never);
+
+      (service as any)._currentEntry.set(entry);
+      service.applyChoice(makeChoice('naturalist'));
+
+      expect(incrementNaturalistSpy).toHaveBeenCalledOnce();
+      expect(gameState.shiftEventQueue).toHaveBeenCalled();
+      expect(service.isDisplayingEvent()).toBe(false);
+    });
+
+    it('calls incrementArchitect and closes when tag is architect', () => {
+      const event = makeCultureEvent({ id: 'ce_a' });
+      const entry = makeCultureEventEntry({ eventId: 'ce_a' });
+      const { service, gameState } = setup({ gameYear: 2040, queue: [entry] }, [event]);
+      const incrementArchitectSpy = vi.spyOn(gameState, 'incrementArchitect' as never);
+
+      (service as any)._currentEntry.set(entry);
+      service.applyChoice(makeChoice('architect'));
+
+      expect(incrementArchitectSpy).toHaveBeenCalledOnce();
+      expect(gameState.shiftEventQueue).toHaveBeenCalled();
+      expect(service.isDisplayingEvent()).toBe(false);
+    });
+
+    it('calls neither increment when tag is empty string and still closes', () => {
+      const event = makeCultureEvent({ id: 'ce_a' });
+      const entry = makeCultureEventEntry({ eventId: 'ce_a' });
+      const { service, gameState } = setup({ gameYear: 2040, queue: [entry] }, [event]);
+      const incrementNaturalistSpy = vi.spyOn(gameState, 'incrementNaturalist' as never);
+      const incrementArchitectSpy = vi.spyOn(gameState, 'incrementArchitect' as never);
+
+      (service as any)._currentEntry.set(entry);
+      service.applyChoice(makeChoice(''));
+
+      expect(incrementNaturalistSpy).not.toHaveBeenCalled();
+      expect(incrementArchitectSpy).not.toHaveBeenCalled();
+      expect(gameState.shiftEventQueue).toHaveBeenCalled();
     });
   });
 });

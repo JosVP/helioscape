@@ -96,11 +96,13 @@ No inline `// TODO:` comments in code - all tracking happens here to avoid dupli
 ### CultureEventService — Choice effects application
 
 - **File**: src/app/core/systems/culture-event.service.ts
-- **Location**: New `applyChoice(eventId, choiceId)` public method
-- **TODO**: Apply `CultureEventChoice.effects[]` (colonist tag increments, tech unlocks, etc.) when a choice is selected. Currently all choices in JSON have empty effects arrays.
+- **Location**: `applyChoice()` method (now exists)
+- **TODO**: Apply `CultureEventChoice.effects[]` (tech unlocks, resource bonuses, etc.) when a
+  choice is selected. Tag increment (`naturalist`/`architect`) is **already implemented**
+  (2026-06-13). Only `effects[]` TechTree application remains.
 - **Depends on**: Choice effects being populated in culture-events.json + TechTreeService integration
 - **Prompt block**: TBD (culture event choices block)
-- **Added**: 2026-06-11
+- **Added**: 2026-06-11 | **Partial**: 2026-06-13 (tag increment done)
 
 ### PlanetPanelComponent — Orbit view + city lights (Earth, Mars, Venus)
 
@@ -141,15 +143,15 @@ No inline `// TODO:` comments in code - all tracking happens here to avoid dupli
 - **Prompt block**: TBD (Planet Panel block)
 - **Added**: 2026-06-11
 
-### CultureEventCardComponent / CultureEventToastComponent — culture event UI
+### CultureEventCardComponent — DONE 2026-06-13 / CultureEventToastComponent — stub
 
-- **File**: src/app/features/culture-events/culture-event-card/culture-event-card.component.ts
-- **File**: src/app/features/culture-events/culture-event-toast/culture-event-toast.component.ts
-- **Location**: Both files (currently stubs)
-- **TODO**: Card with event text, portrait, choice buttons; Toast for non-priority events
+- **File**: src/app/features/culture-events/culture-event-card/culture-event-card.component.ts ✓ DONE
+- **File**: src/app/features/culture-events/culture-event-toast/culture-event-toast.component.ts (stub, pending)
+- **Location**: Toast is still a stub
+- **TODO**: Implement CultureEventToastComponent (non-priority events)
 - **Depends on**: GameShellComponent (done), CultureEventService
 - **Prompt block**: TBD (Culture Events UI block)
-- **Added**: 2026-06-11
+- **Added**: 2026-06-11 | **Card completed**: 2026-06-13
 
 ### PauseMenuComponent — pause menu overlay
 
