@@ -45,10 +45,21 @@
     <div class="building-info__miners">
       <div class="building-info__miners-label">
         Miners assigned: <strong>{{ assignedMiners() }}</strong>
+        &nbsp;(pool: {{ minerPoolCount() }})
       </div>
-      <!-- Miner assignment buttons available after Block 9.6 adds the mercuryMiners signal -->
-      <div class="building-info__miners-note">
-        Miner assignment available after Block 9.6.
+      <div class="building-info__miners-actions">
+        <button
+          class="building-info__btn building-info__btn--assign"
+          (click)="gameState.assignMiner(slotId()!)"
+          [disabled]="minerPoolCount() === 0"
+          aria-label="Assign miner to this slot"
+        >+ Assign</button>
+        <button
+          class="building-info__btn building-info__btn--unassign"
+          (click)="gameState.unassignMiner(slotId()!)"
+          [disabled]="assignedMiners() === 0"
+          aria-label="Remove miner from this slot"
+        >− Remove</button>
       </div>
     </div>
   }

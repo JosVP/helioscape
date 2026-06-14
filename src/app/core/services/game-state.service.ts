@@ -15,6 +15,8 @@ import type {
   TechEffect,
   CultureEventEntry,
   CultureEventHistoryEntry,
+  MercuryMinerState,
+  MercurySlotStatus,
 } from '@app/core/models';
 import { DataService } from './data.service';
 
@@ -30,6 +32,16 @@ const BASE_RP_CAPACITY = 60;
 
 /** Initial Mercury resource store. */
 const INITIAL_RESOURCES: Readonly<ResourceStore> = {
+  commonOre: 0,
+  rareMetals: 0,
+  polarVolatiles: 0,
+};
+
+/** Initial Mercury miner state. */
+const INITIAL_MINERS: Readonly<MercuryMinerState> = { poolCount: 3, assignments: {} };
+
+/** Initial resource reservations (all zero). */
+const INITIAL_RESERVATIONS: Readonly<ResourceStore> = {
   commonOre: 0,
   rareMetals: 0,
   polarVolatiles: 0,
@@ -101,6 +113,12 @@ export class GameStateService {
   private readonly _bioPhases = signal<Record<string, PlanetBioState>>({});
   private readonly _europaState = signal<EuropaState>({ ...INITIAL_EUROPA });
 
+  // Mercury RTS (Block 9.6)
+  private readonly _mercurySelectedZone = signal<string | null>(null);
+  private readonly _mercuryMiners = signal<MercuryMinerState>({ ...INITIAL_MINERS, assignments: {} });
+  private readonly _mercurySlotStates = signal<Record<string, MercurySlotStatus>>({});
+  private readonly _resourceReservations = signal<ResourceStore>({ ...INITIAL_RESERVATIONS });
+
   // -------------------------------------------------------------------------
   // Public readonly signals
   // -------------------------------------------------------------------------
@@ -141,6 +159,12 @@ export class GameStateService {
   readonly bioPhases: Signal<Record<string, PlanetBioState>> = this._bioPhases.asReadonly();
   readonly europaState: Signal<EuropaState> = this._europaState.asReadonly();
 
+  // Mercury RTS (Block 9.6)
+  readonly mercurySelectedZone: Signal<string | null> = this._mercurySelectedZone.asReadonly();
+  readonly mercuryMiners: Signal<MercuryMinerState> = this._mercuryMiners.asReadonly();
+  readonly mercurySlotStates: Signal<Record<string, MercurySlotStatus>> = this._mercurySlotStates.asReadonly();
+  readonly resourceReservations: Signal<ResourceStore> = this._resourceReservations.asReadonly();
+
   // -------------------------------------------------------------------------
   // Computed signals
   // -------------------------------------------------------------------------
@@ -176,6 +200,14 @@ export class GameStateService {
     this._activeResearch()
       .filter((t) => !t.isPaused)
       .reduce((sum, t) => sum + (this.data.getResearchTrack(t.trackId)?.rpCost ?? 0), 0)
+  );
+
+  /**
+   * Power balance for all operational Mercury grid buildings.
+   * energyDrawGw < 0 = produced; energyDrawGw > 0 = consumed.
+   */
+  readonly mercuryLocalPower = computed<{ producedGw: number; consumedGw: number }>(
+    () => this._computeMercuryLocalPower(),
   );
 
   // -------------------------------------------------------------------------
@@ -463,6 +495,12 @@ export class GameStateService {
     this._mercuryBuildings.update((buildings) =>
       buildings.map((b) => (b.id === buildingId ? { ...b, status } : b))
     );
+    if (status === 'operational') {
+      const building = this._mercuryBuildings().find((b) => b.id === buildingId);
+      if (building) {
+        this._unlockAdjacentSlots(building);
+      }
+    }
   }
 
   /** Updates the build progress (years) of a building instance by its unique id. */
@@ -640,6 +678,89 @@ export class GameStateService {
   }
 
   // -------------------------------------------------------------------------
+  // Mercury RTS mutations (Block 9.6)
+  // -------------------------------------------------------------------------
+
+  /**
+   * Sets the active starting zone and marks all slots belonging to that zone as 'available'.
+   * Slots in seedSlots and those whose col/row falls inside seedArea are unlocked.
+   */
+  selectMercuryZone(zoneId: string): void {
+    this._mercurySelectedZone.set(zoneId);
+    const zone = this.data.getMercuryStartingZone(zoneId);
+    if (!zone) return;
+
+    this._mercurySlotStates.update((states) => {
+      const next = { ...states };
+      for (const slotId of zone.seedSlots) {
+        next[slotId] = 'available';
+      }
+      const { colMin, colMax, rowMin, rowMax } = zone.seedArea;
+      const allSlots = this.data.getMercuryMapData()?.slots ?? [];
+      for (const slot of allSlots) {
+        if (
+          slot.col >= colMin &&
+          slot.col <= colMax &&
+          slot.row >= rowMin &&
+          slot.row <= rowMax
+        ) {
+          next[slot.id] = 'available';
+        }
+      }
+      return next;
+    });
+  }
+
+  /** Moves one miner from the pool to the given slot. No-op if pool is empty. */
+  assignMiner(slotId: string): void {
+    this._mercuryMiners.update((m) => {
+      if (m.poolCount <= 0) return m;
+      return {
+        poolCount: m.poolCount - 1,
+        assignments: { ...m.assignments, [slotId]: (m.assignments[slotId] ?? 0) + 1 },
+      };
+    });
+  }
+
+  /** Returns one miner from the given slot to the pool. No-op if slot has no miners. */
+  unassignMiner(slotId: string): void {
+    this._mercuryMiners.update((m) => {
+      const current = m.assignments[slotId] ?? 0;
+      if (current <= 0) return m;
+      return {
+        poolCount: m.poolCount + 1,
+        assignments: { ...m.assignments, [slotId]: current - 1 },
+      };
+    });
+  }
+
+  /** Moves one miner directly from one slot to another. No-op if source has no miners. */
+  reassignMiner(fromSlotId: string, toSlotId: string): void {
+    this._mercuryMiners.update((m) => {
+      const from = m.assignments[fromSlotId] ?? 0;
+      if (from <= 0) return m;
+      return {
+        poolCount: m.poolCount,
+        assignments: {
+          ...m.assignments,
+          [fromSlotId]: from - 1,
+          [toSlotId]: (m.assignments[toSlotId] ?? 0) + 1,
+        },
+      };
+    });
+  }
+
+  /** Sets a resource reservation amount (clamped ≥ 0). */
+  setResourceReservation(resource: keyof ResourceStore, amount: number): void {
+    this._resourceReservations.update((r) => ({ ...r, [resource]: Math.max(0, amount) }));
+  }
+
+  /** Directly sets a slot's status. */
+  setMercurySlotState(slotId: string, status: MercurySlotStatus): void {
+    this._mercurySlotStates.update((s) => ({ ...s, [slotId]: status }));
+  }
+
+  // -------------------------------------------------------------------------
   // Save / load / reset
   // -------------------------------------------------------------------------
 
@@ -673,6 +794,10 @@ export class GameStateService {
     this._cultureEventHistory.set([]);
     this._bioPhases.set({});
     this._europaState.set({ ...INITIAL_EUROPA });
+    this._mercurySelectedZone.set(null);
+    this._mercuryMiners.set({ ...INITIAL_MINERS, assignments: {} });
+    this._mercurySlotStates.set({});
+    this._resourceReservations.set({ ...INITIAL_RESERVATIONS });
     // _currentSaveSlot intentionally NOT reset — see docstring above.
   }
 
@@ -704,6 +829,10 @@ export class GameStateService {
     this._cultureEventHistory.set(state.cultureEventHistory);
     this._bioPhases.set(state.bioPhases);
     this._europaState.set(state.europaState);
+    this._mercurySelectedZone.set(state.mercurySelectedZone ?? null);
+    this._mercuryMiners.set(state.mercuryMiners ?? { ...INITIAL_MINERS, assignments: {} });
+    this._mercurySlotStates.set(state.mercurySlotStates ?? {});
+    this._resourceReservations.set(state.resourceReservations ?? { ...INITIAL_RESERVATIONS });
   }
 
   /** Snapshots all signal values into a serialisable plain object. */
@@ -737,6 +866,10 @@ export class GameStateService {
       cultureEventHistory: this._cultureEventHistory(),
       bioPhases: this._bioPhases(),
       europaState: this._europaState(),
+      mercurySelectedZone: this._mercurySelectedZone(),
+      mercuryMiners: this._mercuryMiners(),
+      mercurySlotStates: this._mercurySlotStates(),
+      resourceReservations: this._resourceReservations(),
     };
   }
 
@@ -783,5 +916,48 @@ export class GameStateService {
       },
       {} as Record<string, PlanetState>
     );
+  }
+
+  /**
+   * Computes Mercury local power from operational grid buildings.
+   * Called by the `mercuryLocalPower` computed — uses `this.data` injected at construction.
+   */
+  private _computeMercuryLocalPower(): { producedGw: number; consumedGw: number } {
+    const operationalBuildings = this._mercuryBuildings().filter(
+      (b) => b.status === 'operational',
+    );
+    let producedGw = 0;
+    let consumedGw = 0;
+    for (const placed of operationalBuildings) {
+      const def = this.data.getMercuryBuilding(placed.buildingId);
+      if (!def) continue;
+      if (def.energyDrawGw < 0) {
+        producedGw += Math.abs(def.energyDrawGw);
+      } else {
+        consumedGw += def.energyDrawGw;
+      }
+    }
+    return { producedGw, consumedGw };
+  }
+
+  /**
+   * Transitions every 'locked' slot adjacent to the given placed building to 'available'.
+   * Called by `updateBuildingStatus()` when a building becomes operational.
+   */
+  private _unlockAdjacentSlots(building: PlacedBuilding): void {
+    const slot = this.data
+      .getMercuryMapData()
+      ?.slots.find((s) => s.col === building.col && s.row === building.row);
+    if (!slot || slot.adjacentTo.length === 0) return;
+
+    this._mercurySlotStates.update((states) => {
+      const next = { ...states };
+      for (const adjId of slot.adjacentTo) {
+        if ((next[adjId] ?? 'locked') === 'locked') {
+          next[adjId] = 'available';
+        }
+      }
+      return next;
+    });
   }
 }

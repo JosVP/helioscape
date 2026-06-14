@@ -22,7 +22,7 @@ import { GameStateService } from '@app/core/services/game-state.service';
 })
 export class BuildingInfoComponent {
   private readonly data = inject(DataService);
-  private readonly gameState = inject(GameStateService);
+  protected readonly gameState = inject(GameStateService);
 
   /** The static building definition id (MercuryBuilding.id). */
   readonly buildingId = input.required<string>();
@@ -55,14 +55,11 @@ export class BuildingInfoComponent {
     );
   });
 
-  readonly assignedMiners = computed<number>(() => {
-    // NOTE: depends on mercuryMiners signal (Block 9.6) — guard with optional chaining
-    // until that signal exists. When Block 9.6 lands, replace this with the typed accessor:
-    // this.gameState.mercuryMiners().assignments[this.slotId() ?? ''] ?? 0
-    const gs = this.gameState as unknown as Record<string, unknown>;
-    const miners = gs['mercuryMiners'];
-    if (typeof miners !== 'function') return 0;
-    const state = (miners as () => { assignments?: Record<string, number> } | null)();
-    return state?.assignments?.[this.slotId() ?? ''] ?? 0;
-  });
+  readonly assignedMiners = computed<number>(
+    () => this.gameState.mercuryMiners().assignments[this.slotId() ?? ''] ?? 0,
+  );
+
+  readonly minerPoolCount = computed<number>(
+    () => this.gameState.mercuryMiners().poolCount,
+  );
 }

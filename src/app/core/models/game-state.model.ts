@@ -2,6 +2,25 @@ import type { PlanetState } from './planet.model';
 import type { ActiveResearchTrack } from './tech-tree.model';
 import type { CultureEventEntry, CultureEventHistoryEntry } from './culture-event.model';
 
+// ---------------------------------------------------------------------------
+// Mercury RTS types
+// ---------------------------------------------------------------------------
+
+export type MercurySlotStatus = 'locked' | 'available' | 'building' | 'operational';
+
+export interface MercuryMinerState {
+  poolCount: number;
+  assignments: Record<string, number>;
+}
+
+/** Infrastructure path (empty for playtest; drawn in a future block). */
+export interface MercuryPath {
+  id: string;
+  segments: { col: number; row: number }[];
+}
+
+// ---------------------------------------------------------------------------
+
 /**
  * The full serializable game state — what gets saved/loaded.
  * This is the shape of a complete save file.
@@ -38,6 +57,11 @@ export interface SerializedGameState {
   bioPhases: Record<string, PlanetBioState>;
   europaState: EuropaState;
   currentSaveSlot: number;
+  // Mercury RTS (Block 9.6)
+  mercurySelectedZone: string | null;
+  mercuryMiners: MercuryMinerState;
+  mercurySlotStates: Record<string, MercurySlotStatus>;
+  resourceReservations: ResourceStore;
 }
 
 /**

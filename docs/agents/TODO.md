@@ -340,22 +340,14 @@ No inline `// TODO:` comments in code - all tracking happens here to avoid dupli
 - **Prompt block**: TBD (post-playtest)
 - **Added**: 2026-06-13
 
-### GameStateService — Mercury RTS signals
+### GameStateService — Mercury RTS paths signal (post-playtest)
 
 - **File**: `src/app/core/services/game-state.service.ts`
-- **Location**: New signals + mutations
-- **TODO**: Add the following to GameStateService for the Mercury RTS view:
-  - `mercurySelectedZone: Signal<string | null>` — null = zone not yet chosen
-  - `mercuryMiners: Signal<MercuryMinerState>` — { poolCount: number, assignments: Record<slotId, number> }
-  - `resourceReservations: Signal<ResourceStore>` — player-set minimum reserves
-  - `mercuryPaths: Signal<MercuryPath[]>` — empty for playtest; infrastructure path drawing (post-playtest)
-  - `mercuryLocalPower: Signal<{ producedGw: number; consumedGw: number }>` — computed from operational Mercury buildings
-  - `mercurySlotStates: Signal<Record<string, MercurySlotState>>` — LOCKED/AVAILABLE/BUILDING/OPERATIONAL per slot
-  Mutations: `selectMercuryZone(zoneId)`, `assignMiner(slotId)`, `unassignMiner(slotId)`, `reassignMiner(fromSlotId, toSlotId)`, `setResourceReservation(resource, amount)`, `setMercurySlotState(slotId, state)`
-  Add all new fields to `SerializedGameState` and `serialise()`/`hydrate()`.
-- **Depends on**: `mercury-map.json` and `MercuryMapData` interfaces
-- **Prompt block**: Block 9.6
-- **Added**: 2026-06-13
+- **Location**: New signal + serialisation
+- **TODO**: Add `mercuryPaths: Signal<MercuryPath[]>` — empty for playtest; infrastructure path drawing. `MercuryPath` type already exists in `game-state.model.ts` (Block 9.6). Add signal, serialise/hydrate, and path-drawing UI when path mechanic is designed.
+- **Depends on**: Path mechanic design (post-playtest)
+- **Prompt block**: TBD (post-playtest)
+- **Added**: 2026-06-14
 
 ### CultureEventCardComponent — Click protection (quick fix)
 
@@ -392,6 +384,11 @@ No inline `// TODO:` comments in code - all tracking happens here to avoid dupli
 ## Completed TODOs
 
 _(Moved here when implemented, kept for history)_
+
+### ✅ GameStateService — Mercury RTS signals
+- **Completed**: 2026-06-14
+- **Implemented in**: `src/app/core/services/game-state.service.ts`, `src/app/core/models/game-state.model.ts`
+- **Notes**: Added `MercurySlotStatus`, `MercuryMinerState`, `MercuryPath` types. Added 4 private signals (`_mercurySelectedZone`, `_mercuryMiners`, `_mercurySlotStates`, `_resourceReservations`), 4 public readonly signals, `mercuryLocalPower` computed, 6 mutation methods (`selectMercuryZone`, `assignMiner`, `unassignMiner`, `reassignMiner`, `setResourceReservation`, `setMercurySlotState`), `_unlockAdjacentSlots` private helper wired to `updateBuildingStatus`. Serialise/hydrate/reset patched. `building-info.component.ts/.html` updated with typed signals and assign/unassign buttons (Block 9.5b patch). `mercuryPaths` deferred to post-playtest (new TODO above).
 
 ### ✅ HudComponent — full HUD implementation
 - **Completed**: 2026-06-11
