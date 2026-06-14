@@ -566,9 +566,10 @@ export class MercuryGridComponent implements AfterViewInit, OnDestroy {
     }
 
     // Sprite for a 2×2 building: draw centred over the footprint.
-    // The visual centre of [[0,0],[1,0],[0,1],[1,1]] in screen space is
-    // offset +HALF_W horizontally and +HALF_H vertically from anchor screen pos.
-    const footprintCx = cx + HALF_W;
+    // The visual centre of [[0,0],[1,0],[0,1],[1,1]] in screen space:
+    //   avg-x = cx + (HALF_W - HALF_W + 0) / 4 * 4 = cx  (the ±HALF_W terms cancel)
+    //   avg-y = cy + HALF_H
+    const footprintCx = cx;
     const footprintCy = cy + HALF_H;
     this.ctx.drawImage(img, footprintCx - 32, footprintCy - 64, 64, 64);
   }
@@ -580,8 +581,8 @@ export class MercuryGridComponent implements AfterViewInit, OnDestroy {
     timestamp: number,
     reducedMotion: boolean,
   ): void {
-    // Centre over the 2×2 footprint (same offset as sprite)
-    const barCx = cx + HALF_W;
+    // Centre over the 2×2 footprint (same offset as sprite — see drawBuildingSprite)
+    const barCx = cx;
     const barCy = cy + HALF_H + 8;
     const barW = 48;
     const barH = 6;

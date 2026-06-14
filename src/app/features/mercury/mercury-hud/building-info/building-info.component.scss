@@ -1,0 +1,115 @@
+:host {
+  display: block;
+}
+
+.building-info {
+  position: absolute;
+  right: 290px;
+  top: var(--space-3);
+  width: 240px;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  z-index: 30;
+  box-shadow: var(--shadow-md);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-2);
+  }
+
+  &__name {
+    font-weight: 600;
+    font-size: var(--font-size-base);
+    color: var(--color-text-strong);
+  }
+
+  &__close {
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 var(--space-1);
+
+    &:hover {
+      color: var(--color-text);
+    }
+  }
+
+  &__status {
+    margin-bottom: var(--space-2);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+
+    &--building {
+      background: color-mix(in srgb, var(--color-warning, #f59e0b) 15%, transparent);
+      color: var(--color-warning, #f59e0b);
+    }
+
+    &--operational {
+      background: color-mix(in srgb, var(--color-success, #22c55e) 15%, transparent);
+      color: var(--color-success, #22c55e);
+    }
+  }
+
+  &__desc {
+    margin-bottom: var(--space-2);
+    color: var(--color-text-muted);
+    line-height: 1.4;
+  }
+
+  &__power {
+    margin-bottom: var(--space-1);
+    color: var(--color-text-muted);
+  }
+
+  &__effect {
+    margin-bottom: var(--space-1);
+    color: var(--color-text-muted);
+  }
+
+  &__mine {
+    margin-top: var(--space-3);
+    padding-top: var(--space-2);
+    border-top: 1px solid var(--color-border);
+  }
+
+  &__mine-title {
+    font-weight: 600;
+    margin-bottom: var(--space-1);
+    color: var(--color-text-strong);
+  }
+
+  &__mine-ratios {
+    color: var(--color-text-muted);
+  }
+
+  &__miners {
+    margin-top: var(--space-3);
+    padding-top: var(--space-2);
+    border-top: 1px solid var(--color-border);
+  }
+
+  &__miners-label {
+    margin-bottom: var(--space-1);
+
+    strong {
+      color: var(--color-text-strong);
+    }
+  }
+
+  &__miners-note {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    font-style: italic;
+  }
+}

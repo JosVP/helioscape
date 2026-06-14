@@ -35,4 +35,9 @@ export class MercuryQueueBarComponent {
       })
       .filter((item): item is EnrichedQueueItem => item !== null);
   });
+
+  /** camelCase component id → kebab-case filename, e.g. precipitationEngine → precipitation-engine */
+  getComponentIconPath(componentId: string): string {
+    return componentId.replace(/([A-Z])/g, (m) => `-${m.toLowerCase()}`) + '.svg';
+  }
 }

@@ -38,7 +38,87 @@
     [id]="'sidebar-panel-' + activeTab()"
     [attr.aria-label]="activeTab() + ' tab panel'">
 
-    @if (filteredBuildings().length === 0) {
+    @if (activeTab() === 'space') {
+      <!-- Planet target picker -->
+      <div class="mercury-sidebar__planet-picker">
+        <span class="mercury-sidebar__planet-label">Target:</span>
+        @for (p of availablePlanets; track p.id) {
+          <button
+            class="mercury-sidebar__planet-btn"
+            [class.mercury-sidebar__planet-btn--active]="targetPlanet() === p.id"
+            (click)="targetPlanet.set(p.id)"
+            [attr.aria-pressed]="targetPlanet() === p.id">
+            {{ p.label }}
+          </button>
+        }
+      </div>
+
+      <!-- Current resource stock -->
+      <div class="mercury-sidebar__resources" aria-label="Current Mercury resources">
+        <span class="mercury-sidebar__resource mercury-sidebar__resource--ore"
+              title="Common Ore">⬡ {{ mercuryResources().commonOre }}</span>
+        <span class="mercury-sidebar__resource mercury-sidebar__resource--metals"
+              title="Rare Metals">◆ {{ mercuryResources().rareMetals }}</span>
+        <span class="mercury-sidebar__resource mercury-sidebar__resource--vol"
+              title="Polar Volatiles">❄ {{ mercuryResources().polarVolatiles }}</span>
+      </div>
+
+      @for (c of filteredComponents(); track c.id) {
+        @let blocked = queueBlockReason(c);
+        <div class="mercury-sidebar__card"
+             [class.mercury-sidebar__card--locked]="!!blocked"
+             [attr.title]="blocked">
+          <div class="mercury-sidebar__card-icon" aria-hidden="true">
+            <img [src]="getComponentIconPath(c.id)"
+                 [alt]="c.displayName + ' icon'"
+                 class="mercury-sidebar__card-icon-img"
+                 width="48" height="48" />
+          </div>
+          <div class="mercury-sidebar__card-body">
+            <div class="mercury-sidebar__card-name">{{ c.displayName }}</div>
+            <div class="mercury-sidebar__card-stats">
+              <span class="mercury-sidebar__card-time">{{ c.buildTimeYears }}yr</span>
+            </div>
+            <div class="mercury-sidebar__card-cost">
+              @if (c.cost.rareMetals > 0) {
+                <span class="mercury-sidebar__card-cost-item mercury-sidebar__card-cost-item--metals"
+                      [class.mercury-sidebar__card-cost-item--short]="mercuryResources().rareMetals < c.cost.rareMetals">
+                  <span class="mercury-sidebar__card-cost-dot"></span>{{ c.cost.rareMetals }} metals
+                </span>
+              }
+              @if (c.cost.polarVolatiles > 0) {
+                <span class="mercury-sidebar__card-cost-item mercury-sidebar__card-cost-item--vol"
+                      [class.mercury-sidebar__card-cost-item--short]="mercuryResources().polarVolatiles < c.cost.polarVolatiles">
+                  <span class="mercury-sidebar__card-cost-dot"></span>{{ c.cost.polarVolatiles }} vol
+                </span>
+              }
+            </div>
+            @if (blocked) {
+              <div class="mercury-sidebar__blocked-reason">{{ blocked }}</div>
+            }
+            <button
+              class="mercury-sidebar__queue-btn"
+              [disabled]="!!blocked"
+              [attr.aria-label]="'Queue ' + c.displayName + ' for ' + targetPlanet()"
+              [attr.aria-describedby]="blocked ? 'blocked-' + c.id : null"
+              (click)="queueComponent(c.id)">
+              Queue → {{ targetPlanet() | titlecase }}
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- DEV: give resources for testing — remove before release -->
+      <div class="mercury-sidebar__dev-section">
+        <div class="mercury-sidebar__dev-label">⚠ DEV</div>
+        <button class="mercury-sidebar__dev-btn" (click)="devGiveResources()"
+                title="Adds 500 of each resource for testing">
+          +500 all resources
+        </button>
+      </div>
+    }
+
+    @if (activeTab() !== 'space' && filteredBuildings().length === 0) {
       <div class="mercury-sidebar__empty">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
              aria-hidden="true" class="mercury-sidebar__empty-icon">

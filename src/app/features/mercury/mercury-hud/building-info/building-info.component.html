@@ -1,0 +1,56 @@
+<div class="building-info" role="dialog" aria-modal="true"
+     [attr.aria-label]="'Building info: ' + (building()?.displayName ?? '')">
+
+  <div class="building-info__header">
+    <span class="building-info__name">{{ building()?.displayName }}</span>
+    <button class="building-info__close" (click)="closed.emit()" aria-label="Close">×</button>
+  </div>
+
+  @if (placed(); as p) {
+    @if (p.status === 'building') {
+      <div class="building-info__status building-info__status--building">
+        Under construction — {{ (p.buildProgressYears / p.totalBuildYears * 100) | number:'1.0-0' }}%
+      </div>
+    } @else {
+      <div class="building-info__status building-info__status--operational">Operational</div>
+    }
+  }
+
+  @if (building(); as b) {
+    <div class="building-info__desc">{{ b.description }}</div>
+
+    @if (b.energyDrawGw !== 0) {
+      <div class="building-info__power">
+        Power:
+        {{ b.energyDrawGw < 0 ? '+' + (-b.energyDrawGw) : b.energyDrawGw }} GW
+        {{ b.energyDrawGw < 0 ? '(produced)' : '(consumed)' }}
+      </div>
+    }
+
+    @for (eff of b.effects; track eff.type) {
+      @if (eff.type === 'resource_rate') {
+        <div class="building-info__effect">+{{ eff.rate }}/yr {{ eff.resourceId }}</div>
+      }
+    }
+  }
+
+  @if (isRefinery() && miningInfo(); as mine) {
+    <div class="building-info__mine">
+      <div class="building-info__mine-title">Mining location ore ratios</div>
+      <div class="building-info__mine-ratios">{{ mine.oreRatioDisplay }}</div>
+    </div>
+  }
+
+  @if (isRefinery()) {
+    <div class="building-info__miners">
+      <div class="building-info__miners-label">
+        Miners assigned: <strong>{{ assignedMiners() }}</strong>
+      </div>
+      <!-- Miner assignment buttons available after Block 9.6 adds the mercuryMiners signal -->
+      <div class="building-info__miners-note">
+        Miner assignment available after Block 9.6.
+      </div>
+    </div>
+  }
+
+</div>

@@ -5,6 +5,14 @@
       [selectedBuildingId]="selectedBuildingId()"
       (tileClicked)="onTileClicked($event)"
     />
+    @if (activeBuildingInfo(); as info) {
+      <app-mercury-building-info
+        [buildingId]="info.buildingId"
+        [placedId]="info.placedId"
+        [slotId]="info.slotId"
+        (closed)="activeBuildingInfo.set(null)"
+      />
+    }
   </div>
 
   <aside class="mercury__sidebar" aria-label="Mercury controls">
