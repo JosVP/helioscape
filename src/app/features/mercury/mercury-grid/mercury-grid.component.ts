@@ -35,31 +35,33 @@ import {
 // ---------------------------------------------------------------------------
 // Grid constants — 128×128 fully playable game grid.
 //
-// The camera is clamped to an inner 64×64 zone (VIEW_OFFSET … VIEW_LAST) so
-// the viewport corners always land on real gameplay tiles.  The outer 32-tile
-// buffer on every side is never reachable by camera scroll, but every tile in
-// the full 128×128 grid is a valid build target.
+// The camera is clamped to an inner 44-wide × 64-tall zone centred in the
+// 128×128 grid. Using fewer columns than rows creates a landscape-friendly
+// isometric diamond. Every tile in the full 128×128 grid is a valid build
+// target; the outer buffer tiles are simply never reachable by camera scroll.
 // ---------------------------------------------------------------------------
 
 const GRID_COLS = 128;
 const GRID_ROWS = 128;
 const ORIGIN_Y  = 80;
 
-// Inner 64×64 camera-accessible zone centred in the 128×128 grid.
-const VIEW_OFFSET = 32;                          // inner zone starts at col/row 32
-const VIEW_SIZE   = 64;                          // inner zone is 64×64 tiles
-const VIEW_LAST   = VIEW_OFFSET + VIEW_SIZE - 1; // = 95
+// Inner camera zone: 44 cols × 64 rows, centred in the 128×128 grid.
+const VIEW_COLS       = 44;
+const VIEW_ROWS       = 64;
+const VIEW_COL_OFFSET = (GRID_COLS - VIEW_COLS) / 2;     // = 42
+const VIEW_ROW_OFFSET = (GRID_ROWS - VIEW_ROWS) / 2;     // = 32
+const VIEW_COL_LAST   = VIEW_COL_OFFSET + VIEW_COLS - 1; // = 85
+const VIEW_ROW_LAST   = VIEW_ROW_OFFSET + VIEW_ROWS - 1; // = 95
 
-// Horizontal half-span of the inner zone (identical to the old 64×64 grid span).
-const VIEW_HALF_W = (VIEW_SIZE + VIEW_SIZE - 2) / 2 * HALF_W;  // 63 × 32 = 2016 px
+// Horizontal half-span of the inner zone in draw-space (symmetric).
+// Leftmost:  tile (VIEW_COL_OFFSET, VIEW_ROW_LAST)  → dx = (42−95)*32 = −1696 px
+// Rightmost: tile (VIEW_COL_LAST,   VIEW_ROW_OFFSET) → dx = (85−32)*32 = +1696 px
+const VIEW_HALF_W = (VIEW_COL_LAST - VIEW_ROW_OFFSET) * HALF_W;  // 53 × 32 = 1696 px
 
-// Draw-space Y of the top vertex of the northernmost inner tile (32,32).
-const VIEW_TOP_Y    = ORIGIN_Y + (VIEW_OFFSET + VIEW_OFFSET - 1) * HALF_H; // 1088 px
-// Draw-space Y of the bottom vertex of the southernmost inner tile (95,95).
-const VIEW_BOTTOM_Y = ORIGIN_Y + (VIEW_LAST + VIEW_LAST + 1) * HALF_H;     // 3136 px
+// Draw-space Y of the top/bottom vertices of the inner zone.
+const VIEW_TOP_Y    = ORIGIN_Y + (VIEW_COL_OFFSET + VIEW_ROW_OFFSET) * HALF_H - HALF_H;  // 1248 px
+const VIEW_BOTTOM_Y = ORIGIN_Y + (VIEW_COL_LAST   + VIEW_ROW_LAST)   * HALF_H + HALF_H;  // 2976 px
 
-// Render grid = full 128×128 (no extra filler border needed; the 32-tile buffer
-// around the inner zone is more than enough to fill any viewport corner).
 const RENDER_COLS = GRID_COLS;
 const RENDER_ROWS = GRID_ROWS;
 
@@ -83,7 +85,6 @@ const TERRAIN_COLORS: Record<TerrainType, { fill: string; stroke: string }> = {
 const SLOT_TINTS: Partial<Record<string, string>> = {
   mining_location: '#ffcc44',
   refinery:        '#88bbff',
-  solar_array:     '#ffee88',
   mass_driver:     '#ff8844',
   fusion_reactor:  '#cc44ff',
 };
@@ -163,7 +164,9 @@ export class MercuryGridComponent implements AfterViewInit, OnDestroy {
   private edgeScrollY = -Infinity;
 
   private static readonly EDGE_ZONE  = 200;  // px from edge that activates scroll
-  private static readonly EDGE_SPEED = 10;   // px per RAF frame
+  private static readonly EDGE_SPEED = 10;   // px per RAF frame (perceived screen px)
+  /** Horizontal scale factor — 1.0 = no compression. Reduce below 1 to compress map width. */
+  private static readonly SCALE_X    = 1.0;
 
   private resizeObserver: ResizeObserver | null = null;
 
@@ -252,12 +255,9 @@ export class MercuryGridComponent implements AfterViewInit, OnDestroy {
       this.viewH = canvas.height;
     }
 
-    // Start pan centred on the inner 64×64 zone.
+    // Start at the top of the inner zone so polar ice is immediately visible.
     this.panX = 0;
-    const innerCenterY = Math.floor((VIEW_TOP_Y + VIEW_BOTTOM_Y) / 2);
-    this.panY = this.viewH > 0
-      ? Math.floor(this.viewH / 2) - innerCenterY
-      : -innerCenterY;
+    this.panY = -VIEW_TOP_Y;
     this.clampPan();
 
     canvas.addEventListener('mousemove', this.onMouseMoveBound);
@@ -292,17 +292,16 @@ export class MercuryGridComponent implements AfterViewInit, OnDestroy {
   // ---------------------------------------------------------------------------
 
   private clampPan(): void {
-    // Horizontal: keep inner zone's left/right vertices within the viewport.
-    const maxPanX = Math.max(0, VIEW_HALF_W - this.viewW / 2);
+    // Horizontal: the map is rendered with SCALE_X compression centred on vw/2,
+    // so the effective viewport half-width in draw-space is viewW / (2 * SCALE_X).
+    const scaleX  = MercuryGridComponent.SCALE_X;
+    const maxPanX = Math.max(0, VIEW_HALF_W - this.viewW / (2 * scaleX));
     this.panX = Math.max(-maxPanX, Math.min(maxPanX, this.panX));
 
     // Vertical: clamp so camera only shows the inner VIEW_SIZE×VIEW_SIZE zone.
-    //   lo = panY that puts inner zone BOTTOM at screen bottom (max pan up).
-    //   hi = panY that puts inner zone TOP    at screen top    (max pan down).
     const lo = this.viewH - VIEW_BOTTOM_Y;
     const hi = -VIEW_TOP_Y;
     if (lo >= hi) {
-      // Inner zone fits entirely in viewport — centre it.
       this.panY = Math.round((lo + hi) / 2);
     } else {
       this.panY = Math.max(lo, Math.min(hi, this.panY));
@@ -322,8 +321,8 @@ export class MercuryGridComponent implements AfterViewInit, OnDestroy {
     if (!isFinite(this.edgeScrollX)) return;
 
     const zone  = MercuryGridComponent.EDGE_ZONE;
-    const hSpeed = MercuryGridComponent.EDGE_SPEED;
-    const vSpeed = MercuryGridComponent.EDGE_SPEED / 1.5; // tile height is half the width, so slow vertical scroll a bit to keep perceived speed consistent in both axes.
+    const hSpeed = MercuryGridComponent.EDGE_SPEED * (HALF_W / HALF_H) / MercuryGridComponent.SCALE_X;
+    const vSpeed = MercuryGridComponent.EDGE_SPEED;
     let moved = false;
 
     
@@ -367,9 +366,13 @@ export class MercuryGridComponent implements AfterViewInit, OnDestroy {
     this.ctx.fillStyle = '#1a1520';
     this.ctx.fillRect(0, 0, vw, vh);
 
-    // Apply pan translation for the scene.
+    // Apply pan translation + horizontal scale centred on vw/2.
+    // Screen x of tile (col,row) = vw/2 + SCALE_X*(panX + (col-row)*HALF_W)
+    // Screen y of tile (col,row) = panY + ORIGIN_Y + (col+row)*HALF_H  (unchanged)
     this.ctx.save();
-    this.ctx.translate(this.panX, this.panY);
+    this.ctx.translate(vw / 2, 0);
+    this.ctx.scale(MercuryGridComponent.SCALE_X, 1);
+    this.ctx.translate(-vw / 2 + this.panX, this.panY);
 
     // Draw all tiles back→front (includes border tiles that cover viewport corners)
     for (const { col, row } of ALL_TILES) {
@@ -693,8 +696,10 @@ export class MercuryGridComponent implements AfterViewInit, OnDestroy {
   /** Recalculate the hovered tile from a viewport pixel position. */
   private updateHoverFromScreenPos(screenX: number, screenY: number): void {
     const originX = this.viewW / 2;
-    // Convert viewport pixel → draw-space by subtracting pan offset.
-    const { col, row } = toGrid(screenX - this.panX, screenY - this.panY, originX, ORIGIN_Y);
+    // Un-apply the horizontal scale centred on vw/2 before toGrid.
+    const scaleX  = MercuryGridComponent.SCALE_X;
+    const drawX   = originX + (screenX - originX) / scaleX;
+    const { col, row } = toGrid(drawX - this.panX, screenY - this.panY, originX, ORIGIN_Y);
     if (!isInBounds(col, row, GRID_COLS, GRID_ROWS)) {
       this.hoverTile = null;
       this._hoveredTileInfo.set(null);
@@ -727,7 +732,9 @@ export class MercuryGridComponent implements AfterViewInit, OnDestroy {
 
   private onClick(e: MouseEvent): void {
     const originX = this.viewW / 2;
-    const { col, row } = toGrid(e.offsetX - this.panX, e.offsetY - this.panY, originX, ORIGIN_Y);
+    const scaleX  = MercuryGridComponent.SCALE_X;
+    const drawX   = originX + (e.offsetX - originX) / scaleX;
+    const { col, row } = toGrid(drawX - this.panX, e.offsetY - this.panY, originX, ORIGIN_Y);
     if (!isInBounds(col, row, GRID_COLS, GRID_ROWS)) return;
 
     const buildings = this.gameState.mercuryBuildings();
@@ -760,7 +767,7 @@ export class MercuryGridComponent implements AfterViewInit, OnDestroy {
           this.freshlyPlaced.set(`${t.col},${t.row}`, now);
         }
         this._announcementText.set(
-          `${buildingData.displayName} construction started at column ${col - VIEW_OFFSET + 1}, row ${row - VIEW_OFFSET + 1}.`,
+          `${buildingData.displayName} construction started at column ${col - VIEW_COL_OFFSET + 1}, row ${row - VIEW_ROW_OFFSET + 1}.`,
         );
       }
     }
@@ -778,10 +785,10 @@ export class MercuryGridComponent implements AfterViewInit, OnDestroy {
     const move = moves[e.key];
     if (move) {
       e.preventDefault();
-      const current = this.hoverTile ?? { col: Math.floor((VIEW_OFFSET + VIEW_LAST) / 2), row: Math.floor((VIEW_OFFSET + VIEW_LAST) / 2) };
+      const current = this.hoverTile ?? { col: Math.floor((VIEW_COL_OFFSET + VIEW_COL_LAST) / 2), row: Math.floor((VIEW_ROW_OFFSET + VIEW_ROW_LAST) / 2) };
       const next = {
-        col: Math.max(VIEW_OFFSET, Math.min(VIEW_LAST, current.col + move.dc)),
-        row: Math.max(VIEW_OFFSET, Math.min(VIEW_LAST, current.row + move.dr)),
+        col: Math.max(VIEW_COL_OFFSET, Math.min(VIEW_COL_LAST, current.col + move.dc)),
+        row: Math.max(VIEW_ROW_OFFSET, Math.min(VIEW_ROW_LAST, current.row + move.dr)),
       };
       this.hoverTile = next;
       const terrain = this.getTerrainAt(next.col, next.row);
@@ -829,7 +836,7 @@ export class MercuryGridComponent implements AfterViewInit, OnDestroy {
               this.freshlyPlaced.set(`${t.col},${t.row}`, now);
             }
             this._announcementText.set(
-              `${buildingData.displayName} construction started at column ${col - VIEW_OFFSET + 1}, row ${row - VIEW_OFFSET + 1}.`,
+              `${buildingData.displayName} construction started at column ${col - VIEW_COL_OFFSET + 1}, row ${row - VIEW_ROW_OFFSET + 1}.`,
             );
           }
         }
@@ -842,8 +849,10 @@ export class MercuryGridComponent implements AfterViewInit, OnDestroy {
   // Template helpers
   // ---------------------------------------------------------------------------
 
-  /** Convert an internal grid coord to the 1-based user-facing display coord. */
-  displayCoord(val: number): number { return val - VIEW_OFFSET + 1; }
+  /** Convert an internal col coordinate to the 1-based user-facing display col. */
+  displayCol(col: number): number { return col - VIEW_COL_OFFSET + 1; }
+  /** Convert an internal row coordinate to the 1-based user-facing display row. */
+  displayRow(row: number): number { return row - VIEW_ROW_OFFSET + 1; }
 
   terrainLabel(terrain: string): string {
     const labels: Record<string, string> = {
@@ -859,7 +868,6 @@ export class MercuryGridComponent implements AfterViewInit, OnDestroy {
     const labels: Record<string, string> = {
       mining_location: 'Mining Location',
       refinery:        'Refinery Slot',
-      solar_array:     'Solar Array Slot',
       mass_driver:     'Mass Driver Site',
       fusion_reactor:  'Fusion Reactor Site',
     };

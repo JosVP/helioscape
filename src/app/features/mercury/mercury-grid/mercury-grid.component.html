@@ -26,8 +26,8 @@
         <span class="mercury-grid__status-sep" aria-hidden="true">&mdash;</span>
         <span class="mercury-grid__status-building">{{ info.buildingName }}</span>
       }
-      <span class="mercury-grid__status-coords" aria-label="Column {{ displayCoord(info.col) }}, row {{ displayCoord(info.row) }}">
-        {{ displayCoord(info.col) }}, {{ displayCoord(info.row) }}
+      <span class="mercury-grid__status-coords" aria-label="Column {{ displayCol(info.col) }}, row {{ displayRow(info.row) }}">
+        {{ displayCol(info.col) }}, {{ displayRow(info.row) }}
       </span>
       @if (info.slotId) {
         <span class="mercury-grid__status-sep" aria-hidden="true">&bull;</span>
