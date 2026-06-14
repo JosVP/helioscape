@@ -7,12 +7,13 @@ import {
 } from '@angular/core';
 import { GameStateService } from '@app/core/services/game-state.service';
 import { MercuryGridComponent } from './mercury-grid/mercury-grid.component';
+import { MercurySidebarComponent } from './mercury-hud/sidebar/sidebar.component';
 
 @Component({
   selector: 'app-mercury',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [MercuryGridComponent],
+  imports: [MercuryGridComponent, MercurySidebarComponent],
   templateUrl: './mercury.component.html',
   styleUrl: './mercury.component.scss',
 })

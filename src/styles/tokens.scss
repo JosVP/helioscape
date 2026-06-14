@@ -63,6 +63,44 @@
   --shadow-title: 0 0 30px rgba(232, 160, 48, 0.6), 0 0 80px rgba(232, 160, 48, 0.15);
   --shadow-btn-glow: 0 0 18px rgba(232, 160, 48, 0.28);
   --shadow-panel: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.06);
+
+  // ─── Extended UI tokens (Mercury HUD + component system) ──────────────────
+
+  // Surface depth system (for layered UI panels)
+  --color-surface-1: var(--color-bg-surface);      // #161618 — base panels
+  --color-surface-2: var(--color-bg-elevated);     // #1e1e22 — sidebar, overlays
+  --color-surface-3: #242428;                      // raised elements, hover states
+  --color-surface-4: #2c2c30;                      // tooltips, selected states
+
+  // Borders
+  --color-border: rgba(255, 255, 255, 0.08);       // default UI border
+  --color-border-strong: rgba(255, 255, 255, 0.16); // hover / focus border
+
+  // Text extensions
+  --color-text-muted: #4a4440;                     // dimmer than secondary — placeholders
+
+  // Accent aliases (canonical source: --color-accent and --color-neutral)
+  --color-accent-primary: var(--color-accent);     // #c8861e amber
+  --color-accent-glow-dim: rgba(200, 134, 30, 0.15); // subtle accent fill
+
+  // Numeric spacing scale (1 = 4px, base 8px per step)
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  // Font-size aliases (matches --text-* above, for component convention)
+  --font-size-xs: var(--text-xs);   // 11px
+  --font-size-sm: var(--text-sm);   // 13px
+  --font-size-md: var(--text-md);   // 14px
+  --font-size-lg: var(--text-lg);   // 16px
+
+  // Timing
+  --duration-fast:   0.12s;
+  --duration-normal: 0.25s;
+  --duration-slow:   0.4s;
 }
 
 // ─── Reduced-motion global override ──────────────────────────────────────────

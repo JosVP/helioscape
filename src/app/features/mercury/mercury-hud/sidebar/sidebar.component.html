@@ -1,0 +1,120 @@
+<div class="mercury-sidebar">
+
+  <div class="mercury-sidebar__minimap">
+    <!-- Mini-map canvas: Block 9.3b (post-playtest) — render placeholder div for now -->
+    <div class="mercury-sidebar__minimap-placeholder" aria-label="Mini-map coming soon">
+      <svg class="mercury-sidebar__minimap-grid" viewBox="0 0 240 120" aria-hidden="true">
+        <defs>
+          <pattern id="mini-grid" x="0" y="0" width="12" height="12" patternUnits="userSpaceOnUse">
+            <path d="M 12 0 L 0 0 0 12" fill="none" stroke="currentColor" stroke-width="0.4"/>
+          </pattern>
+        </defs>
+        <rect width="240" height="120" fill="url(#mini-grid)"/>
+        <text x="120" y="66" text-anchor="middle" dominant-baseline="middle"
+              font-family="monospace" font-size="9" fill="currentColor">
+          Mini-map — Block 9.3b
+        </text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="mercury-sidebar__tabs" role="tablist" aria-label="Build categories">
+    @for (tab of tabs; track tab.id) {
+      <button
+        role="tab"
+        [attr.aria-selected]="activeTab() === tab.id"
+        [attr.aria-controls]="'sidebar-panel-' + tab.id"
+        (click)="activeTab.set(tab.id)"
+        class="mercury-sidebar__tab"
+        [class.mercury-sidebar__tab--active]="activeTab() === tab.id">
+        {{ tab.label }}
+      </button>
+    }
+  </div>
+
+  <div
+    class="mercury-sidebar__list"
+    role="tabpanel"
+    [id]="'sidebar-panel-' + activeTab()"
+    [attr.aria-label]="activeTab() + ' tab panel'">
+
+    @if (filteredBuildings().length === 0) {
+      <div class="mercury-sidebar__empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+             aria-hidden="true" class="mercury-sidebar__empty-icon">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 8v4m0 4h.01"/>
+        </svg>
+        <p>Nothing available yet.</p>
+      </div>
+    }
+
+    @for (b of filteredBuildings(); track b.id) {
+      <div
+        class="mercury-sidebar__card"
+        [class.mercury-sidebar__card--selected]="selectedBuildingId() === b.id"
+        (click)="selectBuilding(b.id)"
+        role="button"
+        tabindex="0"
+        [attr.aria-pressed]="selectedBuildingId() === b.id"
+        [attr.aria-label]="b.displayName + (selectedBuildingId() === b.id ? ' (selected)' : '')"
+        (keydown.enter)="selectBuilding(b.id)"
+        (keydown.space)="$event.preventDefault(); selectBuilding(b.id)">
+
+        <!-- Icon column -->
+        <div class="mercury-sidebar__card-icon" aria-hidden="true">
+          <img
+            [src]="getBuildingIconPath(b.id)"
+            [alt]="b.displayName + ' icon'"
+            class="mercury-sidebar__card-icon-img"
+            width="48"
+            height="48"
+          />
+        </div>
+
+        <!-- Text column -->
+        <div class="mercury-sidebar__card-body">
+          <div class="mercury-sidebar__card-name">{{ b.displayName }}</div>
+
+          <div class="mercury-sidebar__card-stats">
+            <span class="mercury-sidebar__card-time">{{ b.buildTimeYears }}yr</span>
+            @if (b.energyDrawGw < 0) {
+              <span class="mercury-sidebar__card-energy mercury-sidebar__card-energy--gen">
+                +{{ -b.energyDrawGw }} GW
+              </span>
+            } @else if (b.energyDrawGw > 0) {
+              <span class="mercury-sidebar__card-energy mercury-sidebar__card-energy--draw">
+                {{ b.energyDrawGw }} GW draw
+              </span>
+            }
+          </div>
+
+          <div class="mercury-sidebar__card-cost">
+            @if (b.cost.commonOre > 0) {
+              <span class="mercury-sidebar__card-cost-item mercury-sidebar__card-cost-item--ore">
+                <span class="mercury-sidebar__card-cost-dot"></span>{{ b.cost.commonOre }} ore
+              </span>
+            }
+            @if (b.cost.rareMetals > 0) {
+              <span class="mercury-sidebar__card-cost-item mercury-sidebar__card-cost-item--metals">
+                <span class="mercury-sidebar__card-cost-dot"></span>{{ b.cost.rareMetals }} metals
+              </span>
+            }
+            @if (b.cost.polarVolatiles > 0) {
+              <span class="mercury-sidebar__card-cost-item mercury-sidebar__card-cost-item--vol">
+                <span class="mercury-sidebar__card-cost-dot"></span>{{ b.cost.polarVolatiles }} vol
+              </span>
+            }
+            @if (b.cost.commonOre === 0 && b.cost.rareMetals === 0 && b.cost.polarVolatiles === 0) {
+              <span class="mercury-sidebar__card-cost-item mercury-sidebar__card-cost-item--free">Free</span>
+            }
+          </div>
+
+          <div class="mercury-sidebar__card-desc">{{ b.description }}</div>
+        </div>
+
+      </div>
+    }
+  </div>
+
+</div>

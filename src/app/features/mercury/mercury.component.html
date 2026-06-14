@@ -11,8 +11,7 @@
     <button class="mercury__back-btn" (click)="backToOrrery.emit()" aria-label="Back to orrery">
       ← Orrery
     </button>
-    <!-- mercury-hud/sidebar (Block 9.3) -->
-    <p class="mercury__sidebar-placeholder">Build list — Block 9.3</p>
+    <app-mercury-sidebar (buildingSelected)="selectedBuildingId.set($event)" />
   </aside>
 
   <!-- mercury-hud/queue-bar (Block 9.4) -->
