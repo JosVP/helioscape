@@ -1,0 +1,151 @@
+:host {
+  display: contents;
+}
+
+// ─── Queue bar shell ──────────────────────────────────────────────────────────
+
+.queue-bar {
+  position: relative;
+  height: 72px;
+  background: var(--color-surface-2);
+  // Amber accent border anchors the bar to the Mercury HUD theme
+  border-top: 1px solid var(--color-accent-dim);
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-3);
+  gap: 0;
+  overflow-x: auto;
+
+  // Thin amber scrollbar — only visible when items overflow
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-accent-dim) transparent;
+
+  &::-webkit-scrollbar {
+    height: 3px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--color-accent-dim);
+    border-radius: 2px;
+  }
+}
+
+// ─── Label ────────────────────────────────────────────────────────────────────
+
+.queue-bar__label {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  flex-shrink: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  // Vertical divider separates label from scrollable item list
+  padding-right: var(--space-3);
+  margin-right: var(--space-3);
+  border-right: 1px solid var(--color-border);
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+}
+
+// ─── Item list ────────────────────────────────────────────────────────────────
+
+.queue-bar__items {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  flex: 1;
+  min-width: 0; // allow flex children to shrink inside overflow container
+}
+
+.queue-bar__empty {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+// ─── Individual item card ─────────────────────────────────────────────────────
+
+@keyframes queue-item-enter {
+  from {
+    opacity: 0;
+    transform: translateX(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.queue-bar__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: var(--color-surface-3);
+  border: 1px solid var(--color-border);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  min-width: 180px;
+  flex-shrink: 0;
+  animation: queue-item-enter var(--duration-normal) ease-out both;
+  transition: border-color var(--duration-fast) ease;
+
+  &:hover {
+    border-color: var(--color-border-strong);
+  }
+
+  // First item is actively building — highlight with amber border
+  &--active {
+    border-color: var(--color-accent-dim);
+
+    .queue-bar__item-fill {
+      // Pulse the glow while actively building
+      box-shadow: 0 0 6px var(--color-accent-glow-dim);
+    }
+  }
+}
+
+.queue-bar__item-name {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.queue-bar__item-target {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.queue-bar__item-progress {
+  flex: 1;
+  height: 4px;
+  background: var(--color-surface-4);
+  border-radius: 2px;
+  overflow: hidden;
+  min-width: 40px; // never let it collapse to zero
+}
+
+.queue-bar__item-fill {
+  height: 100%;
+  width: calc(var(--progress, 0) * 100%);
+  background: var(--color-accent-primary);
+  // Use the project token — automatically becomes `none` under reduced-motion
+  transition: var(--transition-tick);
+}
+
+.queue-bar__item-years {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+  // Tabular numerals prevent the layout from jumping as years tick down
+  font-variant-numeric: tabular-nums;
+}

@@ -1,0 +1,51 @@
+<div class="queue-bar" role="region" aria-label="Production queue">
+  <div class="queue-bar__label" aria-hidden="true">Production queue</div>
+
+  <!-- aria-live so screen readers announce queue changes without focus -->
+  <div class="queue-bar__items" aria-live="polite" aria-atomic="false">
+    @if (queue().length === 0) {
+      <div class="queue-bar__empty" role="status">
+        Queue empty — select a component in the Space tab to build
+      </div>
+    }
+
+    @for (item of queue(); track $index; let first = $first) {
+      <div
+        class="queue-bar__item"
+        [class.queue-bar__item--active]="first"
+        [attr.aria-label]="item.def.displayName
+          + (item.entry.targetPlanet ? ' → ' + item.entry.targetPlanet : '')
+          + ', '
+          + (item.def.buildTimeYears - item.entry.progressYears)
+          + ' years remaining'"
+      >
+        <span class="queue-bar__item-name">{{ item.def.displayName }}</span>
+
+        @if (item.entry.targetPlanet) {
+          <span class="queue-bar__item-target" aria-hidden="true">
+            → {{ item.entry.targetPlanet | titlecase }}
+          </span>
+        }
+
+        <div
+          class="queue-bar__item-progress"
+          role="progressbar"
+          aria-valuemin="0"
+          [attr.aria-valuenow]="item.entry.progressYears"
+          [attr.aria-valuemax]="item.def.buildTimeYears"
+          [attr.aria-valuetext]="item.entry.progressYears + ' of ' + item.def.buildTimeYears + ' years complete'"
+          [attr.aria-label]="item.def.displayName + ' build progress'"
+        >
+          <div
+            class="queue-bar__item-fill"
+            [style.--progress]="item.entry.progressYears / item.def.buildTimeYears"
+          ></div>
+        </div>
+
+        <span class="queue-bar__item-years" aria-hidden="true">
+          {{ item.def.buildTimeYears - item.entry.progressYears | number:'1.0-0' }}yr
+        </span>
+      </div>
+    }
+  </div>
+</div>

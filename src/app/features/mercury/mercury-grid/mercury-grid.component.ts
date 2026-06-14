@@ -163,7 +163,7 @@ export class MercuryGridComponent implements AfterViewInit, OnDestroy {
   private edgeScrollX = -Infinity;
   private edgeScrollY = -Infinity;
 
-  private static readonly EDGE_ZONE  = 200;  // px from edge that activates scroll
+  private static readonly EDGE_ZONE  = 100;  // px from edge that activates scroll
   private static readonly EDGE_SPEED = 10;   // px per RAF frame (perceived screen px)
   /** Horizontal scale factor — 1.0 = no compression. Reduce below 1 to compress map width. */
   private static readonly SCALE_X    = 1.0;

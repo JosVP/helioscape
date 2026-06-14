@@ -8,12 +8,13 @@ import {
 import { GameStateService } from '@app/core/services/game-state.service';
 import { MercuryGridComponent } from './mercury-grid/mercury-grid.component';
 import { MercurySidebarComponent } from './mercury-hud/sidebar/sidebar.component';
+import { MercuryQueueBarComponent } from './mercury-hud/queue-bar/queue-bar.component';
 
 @Component({
   selector: 'app-mercury',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [MercuryGridComponent, MercurySidebarComponent],
+  imports: [MercuryGridComponent, MercurySidebarComponent, MercuryQueueBarComponent],
   templateUrl: './mercury.component.html',
   styleUrl: './mercury.component.scss',
 })

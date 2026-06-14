@@ -11,7 +11,7 @@
   left: 0;
   display: grid;
   grid-template-columns: 1fr 280px;
-  grid-template-rows: 1fr;
+  grid-template-rows: 1fr auto;
   z-index: 10;
   background: var(--color-bg-base);
 }
@@ -35,6 +35,11 @@
   background: var(--color-surface-2);
   border-left: 1px solid var(--color-border);
   overflow-y: auto;
+}
+
+app-mercury-queue-bar {
+  grid-column: 1 / -1;
+  grid-row: 2;
 }
 
 .mercury__back-btn {
