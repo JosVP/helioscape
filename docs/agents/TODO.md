@@ -363,27 +363,16 @@ No inline `// TODO:` comments in code - all tracking happens here to avoid dupli
 - **Prompt block**: Quick fix, any block
 - **Added**: 2026-06-13
 
-### Global resource/power HUD strip
-
-- **File**: New `src/app/shared/components/resource-power-bar/resource-power-bar.component.ts`
-- **Location**: `src/app/features/game-shell/game-shell.component.html` (add to template)
-- **TODO**: Persistent bottom-right strip always visible in orrery and Mercury views.
-  Shows: ore/metals/volatiles counts + rates (+N/yr), Dyson power bar (consumed vs available,
-  green→amber→red colour zones). Reads `mercuryResources`, `mercuryBuildings`,
-  `dysonEnergyWatts` from GameStateService. Resource rates computed from operational buildings.
-  Power bar: 0–80% consumed = green, 80–100% = amber, ≥100% = red.
-  Resource reservation inputs (ore/metals/volatiles): shown in Mercury view only.
-- **Depends on**: GameStateService mercury RTS signals (resource reservations)
-- **Prompt block**: Block 9.8
-- **Added**: 2026-06-13
-
-
-
 ---
 
 ## Completed TODOs
 
 _(Moved here when implemented, kept for history)_
+
+### ✅ Global resource/power HUD strip — ResourcePowerBarComponent
+- **Completed**: 2026-06-14
+- **Implemented in**: `src/app/shared/components/resource-power-bar/resource-power-bar.component.ts/.html/.scss`
+- **Notes**: New shared standalone component. Reads `mercuryResources`, `mercuryBuildings`, `dysonEnergyWatts`, `resourceReservations` from GameStateService. Computes `resourceRates` from operational buildings via `DataService.getMercuryBuilding()`. Power bar green/amber/red via `[data-color]` attribute. Reservation inputs shown only in Mercury view via `showReservationInputs` input. Wired into `game-shell.component.html` outside both view containers (position: fixed). Tokens `--color-success/warning/danger` added to `tokens.scss`. `dysonConsumptionTw` is a 0.8 TW placeholder pending DysonService consumer registration.
 
 ### ✅ GameStateService — Mercury RTS signals
 - **Completed**: 2026-06-14

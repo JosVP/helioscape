@@ -83,6 +83,11 @@
   --color-accent-primary: var(--color-accent);     // #c8861e amber
   --color-accent-glow-dim: rgba(200, 134, 30, 0.15); // subtle accent fill
 
+  // Semantic status colours (power bar, build status)
+  --color-success: #22c55e;   // operational / power OK
+  --color-warning: #f59e0b;   // power 80–99% / caution
+  --color-danger:  #ef4444;   // power ≥ 100% / error
+
   // Numeric spacing scale (1 = 4px, base 8px per step)
   --space-1: 4px;
   --space-2: 8px;
@@ -96,6 +101,11 @@
   --font-size-sm: var(--text-sm);   // 13px
   --font-size-md: var(--text-md);   // 14px
   --font-size-lg: var(--text-lg);   // 16px
+  --font-size-xl: var(--text-xl);   // 20px
+  --font-size-2xl: var(--text-2xl); // 28px
+
+  // Secondary accent — cool blue-grey counterpoint to the warm amber primary
+  --color-accent-secondary: var(--color-neutral); // #4a6a8a
 
   // Timing
   --duration-fast:   0.12s;

@@ -22,6 +22,7 @@ import { OrreryComponent } from '@app/features/orrery/orrery.component';
 import { PauseMenuComponent } from '@app/features/pause-menu/pause-menu.component';
 import { PlanetPanelComponent } from '@app/features/planet-panel/planet-panel.component';
 import { ResearchHubComponent } from '@app/features/research-hub/research-hub.component';
+import { ResourcePowerBarComponent } from '@app/shared/components/resource-power-bar/resource-power-bar.component';
 
 @Component({
   selector: 'app-game-shell',
@@ -37,6 +38,7 @@ import { ResearchHubComponent } from '@app/features/research-hub/research-hub.co
     CultureEventToastComponent,
     PauseMenuComponent,
     ResearchHubComponent,
+    ResourcePowerBarComponent,
   ],
   templateUrl: './game-shell.component.html',
   styleUrl: './game-shell.component.scss',

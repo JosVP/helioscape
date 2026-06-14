@@ -31,3 +31,5 @@
 @if (isResearchHubOpen()) {
   <app-research-hub (closed)="closeResearchHub()" />
 }
+
+<app-resource-power-bar [showReservationInputs]="activeView() === 'mercury'" />

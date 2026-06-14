@@ -1,0 +1,112 @@
+:host {
+  display: contents;
+}
+
+.resource-power-bar {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md) 0 0;
+  padding: var(--space-2) var(--space-3);
+  z-index: 90;
+  font-size: var(--font-size-xs);
+  min-width: 260px;
+  color: var(--color-text-primary);
+
+  &__resources {
+    display: flex;
+    gap: var(--space-3);
+  }
+
+  &__item {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-1);
+  }
+
+  &__rate {
+    color: var(--color-text-muted);
+  }
+
+  &__power {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  &__power-label {
+    flex-shrink: 0;
+  }
+
+  &__power-track {
+    flex: 1;
+    height: 6px;
+    background: var(--color-surface-4);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  &__power-fill {
+    height: 100%;
+    width: calc(var(--power-pct, 0) * 100%);
+    transition: width 1s linear, background-color var(--duration-fast) ease;
+    background: var(--color-success);
+  }
+
+  // [data-color] attribute lives on __power, which is an ancestor of __power-fill
+  // within this component's template — Angular scoped styles handle this correctly.
+  &__power[data-color='amber'] &__power-fill {
+    background: var(--color-warning);
+  }
+
+  &__power[data-color='red'] &__power-fill {
+    background: var(--color-danger);
+  }
+
+  &__power-text {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  &__reservations {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    align-items: center;
+    border-top: 1px solid var(--color-border);
+    padding-top: var(--space-1);
+    margin-top: var(--space-1);
+  }
+
+  &__reserve-label {
+    flex-shrink: 0;
+  }
+
+  &__reserve-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    cursor: default;
+  }
+
+  &__reserve-input {
+    width: 60px;
+    font-size: var(--font-size-xs);
+    background: var(--color-surface-3);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+    padding: 2px 4px;
+    border-radius: var(--radius-sm);
+    text-align: right;
+
+    &:focus {
+      outline: none;
+      border-color: var(--color-border-strong);
+    }
+  }
+}

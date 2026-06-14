@@ -1,0 +1,48 @@
+<div class="resource-power-bar" role="complementary" aria-label="Resources and power">
+
+  <div class="resource-power-bar__resources">
+    <span class="resource-power-bar__item">
+      Ore: {{ resources().commonOre | number:'1.0-0' }}
+      <span class="resource-power-bar__rate">(+{{ resourceRates()['commonOre'] | number:'1.1-1' }}/yr)</span>
+    </span>
+    <span class="resource-power-bar__item">
+      Metals: {{ resources().rareMetals | number:'1.0-0' }}
+      <span class="resource-power-bar__rate">(+{{ resourceRates()['rareMetals'] | number:'1.1-1' }}/yr)</span>
+    </span>
+    <span class="resource-power-bar__item">
+      Vol: {{ resources().polarVolatiles | number:'1.0-0' }}
+      <span class="resource-power-bar__rate">(+{{ resourceRates()['polarVolatiles'] | number:'1.1-1' }}/yr)</span>
+    </span>
+  </div>
+
+  <div class="resource-power-bar__power" [attr.data-color]="powerBarColor()">
+    <span class="resource-power-bar__power-label">Power</span>
+    <div class="resource-power-bar__power-track"
+         role="progressbar"
+         [attr.aria-valuenow]="powerBarPercent()"
+         [attr.aria-valuetext]="dysonConsumptionTw() + ' TW / ' + dysonPowerTw() + ' TW'">
+      <div class="resource-power-bar__power-fill"
+           [style.--power-pct]="powerBarPercent() / 100"></div>
+    </div>
+    <span class="resource-power-bar__power-text">
+      {{ dysonConsumptionTw() | number:'1.1-1' }} / {{ dysonPowerTw() | number:'1.1-1' }} TW
+    </span>
+  </div>
+
+  @if (showReservationInputs()) {
+    <div class="resource-power-bar__reservations">
+      <span class="resource-power-bar__reserve-label">Reserves:</span>
+      @for (key of reservationKeys; track key.id) {
+        <label class="resource-power-bar__reserve-item">
+          {{ key.label }}
+          <input type="number" min="0" step="100"
+                 [value]="reservations()[key.id]"
+                 (change)="onReservationChange(key.id, $event)"
+                 class="resource-power-bar__reserve-input"
+                 [attr.aria-label]="'Minimum ' + key.label + ' reserve'" />
+        </label>
+      }
+    </div>
+  }
+
+</div>
