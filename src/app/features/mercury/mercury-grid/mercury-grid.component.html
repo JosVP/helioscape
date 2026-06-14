@@ -5,8 +5,6 @@
     <canvas
       #mercuryCanvas
       class="mercury-grid__canvas"
-      [width]="canvasWidth"
-      [height]="canvasHeight"
       role="application"
       [attr.aria-label]="canvasAriaLabel()"
       tabindex="0"
@@ -28,8 +26,8 @@
         <span class="mercury-grid__status-sep" aria-hidden="true">&mdash;</span>
         <span class="mercury-grid__status-building">{{ info.buildingName }}</span>
       }
-      <span class="mercury-grid__status-coords" aria-label="Column {{ info.col + 1 }}, row {{ info.row + 1 }}">
-        {{ info.col + 1 }}, {{ info.row + 1 }}
+      <span class="mercury-grid__status-coords" aria-label="Column {{ displayCoord(info.col) }}, row {{ displayCoord(info.row) }}">
+        {{ displayCoord(info.col) }}, {{ displayCoord(info.row) }}
       </span>
       @if (info.slotId) {
         <span class="mercury-grid__status-sep" aria-hidden="true">&bull;</span>

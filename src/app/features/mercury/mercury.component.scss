@@ -4,18 +4,20 @@
 
 .mercury {
   position: fixed;
-  inset: 0;
+  // Start below the HUD bar (48 px) so it remains visible.
+  top: 48px;
+  right: 0;
+  bottom: 0;
+  left: 0;
   display: grid;
   grid-template-columns: 1fr 280px;
   grid-template-rows: 1fr;
   z-index: 10;
   background: var(--color-bg-base);
-  // Leave space for the HUD top bar.
-  padding-top: 52px;
 }
 
 .mercury__canvas-area {
-  overflow: auto;
+  overflow: hidden;
   position: relative;
   grid-column: 1;
   grid-row: 1;

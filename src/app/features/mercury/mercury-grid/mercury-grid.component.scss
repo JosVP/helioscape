@@ -29,9 +29,10 @@
 :host {
   display: flex;
   flex-direction: column;
+  height: 100%;
   background-color: var(--color-bg-base);
   border: var(--border-subtle);
-  border-radius: var(--radius-md);
+  // border-radius: var(--radius-md);
   overflow: hidden;
 
   // Entrance animation — the whole grid fades + lifts in when mounted
@@ -62,35 +63,20 @@
 
 .mercury-grid__viewport {
   flex: 1;
-  overflow: auto;
+  overflow: hidden;
   position: relative;
   // Subtle amber glow around the canvas area — Mercury accent
   box-shadow: inset 0 0 32px rgba(200, 134, 30, 0.06);
-
-  // Custom scrollbar — minimal, dark-themed
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-accent-dim) var(--color-bg-surface);
-
-  &::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: var(--color-bg-surface);
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: var(--color-accent-dim);
-    border-radius: var(--radius-sm);
-  }
+  min-height: 0; // Prevent grid blowout in flex containers
 }
 
 // ─── Canvas ──────────────────────────────────────────────────────────────────
 
 .mercury-grid__canvas {
   display: block;
-  cursor: crosshair;
+  // Fill the viewport — pixel dimensions are set programmatically via ResizeObserver.
+  width: 100%;
+  height: 100%;
   // Crisp pixel rendering for building sprites
   image-rendering: pixelated;
   // Outline for keyboard focus — uses accent colour instead of default browser blue
@@ -100,6 +86,7 @@
     outline: 2px solid var(--color-accent);
     outline-offset: -2px;
   }
+
 }
 
 // ─── Status bar ──────────────────────────────────────────────────────────────

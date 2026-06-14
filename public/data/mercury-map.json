@@ -1,6 +1,139 @@
 {
-  "gridCols": 64,
-  "gridRows": 64,
+  "gridCols": 128,
+  "gridRows": 128,
+
+  "terrainRules": [
+    { "type": "polar",      "rowMin": 32, "rowMax": 39 },
+    { "type": "crater_rim", "rowMin": 40, "rowMax": 43 },
+    { "type": "flat",       "rowMin": 44, "rowMax": 83 },
+    { "type": "crater_rim", "rowMin": 84, "rowMax": 87 },
+    { "type": "polar",      "rowMin": 88, "rowMax": 95 }
+  ],
+
+  "craterOverrides": [
+    { "colMin": 60, "colMax": 68, "rowMin": 90, "rowMax": 95 }
+  ],
+
+  "slots": [
+    { "id": "mine_z1_a",    "col": 42, "row": 47, "slotType": "mining_location", "reserved": true,  "adjacentTo": [], "startingZone": "zone_1" },
+    { "id": "mine_z1_b",    "col": 54, "row": 53, "slotType": "mining_location", "reserved": true,  "adjacentTo": [], "startingZone": "zone_1" },
+    { "id": "mine_z2_a",    "col": 74, "row": 47, "slotType": "mining_location", "reserved": true,  "adjacentTo": [], "startingZone": "zone_2" },
+    { "id": "mine_z2_b",    "col": 86, "row": 53, "slotType": "mining_location", "reserved": true,  "adjacentTo": [], "startingZone": "zone_2" },
+    { "id": "mine_z3_a",    "col": 60, "row": 66, "slotType": "mining_location", "reserved": true,  "adjacentTo": [], "startingZone": "zone_3" },
+    { "id": "mine_z3_b",    "col": 70, "row": 72, "slotType": "mining_location", "reserved": true,  "adjacentTo": [], "startingZone": "zone_3" },
+    { "id": "mine_polar_a", "col": 44, "row": 36, "slotType": "mining_location", "reserved": true,  "adjacentTo": [], "startingZone": null },
+    { "id": "mine_polar_b", "col": 82, "row": 36, "slotType": "mining_location", "reserved": true,  "adjacentTo": [], "startingZone": null },
+
+    { "id": "refinery_z1a_1", "col": 42, "row": 45, "slotType": "refinery", "reserved": true, "adjacentTo": ["refinery_z1a_2", "refinery_z1a_3"], "startingZone": "zone_1" },
+    { "id": "refinery_z1a_2", "col": 40, "row": 47, "slotType": "refinery", "reserved": true, "adjacentTo": ["refinery_z1a_1", "refinery_z1a_3"], "startingZone": "zone_1" },
+    { "id": "refinery_z1a_3", "col": 42, "row": 49, "slotType": "refinery", "reserved": true, "adjacentTo": ["refinery_z1a_1", "refinery_z1a_2", "refinery_z1b_1"], "startingZone": "zone_1" },
+
+    { "id": "refinery_z1b_1", "col": 56, "row": 52, "slotType": "refinery", "reserved": true, "adjacentTo": ["refinery_z1b_2", "refinery_z1b_3"], "startingZone": "zone_1" },
+    { "id": "refinery_z1b_2", "col": 52, "row": 54, "slotType": "refinery", "reserved": true, "adjacentTo": ["refinery_z1b_1", "refinery_z1b_3"], "startingZone": "zone_1" },
+    { "id": "refinery_z1b_3", "col": 55, "row": 55, "slotType": "refinery", "reserved": true, "adjacentTo": ["refinery_z1b_1", "refinery_z1b_2"], "startingZone": "zone_1" },
+
+    { "id": "refinery_z2a_1", "col": 76, "row": 46, "slotType": "refinery", "reserved": true, "adjacentTo": ["refinery_z2a_2", "refinery_z2a_3"], "startingZone": "zone_2" },
+    { "id": "refinery_z2a_2", "col": 72, "row": 48, "slotType": "refinery", "reserved": true, "adjacentTo": ["refinery_z2a_1", "refinery_z2a_3"], "startingZone": "zone_2" },
+    { "id": "refinery_z2a_3", "col": 75, "row": 49, "slotType": "refinery", "reserved": true, "adjacentTo": ["refinery_z2a_1", "refinery_z2a_2", "refinery_z2b_1"], "startingZone": "zone_2" },
+
+    { "id": "refinery_z2b_1", "col": 88, "row": 52, "slotType": "refinery", "reserved": true, "adjacentTo": ["refinery_z2b_2", "refinery_z2b_3"], "startingZone": "zone_2" },
+    { "id": "refinery_z2b_2", "col": 84, "row": 54, "slotType": "refinery", "reserved": true, "adjacentTo": ["refinery_z2b_1", "refinery_z2b_3"], "startingZone": "zone_2" },
+    { "id": "refinery_z2b_3", "col": 87, "row": 55, "slotType": "refinery", "reserved": true, "adjacentTo": ["refinery_z2b_1", "refinery_z2b_2"], "startingZone": "zone_2" },
+
+    { "id": "refinery_z3a_1", "col": 62, "row": 65, "slotType": "refinery", "reserved": true, "adjacentTo": ["refinery_z3a_2", "refinery_z3b_1"], "startingZone": "zone_3" },
+    { "id": "refinery_z3a_2", "col": 58, "row": 67, "slotType": "refinery", "reserved": true, "adjacentTo": ["refinery_z3a_1", "refinery_z3b_1"], "startingZone": "zone_3" },
+
+    { "id": "refinery_z3b_1", "col": 72, "row": 71, "slotType": "refinery", "reserved": true, "adjacentTo": ["refinery_z3b_2", "refinery_z3b_3", "refinery_z3a_1"], "startingZone": "zone_3" },
+    { "id": "refinery_z3b_2", "col": 68, "row": 73, "slotType": "refinery", "reserved": true, "adjacentTo": ["refinery_z3b_1", "refinery_z3b_3"], "startingZone": "zone_3" },
+    { "id": "refinery_z3b_3", "col": 71, "row": 74, "slotType": "refinery", "reserved": true, "adjacentTo": ["refinery_z3b_1", "refinery_z3b_2"], "startingZone": "zone_3" },
+
+    { "id": "refinery_polar_a1", "col": 46, "row": 35, "slotType": "refinery", "reserved": true, "adjacentTo": ["refinery_polar_a2"], "startingZone": null },
+    { "id": "refinery_polar_a2", "col": 42, "row": 37, "slotType": "refinery", "reserved": true, "adjacentTo": ["refinery_polar_a1"], "startingZone": null },
+
+    { "id": "refinery_polar_b1", "col": 84, "row": 35, "slotType": "refinery", "reserved": true, "adjacentTo": ["refinery_polar_b2"], "startingZone": null },
+    { "id": "refinery_polar_b2", "col": 80, "row": 37, "slotType": "refinery", "reserved": true, "adjacentTo": ["refinery_polar_b1"], "startingZone": null },
+
+    { "id": "mass_driver",   "col": 88, "row": 82, "slotType": "mass_driver",   "reserved": true, "adjacentTo": [], "startingZone": "zone_3" },
+    { "id": "fusion_reactor","col": 62, "row": 92, "slotType": "fusion_reactor","reserved": true, "adjacentTo": [], "startingZone": null }
+  ],
+
+  "miningLocations": [
+    {
+      "slotId": "mine_z1_a",
+      "oreRatios": { "commonOre": 0.75, "rareMetals": 0.25, "polarVolatiles": 0.0 },
+      "oreRatioDisplay": "75% common ore · 25% rare metals",
+      "adjacentRefinerySlots": ["refinery_z1a_1", "refinery_z1a_2", "refinery_z1a_3"]
+    },
+    {
+      "slotId": "mine_z1_b",
+      "oreRatios": { "commonOre": 0.70, "rareMetals": 0.30, "polarVolatiles": 0.0 },
+      "oreRatioDisplay": "70% common ore · 30% rare metals",
+      "adjacentRefinerySlots": ["refinery_z1b_1", "refinery_z1b_2", "refinery_z1b_3"]
+    },
+    {
+      "slotId": "mine_z2_a",
+      "oreRatios": { "commonOre": 0.30, "rareMetals": 0.70, "polarVolatiles": 0.0 },
+      "oreRatioDisplay": "30% common ore · 70% rare metals",
+      "adjacentRefinerySlots": ["refinery_z2a_1", "refinery_z2a_2", "refinery_z2a_3"]
+    },
+    {
+      "slotId": "mine_z2_b",
+      "oreRatios": { "commonOre": 0.35, "rareMetals": 0.65, "polarVolatiles": 0.0 },
+      "oreRatioDisplay": "35% common ore · 65% rare metals",
+      "adjacentRefinerySlots": ["refinery_z2b_1", "refinery_z2b_2", "refinery_z2b_3"]
+    },
+    {
+      "slotId": "mine_z3_a",
+      "oreRatios": { "commonOre": 0.40, "rareMetals": 0.35, "polarVolatiles": 0.25 },
+      "oreRatioDisplay": "40% common ore · 35% rare metals · 25% volatiles",
+      "adjacentRefinerySlots": ["refinery_z3a_1", "refinery_z3a_2"]
+    },
+    {
+      "slotId": "mine_z3_b",
+      "oreRatios": { "commonOre": 0.38, "rareMetals": 0.32, "polarVolatiles": 0.30 },
+      "oreRatioDisplay": "38% common ore · 32% rare metals · 30% volatiles",
+      "adjacentRefinerySlots": ["refinery_z3b_1", "refinery_z3b_2", "refinery_z3b_3"]
+    },
+    {
+      "slotId": "mine_polar_a",
+      "oreRatios": { "commonOre": 0.20, "rareMetals": 0.15, "polarVolatiles": 0.65 },
+      "oreRatioDisplay": "20% common ore · 15% rare metals · 65% polar volatiles",
+      "adjacentRefinerySlots": ["refinery_polar_a1", "refinery_polar_a2"]
+    },
+    {
+      "slotId": "mine_polar_b",
+      "oreRatios": { "commonOre": 0.15, "rareMetals": 0.20, "polarVolatiles": 0.65 },
+      "oreRatioDisplay": "15% common ore · 20% rare metals · 65% polar volatiles",
+      "adjacentRefinerySlots": ["refinery_polar_b1", "refinery_polar_b2"]
+    }
+  ],
+
+  "startingZones": [
+    {
+      "id": "zone_1",
+      "displayName": "Zone 1 — Infrastructure Speed",
+      "tagline": "Common ore cluster, fast base construction",
+      "description": "Nearby deposits are rich in common ore. Refineries and fabricators come online faster, giving us a strong industrial foundation from the start.",
+      "seedArea": { "colMin": 38, "colMax": 58, "rowMin": 44, "rowMax": 60 },
+      "seedSlots": ["mine_z1_a", "refinery_z1a_1", "refinery_z1a_2", "refinery_z1a_3"]
+    },
+    {
+      "id": "zone_2",
+      "displayName": "Zone 2 — Dyson Output",
+      "tagline": "Rare metals deposits, maximum panel production",
+      "description": "This region's ore skews heavily toward rare metals — the bottleneck for Dyson panel production. We can reach peak panel throughput faster from here.",
+      "seedArea": { "colMin": 70, "colMax": 94, "rowMin": 44, "rowMax": 60 },
+      "seedSlots": ["mine_z2_a", "refinery_z2a_1", "refinery_z2a_2", "refinery_z2a_3"]
+    },
+    {
+      "id": "zone_3",
+      "displayName": "Zone 3 — Balanced Start",
+      "tagline": "Mixed deposits, flexible expansion",
+      "description": "All ore types are accessible from the start. Proximity to the mass driver site means our orbital launch capability comes online with less expansion.",
+      "seedArea": { "colMin": 54, "colMax": 78, "rowMin": 62, "rowMax": 82 },
+      "seedSlots": ["mine_z3_a", "mine_z3_b", "refinery_z3a_1", "refinery_z3a_2", "refinery_z3b_1", "mass_driver"]
+    }
+  ],
 
   "terrainRules": [
     { "type": "polar",      "rowMin": 0,  "rowMax": 7  },

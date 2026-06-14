@@ -33,18 +33,35 @@ import {
 } from '@app/shared/utils/mercury-isometric.utils';
 
 // ---------------------------------------------------------------------------
-// Grid constants — 64×64 map
+// Grid constants — 128×128 fully playable game grid.
+//
+// The camera is clamped to an inner 64×64 zone (VIEW_OFFSET … VIEW_LAST) so
+// the viewport corners always land on real gameplay tiles.  The outer 32-tile
+// buffer on every side is never reachable by camera scroll, but every tile in
+// the full 128×128 grid is a valid build target.
 // ---------------------------------------------------------------------------
 
-const GRID_COLS = 64;
-const GRID_ROWS = 64;
-const ORIGIN_Y = 80;
+const GRID_COLS = 128;
+const GRID_ROWS = 128;
+const ORIGIN_Y  = 80;
 
-// Full canvas spans the entire isometric diamond for a 64×64 grid.
-// Width  = (GRID_COLS + GRID_ROWS - 1) * HALF_W + TILE_W + 2*margin
-// Height = (GRID_COLS + GRID_ROWS) * HALF_H + ORIGIN_Y + margin
-const CANVAS_WIDTH = (GRID_COLS + GRID_ROWS - 1) * HALF_W + TILE_W + 160;   // ≈ 4288
-const CANVAS_HEIGHT = (GRID_COLS + GRID_ROWS) * HALF_H + ORIGIN_Y + 80;     // ≈ 2208
+// Inner 64×64 camera-accessible zone centred in the 128×128 grid.
+const VIEW_OFFSET = 32;                          // inner zone starts at col/row 32
+const VIEW_SIZE   = 64;                          // inner zone is 64×64 tiles
+const VIEW_LAST   = VIEW_OFFSET + VIEW_SIZE - 1; // = 95
+
+// Horizontal half-span of the inner zone (identical to the old 64×64 grid span).
+const VIEW_HALF_W = (VIEW_SIZE + VIEW_SIZE - 2) / 2 * HALF_W;  // 63 × 32 = 2016 px
+
+// Draw-space Y of the top vertex of the northernmost inner tile (32,32).
+const VIEW_TOP_Y    = ORIGIN_Y + (VIEW_OFFSET + VIEW_OFFSET - 1) * HALF_H; // 1088 px
+// Draw-space Y of the bottom vertex of the southernmost inner tile (95,95).
+const VIEW_BOTTOM_Y = ORIGIN_Y + (VIEW_LAST + VIEW_LAST + 1) * HALF_H;     // 3136 px
+
+// Render grid = full 128×128 (no extra filler border needed; the 32-tile buffer
+// around the inner zone is more than enough to fill any viewport corner).
+const RENDER_COLS = GRID_COLS;
+const RENDER_ROWS = GRID_ROWS;
 
 /** Default 2×2 footprint used when a building has no footprint defined. */
 const DEFAULT_FOOTPRINT: readonly [number, number][] = [[0,0],[1,0],[0,1],[1,1]];
@@ -74,8 +91,8 @@ const SLOT_TINTS: Partial<Record<string, string>> = {
 // Pre-sorted tile list (back → front). Computed once at module load.
 interface TilePos { col: number; row: number; }
 const ALL_TILES: TilePos[] = sortByDepth(
-  Array.from({ length: GRID_ROWS }, (_, row) =>
-    Array.from({ length: GRID_COLS }, (_, col) => ({ col, row })),
+  Array.from({ length: RENDER_ROWS }, (_, row) =>
+    Array.from({ length: RENDER_COLS }, (_, col) => ({ col, row }))
   ).flat(),
 );
 
@@ -129,6 +146,27 @@ export class MercuryGridComponent implements AfterViewInit, OnDestroy {
   private rafId = 0;
   private hoverTile: TilePos | null = null;
 
+  // ---------------------------------------------------------------------------
+  // Viewport + pan state (RTS camera)
+  // ---------------------------------------------------------------------------
+
+  /** Current viewport pixel dimensions — updated by ResizeObserver. */
+  private viewW = 0;
+  private viewH = 0;
+
+  /** Pan offset: positive = map content moves right/down. */
+  private panX = 0;
+  private panY = 0;
+
+  /** Last known mouse viewport-pixel position for edge-scroll detection. */
+  private edgeScrollX = -Infinity;
+  private edgeScrollY = -Infinity;
+
+  private static readonly EDGE_ZONE  = 200;  // px from edge that activates scroll
+  private static readonly EDGE_SPEED = 10;   // px per RAF frame
+
+  private resizeObserver: ResizeObserver | null = null;
+
   /** Slot lookup by position key `"${col},${row}"`. Built in ngAfterViewInit. */
   private slotByPos = new Map<string, MercurySlot>();
   /** Mining location lookup by slotId. Built in ngAfterViewInit. */
@@ -144,9 +182,6 @@ export class MercuryGridComponent implements AfterViewInit, OnDestroy {
   private readonly onClickBound = this.onClick.bind(this);
   private readonly onMouseLeaveBound = this.onMouseLeave.bind(this);
   private readonly onKeyDownBound = this.onKeyDown.bind(this);
-
-  readonly canvasWidth = CANVAS_WIDTH;
-  readonly canvasHeight = CANVAS_HEIGHT;
 
   // ---------------------------------------------------------------------------
   // Template-facing signals
@@ -193,6 +228,38 @@ export class MercuryGridComponent implements AfterViewInit, OnDestroy {
       }
     }
 
+    // Resize observer keeps canvas pixel dimensions in sync with CSS display size.
+    this.resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect;
+        if (width > 0 && height > 0) {
+          canvas.width = Math.round(width);
+          canvas.height = Math.round(height);
+          this.viewW = canvas.width;
+          this.viewH = canvas.height;
+          this.clampPan();
+        }
+      }
+    });
+    this.resizeObserver.observe(canvas);
+
+    // Bootstrap from current size immediately (before first ResizeObserver tick).
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width > 0 && rect.height > 0) {
+      canvas.width = Math.round(rect.width);
+      canvas.height = Math.round(rect.height);
+      this.viewW = canvas.width;
+      this.viewH = canvas.height;
+    }
+
+    // Start pan centred on the inner 64×64 zone.
+    this.panX = 0;
+    const innerCenterY = Math.floor((VIEW_TOP_Y + VIEW_BOTTOM_Y) / 2);
+    this.panY = this.viewH > 0
+      ? Math.floor(this.viewH / 2) - innerCenterY
+      : -innerCenterY;
+    this.clampPan();
+
     canvas.addEventListener('mousemove', this.onMouseMoveBound);
     canvas.addEventListener('mouseleave', this.onMouseLeaveBound);
     canvas.addEventListener('click', this.onClickBound);
@@ -207,6 +274,8 @@ export class MercuryGridComponent implements AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     cancelAnimationFrame(this.rafId);
+    this.resizeObserver?.disconnect();
+    this.resizeObserver = null;
     const canvas = this.canvasRef?.nativeElement;
     if (canvas) {
       canvas.removeEventListener('mousemove', this.onMouseMoveBound);
@@ -222,29 +291,94 @@ export class MercuryGridComponent implements AfterViewInit, OnDestroy {
   // RAF render loop
   // ---------------------------------------------------------------------------
 
+  private clampPan(): void {
+    // Horizontal: keep inner zone's left/right vertices within the viewport.
+    const maxPanX = Math.max(0, VIEW_HALF_W - this.viewW / 2);
+    this.panX = Math.max(-maxPanX, Math.min(maxPanX, this.panX));
+
+    // Vertical: clamp so camera only shows the inner VIEW_SIZE×VIEW_SIZE zone.
+    //   lo = panY that puts inner zone BOTTOM at screen bottom (max pan up).
+    //   hi = panY that puts inner zone TOP    at screen top    (max pan down).
+    const lo = this.viewH - VIEW_BOTTOM_Y;
+    const hi = -VIEW_TOP_Y;
+    if (lo >= hi) {
+      // Inner zone fits entirely in viewport — centre it.
+      this.panY = Math.round((lo + hi) / 2);
+    } else {
+      this.panY = Math.max(lo, Math.min(hi, this.panY));
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Edge-scroll
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Called every RAF frame. When the mouse is within EDGE_ZONE pixels of a
+   * viewport edge the camera drifts toward that edge at EDGE_SPEED px/frame.
+   * Does nothing during drag-pan (drag takes priority).
+   */
+  private applyEdgeScroll(): void {
+    if (!isFinite(this.edgeScrollX)) return;
+
+    const zone  = MercuryGridComponent.EDGE_ZONE;
+    const hSpeed = MercuryGridComponent.EDGE_SPEED;
+    const vSpeed = MercuryGridComponent.EDGE_SPEED / 1.5; // tile height is half the width, so slow vertical scroll a bit to keep perceived speed consistent in both axes.
+    let moved = false;
+
+    
+    if (this.edgeScrollX < zone)              { this.panX += hSpeed; moved = true; }
+    if (this.edgeScrollX > this.viewW - zone) { this.panX -= hSpeed; moved = true; }
+    if (this.edgeScrollY < zone)              { this.panY += vSpeed; moved = true; }
+    if (this.edgeScrollY > this.viewH - zone) { this.panY -= vSpeed; moved = true; }
+
+    if (moved) {
+      this.clampPan();
+      // Re-evaluate the hovered tile since the pan changed without a mouse-move event.
+      if (isFinite(this.edgeScrollX) && isFinite(this.edgeScrollY)) {
+        this.updateHoverFromScreenPos(this.edgeScrollX, this.edgeScrollY);
+      }
+    }
+  }
+
   private renderLoop(timestamp = 0): void {
+    this.applyEdgeScroll();
     this.drawFrame(timestamp);
     this.rafId = requestAnimationFrame((ts) => this.renderLoop(ts));
   }
 
   private drawFrame(timestamp: number): void {
-    const canvas = this.canvasRef.nativeElement;
+    const vw = this.viewW;
+    const vh = this.viewH;
+    if (vw === 0 || vh === 0) return;
+
     // Read all signals ONCE at the top of the frame — never mid-render.
     const buildings = this.gameState.mercuryBuildings();
     const selectedId = this.selectedBuildingId();
     const reducedMotion = this.settings.reducedMotion();
-    const originX = canvas.width / 2;
 
-    this.ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // The tile (0,0) top-vertex is always drawn at (vw/2, ORIGIN_Y) in draw-space.
+    // ctx.translate(panX, panY) shifts the entire drawn scene, so the screen position
+    // of tile (0,0) is (vw/2 + panX, ORIGIN_Y + panY).
+    const originX = vw / 2;
 
-    // 1. Draw all tiles back→front
+    // Fill background before drawing tiles — avoids a transparent/black flash when
+    // the canvas is resized between RAF frames.
+    this.ctx.fillStyle = '#1a1520';
+    this.ctx.fillRect(0, 0, vw, vh);
+
+    // Apply pan translation for the scene.
+    this.ctx.save();
+    this.ctx.translate(this.panX, this.panY);
+
+    // Draw all tiles back→front (includes border tiles that cover viewport corners)
     for (const { col, row } of ALL_TILES) {
       const terrain = this.getTerrainAt(col, row);
       const building = this.buildingAtTile(col, row, buildings);
       this.drawTile(col, row, terrain, building, originX, timestamp, reducedMotion);
     }
 
-    // 2. Draw placement flash overlays
+    // Draw placement flash overlays
     if (!reducedMotion) {
       for (const [key, flashTime] of this.freshlyPlaced) {
         const elapsed = timestamp - flashTime;
@@ -261,13 +395,15 @@ export class MercuryGridComponent implements AfterViewInit, OnDestroy {
       this.freshlyPlaced.clear();
     }
 
-    // 3. Workers stub (see TODO.md)
+    // Workers stub (see TODO.md)
     this.drawWorkers();
 
-    // 4. Hover preview
+    // Hover preview
     if (selectedId !== null && this.hoverTile !== null) {
       this.drawHoverPreview(this.hoverTile, selectedId, buildings, originX, timestamp, reducedMotion);
     }
+
+    this.ctx.restore();
   }
 
   // ---------------------------------------------------------------------------
@@ -276,21 +412,28 @@ export class MercuryGridComponent implements AfterViewInit, OnDestroy {
 
   /**
    * Returns the terrain type for a tile.
-   * Checks crater overrides first, then falls back to row-based terrain rules.
-   * Does NOT look at slots — slot rendering is separate (tint layer).
+   * Crater overrides only apply within the 64×64 game grid.
+   * For rows outside the game grid (border tiles), the row is clamped to the
+   * nearest edge before looking up terrain rules — this naturally extends polar
+   * ice bands beyond rows 0 and 63 without needing extra JSON entries.
    */
   private getTerrainAt(col: number, row: number): TerrainType {
     const mapData = this.data.getMercuryMapData();
     if (!mapData) return 'flat';
 
-    for (const ov of mapData.craterOverrides) {
-      if (col >= ov.colMin && col <= ov.colMax && row >= ov.rowMin && row <= ov.rowMax) {
-        return 'crater';
+    // Crater overrides: only valid within the playable game grid.
+    if (isInBounds(col, row, GRID_COLS, GRID_ROWS)) {
+      for (const ov of mapData.craterOverrides) {
+        if (col >= ov.colMin && col <= ov.colMax && row >= ov.rowMin && row <= ov.rowMax) {
+          return 'crater';
+        }
       }
     }
 
+    // Clamp row to game-grid range so terrain bands extend naturally into the border.
+    const effectiveRow = Math.max(0, Math.min(GRID_ROWS - 1, row));
     for (const rule of mapData.terrainRules) {
-      if (row >= rule.rowMin && row <= rule.rowMax) {
+      if (effectiveRow >= rule.rowMin && effectiveRow <= rule.rowMax) {
         return rule.type as TerrainType;
       }
     }
@@ -344,7 +487,7 @@ export class MercuryGridComponent implements AfterViewInit, OnDestroy {
     if (allowedSlotType === 'any') return true;
     if (allowedSlotType) {
       // Must not be placing a reserved-only building (e.g. fusion_reactor) on a free tile.
-      const reservedTypes = ['fusion_reactor', 'mass_driver', 'solar_array', 'refinery'];
+      const reservedTypes = ['fusion_reactor', 'mass_driver', 'refinery'];
       if (reservedTypes.includes(allowedSlotType)) return false;
       return terrain === allowedSlotType || allowedSlotType === 'any';
     }
@@ -541,8 +684,17 @@ export class MercuryGridComponent implements AfterViewInit, OnDestroy {
   // ---------------------------------------------------------------------------
 
   private onMouseMove(e: MouseEvent): void {
-    const originX = this.canvasRef.nativeElement.width / 2;
-    const { col, row } = toGrid(e.offsetX, e.offsetY, originX, ORIGIN_Y);
+    // Always track position so edge-scroll knows where the mouse is.
+    this.edgeScrollX = e.offsetX;
+    this.edgeScrollY = e.offsetY;
+    this.updateHoverFromScreenPos(e.offsetX, e.offsetY);
+  }
+
+  /** Recalculate the hovered tile from a viewport pixel position. */
+  private updateHoverFromScreenPos(screenX: number, screenY: number): void {
+    const originX = this.viewW / 2;
+    // Convert viewport pixel → draw-space by subtracting pan offset.
+    const { col, row } = toGrid(screenX - this.panX, screenY - this.panY, originX, ORIGIN_Y);
     if (!isInBounds(col, row, GRID_COLS, GRID_ROWS)) {
       this.hoverTile = null;
       this._hoveredTileInfo.set(null);
@@ -566,14 +718,16 @@ export class MercuryGridComponent implements AfterViewInit, OnDestroy {
   }
 
   private onMouseLeave(): void {
+    this.edgeScrollX = -Infinity;
+    this.edgeScrollY = -Infinity;
     this.hoverTile = null;
     this._hoveredTileInfo.set(null);
     this._hoveredMiningLocation.set(null);
   }
 
   private onClick(e: MouseEvent): void {
-    const originX = this.canvasRef.nativeElement.width / 2;
-    const { col, row } = toGrid(e.offsetX, e.offsetY, originX, ORIGIN_Y);
+    const originX = this.viewW / 2;
+    const { col, row } = toGrid(e.offsetX - this.panX, e.offsetY - this.panY, originX, ORIGIN_Y);
     if (!isInBounds(col, row, GRID_COLS, GRID_ROWS)) return;
 
     const buildings = this.gameState.mercuryBuildings();
@@ -606,7 +760,7 @@ export class MercuryGridComponent implements AfterViewInit, OnDestroy {
           this.freshlyPlaced.set(`${t.col},${t.row}`, now);
         }
         this._announcementText.set(
-          `${buildingData.displayName} construction started at column ${col + 1}, row ${row + 1}.`,
+          `${buildingData.displayName} construction started at column ${col - VIEW_OFFSET + 1}, row ${row - VIEW_OFFSET + 1}.`,
         );
       }
     }
@@ -624,10 +778,10 @@ export class MercuryGridComponent implements AfterViewInit, OnDestroy {
     const move = moves[e.key];
     if (move) {
       e.preventDefault();
-      const current = this.hoverTile ?? { col: Math.floor(GRID_COLS / 2), row: Math.floor(GRID_ROWS / 2) };
+      const current = this.hoverTile ?? { col: Math.floor((VIEW_OFFSET + VIEW_LAST) / 2), row: Math.floor((VIEW_OFFSET + VIEW_LAST) / 2) };
       const next = {
-        col: Math.max(0, Math.min(GRID_COLS - 1, current.col + move.dc)),
-        row: Math.max(0, Math.min(GRID_ROWS - 1, current.row + move.dr)),
+        col: Math.max(VIEW_OFFSET, Math.min(VIEW_LAST, current.col + move.dc)),
+        row: Math.max(VIEW_OFFSET, Math.min(VIEW_LAST, current.row + move.dr)),
       };
       this.hoverTile = next;
       const terrain = this.getTerrainAt(next.col, next.row);
@@ -675,7 +829,7 @@ export class MercuryGridComponent implements AfterViewInit, OnDestroy {
               this.freshlyPlaced.set(`${t.col},${t.row}`, now);
             }
             this._announcementText.set(
-              `${buildingData.displayName} construction started at column ${col + 1}, row ${row + 1}.`,
+              `${buildingData.displayName} construction started at column ${col - VIEW_OFFSET + 1}, row ${row - VIEW_OFFSET + 1}.`,
             );
           }
         }
@@ -687,6 +841,9 @@ export class MercuryGridComponent implements AfterViewInit, OnDestroy {
   // ---------------------------------------------------------------------------
   // Template helpers
   // ---------------------------------------------------------------------------
+
+  /** Convert an internal grid coord to the 1-based user-facing display coord. */
+  displayCoord(val: number): number { return val - VIEW_OFFSET + 1; }
 
   terrainLabel(terrain: string): string {
     const labels: Record<string, string> = {

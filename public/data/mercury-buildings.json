@@ -59,7 +59,7 @@
     "maxInstances": null,
     "unlockCondition": null,
     "placementRule": "flat",
-    "allowedSlotType": "solar_array",
+    "allowedSlotType": null,
     "footprint": [[0,0],[1,0],[0,1],[1,1]],
     "effects": [{ "type": "dyson_panels_per_year", "amount": 1 }]
   },
