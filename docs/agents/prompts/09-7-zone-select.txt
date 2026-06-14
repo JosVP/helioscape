@@ -1,0 +1,112 @@
+Block 9.7 — mercury-hud/zone-select component (starting zone selection modal)
+
+Implement the first-visit blocking modal that lets the player choose their starting zone.
+Depends on Block 9.6 (mercurySelectedZone signal and selectMercuryZone() mutation).
+
+Read before starting:
+  - docs/agents/ARCHITECTURE.md § "Mercury full-screen view" → Starting zone selection
+  - docs/agents/GDD/mercury-additions.md § Starting Zones (zone names, taglines, descriptions)
+  - public/data/mercury-map.json (startingZones array)
+  - src/app/core/services/data.service.ts → getAllMercuryStartingZones()
+  - src/app/core/services/game-state.service.ts → mercurySelectedZone, selectMercuryZone()
+
+─────────────────────────────────────────────────────────────────────────────
+File: src/app/features/mercury/mercury-hud/zone-select/zone-select.component.ts
+─────────────────────────────────────────────────────────────────────────────
+
+Selector: app-mercury-zone-select
+Standalone, OnPush.
+Inject: DataService, GameStateService.
+
+No inputs. No outputs. Interacts via GameStateService directly.
+NOTE: This component renders as a blocking overlay — it has no "cancel" path.
+      The player MUST choose a zone before interacting with the map.
+
+Signals:
+  readonly zones = signal(this.data.getAllMercuryStartingZones())
+  readonly hoveredZoneId = signal<string | null>(null)
+
+Template:
+  <div class="zone-select" role="dialog" aria-modal="true" aria-label="Choose your starting zone">
+    <div class="zone-select__backdrop"></div>
+    <div class="zone-select__content">
+      <h2 class="zone-select__title">Choose your starting zone</h2>
+      <p class="zone-select__subtitle">
+        This choice is permanent. It determines which ore deposits and buildings
+        are available from the start.
+      </p>
+
+      <div class="zone-select__cards">
+        @for (zone of zones(); track zone.id) {
+          <div class="zone-select__card"
+               [class.zone-select__card--hovered]="hoveredZoneId() === zone.id"
+               (mouseenter)="hoveredZoneId.set(zone.id)"
+               (mouseleave)="hoveredZoneId.set(null)"
+               (click)="confirmSelection(zone.id)"
+               role="button" tabindex="0"
+               (keydown.enter)="confirmSelection(zone.id)"
+               (keydown.space)="$event.preventDefault(); confirmSelection(zone.id)"
+               [attr.aria-label]="'Choose ' + zone.displayName">
+            <div class="zone-select__card-name">{{ zone.displayName }}</div>
+            <div class="zone-select__card-tagline">{{ zone.tagline }}</div>
+            <div class="zone-select__card-desc">{{ zone.description }}</div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+Methods:
+  confirmSelection(zoneId: string): void
+    this.gameState.selectMercuryZone(zoneId)
+    // Component is removed from DOM via @if in mercury.component.ts after state change
+
+SCSS:
+  .zone-select — position: absolute; inset: 0; z-index: 50; display: flex;
+    align-items: center; justify-content: center;
+  .zone-select__backdrop — position: absolute; inset: 0;
+    background: rgba(0,0,0,0.75); backdrop-filter: blur(2px);
+  .zone-select__content — position: relative; z-index: 1; max-width: 860px;
+    width: 90%; padding: var(--space-6);
+  .zone-select__title — font-size: var(--font-size-2xl); color: var(--color-text-primary);
+    margin-bottom: var(--space-2);
+  .zone-select__subtitle — color: var(--color-text-muted); margin-bottom: var(--space-5);
+  .zone-select__cards — display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-4);
+  .zone-select__card — background: var(--color-surface-2); border: 1px solid var(--color-border);
+    border-radius: var(--radius-md); padding: var(--space-4); cursor: pointer;
+    transition: border-color var(--duration-fast) ease, transform var(--duration-fast) ease;
+    &--hovered { border-color: var(--color-accent-primary); transform: translateY(-2px); }
+  .zone-select__card-name — font-size: var(--font-size-lg); font-weight: 600;
+    margin-bottom: var(--space-1);
+  .zone-select__card-tagline — font-size: var(--font-size-sm); color: var(--color-accent-secondary);
+    margin-bottom: var(--space-2);
+  .zone-select__card-desc — font-size: var(--font-size-sm); color: var(--color-text-secondary);
+    line-height: 1.5;
+
+─────────────────────────────────────────────────────────────────────────────
+Wire into mercury.component.ts
+─────────────────────────────────────────────────────────────────────────────
+
+Import MercuryZoneSelectComponent.
+Inject GameStateService.
+
+Replace <!-- mercury-hud/zone-select goes here --> with:
+
+  @if (gameState.mercurySelectedZone() === null) {
+    <app-mercury-zone-select />
+  }
+
+The component is inside the mercury view container (position: absolute covers the canvas
+area). Using @if ensures it is destroyed after zone selection — no cleanup needed.
+
+─────────────────────────────────────────────────────────────────────────────
+ACCEPTANCE CRITERIA
+─────────────────────────────────────────────────────────────────────────────
+
+- On first Mercury visit (mercurySelectedZone === null), the overlay appears
+- Map is visible but non-interactive behind the modal (pointer-events: none on canvas when overlay active — add [attr.inert]="gameState.mercurySelectedZone() === null" on <app-mercury-grid>)
+- Three zone cards show name, tagline, and description from mercury-map.json
+- Clicking a card calls selectMercuryZone(), the modal disappears, map becomes interactive
+- Choice persists through save/load (serialised in Block 9.6)
+- ng build passes with zero errors

@@ -17,6 +17,7 @@ import { CultureEventCardComponent } from '@app/features/culture-events/culture-
 import { CultureEventToastComponent } from '@app/features/culture-events/culture-event-toast/culture-event-toast.component';
 import { HudComponent } from '@app/features/hud/hud.component';
 import { PlanetsMenuComponent } from '@app/features/hud/planets-menu/planets-menu.component';
+import { MercuryComponent } from '@app/features/mercury/mercury.component';
 import { OrreryComponent } from '@app/features/orrery/orrery.component';
 import { PauseMenuComponent } from '@app/features/pause-menu/pause-menu.component';
 import { PlanetPanelComponent } from '@app/features/planet-panel/planet-panel.component';
@@ -30,6 +31,7 @@ import { ResearchHubComponent } from '@app/features/research-hub/research-hub.co
     HudComponent,
     PlanetsMenuComponent,
     OrreryComponent,
+    MercuryComponent,
     PlanetPanelComponent,
     CultureEventCardComponent,
     CultureEventToastComponent,
@@ -54,6 +56,8 @@ export class GameShellComponent implements OnInit, OnDestroy {
   readonly selectedPlanetId = signal<string | null>(null);
   readonly isPauseMenuOpen = signal(false);
   readonly isResearchHubOpen = signal(false);
+  /** Controls which full-screen view is shown. Orrery is hidden (not destroyed) when Mercury is active. */
+  readonly activeView = signal<'orrery' | 'mercury'>('orrery');
   /** Set to true when the player clicks the Moon row; signals PlanetPanel to open at the Moon/research tab. */
   readonly moonTabActive = signal(false);
 
@@ -68,7 +72,15 @@ export class GameShellComponent implements OnInit, OnDestroy {
 
     this.eventBus.planetSelected$
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((id) => this.selectedPlanetId.set(id));
+      .subscribe((id) => {
+        if (id === 'mercury') {
+          this.activeView.set('mercury');
+          this.selectedPlanetId.set(null);
+        } else {
+          this.activeView.set('orrery');
+          this.selectedPlanetId.set(id);
+        }
+      });
 
     this.eventBus.moonTabRequested$
       .pipe(takeUntilDestroyed(this.destroyRef))

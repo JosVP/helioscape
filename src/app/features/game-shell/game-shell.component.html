@@ -2,7 +2,14 @@
 
 <app-planets-menu [selectedPlanetId]="selectedPlanetId()" />
 
-<app-orrery />
+<!-- Orrery is hidden with display:none (not destroyed) so Three.js scene is preserved. -->
+<app-orrery [style.display]="activeView() === 'orrery' ? 'block' : 'none'" />
+
+<!-- Mercury full-screen RTS view. Hidden when orrery is active. -->
+<app-mercury
+  [style.display]="activeView() === 'mercury' ? 'block' : 'none'"
+  (backToOrrery)="activeView.set('orrery')"
+/>
 
 <app-planet-panel
   [planetId]="selectedPlanetId()"

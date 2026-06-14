@@ -1,0 +1,111 @@
+Block 9.3 — mercury-hud/sidebar component (mini-map + build list)
+
+Implement the right-hand sidebar for the Mercury RTS view.
+Builds on Block 9.2 (mercury.component.ts must exist).
+
+Read before starting:
+  - docs/agents/ARCHITECTURE.md § "Mercury full-screen view" → Layout, Building categories
+  - public/data/mercury-map.json (slot positions, miningLocations)
+  - public/data/mercury-buildings.json (all buildings, categories)
+  - src/app/features/mercury/mercury.component.ts
+
+─────────────────────────────────────────────────────────────────────────────
+File: src/app/features/mercury/mercury-hud/sidebar/sidebar.component.ts
+─────────────────────────────────────────────────────────────────────────────
+
+Selector: app-mercury-sidebar
+Standalone, OnPush.
+Inject: DataService, GameStateService.
+
+Outputs:
+  buildingSelected = output<string | null>()   // emits buildingId, or null to deselect
+
+Signals (internal):
+  readonly activeTab = signal<'buildings' | 'units' | 'upgrades' | 'space'>('buildings')
+  readonly selectedBuildingId = signal<string | null>(null)
+
+Computed:
+  readonly filteredBuildings = computed(() => {
+    // Read all mercury buildings from DataService
+    // Filter by activeTab === 'buildings' → show buildings with category === 'buildings'
+    // For playtest: all tabs except 'buildings' show an empty state message
+    // Unlocked check: check unlockCondition against GameStateService.completedTech()
+    // maxInstances check: count operational buildings of that type vs maxInstances
+  })
+
+Template:
+  <div class="mercury-sidebar">
+    <div class="mercury-sidebar__minimap">
+      <!-- Mini-map canvas: Block 9.3b (post-playtest) — render placeholder div for now -->
+      <div class="mercury-sidebar__minimap-placeholder" aria-label="Mini-map coming soon"></div>
+    </div>
+
+    <div class="mercury-sidebar__tabs" role="tablist">
+      @for (tab of tabs; track tab.id) {
+        <button role="tab" [attr.aria-selected]="activeTab() === tab.id"
+                (click)="activeTab.set(tab.id)" class="mercury-sidebar__tab"
+                [class.mercury-sidebar__tab--active]="activeTab() === tab.id">
+          {{ tab.label }}
+        </button>
+      }
+    </div>
+
+    <div class="mercury-sidebar__list" role="tabpanel">
+      @if (filteredBuildings().length === 0) {
+        <p class="mercury-sidebar__empty">Nothing available yet.</p>
+      }
+      @for (b of filteredBuildings(); track b.id) {
+        <div class="mercury-sidebar__card"
+             [class.mercury-sidebar__card--selected]="selectedBuildingId() === b.id"
+             (click)="selectBuilding(b.id)"
+             role="button" tabindex="0"
+             [attr.aria-pressed]="selectedBuildingId() === b.id"
+             (keydown.enter)="selectBuilding(b.id)"
+             (keydown.space)="$event.preventDefault(); selectBuilding(b.id)">
+          <div class="mercury-sidebar__card-name">{{ b.displayName }}</div>
+          <div class="mercury-sidebar__card-cost">
+            @if (b.cost.commonOre > 0) { <span>Ore: {{ b.cost.commonOre }}</span> }
+            @if (b.cost.rareMetals > 0) { <span>Metals: {{ b.cost.rareMetals }}</span> }
+            @if (b.cost.polarVolatiles > 0) { <span>Vol: {{ b.cost.polarVolatiles }}</span> }
+          </div>
+          <div class="mercury-sidebar__card-meta">
+            {{ b.buildTimeYears }}yr
+            @if (b.energyDrawGw < 0) { · +{{ -b.energyDrawGw }} GW }
+            @else if (b.energyDrawGw > 0) { · {{ b.energyDrawGw }} GW draw }
+          </div>
+          <div class="mercury-sidebar__card-desc">{{ b.description }}</div>
+        </div>
+      }
+    </div>
+  </div>
+
+Methods:
+  selectBuilding(id: string): void
+    If selectedBuildingId() === id → deselect (null) and emit null
+    Else → set selectedBuildingId(id) and emit id
+
+SCSS: Use design tokens only. Cards have a subtle border, selected state uses
+  --color-accent-primary with left-border highlight. Compact layout, text xs/sm.
+  Mini-map placeholder: min-height 120px, background var(--color-surface-3),
+  border: 1px dashed var(--color-border), label centered in muted text.
+
+─────────────────────────────────────────────────────────────────────────────
+Wire into mercury.component.ts
+─────────────────────────────────────────────────────────────────────────────
+
+Import MercurySidebarComponent.
+Replace the <!-- mercury-hud/sidebar goes here --> placeholder comment with:
+  <app-mercury-sidebar (buildingSelected)="selectedBuildingId.set($event)" />
+
+Pass selectedBuildingId to MercuryGridComponent as before.
+
+─────────────────────────────────────────────────────────────────────────────
+ACCEPTANCE CRITERIA
+─────────────────────────────────────────────────────────────────────────────
+
+- Sidebar renders to the right of the canvas
+- Four tabs visible; Buildings tab shows the 5 buildings from mercury-buildings.json
+- Clicking a building card selects it; clicking again deselects
+- Selected building id flows down to MercuryGridComponent → hover preview shows on map
+- Mini-map area is a clearly-labelled placeholder (no canvas yet)
+- ng build passes with zero errors

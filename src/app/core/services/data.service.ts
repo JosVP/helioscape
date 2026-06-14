@@ -44,6 +44,7 @@ export interface MercuryBuilding {
   id: string;
   displayName: string;
   description: string;
+  /** Sidebar filter tab: 'buildings' | 'units' | 'upgrades' | 'space' */
   category: string;
   cost: ResourceStore;
   energyDrawGw: number;
@@ -51,8 +52,83 @@ export interface MercuryBuilding {
   repeatable: boolean;
   maxInstances: number | null;
   unlockCondition: string | null;
+  /** Legacy terrain-match rule. Used when allowedSlotType is absent. */
   placementRule: string;
+  /**
+   * Slot type this building requires. Matches MercurySlot.slotType.
+   * 'any' = can go on any unlocked non-reserved tile of the correct terrain.
+   * If absent, falls back to placementRule for terrain matching.
+   */
+  allowedSlotType?: string;
+  /**
+   * 2-D footprint as [colOffset, rowOffset] pairs relative to anchor.
+   * Defaults to [[0,0],[1,0],[0,1],[1,1]] (2×2) when absent.
+   */
+  footprint?: [number, number][];
   effects: MercuryBuildingEffect[];
+}
+
+// ---------------------------------------------------------------------------
+// Mercury map data
+// ---------------------------------------------------------------------------
+
+export interface MercuryTerrainRule {
+  type: string;
+  rowMin: number;
+  rowMax: number;
+}
+
+export interface MercuryCraterOverride {
+  colMin: number;
+  colMax: number;
+  rowMin: number;
+  rowMax: number;
+}
+
+export interface MercurySlot {
+  id: string;
+  col: number;
+  row: number;
+  /**
+   * 'mining_location' | 'refinery' | 'factory' | 'solar_array' |
+   * 'mass_driver' | 'fusion_reactor'
+   */
+  slotType: string;
+  /** When true only the designated building type may occupy this slot. */
+  reserved: boolean;
+  /** Slot ids that transition LOCKED → AVAILABLE when this slot becomes operational. */
+  adjacentTo: string[];
+  /** Starting zone id this slot belongs to (null = not in any starting zone). */
+  startingZone: string | null;
+}
+
+export interface MercuryMiningLocation {
+  slotId: string;
+  oreRatios: { commonOre: number; rareMetals: number; polarVolatiles: number };
+  /** Human-readable ratio string for the tooltip. */
+  oreRatioDisplay: string;
+  adjacentRefinerySlots: string[];
+}
+
+export interface MercuryStartingZone {
+  id: string;
+  displayName: string;
+  tagline: string;
+  description: string;
+  /** Bounding box of flat tiles unlocked initially (col/row inclusive). */
+  seedArea: { colMin: number; colMax: number; rowMin: number; rowMax: number };
+  /** Special slot ids (mines, reserved slots) that start as AVAILABLE. */
+  seedSlots: string[];
+}
+
+export interface MercuryMapData {
+  gridCols: number;
+  gridRows: number;
+  terrainRules: MercuryTerrainRule[];
+  craterOverrides: MercuryCraterOverride[];
+  slots: MercurySlot[];
+  miningLocations: MercuryMiningLocation[];
+  startingZones: MercuryStartingZone[];
 }
 
 /**
@@ -108,6 +184,7 @@ export class DataService {
   private mercuryBuildings: MercuryBuilding[] = [];
   private mercuryComponents: MercuryComponent[] = [];
   private bioPhases: Record<string, BioPhaseDef[]> = {};
+  private mercuryMap: MercuryMapData | null = null;
 
   /**
    * Fetches all game-data JSON files in parallel and stores them.
@@ -125,6 +202,7 @@ export class DataService {
         mercuryBuildings,
         bioPhases,
         mercuryComponents,
+        mercuryMap,
       ] = await Promise.all([
         this.fetchJson<PlanetData[]>('/data/planets.json'),
         this.fetchJson<TechNode[]>('/data/tech-tree.json'),
@@ -135,6 +213,7 @@ export class DataService {
         this.fetchJson<MercuryBuilding[]>('/data/mercury-buildings.json'),
         this.fetchJson<Record<string, BioPhaseDef[]>>('/data/bio-phases.json'),
         this.fetchJson<MercuryComponent[]>('/data/mercury-components.json'),
+        this.fetchJson<MercuryMapData>('/data/mercury-map.json'),
       ]);
 
       this.planets = planetsArray.reduce(
@@ -152,6 +231,7 @@ export class DataService {
       this.mercuryBuildings = mercuryBuildings;
       this.bioPhases = bioPhases;
       this.mercuryComponents = mercuryComponents;
+      this.mercuryMap = mercuryMap;
 
       console.log('DataService: all game data loaded');
     } catch (error) {
@@ -262,6 +342,34 @@ export class DataService {
 
   getAllMercuryComponents(): MercuryComponent[] {
     return this.mercuryComponents;
+  }
+
+  // -------------------------------------------------------------------------
+  // Mercury map accessors
+  // -------------------------------------------------------------------------
+
+  /**
+   * Returns the full mercury map data loaded from mercury-map.json.
+   * Returns null before loadAll() has completed (should not happen in normal usage).
+   */
+  getMercuryMapData(): MercuryMapData | null {
+    return this.mercuryMap;
+  }
+
+  getMercurySlot(id: string): MercurySlot | undefined {
+    return this.mercuryMap?.slots.find((s) => s.id === id);
+  }
+
+  getMercuryMiningLocation(slotId: string): MercuryMiningLocation | undefined {
+    return this.mercuryMap?.miningLocations.find((m) => m.slotId === slotId);
+  }
+
+  getMercuryStartingZone(id: string): MercuryStartingZone | undefined {
+    return this.mercuryMap?.startingZones.find((z) => z.id === id);
+  }
+
+  getAllMercuryStartingZones(): MercuryStartingZone[] {
+    return this.mercuryMap?.startingZones ?? [];
   }
 
   // -------------------------------------------------------------------------

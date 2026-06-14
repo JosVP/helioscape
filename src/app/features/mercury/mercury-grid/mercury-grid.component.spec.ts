@@ -17,7 +17,7 @@ import { MercuryBuildService } from '@app/core/systems/mercury-build.service';
 function makePlacedBuilding(overrides: Partial<PlacedBuilding> = {}): PlacedBuilding {
   return {
     id: 'pb-1',
-    buildingId: 'solar_array',
+    buildingId: 'mining_outpost',
     col: 3,
     row: 3,
     status: 'operational',
@@ -29,17 +29,19 @@ function makePlacedBuilding(overrides: Partial<PlacedBuilding> = {}): PlacedBuil
 
 function makeMercuryBuilding(overrides: Partial<MercuryBuilding> = {}): MercuryBuilding {
   return {
-    id: 'solar_array',
-    displayName: 'Solar Array',
+    id: 'mining_outpost',
+    displayName: 'Mining Outpost',
     description: 'Test building',
-    category: 'power',
-    cost: { commonOre: 15, rareMetals: 5, polarVolatiles: 0 },
-    energyDrawGw: -8,
-    buildTimeYears: 2,
+    category: 'buildings',
+    cost: { commonOre: 0, rareMetals: 10, polarVolatiles: 0 },
+    energyDrawGw: 2,
+    buildTimeYears: 3,
     repeatable: true,
     maxInstances: null,
     unlockCondition: null,
     placementRule: 'flat',
+    allowedSlotType: 'any',
+    footprint: [[0,0],[1,0],[0,1],[1,1]],
     effects: [],
     ...overrides,
   };
@@ -90,6 +92,9 @@ function makeGameStateFake(buildings: PlacedBuilding[] = []) {
 function makeDataFake(building: MercuryBuilding | undefined = makeMercuryBuilding()) {
   return {
     getMercuryBuilding: vi.fn(() => building),
+    getMercuryMapData: vi.fn(() => null),
+    getMercurySlot: vi.fn(() => undefined),
+    getMercuryMiningLocation: vi.fn(() => undefined),
   };
 }
 
@@ -192,14 +197,13 @@ describe('MercuryGridComponent', () => {
     const placedBuilding = makePlacedBuilding({ col: 3, row: 3 });
     const { component, canvas } = setup([placedBuilding]);
 
-    const emitted: Array<{ col: number; row: number; hasBuilding: boolean }> = [];
+    const emitted: Array<{ col: number; row: number; hasBuilding: boolean; terrain: string; slotId: string | null }> = [];
     component.tileClicked.subscribe((e) => emitted.push(e));
 
-    // Fire a click event at a pixel that maps to col=3, row=3
-    // toScreen(3, 3, 416, 80) → x=416, y=176; so clicking that pixel → (3,3)
+    // toScreen(3, 3, originX, 80): x = originX + 0*32 = originX, y = 80 + 6*16 = 176
+    // originX = CANVAS_WIDTH / 2 = 4288 / 2 = 2144
     const clickEvent = new MouseEvent('click', { bubbles: true });
-    // offsetX/Y are read-only; use defineProperty
-    Object.defineProperty(clickEvent, 'offsetX', { value: 416 });
+    Object.defineProperty(clickEvent, 'offsetX', { value: 2144 });
     Object.defineProperty(clickEvent, 'offsetY', { value: 176 });
     canvas.dispatchEvent(clickEvent);
 
@@ -215,26 +219,25 @@ describe('MercuryGridComponent', () => {
       // Set the input signal value by using the fixture's input setter pattern
     });
 
-    // Simulate selectedBuildingId being 'solar_array' via component's signal input
-    // We cannot set signal inputs directly; we use fixture.componentRef.setInput
+    // Simulate selectedBuildingId being 'mining_outpost' (allowedSlotType: 'any')
     const { fixture } = setup([]);
-    fixture.componentRef.setInput('selectedBuildingId', 'solar_array');
+    fixture.componentRef.setInput('selectedBuildingId', 'mining_outpost');
     fixture.detectChanges();
 
-    const emitted: Array<{ col: number; row: number; hasBuilding: boolean }> = [];
+    const emitted: Array<{ col: number; row: number; hasBuilding: boolean; terrain: string; slotId: string | null }> = [];
     fixture.componentInstance.tileClicked.subscribe((e) => emitted.push(e));
 
     // Click on an empty flat tile (col=4, row=4)
-    // toScreen(4, 4, 416, 80) → x=416, y=208
+    // toScreen(4, 4, 2144, 80) → x=2144, y=80+8*16=208
     const clickEvent = new MouseEvent('click', { bubbles: true });
     const canvas2 = fixture.nativeElement.querySelector('canvas') as HTMLCanvasElement;
-    Object.defineProperty(clickEvent, 'offsetX', { value: 416 });
+    Object.defineProperty(clickEvent, 'offsetX', { value: 2144 });
     Object.defineProperty(clickEvent, 'offsetY', { value: 208 });
     canvas2.dispatchEvent(clickEvent);
 
     expect(gameStateFake._placeMock).toHaveBeenCalled();
     const placed: PlacedBuilding = gameStateFake._placeMock.mock.calls[0][0] as PlacedBuilding;
-    expect(placed.buildingId).toBe('solar_array');
+    expect(placed.buildingId).toBe('mining_outpost');
     expect(placed.status).toBe('building');
     expect(placed.buildProgressYears).toBe(0);
   });

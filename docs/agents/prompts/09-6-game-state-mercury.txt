@@ -1,0 +1,131 @@
+Block 9.6 — GameStateService: Mercury RTS signals + miner assignment
+
+Extend GameStateService with all state required by the Mercury RTS view.
+This unblocks full miner assignment (Block 9.5b), zone selection (Block 9.7),
+slot unlock cascade, and the resource/power HUD (Block 9.8).
+
+Read before starting:
+  - docs/agents/TODO.md § "GameStateService — Mercury RTS signals" (full spec)
+  - docs/agents/ARCHITECTURE.md § "Mercury full-screen view" → Slot-based placement,
+    Starting zone selection, Mercury-local power
+  - src/app/core/services/game-state.service.ts (existing signals and serialisation)
+  - src/app/core/models/game-state.model.ts (SerializedGameState, add new fields here)
+  - public/data/mercury-map.json (slot ids, zone seed slots, terrain)
+
+─────────────────────────────────────────────────────────────────────────────
+New interfaces — add to src/app/core/models/game-state.model.ts
+─────────────────────────────────────────────────────────────────────────────
+
+export type MercurySlotStatus = 'locked' | 'available' | 'building' | 'operational';
+
+export interface MercuryMinerState {
+  poolCount: number;              // total miners in reserve (unassigned)
+  assignments: Record<string, number>;  // slotId → number of miners assigned
+}
+
+export interface MercuryPath {
+  id: string;
+  segments: { col: number; row: number }[];  // empty for playtest
+}
+
+─────────────────────────────────────────────────────────────────────────────
+Add to SerializedGameState and GameStateService
+─────────────────────────────────────────────────────────────────────────────
+
+SerializedGameState new fields:
+  mercurySelectedZone: string | null
+  mercuryMiners: MercuryMinerState
+  mercurySlotStates: Record<string, MercurySlotStatus>  // slotId → status
+  resourceReservations: ResourceStore
+
+GameStateService new private signals (writable):
+  private readonly _mercurySelectedZone = signal<string | null>(null)
+  private readonly _mercuryMiners = signal<MercuryMinerState>({ poolCount: 3, assignments: {} })
+  private readonly _mercurySlotStates = signal<Record<string, MercurySlotStatus>>({})
+  private readonly _resourceReservations = signal<ResourceStore>({ commonOre: 0, rareMetals: 0, polarVolatiles: 0 })
+
+GameStateService new public readonly signals:
+  readonly mercurySelectedZone: Signal<string | null>
+  readonly mercuryMiners: Signal<MercuryMinerState>
+  readonly mercurySlotStates: Signal<Record<string, MercurySlotStatus>>
+  readonly resourceReservations: Signal<ResourceStore>
+
+New computed:
+  readonly mercuryLocalPower = computed(() => {
+    const buildings = this.mercuryBuildings();
+    const defs = inject(DataService);  // NOTE: inject only works if this computed is initialised
+    // in the constructor context. Use a private method pattern instead:
+    // Call a private _computeMercuryLocalPower() helper that reads from this.mercuryBuildings()
+    // Sum energyDrawGw for all 'operational' buildings; negative = produced, positive = consumed
+    // return { producedGw, consumedGw }
+    //   producedGw = sum of |energyDrawGw| where energyDrawGw < 0
+    //   consumedGw = sum of energyDrawGw where energyDrawGw > 0
+  })
+  NOTE: DataService is already injected by GameStateService (or add it). Use inject() only
+  in the constructor body, not inside computed/effect callbacks. Store the reference in a
+  private field first: private readonly data = inject(DataService).
+
+New mutations:
+  selectMercuryZone(zoneId: string): void
+    - Set _mercurySelectedZone(zoneId)
+    - Load mercury-map.json starting zone seed slots from DataService
+    - Set those slots + seedArea tiles to 'available' in _mercurySlotStates
+
+  assignMiner(slotId: string): void
+    - If poolCount > 0: poolCount--, assignments[slotId]++
+
+  unassignMiner(slotId: string): void
+    - If assignments[slotId] > 0: assignments[slotId]--, poolCount++
+
+  reassignMiner(fromSlotId: string, toSlotId: string): void
+    - If assignments[fromSlotId] > 0: assignments[fromSlotId]--, assignments[toSlotId]++
+
+  setResourceReservation(resource: keyof ResourceStore, amount: number): void
+    - Clamp amount >= 0
+    - Update _resourceReservations
+
+  setMercurySlotState(slotId: string, status: MercurySlotStatus): void
+    - Update _mercurySlotStates
+
+Slot unlock cascade:
+  Existing placeMercuryBuilding() mutation should, when a building completes (status →
+  'operational'), call a private _unlockAdjacentSlots(building: PlacedBuilding) method:
+    - Find the slot at building.col/row via DataService.getMercuryMapData()
+    - For each slotId in slot.adjacentTo: if current state is 'locked' → set to 'available'
+  NOTE: placeMercuryBuilding currently sets status directly. If the build is completed via
+  MercuryBuildService (via tick), the state transition happens in MercuryBuildService's
+  completeBuild() method — add the cascade call there too.
+
+─────────────────────────────────────────────────────────────────────────────
+Serialisation
+─────────────────────────────────────────────────────────────────────────────
+
+serialise(): add new fields to the returned object
+hydrate(): restore all new signals from the serialized data
+  - Default missing fields gracefully (e.g. mercurySelectedZone: saved?.mercurySelectedZone ?? null)
+
+─────────────────────────────────────────────────────────────────────────────
+Wire building-info miner assignment (Block 9.5b patch)
+─────────────────────────────────────────────────────────────────────────────
+
+After Block 9.6 exists, update building-info.component.ts to replace the placeholder
+miner note with actual assign/unassign buttons:
+
+  Replace the guarded (gameState as any).mercuryMiners?.() with:
+    gameState.mercuryMiners()
+
+  Add assign/unassign button:
+    <button (click)="gameState.assignMiner(slotId()!)"
+            [disabled]="gameState.mercuryMiners().poolCount === 0">+ Assign miner</button>
+    <button (click)="gameState.unassignMiner(slotId()!)"
+            [disabled]="(gameState.mercuryMiners().assignments[slotId()!] ?? 0) === 0">- Remove</button>
+
+─────────────────────────────────────────────────────────────────────────────
+ACCEPTANCE CRITERIA
+─────────────────────────────────────────────────────────────────────────────
+
+- All new signals serialise/hydrate correctly (save/load round-trip)
+- selectMercuryZone() sets the correct slots to 'available'
+- assignMiner / unassignMiner correctly mutate the pool count
+- mercuryLocalPower computed returns correct producedGw / consumedGw
+- ng build passes with zero errors

@@ -69,10 +69,13 @@ helioscape/
 │   │   │   │   ├── bio-phase/
 │   │   │   │   └── vignette/
 │   │   │   ├── mercury/
-│   │   │   │   ├── mercury.component.ts
-│   │   │   │   ├── mercury-grid/
-│   │   │   │   ├── mercury-hud/
-│   │   │   │   └── building-selector/
+│   │   │   │   ├── mercury.component.ts     # full-screen RTS container
+│   │   │   │   ├── mercury-grid/            # canvas isometric map
+│   │   │   │   └── mercury-hud/
+│   │   │   │       ├── sidebar/             # mini-map + build list
+│   │   │   │       ├── queue-bar/           # bottom production queue
+│   │   │   │       ├── building-info/       # refinery pop-up, mining tooltip
+│   │   │   │       └── zone-select/         # first-visit starting zone modal
 │   │   │   ├── culture-events/
 │   │   │   │   ├── culture-event-card/
 │   │   │   │   └── culture-event-toast/
@@ -97,7 +100,8 @@ helioscape/
 │   │   ├── culture-events.json
 │   │   ├── kardashev-milestones.json
 │   │   ├── resources.json
-│   │   ├── mercury-buildings.json
+│   │   ├── mercury-buildings.json            # building defs: category, footprint, cost, effects
+│   │   ├── mercury-map.json                  # slot positions, mining locations, starting zones
 │   │   ├── organisms.json
 │   │   ├── bio-phases.json
 │   │   └── boosters.json
@@ -364,6 +368,12 @@ TILE_WIDTH = 64    // full diamond width
 TILE_HEIGHT = 32   // full diamond height (TILE_WIDTH / 2)
 ORIGIN_X = canvas.width / 2  // diamond center on canvas
 ORIGIN_Y = 80                 // top of diamond
+
+// Full 64×64 map canvas dimensions:
+// CANVAS_WIDTH  = (64 + 64) * 32 = 4096px
+// CANVAS_HEIGHT = (64 + 64) * 16 + padding ≈ 2200px
+// The viewport is a CSS-clipped scrollable window over this canvas.
+// Scroll position is a signal; the mini-map reflects it.
 ```
 
 Draw order: sort all tiles by `(col + row)`, draw back to front.
@@ -608,3 +618,173 @@ toGrid(screenX, screenY):
 Draw order: sort tiles by (col + row) ascending, draw back to front.
 Building z-order: zIndex = row + col + building.heightTiles
 ```
+
+---
+
+## Mercury full-screen view
+
+### View switching
+
+Mercury is a **full-screen view** that replaces the orrery when active, not a side panel or route.
+
+`GameShellComponent` owns an `activeView` signal:
+
+```ts
+readonly activeView = signal<'orrery' | 'mercury'>('orrery');
+```
+
+The orrery canvas uses `[style.display]` binding, NOT `@if`. This preserves the Three.js
+scene (renderer, camera, scene graph) across view switches — destroying and re-creating it
+is expensive and causes visible loading flash.
+
+```html
+<!-- game-shell.component.html -->
+<app-orrery [style.display]="activeView() === 'orrery' ? 'block' : 'none'" />
+<app-mercury [style.display]="activeView() === 'mercury' ? 'block' : 'none'" />
+```
+
+Mercury is entered by clicking Mercury in the orrery or the planets panel. No router navigation
+involved. Steam builds have no browser back-button — the back-to-orrery button is inside the
+Mercury view itself.
+
+### Layout
+
+```
+┌─────────────────────────────────────────────┐
+│  HUD top bar (always visible, z-index: 100)  │
+├───────────────────────┬─────────────────────┤
+│                       │  ← Back to orrery   │
+│                       │  ┌───────────────┐  │
+│   MERCURY CANVAS      │  │  Mini-map     │  │
+│   (isometric map)     │  ├───────────────┤  │
+│                       │  │  Build list   │  │  ← scrollable, category tabs
+│                       │  │  (scrollable) │  │
+│                       │  └───────────────┘  │
+├───────────────────────┴─────────────────────┤
+│  Production queue bar                        │  ← always visible
+├─────────────────────────────────────────────┤
+│  Resources + power bar     (bottom-right)    │  ← shared, visible in both views
+└─────────────────────────────────────────────┘
+```
+
+Culture event cards and toasts overlay everything at the app level.
+
+### Slot-based placement system
+
+The map is **64×64 tiles**. The viewport shows a portion of the map; the canvas is scrollable.
+With 2×2 building footprints this provides ample space (comparable to a small Red Alert 1 map).
+
+`mercury-map.json` defines fixed **slots** — each tile (or group of tiles) is a typed slot:
+
+```ts
+interface MercurySlot {
+  id: string;
+  col: number;
+  row: number;
+  slotType: 'mining_location' | 'refinery' | 'factory' | 'solar_array' | 'mass_driver' | 'polar' | 'fusion_reactor';
+  reserved: boolean;     // true = ONLY the designated building type may occupy this slot
+  adjacentTo: string[];  // slot ids that unlock this slot when operational
+  startingZone: string | null;  // which zone unlocks this slot initially
+}
+
+interface MercuryMiningLocation {
+  slotId: string;
+  oreRatios: { commonOre: number; rareMetals: number; polarVolatiles: number }; // sum = 1.0
+  oreRatioDisplay: string;  // e.g. "70% common ore, 30% rare metals"
+  adjacentRefinerySlots: string[];
+}
+```
+
+**Slot type rules:**
+- `refinery` slots: adjacent to a mining location. ONLY refineries may be placed here.
+- `fusion_reactor` slot: inside the deep polar crater (permanently shadowed). ONLY the fusion reactor may be placed here. Reserved = true.
+- `solar_array` slots: fixed positions across the map. ONLY solar arrays may be placed here.
+- `mass_driver` slot: single fixed position, far end of map. ONLY the mass driver may be placed here.
+- All other buildings (factories, etc.): free placement on any non-reserved, unlocked, terrain-compatible slot.
+
+Only `AVAILABLE` slots (adjacent to an operational building, or in the starting zone)
+accept building placement. `LOCKED` slots render dim with a lock icon.
+
+**Mining locations**: every location has 2+ ore types; no location is mono-type.
+The dominant ore type varies by map region (drives starting zone strategy).
+Players are never locked out of any ore type — only the density/rate differs.
+
+Slot unlock cascade: when a building reaches `operational` status, all adjacent slots
+(defined by `adjacentTo` in the JSON) transition from `LOCKED` → `AVAILABLE`.
+Distant deposits require a chain of intermediate buildings to reach — this is the
+geographic cost that makes starting zone proximity strategically meaningful.
+Path length/throughput does NOT affect flow rate; only the slot unlock cascade governs
+expansion cost.
+
+### Multi-tile footprints
+
+Buildings occupy multiple tiles. Playtest: all buildings are **2×2** (four tiles).
+Footprint is stored per-building in `mercury-buildings.json`:
+
+```json
+{ "footprint": [[0,0],[1,0],[0,1],[1,1]] }
+```
+
+The anchor tile `[0,0]` is where the player clicks to place. All footprint tiles must:
+1. Be of the correct `slotType` for the building's `allowedSlotType`
+2. Be unoccupied
+
+Hover/placement preview: draw all footprint tiles in green (valid) or red (invalid).
+Building sprite rendered centred over all footprint tiles.
+
+### Building categories (sidebar filter tabs)
+
+Build list in the sidebar is filtered by category tab:
+
+| Tab | Contents |
+|---|---|
+| Buildings | Refinery, Fabricator, Mass Driver, Polar Drill, Solar Array, Fusion Reactor |
+| Units | Miners (add to reserve pool) |
+| Upgrades | Per-building overdrive (unlocked at Dyson 25% / 50%), Retrofit Production Lines |
+| Space | Dyson Panel (default queue), Skyhook, Terraforming components, Relay Station |
+
+### Global resource/power bar (bottom-right, shared)
+
+Always visible in both orrery and Mercury views. Located bottom-right of the screen.
+Implemented as a standalone component, placed in `GameShellComponent`'s template outside
+both the orrery and Mercury containers.
+
+```
+Ore: 4,820 (+12/yr)   Metals: 1,203 (+4/yr)   Volatiles: 340 (+1/yr)
+Power: [████████░░░░] 1.2 TW / 3.0 TW
+```
+
+Power bar colour: green (0–80% consumed), amber (80–100%), red (≥100% — new builds blocked).
+
+Resource reservation: player-set minimums prevent DysonService from auto-spending below
+the floor. Stored in `GameStateService.resourceReservations: Signal<ResourceStore>`.
+
+### Mercury-local power (sidebar, Mercury view only)
+
+Mercury surface power (solar arrays + fission/fusion output vs. buildings' draw) is shown
+in the Mercury sidebar as a separate, smaller indicator. Not the same as global Dyson watts.
+
+### Starting zone selection
+
+First Mercury visit: a modal overlay blocks interaction with the map below.
+Three zone cards are shown over the visible (but non-interactive) Mercury terrain.
+Choice is permanent. Modal is removed from the DOM after selection.
+
+State: `GameStateService.mercurySelectedZone: Signal<string | null>`.
+When `null` and `activeView === 'mercury'`: `ZoneSelectComponent` renders as a blocking overlay.
+After selection: zone's initial slots become `AVAILABLE`, modal signal clears, never re-renders.
+
+### Miner SVGs
+
+Miners are rendered as SVG `<img>` elements in HTML overlays (positioned absolutely over the
+canvas, CSS `top`/`left` set from canvas-to-screen coordinates). Not drawn on the canvas.
+Placeholder SVGs ship with the feature. Walking animation (CSS transition on `top`/`left`)
+is a post-playtest TODO — static positioning for playtest build.
+
+Miner assignment is handled via a refinery info HTML overlay (not canvas-drawn):
+- Click operational refinery tile → info panel appears as a positioned HTML div
+- Shows miner slots (SVG icons), assign/unassign buttons
+- Reassign mode (RTS-style): button click → map CSS cursor changes to crosshair,
+  all other refineries get `data-reassign-target` class (CSS amber highlight),
+  click on target → assignment transferred, mode exits
+

@@ -31,6 +31,10 @@
       <span class="mercury-grid__status-coords" aria-label="Column {{ info.col + 1 }}, row {{ info.row + 1 }}">
         {{ info.col + 1 }}, {{ info.row + 1 }}
       </span>
+      @if (info.slotId) {
+        <span class="mercury-grid__status-sep" aria-hidden="true">&bull;</span>
+        <span class="mercury-grid__status-slot">{{ slotLabel(getSlotType(info.slotId)) }}</span>
+      }
     } @else {
       <span class="mercury-grid__status-hint">
         @if (selectedBuildingId()) {
@@ -66,5 +70,13 @@
   <div aria-live="polite" aria-atomic="true" class="mercury-grid__sr-only">
     {{ announcementText() }}
   </div>
+
+  <!-- Mining location ore tooltip — shown when hovering a mine marker -->
+  @if (hoveredMiningLocation(); as mine) {
+    <div class="mercury-grid__mine-tooltip" role="tooltip" aria-live="polite">
+      <span class="mercury-grid__mine-tooltip-title">Mining Location</span>
+      <span class="mercury-grid__mine-tooltip-ratios">{{ mine.oreRatioDisplay }}</span>
+    </div>
+  }
 
 </div>

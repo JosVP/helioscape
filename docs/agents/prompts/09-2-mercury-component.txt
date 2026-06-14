@@ -1,0 +1,95 @@
+Block 9.2 — mercury.component.ts + GameShellComponent view switching
+
+Implement the Mercury full-screen RTS container and wire it into GameShellComponent.
+
+Read before starting:
+  - docs/agents/ARCHITECTURE.md § "Mercury full-screen view" (view switching, layout)
+  - docs/agents/TODO.md § "GameStateService — Mercury RTS signals"
+  - src/app/features/game-shell/game-shell.component.ts
+  - src/app/features/game-shell/game-shell.component.html
+
+─────────────────────────────────────────────────────────────────────────────
+PART A — GameShellComponent patch
+─────────────────────────────────────────────────────────────────────────────
+
+File: src/app/features/game-shell/game-shell.component.ts
+
+1. Add signal:
+     readonly activeView = signal<'orrery' | 'mercury'>('orrery');
+
+2. Subscribe to eventBus.planetSelected$ in ngOnInit:
+   - If emitted id === 'mercury' → set activeView('mercury')
+   - Any other planet id → set activeView('orrery') and set selectedPlanetId normally
+
+3. Add openPlanetPanel(id: string) method that sets activeView/selectedPlanetId.
+
+4. Import MercuryComponent and add it to imports[].
+
+File: src/app/features/game-shell/game-shell.component.html
+
+Use [style.display] binding — NOT @if — so the Three.js scene is NOT destroyed on switch:
+
+  <app-orrery [style.display]="activeView() === 'orrery' ? 'block' : 'none'" />
+  <app-mercury [style.display]="activeView() === 'mercury' ? 'block' : 'none'"
+               (backToOrrery)="activeView.set('orrery')" />
+
+─────────────────────────────────────────────────────────────────────────────
+PART B — mercury.component.ts
+─────────────────────────────────────────────────────────────────────────────
+
+File: src/app/features/mercury/mercury.component.ts
+
+Selector: app-mercury
+Standalone, OnPush.
+Imports: MercuryGridComponent (placeholder imports for the HUD sub-components — add them as
+  they are built in subsequent blocks).
+
+Outputs:
+  backToOrrery = output<void>()
+
+Inject: GameStateService, DataService
+
+Template structure:
+  <div class="mercury">
+    <div class="mercury__canvas-area">
+      <app-mercury-grid [selectedBuildingId]="selectedBuildingId()"
+                        (tileClicked)="onTileClicked($event)" />
+    </div>
+    <aside class="mercury__sidebar">
+      <button class="mercury__back-btn" (click)="backToOrrery.emit()">← Orrery</button>
+      <!-- mercury-hud/sidebar goes here in Block 9.3 -->
+    </aside>
+    <!-- mercury-hud/queue-bar goes here in Block 9.4 -->
+    <!-- mercury-hud/zone-select goes here in Block 9.7 (blocking overlay) -->
+  </div>
+
+Signals:
+  readonly selectedBuildingId = signal<string | null>(null)
+
+Methods:
+  onTileClicked(event: { col: number; row: number; hasBuilding: boolean; terrain: string; slotId: string | null }): void
+    - If hasBuilding → clear selectedBuildingId (deselect mode)
+    - If !hasBuilding and slotId exists → do nothing for now (building info panel in Block 9.5)
+
+SCSS:
+  .mercury — position: fixed; inset: 0; display: flex; flex-direction: column; z-index: 10;
+    background: var(--color-bg-base);
+  .mercury__canvas-area — flex: 1; overflow: auto; position: relative;
+  .mercury__sidebar — position: absolute; right: 0; top: 0; bottom: 0;
+    width: 280px; background: var(--color-surface-2); display: flex; flex-direction: column;
+    z-index: 20; padding: var(--space-3);
+  .mercury__back-btn — margin-bottom: var(--space-3); cursor: pointer; background: transparent;
+    border: 1px solid var(--color-border); color: var(--color-text-primary);
+    padding: var(--space-1) var(--space-2); border-radius: var(--radius-sm);
+    transition: background var(--duration-fast) ease;
+    &:hover { background: var(--color-surface-3); }
+
+─────────────────────────────────────────────────────────────────────────────
+ACCEPTANCE CRITERIA
+─────────────────────────────────────────────────────────────────────────────
+
+- Clicking Mercury in the planets menu shows the full-screen Mercury view
+- The orrery is hidden (display:none) but NOT destroyed — switching back preserves it
+- A "← Orrery" button returns to the orrery view
+- The canvas is scrollable (the 64×64 grid is larger than the viewport)
+- ng build passes with zero errors

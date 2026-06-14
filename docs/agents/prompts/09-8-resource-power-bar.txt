@@ -1,0 +1,174 @@
+Block 9.8 — resource-power-bar component (global HUD strip, bottom-right)
+
+Implement the persistent resource and power bar visible in BOTH orrery and Mercury views.
+Depends on Block 9.6 (resourceReservations, mercuryLocalPower signals in GameStateService).
+
+Read before starting:
+  - docs/agents/ARCHITECTURE.md § "Mercury full-screen view" → Global resource/power bar
+  - docs/agents/TODO.md § "Global resource/power HUD strip"
+  - src/app/core/services/game-state.service.ts → mercuryResources, mercuryBuildings,
+    dysonEnergyWatts, resourceReservations, mercuryLocalPower
+  - src/app/core/services/data.service.ts → getMercuryBuilding() for rate computation
+  - src/app/features/game-shell/game-shell.component.ts (add component here)
+
+─────────────────────────────────────────────────────────────────────────────
+File: src/app/shared/components/resource-power-bar/resource-power-bar.component.ts
+─────────────────────────────────────────────────────────────────────────────
+
+Selector: app-resource-power-bar
+Standalone, OnPush.
+Inject: GameStateService, DataService.
+
+Inputs:
+  showReservationInputs = input<boolean>(false)  // true in Mercury view, false in orrery
+
+Computed:
+  readonly resources = computed(() => this.gameState.mercuryResources())
+
+  readonly resourceRates = computed(() => {
+    // Sum resource_rate effects from all 'operational' buildings
+    const buildings = this.gameState.mercuryBuildings();
+    const rates: Record<string, number> = { commonOre: 0, rareMetals: 0, polarVolatiles: 0 };
+    for (const b of buildings) {
+      if (b.status !== 'operational') continue;
+      const def = this.data.getMercuryBuilding(b.buildingId);
+      if (!def) continue;
+      for (const eff of def.effects) {
+        if (eff.type === 'resource_rate' && eff.resourceId in rates) {
+          rates[eff.resourceId as string] += eff.rate;
+        }
+      }
+    }
+    return rates;
+  })
+
+  readonly dysonPowerTw = computed(() => {
+    const watts = this.gameState.dysonEnergyWatts();  // from DysonService signal
+    return watts / 1e12;  // W → TW
+  })
+
+  readonly dysonConsumptionTw = computed(() => {
+    // Approximate: sum planet terraforming draws, life support, etc.
+    // For now: return a placeholder 0.8 TW until full consumption accounting is wired.
+    // NOTE: Full consumption accounting requires DysonService consumer registration (future).
+    return 0.8;
+  })
+
+  readonly powerBarPercent = computed(() => {
+    const avail = this.dysonPowerTw();
+    if (avail <= 0) return 100;
+    return Math.min(100, this.dysonConsumptionTw() / avail * 100);
+  })
+
+  readonly powerBarColor = computed(() => {
+    const pct = this.powerBarPercent();
+    if (pct >= 100) return 'red';
+    if (pct >= 80) return 'amber';
+    return 'green';
+  })
+
+  readonly reservations = computed(() => this.gameState.resourceReservations())
+
+Template:
+  <div class="resource-power-bar" role="complementary" aria-label="Resources and power">
+
+    <div class="resource-power-bar__resources">
+      <span class="resource-power-bar__item">
+        Ore: {{ resources().commonOre | number:'1.0-0' }}
+        <span class="resource-power-bar__rate">(+{{ resourceRates().commonOre | number:'1.1-1' }}/yr)</span>
+      </span>
+      <span class="resource-power-bar__item">
+        Metals: {{ resources().rareMetals | number:'1.0-0' }}
+        <span class="resource-power-bar__rate">(+{{ resourceRates().rareMetals | number:'1.1-1' }}/yr)</span>
+      </span>
+      <span class="resource-power-bar__item">
+        Vol: {{ resources().polarVolatiles | number:'1.0-0' }}
+        <span class="resource-power-bar__rate">(+{{ resourceRates().polarVolatiles | number:'1.1-1' }}/yr)</span>
+      </span>
+    </div>
+
+    <div class="resource-power-bar__power" [attr.data-color]="powerBarColor()">
+      <span class="resource-power-bar__power-label">Power</span>
+      <div class="resource-power-bar__power-track" role="progressbar"
+           [attr.aria-valuenow]="powerBarPercent()"
+           [attr.aria-valuetext]="dysonConsumptionTw() + ' TW / ' + dysonPowerTw() + ' TW'">
+        <div class="resource-power-bar__power-fill"
+             [style.--power-pct]="powerBarPercent() / 100"></div>
+      </div>
+      <span class="resource-power-bar__power-text">
+        {{ dysonConsumptionTw() | number:'1.1-1' }} / {{ dysonPowerTw() | number:'1.1-1' }} TW
+      </span>
+    </div>
+
+    @if (showReservationInputs()) {
+      <div class="resource-power-bar__reservations">
+        <span class="resource-power-bar__reserve-label">Reserves:</span>
+        @for (key of reservationKeys; track key.id) {
+          <label class="resource-power-bar__reserve-item">
+            {{ key.label }}
+            <input type="number" min="0" step="100"
+                   [value]="reservations()[key.id]"
+                   (change)="onReservationChange(key.id, $event)"
+                   class="resource-power-bar__reserve-input"
+                   [attr.aria-label]="'Minimum ' + key.label + ' reserve'" />
+          </label>
+        }
+      </div>
+    }
+  </div>
+
+Fields:
+  readonly reservationKeys = [
+    { id: 'commonOre' as const, label: 'Ore' },
+    { id: 'rareMetals' as const, label: 'Metals' },
+    { id: 'polarVolatiles' as const, label: 'Vol' },
+  ]
+
+Methods:
+  onReservationChange(resource: keyof ResourceStore, event: Event): void
+    const value = Number((event.target as HTMLInputElement).value);
+    this.gameState.setResourceReservation(resource, value);
+
+SCSS:
+  .resource-power-bar — position: fixed; bottom: var(--space-3); right: var(--space-3);
+    display: flex; flex-direction: column; gap: var(--space-1);
+    background: var(--color-surface-2); border: 1px solid var(--color-border);
+    border-radius: var(--radius-md); padding: var(--space-2) var(--space-3);
+    z-index: 90; font-size: var(--font-size-xs); min-width: 260px;
+  .resource-power-bar__resources — display: flex; gap: var(--space-3);
+  .resource-power-bar__rate — color: var(--color-text-muted);
+  .resource-power-bar__power — display: flex; align-items: center; gap: var(--space-2);
+  .resource-power-bar__power-track — flex: 1; height: 6px;
+    background: var(--color-surface-4); border-radius: 3px; overflow: hidden;
+  .resource-power-bar__power-fill — height: 100%; width: calc(var(--power-pct) * 100%);
+    transition: width 1s linear, background-color var(--duration-fast) ease;
+    background: var(--color-success);  // overridden by [data-color] variants below
+  [data-color="amber"] .resource-power-bar__power-fill { background: var(--color-warning); }
+  [data-color="red"] .resource-power-bar__power-fill { background: var(--color-danger); }
+  .resource-power-bar__reservations — display: flex; flex-wrap: wrap;
+    gap: var(--space-2); align-items: center; border-top: 1px solid var(--color-border);
+    padding-top: var(--space-1); margin-top: var(--space-1);
+  .resource-power-bar__reserve-input — width: 60px; font-size: var(--font-size-xs);
+    background: var(--color-surface-3); border: 1px solid var(--color-border);
+    color: var(--color-text-primary); padding: 2px 4px; border-radius: var(--radius-sm);
+
+─────────────────────────────────────────────────────────────────────────────
+Wire into game-shell.component
+─────────────────────────────────────────────────────────────────────────────
+
+Import ResourcePowerBarComponent in GameShellComponent.
+Add to template (OUTSIDE orrery and mercury containers, always visible):
+
+  <app-resource-power-bar [showReservationInputs]="activeView() === 'mercury'" />
+
+─────────────────────────────────────────────────────────────────────────────
+ACCEPTANCE CRITERIA
+─────────────────────────────────────────────────────────────────────────────
+
+- Bar is visible in both orrery view and Mercury view (position: fixed, bottom-right)
+- Resource counts and rates update each game tick (+N/yr from operational buildings)
+- Power bar fills and changes colour (green/amber/red) based on consumption ratio
+- Reservation inputs appear only in Mercury view (showReservationInputs)
+- Reservation inputs call setResourceReservation() and persist through save/load
+- Transitions use 1s linear (tick-driven value pattern, per AGENTS.md)
+- ng build passes with zero errors

@@ -1,0 +1,93 @@
+Block 9.4 — mercury-hud/queue-bar component (production queue)
+
+Implement the bottom production queue bar for the Mercury RTS view.
+Builds on Block 9.2 (mercury.component.ts must exist).
+
+Read before starting:
+  - docs/agents/ARCHITECTURE.md § "Mercury full-screen view" → Layout
+  - public/data/mercury-components.json (orbital components that can be queued)
+  - src/app/core/services/game-state.service.ts → mercuryBuildQueue signal
+  - src/app/core/services/data.service.ts → MercuryComponent interface
+  - src/app/core/models/game-state.model.ts → MercuryQueueEntry interface
+
+─────────────────────────────────────────────────────────────────────────────
+File: src/app/features/mercury/mercury-hud/queue-bar/queue-bar.component.ts
+─────────────────────────────────────────────────────────────────────────────
+
+Selector: app-mercury-queue-bar
+Standalone, OnPush.
+Inject: GameStateService, DataService.
+
+Computed:
+  readonly queue = computed(() => {
+    // Merge mercuryBuildQueue() entries with their MercuryComponent definitions
+    // Each enriched entry: { entry: MercuryQueueEntry, def: MercuryComponent }
+    // Filter out entries with no matching definition (defensive)
+  })
+
+Template:
+  <div class="queue-bar" role="region" aria-label="Production queue">
+    <div class="queue-bar__label">Production queue</div>
+    <div class="queue-bar__items">
+      @if (queue().length === 0) {
+        <div class="queue-bar__empty">Queue empty — select a component in the Space tab to build</div>
+      }
+      @for (item of queue(); track item.entry.id) {
+        <div class="queue-bar__item">
+          <span class="queue-bar__item-name">{{ item.def.displayName }}</span>
+          @if (item.entry.targetPlanetId) {
+            <span class="queue-bar__item-target">→ {{ item.entry.targetPlanetId | titlecase }}</span>
+          }
+          <div class="queue-bar__item-progress" role="progressbar"
+               [attr.aria-valuenow]="item.entry.progressYears"
+               [attr.aria-valuemax]="item.def.buildTimeYears"
+               [attr.aria-valuetext]="item.entry.progressYears + ' of ' + item.def.buildTimeYears + ' years'">
+            <div class="queue-bar__item-fill"
+                 [style.--progress]="(item.entry.progressYears / item.def.buildTimeYears)">
+            </div>
+          </div>
+          <span class="queue-bar__item-years">
+            {{ (item.def.buildTimeYears - item.entry.progressYears) | number:'1.0-0' }}yr
+          </span>
+        </div>
+      }
+    </div>
+  </div>
+
+SCSS:
+  .queue-bar — position: relative; height: 72px; background: var(--color-surface-2);
+    border-top: 1px solid var(--color-border); display: flex; align-items: center;
+    padding: 0 var(--space-3); gap: var(--space-3); overflow-x: auto;
+  .queue-bar__label — font-size: var(--font-size-xs); color: var(--color-text-muted);
+    white-space: nowrap; flex-shrink: 0;
+  .queue-bar__items — display: flex; gap: var(--space-2); align-items: center; flex: 1;
+  .queue-bar__item — display: flex; align-items: center; gap: var(--space-1);
+    background: var(--color-surface-3); border: 1px solid var(--color-border);
+    padding: var(--space-1) var(--space-2); border-radius: var(--radius-sm); min-width: 160px;
+  .queue-bar__item-progress — flex: 1; height: 4px; background: var(--color-surface-4);
+    border-radius: 2px; overflow: hidden;
+  .queue-bar__item-fill — height: 100%; width: calc(var(--progress) * 100%);
+    background: var(--color-accent-primary); transition: width 1s linear;
+
+─────────────────────────────────────────────────────────────────────────────
+Wire into mercury.component.ts
+─────────────────────────────────────────────────────────────────────────────
+
+Import MercuryQueueBarComponent.
+Replace <!-- mercury-hud/queue-bar goes here --> placeholder with:
+  <app-mercury-queue-bar />
+
+Position it below the canvas-area + sidebar row (after the flex row, before the bottom).
+The .mercury layout needs a second row for the queue bar:
+  .mercury — display: grid; grid-template-rows: 1fr auto; grid-template-columns: 1fr;
+
+─────────────────────────────────────────────────────────────────────────────
+ACCEPTANCE CRITERIA
+─────────────────────────────────────────────────────────────────────────────
+
+- Queue bar is always visible at the bottom of the Mercury view
+- Empty state shows the hint message
+- When items are in the queue (from mercuryBuildQueue signal), they render with progress bars
+- Progress bars use the tick-driven 1s linear transition pattern
+- Pipe: uses Angular's built-in DecimalPipe (import from @angular/common)
+- ng build passes with zero errors

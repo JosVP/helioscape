@@ -1,0 +1,141 @@
+Block 9.5 — mercury-hud/building-info component (refinery pop-up + mining tooltip)
+
+Implement the building info panel that appears when clicking an existing building,
+and the refinery-specific miner assignment interface.
+
+Read before starting:
+  - docs/agents/ARCHITECTURE.md § "Mercury full-screen view" → Miner SVGs, Slot-based placement
+  - docs/agents/TODO.md § "GameStateService — Mercury RTS signals" (mercuryMiners signal)
+  - src/app/features/mercury/mercury-grid/mercury-grid.component.ts (tileClicked output shape)
+  - src/app/core/services/data.service.ts (MercuryBuilding, MercuryMiningLocation interfaces)
+  - src/app/core/services/game-state.service.ts (mercuryBuildings, mercuryMiners signals)
+
+NOTE: mercuryMiners signal (Block 9.6) may not exist yet. Guard with optional chaining and
+  fall back gracefully — add a // NOTE: comment explaining the dependency.
+
+─────────────────────────────────────────────────────────────────────────────
+File: src/app/features/mercury/mercury-hud/building-info/building-info.component.ts
+─────────────────────────────────────────────────────────────────────────────
+
+Selector: app-mercury-building-info
+Standalone, OnPush.
+Inject: GameStateService, DataService.
+
+Inputs:
+  buildingId = input.required<string>()   // PlacedBuilding.buildingId
+  placedId   = input.required<string>()   // PlacedBuilding.id (uuid)
+  slotId     = input<string | null>(null) // MercurySlot.id if tile has a slot
+
+Outputs:
+  closed = output<void>()
+
+Computed:
+  readonly building = computed(() => this.data.getMercuryBuilding(this.buildingId()))
+  readonly placed = computed(() =>
+    this.gameState.mercuryBuildings().find(b => b.id === this.placedId()))
+  readonly isRefinery = computed(() =>
+    this.data.getMercurySlot(this.slotId() ?? '')?.slotType === 'refinery')
+  readonly miningInfo = computed(() => {
+    // If this is a refinery slot, find any mining_location that lists this slotId in adjacentRefinerySlots
+    const slot = this.slotId();
+    if (!slot) return null;
+    return this.data.getMercuryMapData()?.miningLocations
+      .find(m => m.adjacentRefinerySlots.includes(slot)) ?? null;
+  })
+  readonly assignedMiners = computed(() => {
+    // NOTE: depends on mercuryMiners signal (Block 9.6) — guard with nullish coalescing
+    const miners = (this.gameState as any).mercuryMiners?.();
+    return miners?.assignments?.[this.slotId() ?? ''] ?? 0;
+  })
+
+Template:
+  <div class="building-info" role="dialog" aria-modal="true"
+       [attr.aria-label]="'Building info: ' + (building()?.displayName ?? '')">
+    <div class="building-info__header">
+      <span class="building-info__name">{{ building()?.displayName }}</span>
+      <button class="building-info__close" (click)="closed.emit()" aria-label="Close">×</button>
+    </div>
+
+    @if (placed(); as p) {
+      @if (p.status === 'building') {
+        <div class="building-info__status building-info__status--building">
+          Under construction — {{ (p.buildProgressYears / p.totalBuildYears * 100) | number:'1.0-0' }}%
+        </div>
+      } @else {
+        <div class="building-info__status building-info__status--operational">Operational</div>
+      }
+    }
+
+    @if (building(); as b) {
+      <div class="building-info__desc">{{ b.description }}</div>
+      @if (b.energyDrawGw !== 0) {
+        <div class="building-info__power">
+          Power: {{ b.energyDrawGw < 0 ? '+' + (-b.energyDrawGw) : b.energyDrawGw }} GW
+          {{ b.energyDrawGw < 0 ? '(produced)' : '(consumed)' }}
+        </div>
+      }
+      @for (eff of b.effects; track eff.type) {
+        @if (eff.type === 'resource_rate') {
+          <div class="building-info__effect">+{{ eff.rate }}/yr {{ eff.resourceId }}</div>
+        }
+      }
+    }
+
+    @if (isRefinery() && miningInfo(); as mine) {
+      <div class="building-info__mine">
+        <div class="building-info__mine-title">Mining location ore ratios</div>
+        <div class="building-info__mine-ratios">{{ mine.oreRatioDisplay }}</div>
+      </div>
+    }
+
+    @if (isRefinery()) {
+      <div class="building-info__miners">
+        <div class="building-info__miners-label">
+          Miners assigned: <strong>{{ assignedMiners() }}</strong>
+        </div>
+        <!-- Miner assignment buttons - Block 9.5b (post Block 9.6 for full miner pool) -->
+        <!-- NOTE: Full miner assignment UI requires mercuryMiners signal from Block 9.6 -->
+        <div class="building-info__miners-note">
+          Miner assignment available after Block 9.6.
+        </div>
+      </div>
+    }
+  </div>
+
+SCSS: position: absolute; right: 290px; top: var(--space-3); width: 240px;
+  background: var(--color-surface-2); border: 1px solid var(--color-border);
+  border-radius: var(--radius-md); padding: var(--space-3); z-index: 30;
+  box-shadow: var(--shadow-md);
+
+─────────────────────────────────────────────────────────────────────────────
+Wire into mercury.component.ts
+─────────────────────────────────────────────────────────────────────────────
+
+Add state to mercury.component.ts:
+  readonly activeBuildingInfo = signal<{ buildingId: string; placedId: string; slotId: string | null } | null>(null)
+
+Update onTileClicked:
+  If hasBuilding AND a building is found at that tile:
+    Set activeBuildingInfo({ buildingId: building.buildingId, placedId: building.id, slotId: event.slotId })
+    Clear selectedBuildingId (can't place while info panel is open)
+
+Add to template inside <div class="mercury__canvas-area">:
+  @if (activeBuildingInfo(); as info) {
+    <app-mercury-building-info
+      [buildingId]="info.buildingId"
+      [placedId]="info.placedId"
+      [slotId]="info.slotId"
+      (closed)="activeBuildingInfo.set(null)"
+    />
+  }
+
+─────────────────────────────────────────────────────────────────────────────
+ACCEPTANCE CRITERIA
+─────────────────────────────────────────────────────────────────────────────
+
+- Clicking an occupied tile opens the building info panel
+- Panel shows building name, status (building / operational), description, power, resource rate
+- Clicking × closes the panel
+- Refinery tiles additionally show the adjacent mining location's ore ratios
+- Panel does not crash when mercuryMiners signal is absent (Block 9.6 dependency guarded)
+- ng build passes with zero errors

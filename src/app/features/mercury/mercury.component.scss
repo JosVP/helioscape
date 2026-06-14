@@ -1,0 +1,62 @@
+// Mercury full-screen RTS container.
+// Canvas area is scrollable (64×64 grid is larger than any viewport).
+// Sidebar is fixed-width on the right; queue bar (Block 9.4) sits below.
+
+.mercury {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  grid-template-rows: 1fr;
+  z-index: 10;
+  background: var(--color-bg-base);
+  // Leave space for the HUD top bar.
+  padding-top: 52px;
+}
+
+.mercury__canvas-area {
+  overflow: auto;
+  position: relative;
+  grid-column: 1;
+  grid-row: 1;
+  // Show a subtle amber glow border consistent with the Mercury theme.
+  border-right: 1px solid var(--color-border);
+}
+
+.mercury__sidebar {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: var(--color-surface-2);
+  border-left: 1px solid var(--color-border);
+  overflow-y: auto;
+}
+
+.mercury__back-btn {
+  align-self: flex-start;
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  transition: background var(--duration-fast) ease;
+
+  &:hover {
+    background: var(--color-surface-3);
+  }
+}
+
+.mercury__sidebar-placeholder {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  font-style: italic;
+  border: 1px dashed var(--color-border);
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  text-align: center;
+}

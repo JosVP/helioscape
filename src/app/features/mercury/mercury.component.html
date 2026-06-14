@@ -1,0 +1,21 @@
+<div class="mercury">
+
+  <div class="mercury__canvas-area">
+    <app-mercury-grid
+      [selectedBuildingId]="selectedBuildingId()"
+      (tileClicked)="onTileClicked($event)"
+    />
+  </div>
+
+  <aside class="mercury__sidebar" aria-label="Mercury controls">
+    <button class="mercury__back-btn" (click)="backToOrrery.emit()" aria-label="Back to orrery">
+      ← Orrery
+    </button>
+    <!-- mercury-hud/sidebar (Block 9.3) -->
+    <p class="mercury__sidebar-placeholder">Build list — Block 9.3</p>
+  </aside>
+
+  <!-- mercury-hud/queue-bar (Block 9.4) -->
+  <!-- mercury-hud/zone-select overlay (Block 9.7) -->
+
+</div>

@@ -291,6 +291,102 @@ No inline `// TODO:` comments in code - all tracking happens here to avoid dupli
 - **Prompt block**: TBD (post-Block 9)
 - **Added**: 2026-06-13
 
+### MercuryGridComponent — Patch for RTS redesign (Block 9.1 patch)
+
+- **File**: `src/app/features/mercury/mercury-grid/mercury-grid.component.ts`
+- **Location**: Whole file — targeted extension of existing implementation
+- **TODO**: The current grid (Block 9.1) is a 12×10 hardcoded map with free-placement.
+  The redesign requires:
+  1. **Map size 64×64**: canvas is ~4096×2200px, clipped in a scrollable viewport. Scroll
+     position stored as a signal. Mini-map reflects current scroll position.
+  2. **Slot-aware placement**: only valid `MercurySlot` tiles (from `mercury-map.json`) accept
+     buildings of the correct type. Locked slots render dim with a lock icon.
+     Reserved slots (refinery, fusion_reactor, mass_driver, solar_array) only accept their
+     designated building type — other buildings cannot be placed there.
+  3. **Multi-tile footprint**: 2×2 tiles per building; all footprint tiles checked for validity
+  4. **`tileClicked` output** gains `terrain: string` and `slotId: string` fields
+  5. **Mining location hover**: HTML overlay tooltip shows ore type ratios when mining slot hovered
+  6. **Hardcoded `TERRAIN_MAP`** replaced by slot data from `mercury-map.json` via DataService
+- **Depends on**: `mercury-map.json` (Block 9.0), `MercuryMapData` interface in DataService
+- **Prompt block**: Block 9.1-patch (before Block 9.2)
+- **Added**: 2026-06-13
+
+### Mercury infrastructure paths (post-playtest deferral)
+
+- **File**: New `src/app/features/mercury/mercury-hud/path-drawing/` + `GameStateService`
+- **Location**: New feature
+- **TODO**: Player-drawn infrastructure paths between buildings. Binary: connected = resources flow,
+  unconnected = no flow. Path drawing: click source → click waypoints → click destination.
+  90° or straight segments only. Segment highlights red if passing through a building.
+  Power lines exempt (underground, visual only). State: `mercuryPaths: MercuryPath[]` in
+  GameStateService (already reserved as empty array placeholder).
+  For playtest build: resource flow is AUTOMATIC (no path required). This feature adds
+  the routing requirement post-playtest.
+- **Depends on**: Mercury full view (Block 9.2+), MercuryGridComponent RTS patch
+- **Prompt block**: TBD (post-playtest)
+- **Added**: 2026-06-13
+
+### Miner SVG walking animation
+
+- **File**: `src/app/features/mercury/mercury-hud/` (miner overlay component)
+- **Location**: Miner HTML overlay positioned over canvas
+- **TODO**: Miners are rendered as SVG `<img>` elements in an HTML overlay. For playtest:
+  static positioning only (at the refinery they are assigned to). Post-playtest: CSS
+  `transition` on `top`/`left` properties to animate movement between waypoints.
+  Each refinery slot has a static waypoint array (refinery pos → mine pos → refinery pos).
+  Miners lerp between waypoints, one segment at a time. REASSIGNING state = straight-line
+  walk to new refinery; no resource contribution during transit.
+- **Depends on**: Mercury full view (Block 9.2+), miner pool state in GameStateService
+- **Prompt block**: TBD (post-playtest)
+- **Added**: 2026-06-13
+
+### GameStateService — Mercury RTS signals
+
+- **File**: `src/app/core/services/game-state.service.ts`
+- **Location**: New signals + mutations
+- **TODO**: Add the following to GameStateService for the Mercury RTS view:
+  - `mercurySelectedZone: Signal<string | null>` — null = zone not yet chosen
+  - `mercuryMiners: Signal<MercuryMinerState>` — { poolCount: number, assignments: Record<slotId, number> }
+  - `resourceReservations: Signal<ResourceStore>` — player-set minimum reserves
+  - `mercuryPaths: Signal<MercuryPath[]>` — empty for playtest; infrastructure path drawing (post-playtest)
+  - `mercuryLocalPower: Signal<{ producedGw: number; consumedGw: number }>` — computed from operational Mercury buildings
+  - `mercurySlotStates: Signal<Record<string, MercurySlotState>>` — LOCKED/AVAILABLE/BUILDING/OPERATIONAL per slot
+  Mutations: `selectMercuryZone(zoneId)`, `assignMiner(slotId)`, `unassignMiner(slotId)`, `reassignMiner(fromSlotId, toSlotId)`, `setResourceReservation(resource, amount)`, `setMercurySlotState(slotId, state)`
+  Add all new fields to `SerializedGameState` and `serialise()`/`hydrate()`.
+- **Depends on**: `mercury-map.json` and `MercuryMapData` interfaces
+- **Prompt block**: Block 9.6
+- **Added**: 2026-06-13
+
+### CultureEventCardComponent — Click protection (quick fix)
+
+- **File**: `src/app/features/culture-events/culture-event-card/culture-event-card.component.scss`
+- **Location**: Root element styles
+- **TODO**: Add `pointer-events: none` for 800ms on card appearance to prevent accidental clicks
+  when an event pops up mid-gameplay. CSS-only, no logic change:
+  ```scss
+  :host { animation: event-block-clicks 0.8s step-end forwards; }
+  @keyframes event-block-clicks { from { pointer-events: none; } to { pointer-events: auto; } }
+  ```
+- **Depends on**: Nothing — can be done immediately
+- **Prompt block**: Quick fix, any block
+- **Added**: 2026-06-13
+
+### Global resource/power HUD strip
+
+- **File**: New `src/app/shared/components/resource-power-bar/resource-power-bar.component.ts`
+- **Location**: `src/app/features/game-shell/game-shell.component.html` (add to template)
+- **TODO**: Persistent bottom-right strip always visible in orrery and Mercury views.
+  Shows: ore/metals/volatiles counts + rates (+N/yr), Dyson power bar (consumed vs available,
+  green→amber→red colour zones). Reads `mercuryResources`, `mercuryBuildings`,
+  `dysonEnergyWatts` from GameStateService. Resource rates computed from operational buildings.
+  Power bar: 0–80% consumed = green, 80–100% = amber, ≥100% = red.
+  Resource reservation inputs (ore/metals/volatiles): shown in Mercury view only.
+- **Depends on**: GameStateService mercury RTS signals (resource reservations)
+- **Prompt block**: Block 9.8
+- **Added**: 2026-06-13
+
+
+
 ---
 
 ## Completed TODOs
