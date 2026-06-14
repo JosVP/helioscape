@@ -4,6 +4,7 @@
     <app-mercury-grid
       [selectedBuildingId]="selectedBuildingId()"
       (tileClicked)="onTileClicked($event)"
+      [attr.inert]="gameState.mercurySelectedZone() === null ? '' : null"
     />
     @if (activeBuildingInfo(); as info) {
       <app-mercury-building-info
@@ -23,6 +24,8 @@
   </aside>
 
   <app-mercury-queue-bar />
-  <!-- mercury-hud/zone-select overlay (Block 9.7) -->
+  @if (gameState.mercurySelectedZone() === null) {
+    <app-mercury-zone-select />
+  }
 
 </div>

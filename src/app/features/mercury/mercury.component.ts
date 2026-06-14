@@ -11,6 +11,7 @@ import { MercuryGridComponent } from './mercury-grid/mercury-grid.component';
 import { MercurySidebarComponent } from './mercury-hud/sidebar/sidebar.component';
 import { MercuryQueueBarComponent } from './mercury-hud/queue-bar/queue-bar.component';
 import { BuildingInfoComponent } from './mercury-hud/building-info/building-info.component';
+import { MercuryZoneSelectComponent } from './mercury-hud/zone-select/zone-select.component';
 
 interface ActiveBuildingInfo {
   buildingId: string;
@@ -22,7 +23,7 @@ interface ActiveBuildingInfo {
   selector: 'app-mercury',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [MercuryGridComponent, MercurySidebarComponent, MercuryQueueBarComponent, BuildingInfoComponent],
+  imports: [MercuryGridComponent, MercurySidebarComponent, MercuryQueueBarComponent, BuildingInfoComponent, MercuryZoneSelectComponent],
   templateUrl: './mercury.component.html',
   styleUrl: './mercury.component.scss',
 })

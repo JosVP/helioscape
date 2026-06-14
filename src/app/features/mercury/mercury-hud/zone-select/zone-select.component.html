@@ -1,0 +1,28 @@
+<div class="zone-select" role="dialog" aria-modal="true" aria-label="Choose your starting zone">
+  <div class="zone-select__backdrop"></div>
+  <div class="zone-select__content">
+    <h2 class="zone-select__title">Choose your starting zone</h2>
+    <p class="zone-select__subtitle">
+      This choice is permanent. It determines which ore deposits and buildings
+      are available from the start.
+    </p>
+
+    <div class="zone-select__cards">
+      @for (zone of zones(); track zone.id) {
+        <div class="zone-select__card"
+             [class.zone-select__card--hovered]="hoveredZoneId() === zone.id"
+             (mouseenter)="hoveredZoneId.set(zone.id)"
+             (mouseleave)="hoveredZoneId.set(null)"
+             (click)="confirmSelection(zone.id)"
+             role="button" tabindex="0"
+             (keydown.enter)="confirmSelection(zone.id)"
+             (keydown.space)="$event.preventDefault(); confirmSelection(zone.id)"
+             [attr.aria-label]="'Choose ' + zone.displayName">
+          <div class="zone-select__card-name">{{ zone.displayName }}</div>
+          <div class="zone-select__card-tagline">{{ zone.tagline }}</div>
+          <div class="zone-select__card-desc">{{ zone.description }}</div>
+        </div>
+      }
+    </div>
+  </div>
+</div>
