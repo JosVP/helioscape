@@ -1,0 +1,33 @@
+Note: this prompt is part of the post-playtest progression-wiring work (Block 19). Stay critical — read the current code first.
+
+Create a plan for atmospheric data, terraforming-phase description and the planet vignette on the Earth/Mars/Venus panels for Helioscape.
+
+CONTEXT
+The planet panels are sparse. For the three terraforming-relevant bodies (Earth, Mars, Venus) we want each panel to communicate, at a glance: the current atmosphere/conditions, the current terraforming phase + a short narrator-voiced description, and a vignette image of how the surface looks right now. This is the readable "state of the world" view that makes terraforming progress feel real.
+
+Read AGENTS.md (Placeholder assets; narrator voice in docs/GDD), docs/GDD/main-gdd.md and docs/GDD/terraforming-options.md (phase structure + tone). Owned by:
+- src/app/features/planet-panel/* 
+- src/app/features/vignette/* (the placeholder vignette component from Block 13 — reuse it)
+- public/data/planets.json (atmospheric/phase descriptive fields)
+
+REQUIREMENTS
+
+1. Atmospheric / conditions data block
+   - Show key conditions for the selected planet: temperature, atmospheric pressure, dominant gases / composition, water/ocean coverage, breathability — whatever the GDD tracks per phase. Values must be DERIVED from game state (pure value derivation from gameYear / terraforming progress per ARCHITECTURE.md Visual value pattern), not stored animation state, so they update as terraforming advances and survive save/load.
+   - Where the terraforming system is not yet wired (Block 22), show the baseline/current values gracefully (Earth = present-day; Mars/Venus = pre-terraform baseline). Do not hardcode the numbers in TS — read baselines + ranges from JSON.
+
+2. Terraforming phase description
+   - Show the current phase name + a short narrator-voiced description (calm, optimistic, factual — match the GDD narrator). Text comes from JSON (per-planet, per-phase strings), never inline in TS.
+   - If terraforming hasn't started, show the "not yet begun / opening decision pending" state appropriately (Venus shows the pending Opening Decision; Mars shows pre-Phase-1).
+
+3. Vignette
+   - Display the vignette component showing the planet's current surface look. Reuse the Block 13 placeholder vignette. Provide per-planet, per-phase placeholder SVG vignettes (see .github/skills/create-placeholder-svg) so each phase looks different — e.g. Mars: rusty desert → thin-atmosphere dawn → blue-sky-with-water. Mark them clearly as placeholders, correctly sized, at the paths the component expects.
+   - The vignette selection is derived from current phase (pure derivation). Cross-fade between phase vignettes can be deferred to Block 22's visual-value work — here, select the correct current vignette.
+
+PATTERNS
+- OnPush, signals, computed() for all derived display values, @if/@for with track, thin templates. BEM SCSS, design tokens only. No game logic in the component.
+
+ASSETS NEEDED (placeholders — never block)
+- Per-planet/per-phase vignette SVGs for Earth, Mars, Venus at the expected asset paths. Generate with the create-placeholder-svg skill; obvious placeholders the user can swap.
+
+OUT OF SCOPE: the terraforming system that advances phases (Block 22); the Moon tab + research link (19-2); the unlock chain (19-1).

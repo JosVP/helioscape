@@ -1,0 +1,31 @@
+Note: this prompt is part of the Mercury RTS fixes (Block 25). Stay critical — read the mercury grid + isometric utils + map data first.
+
+Create a plan for the Mercury debug tile-layer toggle, the large SVG map backdrop, and no-build tiles for Helioscape.
+
+PROBLEMS / GAPS OBSERVED
+- No way to visualise the underlying tile/slot grid for debugging placement.
+- The map has no proper backdrop art — it reads as an abstract grid.
+- "No-build" tiles (terrain you can't build on) aren't represented.
+
+Read AGENTS.md (placeholder assets, debug service Block 15) and docs/agents/ARCHITECTURE.md (Canvas components; isometric utils TILE_W=64/TILE_H=32). Owned by:
+- src/app/features/mercury/mercury-grid/mercury-grid.component.ts (layers + rendering)
+- public/data/mercury-map.json (slot types, add a no-build flag per tile/slot)
+- src/app/core/services (the existing debug service from docs/agents/prompts/15-1-debug-service.txt)
+
+REQUIREMENTS
+
+1. Debug tile-layer toggle
+   - A debug-only toggle (wired through the existing DebugService, browser-dev only) that overlays the tile grid: tile coordinates, slot types (colour-coded), reserved/occupied/no-build flags. Off by default; never shown in shipping unless debug is enabled.
+   - Render as an overlay layer on the canvas, cheap, only when enabled.
+
+2. Large SVG map backdrop
+   - Replace the abstract background with a large placeholder SVG backdrop of the Mercury surface (cratered grey terrain, polar shadow regions, mining-rich areas tinted) sized to the full 128×128 map and aligned to the isometric projection. Generate via create-placeholder-svg — an obvious placeholder the user can swap for real art, at the expected asset path.
+   - Draw it beneath the tiles/buildings; ensure it pans/zooms with the grid (same transform).
+
+3. No-build tiles
+   - Add a no-build flag to tiles/slots in mercury-map.json (e.g. deep shadow, rough terrain). Placement validation (25-1) must reject these (add a "cannot build here" reason). Render them with a clear visual cue (and in the debug overlay).
+
+PATTERNS / CLEANUP
+- Backdrop image loaded once and reused; disposed/cleared on destroy. RAF reads signals once; debug overlay derived from the debug signal. No magic numbers — tile flags from JSON. Debug strictly guarded (browser-dev/Tauri-guard per AGENTS.md).
+
+OUT OF SCOPE: placement validation internals (25-1) beyond honouring the no-build flag; minimap (25-3).

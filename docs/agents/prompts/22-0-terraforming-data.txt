@@ -1,0 +1,43 @@
+Note: this prompt is part of the terraforming build-out (Block 22). Stay critical. This block is large and split into 22-0 (data) → 22-1 (service) → 22-2 (UI) → 22-3 (phase-event dialog) → 22-4 (culture events) → 22-5 (bio composer). Do 22-0 FIRST.
+
+Create a plan for the terraforming DATA model and JSON for Helioscape.
+
+SOURCE OF TRUTH
+- docs/GDD/terraforming-options.md (v5 — the DEFINITIVE terraforming design; just updated for the Venus TWO-PATH redesign) and docs/GDD/main-gdd.md.
+- IMPORTANT VENUS CHANGE: there are now TWO Venus paths only — Path A "Wild Venus" (~117 Earth-day solar day; water via asteroid belt or a captured sky moon Ganymede/Callisto; terminator rail cities + Always-Available orbital day/night mirrors) and Path B "Europa Impact" (single retrograde Europa crash → ~10–20 Earth-day solar day, ~35–50% ocean). There is NO two-moon/Callisto-into-Venus path. Do not reintroduce it.
+
+Read AGENTS.md (all content in JSON, never hardcoded in TS; interfaces for data shapes) and docs/agents/ARCHITECTURE.md.
+
+GOAL
+Define the data that fully describes terraforming for Earth, Mars and Venus so the service (22-1) and UI (22-2/22-3) are pure consumers. The current src/app/core/systems/terraforming.service.ts has stale flat CHOICE_RATES — those will be replaced; this prompt defines the JSON + interfaces they will read.
+
+REQUIREMENTS
+
+1. Per-planet phase structure (from terraforming-options.md)
+   - Mars: Phase 1 Warming/Atmosphere → Phase 2 Nitrogen → Phase 3 Magnetic Protection → Phase 4 Water, plus the bio phase.
+   - Venus: Opening Decision (spin choice A/B) → Phase 1 Cooling → Phase 2 CO₂ Removal → Phase 3 Spin Outcome/Colonisation → Phase 4 Water (Wild Venus only) → bio phase.
+   - Earth: its restoration/uplift track per the GDD (CO₂ drawdown, ocean acidification reversal, etc. — spillover-unlocked).
+   - Each phase: id, name, narrator description, base duration (years), the planet it belongs to, ordering, and completion criteria.
+
+2. Choices per phase
+   - Each phase offers the GDD's named CHOICES (e.g. Mars Phase 1: Orbital Laser Arrays / Statite Mirror / Polar Nuclear; Venus Phase 1: Dedicated Shade Mirror / Dyson Panel Redeployment; etc.). Each choice: id, name, description, cost (materials/components/Dyson draw as applicable), duration modifier, downstream effects, irreversibility flag, and any cross-planet flags (e.g. Venus nitrogen export → Mars Phase 2B).
+   - Venus Opening Decision encoded as a special pre-Phase-1 choice with exactly two options (Wild / Europa Impact), with the day-length + ocean-coverage outcomes and the Europa irreversibility + Hunt-for-Life flag baked from the GDD numbers.
+
+3. Boosts and Always-Available infrastructure
+   - Per-phase optional BOOSTS (e.g. Vortex Engines, Electrochemical Atmosphere Processing) with cost + effect.
+   - ALWAYS-AVAILABLE options (e.g. Venus Day/Night Orbital Mirrors, Mars Magnetic Protection add-anytime, Geothermal Drilling) as a separate category with prerequisites.
+
+4. Phase events
+   - Per-phase EVENT POOLS (positive/negative) with the GDD's events, each with: id, name, description, sign, trigger weighting, and the player RESPONSE OPTIONS (each option: label, cost, effect on timeline/state). The Venus two-moon-only [C] events are removed in the GDD — do not include them.
+
+5. Extraction-rate / slider parameters
+   - Encode the tunable extraction/allocation rates (e.g. Dyson shade % for Venus, delivery rates) as data with min/max/default so the UI sliders (22-2) and service are data-driven.
+
+6. Visual-value inputs
+   - Per phase, the target values for the derived visual/conditions readout (temperature, pressure, ocean %, composition) so the planet-panel conditions (19-3) and orrery texture cross-fade (Block 18/22) can interpolate by year. These are INPUTS to pure getValueAtYear() derivation — not stored animation state.
+
+DELIVERABLES
+- New/updated JSON in public/data/ (e.g. terraforming.json, or per-planet files — choose a clean structure) plus matching TypeScript interfaces in the models folder (import type, named exports). 
+- A short README comment in the JSON noting it is generated from terraforming-options.md v5 (two-path Venus).
+
+OUT OF SCOPE: the service logic (22-1), any UI (22-2+), bio organism data beyond phase hooks (22-5 owns the ecosystem composer data).

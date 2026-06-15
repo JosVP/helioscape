@@ -1,0 +1,33 @@
+Note: this prompt is part of the terraforming build-out (Block 22). Stay critical — read public/data/culture-events.json first.
+
+Create a plan to expand and correct the culture events tied to terraforming and bio phases for Helioscape.
+
+CONTEXT
+public/data/culture-events.json has ~32 events, but most terraforming/bio-triggered events never fire because those systems were not wired (now fixed in Block 22). With terraforming progression live, the terraforming/bio culture events become reachable — and several need content updates for the Venus TWO-PATH redesign.
+
+NOTE: gating culture events on actual STATE rather than just year (the "first birthday fires in 4 seconds" bug) is Block 24's job. THIS prompt is about CONTENT: making sure the right terraforming/bio events EXIST and reference the corrected Venus design.
+
+Read AGENTS.md (content in JSON; narrator voice from docs/GDD) and docs/GDD/terraforming-options.md + main-gdd.md (just updated: Venus = Wild Venus or single Europa Impact; NO two-moon path; Europa ~10–20 day solar day, ~35–50% ocean; one Hunt-for-Life closure on Europa).
+
+REQUIREMENTS
+
+1. Remove/repair obsolete Venus two-moon events
+   - Remove or rewrite any culture event referencing the dropped two-moon path (e.g. "Two New Moons Gone", a Callisto-impact Hunt-for-Life event, "Path C"). The single-Europa closure event ("The New Day", Europa Hunt-for-Life) stays and should reference the corrected ~10–20 day result.
+
+2. Ensure coverage for the live terraforming flow
+   - For Mars and Venus, ensure events exist for: each phase START and COMPLETION (narrator beat), key CHOICE commitments (especially the Venus Opening Decision and the Europa irreversibility moment), notable boosts/infrastructure (e.g. first Venus orbital mirror, first terminator rail city), and the bio phase beats.
+   - Earth restoration spillover events (CO₂ drawdown, ocean acidification reversal) where the GDD calls for them.
+
+3. Bio-phase events
+   - Ensure events for the bio phase milestones (first microbial seeding, first stable ecosystem, first open-air life, "second life on this planet" fossil discovery) exist and are reachable from the bio system (coordinate with 22-5 / existing bio-phase service).
+
+4. Trigger metadata for state-gating (prep for Block 24)
+   - Give each terraforming/bio event STATE-based trigger metadata (e.g. requires planet X at phase Y, or choice Z committed, or colony established) in addition to / instead of a bare year. Match whatever trigger schema Block 24 standardises — if 24 runs first, conform to it; otherwise define a clear, structured trigger object the CultureEventService can evaluate. Do NOT leave terraforming events gated on year alone.
+
+5. Voice + correctness
+   - All copy in the calm, optimistic, factual narrator voice. Numbers must match the corrected GDD (Venus days/ocean coverage, Europa as the only crash).
+
+DELIVERABLE
+- Updated public/data/culture-events.json (+ model interface changes if the trigger shape grows). Keep IDs stable where events already exist; add new IDs for new beats.
+
+OUT OF SCOPE: the CultureEventService trigger-evaluation rewrite + "only 3 events show / fire immediately" fix (Block 24); the terraforming engine (22-1); bio composer UI (22-5).

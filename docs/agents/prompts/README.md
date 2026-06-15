@@ -98,4 +98,4 @@ Verification steps before first run.
 - Follow the numbered order strictly — later prompts depend on earlier ones
 - Use the model recommendations in each block header for cost optimization
 
-## Total Prompts: 58
+## Total Prompts: 58 core (00–17) + 28 post-playtest (18–25) = 86

@@ -1,0 +1,32 @@
+Note: this prompt is part of the Mercury RTS fixes (Block 25). Stay critical — read the reservation/components data + sidebar first.
+
+Create a plan to make reservation inputs disable the corresponding space components on Mercury for Helioscape.
+
+PROBLEM OBSERVED IN PLAYTEST ("the +500 all then reserve 500" bug)
+- Reserving materials/components for a future space project does NOT remove them from the pool available to other uses. The player can add +500 to everything and then also reserve 500, double-counting. Reserved amounts must be withheld from the available/spendable pool.
+
+Read AGENTS.md and docs/agents/ARCHITECTURE.md (state in GameStateService; logic in services; single source of truth). Owned by:
+- src/app/core/systems/mercury-build.service.ts (reservation logic + available-vs-reserved accounting)
+- src/app/features/mercury/mercury-hud/* (reservation inputs UI)
+- public/data/mercury-components.json / resources.json (component/material definitions)
+
+REQUIREMENTS
+
+1. Reserved vs available accounting
+   - Introduce a clear model: total = available + reserved (+ in-use as applicable). Reserving N of a component moves N from available to reserved. Available = total − reserved. All spend/placement/queue checks (25-1 materials check, build costs, miner/upgrade costs) must read AVAILABLE, never total.
+   - Reservation inputs set the reserved amount per component/material; the available figure updates live and cannot go negative. You cannot reserve more than is currently available.
+
+2. Disable the matching space components
+   - When materials are reserved for a specific space project/component, the corresponding space component options that depend on those materials become DISABLED/withheld until released (the reservation "locks" them for the intended project). Make the dependency data-driven (which reservation gates which components) rather than hardcoded.
+   - Releasing a reservation returns the amount to available and re-enables the components.
+
+3. UI clarity
+   - Show total / available / reserved distinctly so the player understands why something is unaffordable or disabled. Disabled components show "reserved for <project>" as the reason.
+
+4. Save/load
+   - Reserved amounts + reservation→component gating live in saved state. Accounting is exact and idempotent on load (no drift).
+
+PATTERNS / CLEANUP
+- All accounting logic in the service (pure, testable: total, reserved → available). Components read signals + call reserve/release. No double-counting. No magic numbers; dependencies from JSON.
+
+OUT OF SCOPE: placement validation (25-1) other than making it read AVAILABLE; upgrades (25-5); multi-launchpad (25-11).

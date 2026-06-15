@@ -1,0 +1,40 @@
+Note: this prompt is part of the post-playtest visual overhaul (Block 18). Stay critical — read the current code first.
+
+Create a plan for the orrery background, starfield, ecliptic grid and orbit lines for Helioscape.
+
+CONTEXT
+The orrery currently renders on a transparent/black scene with thin white TorusGeometry orbit rings. It looks empty and cold. We are giving it a warm, optimistic, flat-shaded art direction INSPIRED BY (not copied from) Kurzgesgant: bold simple geometry, warm palette, a hint of pixel texture. This prompt covers ONLY the backdrop layers. Planet textures (18-2), lighting (18-3), post-processing/glow (18-4) and orbit interaction (18-5) are separate prompts — do not pull them in here.
+
+Read AGENTS.md and docs/agents/ARCHITECTURE.md (Canvas components, Three.js cleanup, Visual value pattern). All Three.js work is owned by:
+- src/app/features/orrery/orrery.component.ts
+- src/app/features/orrery/orrery-scene.builder.ts
+
+REQUIREMENTS
+
+1. Scene background — warm radial gradient
+   - Replace the empty/black background with a radial gradient centred on the sun (origin in screen space): deep warm-charcoal/indigo at the edges easing to a slightly warmer, lighter tone near the sun. This is "mission-control at night", not bright Kurzgesgant daytime — our own spin.
+   - Implement as a large background plane or a CanvasTexture used as scene.background (a generated gradient texture is preferred — see the create-placeholder-svg/canvas approach). Build the gradient in the scene builder so it is testable and disposable.
+   - All colour stops must come from new design tokens (add them to styles/tokens.scss, e.g. --orrery-bg-core / --orrery-bg-edge) and be passed into the builder — never hardcode hex in TypeScript per AGENTS.md.
+
+2. Starfield
+   - A field of small static star dots (Points / a single BufferGeometry of vertices, additive-blended PointsMaterial). A few hundred points is plenty. Slightly warm-white, varied size/opacity for depth. Keep it cheap — one geometry, one material.
+   - Optional: a handful (5–10) of slightly larger/brighter "feature" stars. Configurable count via a builder parameter.
+   - The starfield does NOT rotate with planets; it is a static backdrop (or rotates imperceptibly slowly — make rotation speed a parameter defaulting to 0).
+
+3. Ecliptic grid
+   - A faint blue concentric/polar grid on the ecliptic plane (y=0) to give the orbits a sense of plane and scale. Use a thin LineSegments or GridHelper-style construction recoloured to a faint blue token (--orrery-grid). Very low opacity so it reads as "blueprint", not a hard grid.
+   - Concentric rings aligned with the orbit radii read best; radial spokes optional and configurable.
+
+4. Orbit lines — recolour
+   - Recolour the existing orbit rings from white to the same faint blue family (--orrery-orbit). Keep them as thin rings. Do NOT change their interactivity here — orbit hover/click is Block 18-5.
+
+CONFIGURABILITY
+Expose the new visual quantities (star count, grid opacity, orbit-line opacity, gradient tokens, starfield rotation speed) as parameters of the scene builder so the look can be tuned without code surgery. Document defaults in a comment.
+
+CLEANUP (non-negotiable — see AGENTS.md)
+Every geometry, material and generated CanvasTexture created here MUST be disposed in the existing orrery ngOnDestroy disposal traversal. Add the new objects to whatever dispose list/traversal the component already uses. Generated gradient/star textures must be disposed too.
+
+RAF DISCIPLINE
+Read any signals once into locals at the top of the animate() callback. The backdrop is static, so it should not add per-frame signal reads or allocations. Do not allocate inside the RAF loop.
+
+OUT OF SCOPE (later blocks): planet/sun textures (18-2), day/night lighting (18-3), pixelate + glow (18-4), orbit-ring interaction + removing planet gray-out (18-5), camera re-centring (covered in 18-3).

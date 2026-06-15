@@ -29,11 +29,18 @@ No inline `// TODO:` comments in code - all tracking happens here to avoid dupli
 
 ## Active TODOs
 
+### POST-PLAYTEST PROMPT SET (Blocks 18–25) — authored 2026 by analyst
+
+- **What**: A new batch of build prompts lives in `docs/agents/prompts/18-*` through `25-*`, addressing the post-09-8 playtest issues: orrery visual overhaul (18), planet unlock chain + panels (19), research-as-timed-RP-tracks (20), Kardashev + eager service injection (21), the full terraforming loop incl. bio composer (22), pause + interaction lock (23), state-gated culture events (24), and Mercury RTS fixes incl. upgrades/overdrive + multi-launchpad (25).
+- **Venus redesign (IMPORTANT)**: The GDD now has TWO Venus paths only — Wild Venus (~117-day solar day) and a single retrograde Europa impact (~10–20-day solar day, ~35–50% ocean). The two-moon / Callisto-into-Venus path is DROPPED. See `docs/GDD/terraforming-options.md` (v5, updated), `main-gdd.md`, `economy-logistics.md`. Update any model enums/data accordingly (see `venusSpinPath` below).
+- **Prompt block**: 18–25
+- **Added**: post-playtest
+
 ### GameStateModel — New fields for Jovian moons, phase events, infra health
 
 - **File**: `src/app/core/models/game-state.model.ts`
 - **Location**: `SerializedGameState` and supporting interfaces
-- **TODO**: Add `JovianMoonState` (moonId, which moon assigned to which planet, commitment year, arrival year, extraction rate slider 0–1, status: `'uncommitted' | 'in_transit_to_mars' | 'in_transit_to_venus' | 'captured_mars' | 'captured_venus' | 'destroyed'`, targetPlanetId, isImpact: boolean), `PhaseEventState` (which event fired per phase per planet, response taken, outcome), `waterDeliveryRate` (slider 0–1 per planet), `infraHealth` (effectiveness 0–100 per infra type keyed by id), `powerBalanceGw`, `dysonShadeAllocation` (% panels redirected to Venus), `venusSpinPath` ('none' | 'europa_only_retrograde' | 'callisto_europa_retrograde'). Add `ProbeMissionState` (probeId, targetPlanetId, status: `'in_transit_outbound' | 'at_target' | 'in_transit_return' | 'complete'`, launchYear, arrivalYear) and `probeMissions: Record<string, ProbeMissionState>`. The orrery moon-transit visualisation reads both JovianMoonState and ProbeMissionState directly.
+- **TODO**: Add `JovianMoonState` (moonId, which moon assigned to which planet, commitment year, arrival year, extraction rate slider 0–1, status: `'uncommitted' | 'in_transit_to_mars' | 'in_transit_to_venus' | 'captured_mars' | 'captured_venus' | 'destroyed'`, targetPlanetId, isImpact: boolean), `PhaseEventState` (which event fired per phase per planet, response taken, outcome), `waterDeliveryRate` (slider 0–1 per planet), `infraHealth` (effectiveness 0–100 per infra type keyed by id), `powerBalanceGw`, `dysonShadeAllocation` (% panels redirected to Venus), `venusSpinPath` ('none' | 'wild_venus' | 'europa_retrograde'). NOTE: the two-moon `'callisto_europa_retrograde'` value is OBSOLETE — Venus is now two-path only (Wild Venus / single Europa impact). Add `ProbeMissionState` (probeId, targetPlanetId, status: `'in_transit_outbound' | 'at_target' | 'in_transit_return' | 'complete'`, launchYear, arrivalYear) and `probeMissions: Record<string, ProbeMissionState>`. The orrery moon-transit visualisation reads both JovianMoonState and ProbeMissionState directly.
 - **Depends on**: Nothing — precedes all future model-dependent blocks
 - **Prompt block**: Amendment to Block 0.4
 - **Added**: 2026-06-12
@@ -44,7 +51,7 @@ No inline `// TODO:` comments in code - all tracking happens here to avoid dupli
 - **Location**: Whole service
 - **TODO**: The `CHOICE_RATES` constant uses stale flat choice IDs. New system is per-planet, per-phase: `mars_p1_{orbital_laser | mirror_array | nuclear_detonation}`, `mars_p2_{titan_nitrogen | venus_nitrogen | regolith}`, `mars_p3_{l1_shield | equatorial_ring}`, `mars_p4_{jovian_moon | asteroid_belt}` and Venus equivalents. Phase event RNG (65–70% chance per phase, percentage-based impact) needs a dedicated method. Jovian moon transit tracking must feed from `JovianMoonState`. SGGF boost needs two sub-options (long-lived CF₄/SF₆ = permanent, short-lived methane/N₂O = reversible). Titan strip must require Dyson relay station to be queued first.
 - **Depends on**: GameStateModel amendment above
-- **Prompt block**: Rewrite of Block 3.3
+- **Prompt block**: Rewrite of Block 3.3 — now fully specified in Block 22 (`docs/agents/prompts/22-0`…`22-5`). Venus is TWO-PATH only (drop `callisto_europa_retrograde`).
 - **Added**: 2026-06-12
 
 ### ProbeMissions — New mechanic

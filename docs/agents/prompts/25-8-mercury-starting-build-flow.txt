@@ -1,0 +1,32 @@
+Note: this prompt is part of the Mercury RTS fixes (Block 25). Stay critical — read the mercury component + zone-select + map data first.
+
+Create a plan for the Mercury starting-build flow for Helioscape.
+
+PROBLEM OBSERVED IN PLAYTEST
+- When Mercury first opens there is no guided starting sequence — the player lands on an empty grid with no clear first steps. Per the design, arrival should kick off placing the initial infrastructure (e.g. landing pad / power cell / refinery) in a chosen starting zone.
+
+Read AGENTS.md and docs/agents/ARCHITECTURE.md. Owned by:
+- src/app/features/mercury/mercury.component.ts (flow orchestration / first-open state)
+- src/app/features/mercury/mercury-hud/zone-select/zone-select.component.ts (starting zone pick — already exists; integrate)
+- src/app/core/systems/mercury-build.service.ts (starting-build state)
+- public/data/mercury-map.json (startingZones) and mercury-buildings.json (the starting building set)
+
+REQUIREMENTS
+
+1. Trigger on Mercury arrival
+   - The starting-build flow begins when Mercury unlocks/arrives (Block 19 mission transit completes), only once. Track "starting build complete" in saved state so it doesn't replay on load.
+
+2. Zone selection
+   - Present the zone-select dialog (with the minimap from 25-3) to choose a starting zone from mercury-map.json startingZones. Selecting sets the active build area / centres the viewport there.
+
+3. Guided placement of the initial buildings
+   - Step the player through placing the required starting buildings (read the set + order from JSON — e.g. landing pad → power cell → refinery). Each step: prompt which building to place, restrict placement to valid slots (reuse 25-1 validation), confirm, advance. Provide a clear sequence indicator and the ability to cancel/restart a step.
+   - On completion, mark starting-build complete, hand control to the normal Mercury sandbox (queue, units, upgrades), and fire a culture event/toast ("first days on Mercury" — coordinate Block 24 so it's state-gated, not year-4).
+
+4. Resilience
+   - If the player reloads mid-flow, resume at the correct step from saved state. No setTimeout-driven steps; progression is state-driven.
+
+PATTERNS / CLEANUP
+- Flow state in service/GameState; component reads + renders. No logic in component. Reuse existing placement validation + zone-select; don't duplicate. Listeners cleaned on destroy.
+
+OUT OF SCOPE: placement validation internals (25-1), minimap internals (25-3), the culture-event trigger system (Block 24) — just fire the event through the existing API.

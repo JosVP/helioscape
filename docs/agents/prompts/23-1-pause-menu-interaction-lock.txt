@@ -1,0 +1,34 @@
+Note: this prompt finishes deferred Block 10-1 and adds an interaction lock (Block 23). Stay critical — read the current code.
+
+Create a plan for the pause menu overlay and game interaction lock for Helioscape.
+
+PROBLEMS OBSERVED IN PLAYTEST
+- src/app/features/pause-menu/pause-menu.component.ts is an empty stub (template: '').
+- GameLoopService.pause() stops ticks only — the player can still interact (build, research, click events) while "paused". Pause must also LOCK interaction.
+
+Read AGENTS.md and docs/agents/ARCHITECTURE.md, plus the original spec docs/agents/prompts/10-1-pause-menu.txt. Owned by:
+- src/app/features/pause-menu/* 
+- src/app/features/game-shell/* (owns pause state + overlay placement)
+- coordinate with GameLoopService (already has pause/resume)
+
+REQUIREMENTS
+
+1. Pause menu overlay
+   - A full-screen overlay menu with: Resume, Save, Load, Settings, Quit to title. Reuse existing save-slot/settings components and the confirm-dialog (Quit confirmation). Opened via Escape and/or a HUD button.
+   - OnPush, signals, @if to mount, inject() services, output() events for actions handled by game-shell. Thin template, BEM SCSS, tokens, motion per ARCHITECTURE.md (fade/scale in).
+
+2. Pausing the clock
+   - Opening the pause menu calls GameLoopService.pause(); closing calls resume(). Confirm ticks fully stop (no year advance, no system effects firing on ticks) while paused. Anything derived from game year (terraforming progress, research progress, phase-event countdowns) naturally freezes — verify.
+
+3. Interaction lock (the missing piece)
+   - While paused, the rest of the game UI must be NON-INTERACTIVE: building placement, Mercury actions, research clicks, terraforming choices, and event dialogs cannot be used. Implement a single source of truth — e.g. an isPaused()/interactionLocked() readonly signal (GameStateService or a small Ui-state service) — and have interactive surfaces respect it.
+   - Preferred implementation: the game-shell wraps the in-game content in a container that, when locked, blocks pointer events (e.g. an inert/blocking layer behind the pause overlay) AND/OR interactive components read the lock signal to disable their handlers. Use whichever is cleanest, but the lock must be authoritative and centralised, not duplicated per component. The pause overlay itself remains interactive.
+   - Accessibility: trap focus within the pause overlay while open; restore focus on close; Escape toggles.
+
+4. Save/load + Settings from pause
+   - Save/Load operate via SaveService (Tauri-guarded with browser fallback per AGENTS.md). Settings via SettingsService. Quit returns to the title screen (with confirm).
+
+PATTERNS / CLEANUP
+- No game logic in components. No setTimeout. Any keydown (Escape) listener registered must be removed on destroy (manual-listener rule). Single pause/lock source of truth.
+
+OUT OF SCOPE: the content of the systems being locked. This is pause UX + the lock mechanism only.

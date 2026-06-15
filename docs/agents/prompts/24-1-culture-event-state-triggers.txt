@@ -1,0 +1,37 @@
+Note: this prompt is the culture-event trigger fix (Block 24). Stay critical — read culture-event.service.ts and public/data/culture-events.json first.
+
+Create a plan to gate culture events on real game state (not bare year) and fix the "only 3 events / fire immediately" behaviour for Helioscape.
+
+PROBLEMS OBSERVED IN PLAYTEST
+- "First birthday" (year 2035) and "first day on Mercury" (year 2038) fire within a few real seconds because they are gated ONLY on game year, and time runs ~2s/year.
+- Only ~3 culture events ever appear: 32 exist but most are gated on terraforming/bio/tech milestones that never happened (now wired in Blocks 20/22) AND the trigger evaluation is year-centric, so the rest never qualify.
+
+Read AGENTS.md (content in JSON; narrator voice) and docs/agents/ARCHITECTURE.md. Owned by:
+- src/app/core/systems/culture-event.service.ts (trigger evaluation)
+- public/data/culture-events.json (trigger metadata) + the culture-event model interface
+- coordinate with the event card/toast (docs/agents/prompts/08-1, 08-2) — no UI changes needed beyond what already exists.
+
+REQUIREMENTS
+
+1. Structured, state-aware trigger schema
+   - Replace bare-year triggers with a structured trigger object the service can evaluate against game state. Support condition types such as: gameYear >= N (still allowed, but rarely the SOLE condition), planet unlocked, planet at phase/choice, mission launched/arrived (Block 19), colony/base established, tech researched (Block 20), Dyson coverage >= X, Kardashev >= X, bio milestone reached, a prior culture event fired. Allow ALL-of / ANY-of composition.
+   - Convert the existing 32 events to the new schema. Events that are genuinely time-flavoured (e.g. "first birthday") should ALSO require the enabling STATE (e.g. Moon outpost active AND >= N years SINCE that state began — use an elapsed-years-since-state condition, not an absolute calendar year), so they fire at a sensible moment, not at second 4.
+
+2. Evaluation + firing rules
+   - Evaluate triggers on tick/state change (via effect()+untracked()). Fire an event at most ONCE (track fired events in saved state). Respect prerequisites (don't fire a phase-completion event before the phase exists).
+   - Pacing: avoid bursts — a small minimum spacing between fired events (queue if several qualify the same tick) so the player isn't flooded. Make spacing data/config driven, not a magic literal.
+   - Some events are one-shot; some are repeatable per-occurrence (e.g. each dome teardown). Support a repeatable flag.
+
+3. Elapsed-since-state helper
+   - Provide a clean way to express "N years after <state> first became true" (e.g. first Moon birthday = Moon outpost age >= 1 year). Store the year a tracked state first became true in game state so the condition is pure/derivable and save/load safe.
+
+4. Save/load
+   - Fired-event set + any tracked "state-first-true year" values live in GameStateService and are saved. No event re-fires on load; pending/queued events restore correctly.
+
+5. Verify the fix
+   - On a fresh game, the early flood is gone; events fire as their state conditions are met across a real session, and far more than 3 become reachable as Blocks 20/22 progress.
+
+PATTERNS / CLEANUP
+- effect()+untracked(); content in JSON; interfaces for the trigger shape (import type); no logic in components; no setTimeout.
+
+OUT OF SCOPE: writing new terraforming/bio event CONTENT (Block 22-4 — though this prompt defines the trigger schema 22-4 conforms to; keep them consistent); the toast/card UI.

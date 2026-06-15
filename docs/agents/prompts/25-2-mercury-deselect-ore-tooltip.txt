@@ -1,0 +1,27 @@
+Note: this prompt is part of the Mercury RTS fixes (Block 25). Stay critical — read the mercury grid + building-info components first.
+
+Create a plan for deselect (Escape / right-click) and moving ore% into a tooltip on Mercury for Helioscape.
+
+PROBLEMS OBSERVED IN PLAYTEST
+- No way to cancel a selection / placement: Escape and right-click do nothing.
+- Mining-location ore percentages are shown as a persistent bar; they should be in a hover TOOLTIP instead (less clutter).
+
+Read AGENTS.md and docs/agents/ARCHITECTURE.md (Canvas components own listeners; clean up on destroy). Owned by:
+- src/app/features/mercury/mercury-grid/mercury-grid.component.ts (input handling, hover)
+- src/app/features/mercury/mercury-hud/building-info/building-info.component.ts (where the ore bar currently lives) + a small tooltip
+- public/data/mercury-map.json (miningLocations: oreRatios / oreRatioDisplay)
+
+REQUIREMENTS
+
+1. Deselect / cancel
+   - Escape and right-click both cancel the current action: clears the active building-to-place (exits placement mode) or clears the current selection (selected building/tile). Right-click must NOT trigger the browser context menu over the canvas (preventDefault).
+   - State for "current placement / selection" lives in a signal (MercuryBuildService or a mercury UI-state signal), not local component flags scattered around.
+
+2. Ore% as tooltip
+   - Remove the persistent ore-ratio bar from the building-info/sidebar. Instead, when hovering a mining location tile (or a miner assigned to one), show a small tooltip near the cursor listing the ore ratios (use oreRatioDisplay from mercury-map.json). 
+   - Tooltip is derived from the hovered tile (signal), positioned from the mouse position; OnPush; thin template; tokens-only SCSS. Hide on mouse-leave.
+
+PATTERNS / CLEANUP
+- Add keydown(Escape) + contextmenu + mousemove listeners as needed; REMOVE all of them in ngOnDestroy (manual-listener rule). Reuse a single mouse Vector where applicable; no per-event allocation in hot paths. No logic in component beyond input→signal; derivation via computed().
+
+OUT OF SCOPE: placement validation (25-1), minimap (25-3), and everything else in Block 25.

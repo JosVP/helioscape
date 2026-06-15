@@ -1,0 +1,31 @@
+Note: this prompt is part of the Mercury RTS fixes (Block 25). Stay critical — read the mercury feature + data first.
+
+Create a plan for correct slot/footprint/materials-gated building placement on Mercury for Helioscape.
+
+PROBLEMS OBSERVED IN PLAYTEST
+- Buildings can be placed where they shouldn't be; placement is not restricted to the correct slots/slot types.
+- Refinery (and other multi-tile buildings) are treated as 1 tile though footprints are 2×2 in public/data/mercury-buildings.json.
+- Materials are only checked when something enters the queue, not at placement — you can place things you can't actually afford to build.
+
+Read AGENTS.md and docs/agents/ARCHITECTURE.md (Canvas components — MercuryGridComponent owns its RAF + listeners; isometric utils TILE_W=64/TILE_H=32). Owned by:
+- src/app/features/mercury/mercury-grid/mercury-grid.component.ts (placement validation overlay)
+- src/app/core/systems/mercury-build.service.ts (validation logic)
+- public/data/mercury-map.json (slots: slotType/reserved) and mercury-buildings.json (footprint, cost, allowedSlotType, energyDrawGw)
+
+REQUIREMENTS
+
+1. Slot-type + footprint validation
+   - A building may be placed ONLY where: every tile of its footprint (e.g. 2×2 from mercury-buildings.json) lands on slots of the correct allowedSlotType, none of those slots are already occupied or reserved, and the footprint is within map bounds.
+   - The placement preview must highlight the full footprint (all 2×2 tiles), green when valid / red when invalid, with the reason available (wrong slot type / occupied / reserved / out of bounds / insufficient materials).
+   - Use the isometric utils for tile↔screen mapping; compute footprint tiles from the building's footprint dimensions, not a hardcoded single tile.
+
+2. Materials check at placement
+   - At placement (not only at queue insert), validate the player can afford the building's cost (materials/components). If not, placement is invalid with an "insufficient materials" reason. Keep the queue-time check too, but placement must reflect affordability live.
+
+3. Single source of truth
+   - Validation lives in MercuryBuildService (pure, testable: given map state + building + target tile → valid/invalid + reason). The grid component calls it for the preview and on click; no duplicated rules in the component.
+
+PATTERNS / CLEANUP
+- Logic in the service; component reads state + renders. RAF reads signals once into locals. Any added listeners removed on destroy. Canvas geometry disposed/cleared appropriately. No magic numbers — slot types/footprints from JSON.
+
+OUT OF SCOPE: deselect/right-click + tooltip (25-2), minimap (25-3), units/miners (25-4), upgrades/overdrive (25-5), local energy bar (25-6), default Dyson queue item + conveyor (25-7), starting-build flow (25-8), reservation-disables-components (25-9), debug toggle/SVG backdrop/no-build tiles (25-10), multi-launchpad (25-11).

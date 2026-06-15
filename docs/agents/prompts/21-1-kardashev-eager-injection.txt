@@ -1,0 +1,33 @@
+Note: this prompt is part of the post-playtest progression-wiring work (Block 21). Stay critical — read the current code first.
+
+Create a plan to fix the Kardashev readout and eagerly inject all system services at app start for Helioscape.
+
+PROBLEM OBSERVED IN PLAYTEST
+- The Kardashev bar shows "K 0.00" and bare dots instead of the starting ~0.73 (Earth begins at Kardashev 0.73 per docs/GDD/main-gdd.md).
+
+ROOT CAUSE (verify in code)
+- src/app/core/services/game-state.service.ts initialises kardashevLevel to 0.
+- src/app/core/systems/kardashev.service.ts computes level = 0.73 + (coverage/100)*1.27, but ONLY inside an effect that runs on a YEAR TICK, and the service is NOT eagerly injected, so its effect never registers until something references it. The bar (src/app/features/hud/kardashev-bar/kardashev-bar.component.ts) renders correctly IF the level is 0.73 — it just never receives it at startup.
+- This is the same class of bug the deferred 14-1 "eager injection" work was meant to prevent: system services that drive state via effect() must be instantiated at app start or their effects never run.
+
+Read AGENTS.md and docs/agents/ARCHITECTURE.md (State architecture; system services react via effect()+untracked(); services are providedIn root singletons but a singleton is only created when first injected).
+
+REQUIREMENTS
+
+1. Correct starting Kardashev value
+   - Initialise kardashevLevel to the GDD starting value (~0.73) in GameStateService so the bar is correct from frame one, BEFORE any tick. Read the base value from data/config rather than hardcoding the literal in TS if a config source exists; otherwise define it as a single named constant sourced from the GDD with a comment. (KardashevService's BASE/SPAN of 0.73/1.27 should be the single source — align the init with it.)
+   - Confirm KardashevService still recomputes the level from Dyson coverage on ticks; the init just guarantees a correct value at t=0.
+
+2. Eager injection of system services (finish 14-1)
+   - Ensure ALL system services that drive state purely through effect() are instantiated at application startup so their effects register immediately — not lazily on first template reference. This includes KardashevService and the other systems (research, terraforming, culture events, dyson, bio-phase, mercury build, plus any unlock/transit service from Block 19).
+   - Use the established Angular pattern: an APP_INITIALIZER (or an eager inject() in the root component/bootstrap) that references each system service once. Put this in app.config.ts (see docs/agents/prompts/14-1-app-config-final.txt and src/app/app.config.ts). Document why (effects must register at start).
+   - Verify there are no circular-init problems: effect bodies that mutate state must be wrapped in untracked() (they should already be). Eager injection must not cause an initialisation order crash — order the references safely and rely on signals, not on construction-time reads of other services' state.
+
+3. Verify
+   - On a fresh game (no save), the Kardashev bar reads ~0.73 immediately and advances as Dyson coverage grows.
+   - On load of a save, the value reflects saved Dyson coverage (derived), not 0.
+
+PATTERNS / CLEANUP
+- No logic moved into components. No setTimeout. Keep services providedIn root. The initializer only references services; it does not contain game logic.
+
+OUT OF SCOPE: the Dyson coverage mechanics themselves; the bar's visuals (already correct). This is initialisation + wiring only.

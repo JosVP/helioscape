@@ -1,0 +1,31 @@
+Note: this prompt is part of the Mercury RTS fixes (Block 25). Stay critical — read the mass-driver / shipping logic + queue + economy doc first.
+
+Create a plan for multiple launch pads and rockets (skyhook shipping) on Mercury for Helioscape.
+
+PROBLEM / GAP OBSERVED
+- Shipping off Mercury (mass driver / skyhook launches of components to orbit and onward to other planets) is single-channel. The player should be able to build MULTIPLE launch pads so several rockets/launches run in parallel, scaling throughput.
+
+Read AGENTS.md, docs/GDD/economy-logistics.md (mass driver / ion-drive tug shipping pipeline) and docs/agents/ARCHITECTURE.md. Owned by:
+- src/app/core/systems/mercury-build.service.ts (launch-pad count → shipping throughput)
+- src/app/features/mercury/* (build a launch pad as a building; show launches)
+- public/data/mercury-buildings.json (launch pad building: cost, footprint, allowedSlotType) and mercury-components.json / economy data (launch throughput per pad)
+
+REQUIREMENTS
+
+1. Launch pad as a buildable, repeatable building
+   - The launch pad is a normal Mercury building (footprint, slot type, cost from JSON) that can be placed MULTIPLE times (subject to slot availability + power 25-6). Each pad adds parallel launch capacity.
+
+2. Parallel shipping throughput
+   - Total shipping throughput scales with the number of operational launch pads (and is modified by upgrades/overdrive 25-5 and available power 25-6). The shipping pipeline (mass driver → orbit → ion-drive tug → destination) processes more launches concurrently with more pads. Model throughput in the service; expose effective rate as a readonly signal.
+   - Outbound shipments (e.g. Dyson panels, terraforming components, the Europa impactor package, captured-moon mass-driver gear) draw from this shared, now-parallel capacity.
+
+3. Visual feedback
+   - Show launches happening: a simple launch animation/indicator per pad (placeholder sprite/effect, create-placeholder-svg), and a shipping queue/throughput readout in the HUD so the player sees the benefit of more pads. Derive animation from state/time; cheap; cleaned up on destroy.
+
+4. Integration
+   - Throughput feeds the economy/terraforming delivery rates (e.g. how fast components reach Mars/Venus). Keep a single effective-throughput computation that upgrades/overdrive/power all compose into.
+
+PATTERNS / CLEANUP
+- Logic in services; components read + render. Throughput as computed/readonly signals. Content (pad cost/throughput) from JSON, no magic numbers. RAF/animation reads signals once; resources disposed on destroy. No setTimeout — any launch timing is game-year derived and save/load safe.
+
+OUT OF SCOPE: the terraforming consumers of shipped goods (Block 22) beyond feeding their delivery rate; upgrades/overdrive internals (25-5); power internals (25-6).

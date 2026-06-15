@@ -1,0 +1,30 @@
+Note: this prompt is part of the Mercury RTS fixes (Block 25). Stay critical — read the sidebar (Upgrades tab) + dyson/mercury services first.
+
+Create a plan for the Mercury Upgrades tab and Dyson swarm Overdrive for Helioscape.
+
+PROBLEMS / GAPS OBSERVED
+- The Upgrades tab is empty.
+- There is no Overdrive mechanic (the GDD's idea of pushing the Dyson swarm / production harder for a temporary boost at a cost — e.g. 25% / 50% overdrive).
+
+Read AGENTS.md, docs/GDD/economy-logistics.md and docs/GDD/main-gdd.md (Dyson swarm, production), and docs/agents/ARCHITECTURE.md. Owned by:
+- src/app/features/mercury/mercury-hud/sidebar/sidebar.component.ts (Upgrades tab)
+- src/app/core/systems/mercury-build.service.ts and dyson.service.ts (upgrade + overdrive logic)
+- public/data/mercury-buildings.json / mercury-components.json / a new upgrades data entry (upgrade definitions, costs, effects; overdrive tiers + cost/penalty)
+
+REQUIREMENTS
+
+1. Upgrades tab
+   - List available upgrades (e.g. faster mining, higher mass-driver throughput, better refinery yield, more build-queue parallelism) read from JSON. Each: id, name, description, cost, prerequisites, effect. Purchasing applies a persistent modifier to the relevant production rate (logic in service, modifier stored in saved state).
+   - Show purchased vs available vs locked (prereqs). Buttons disabled with a reason when unaffordable/locked.
+
+2. Dyson Overdrive
+   - An overdrive control offering tiers (e.g. +25% / +50% output) that temporarily boost Dyson/production at a cost or penalty per the GDD (e.g. increased wear/maintenance, higher resource draw, or a cooldown). Define tiers + cost/penalty in JSON.
+   - Overdrive is a toggle/selector that modifies the effective production/Dyson output via a multiplier signal, applied live (reversible). Make the trade-off visible (boosted output vs the penalty). If a duration/cooldown applies, drive it by GAME YEARS (derived), not setTimeout, and make it save/load safe.
+
+3. Integration
+   - Upgrade + overdrive multipliers feed into the same production/economy pipeline the rest of Mercury uses (single place that computes effective rates), so they compose correctly with miners (25-4) and the energy bar (25-6).
+
+PATTERNS / CLEANUP
+- Logic in services; component reads + calls. Multipliers as computed/readonly signals. Content in JSON. No magic numbers, no setTimeout. effect()+untracked() for any reactions.
+
+OUT OF SCOPE: miners (25-4), local energy bar (25-6), conveyor (25-7), reservation logic (25-9), multi-launchpad (25-11).

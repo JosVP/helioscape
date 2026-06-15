@@ -1,0 +1,40 @@
+Note: this prompt is part of the terraforming build-out (Block 22). Do 22-0/22-1 first. Stay critical.
+
+Create a plan for the terraforming phase-event dialog (countdown, no game pause) for Helioscape.
+
+CONTEXT
+Per docs/GDD/terraforming-options.md, each terraforming phase can throw events (positive/negative) the player responds to. 22-1 owns the roll + pending-event state + applying outcomes. THIS prompt is the player-facing dialog: a timed decision the player can handle well, handle partially, or ignore — WITHOUT pausing the game. As the countdown runs out, the better response options grey out, so hesitation costs you the good outcome but never hard-fails.
+
+Read AGENTS.md and docs/agents/ARCHITECTURE.md (Visual value pattern — the countdown must be derived from game years, not a setTimeout; OnPush; signals; no logic in components; GameLoopService is the only timer).
+
+OWNED BY
+- a new phase-event dialog component under src/app/features/ (e.g. terraforming-phase-event/) 
+- it reads the pending event from GameStateService (populated by 22-1) and calls TerraformingService to resolve it.
+
+REQUIREMENTS
+
+1. Presentation
+   - When a pending phase event exists for a planet, show a non-blocking dialog/card (the game keeps running — time does NOT pause). Show: event name, narrator-voiced description, sign (positive/negative cue), and the response options from data (each: label, cost, effect summary).
+   - Multiple simultaneous events: queue or stack cleanly (one prominent at a time is fine); each has its own deadline.
+
+2. Countdown (derived, not timer-based)
+   - The deadline is a game-year value stored with the pending event (set by 22-1). The remaining time shown = deadline − currentGameYear, derived via computed() from the game-year signal. It scales with game speed automatically and is save/load safe. Do NOT use setTimeout/setInterval.
+   - A visual countdown bar uses the visual-value pattern (derive width from years remaining; 1s linear tick transition).
+
+3. Progressive option grey-out
+   - Response options have quality tiers (best / partial / ignore). As the remaining time crosses thresholds (from data, e.g. best option available for the first X years, partial until Y, then only "ignore"), the higher-quality options become DISABLED (greyed) in order. The player can always still pick a remaining option; if the deadline fully passes, 22-1 applies the default "ignored" outcome and the dialog dismisses.
+   - Greying is derived from years-remaining (computed()), so it stays correct across speed changes and save/load.
+
+4. Resolution
+   - Selecting an option calls TerraformingService to apply that response's effect (cost, timeline/state change) and clears the pending event. Fire a follow-up culture event/toast where the GDD calls for one (coordinate Block 24).
+
+5. Interaction-lock interplay
+   - If the pause menu (Block 23) is open with interaction lock active, the event dialog must respect the lock (no interaction while paused) and its countdown must also be frozen while the game clock is paused (since it derives from game year, a paused clock naturally freezes it — verify this holds).
+
+PATTERNS / CLEANUP
+- OnPush, signals, computed() for countdown + grey-out, thin template. No logic in component (delegate to service). BEM SCSS, tokens, motion per ARCHITECTURE.md. No manual timers.
+
+ASSETS
+- Optional event illustration: placeholder SVG via create-placeholder-svg at the expected path. Never block.
+
+OUT OF SCOPE: the event roll + outcome math (22-1), culture-event content (22-4), the terraforming panel (22-2).

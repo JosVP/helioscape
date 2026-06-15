@@ -212,7 +212,7 @@ Dome colonisation: available after Earth's Dome Tech researched. Player-initiate
 Post-terraforming: first open-air city founding, ecosystem micro-events every ~50yr, population milestones, underground drilling → finds 3-billion-year-old fossil traces ("we're the second life on this planet").
 
 Sub-planet bodies affecting Mars:
-- Europa ice: water delivery option (disrupts Europa ocean, reduces Hunt for Life discovery chance)
+- Captured Jovian sky moon (Ganymede or Callisto): water delivery option (moon captured into Mars orbit, ice extracted gradually, permanent sky moon)
 - Titan nitrogen: atmosphere source (strips Titan permanently, locks Titan terraforming forever)
 
 ---
@@ -225,12 +225,12 @@ Shade mirror is MANDATORY — not a path choice. Prerequisite for all Venus cool
 Venus spin-up decision is made ON VENUS UNLOCK (~Year 20), not mid-game. Must be finalised before Year 100. Impacts happen BEFORE Phase 1 cooling, not after — a moon impact is a planetary heat event, so the correct sequence is always crash first, then begin the long cooling project from a hotter but already-watered starting point.
 
 Terraforming paths (opening decision on Venus unlock):
-- Path A — Wild Venus: no spin-up. Terminator zone habitation, rail cities. Proceed immediately to cooling. ~400–600yr.
-- Path B — Europa Spin-up: Europa crash before Phase 1. ~60–80 Earth day result. ~35–50% ocean coverage. Phase 1 extended ~20–30yr from impact heat. ~500–700yr.
-- Path B — Europa Spin-up: Europa crash before Phase 1 (retrograde direction). ~30–40 Earth day solar day result. ~35–50% ocean coverage. Phase 1 extended ~20–30yr from impact heat. ~500–700yr.
-- Path C — Callisto + Europa: sequential crashes before Phase 1 (retrograde). ~10–15 Earth day solar day result. ~55–65% ocean coverage, abundant land. Phase 1 extended ~40–60yr. Highest moral weight (two Hunt for Life closures). ~600–800yr.
+- Path A — Wild Venus: no spin-up. ~117 Earth-day solar day. Terminator zone habitation, rail cities, orbital day/night mirrors. Water via asteroid belt or a captured sky moon (Ganymede/Callisto). Proceed immediately to cooling. ~400–600yr.
+- Path B — Europa Spin-up: single Europa crash before Phase 1 (retrograde direction). ~10–20 Earth-day solar day result. ~35–50% ocean coverage. Water + spin delivered together. Phase 1 extended ~20–30yr from impact heat. One Hunt for Life closure (Europa). ~500–700yr.
 
-Ocean coverage differs visibly by path (planet texture in orrery): Path A/Managed — mostly rocky, inland seas; Path B — Earth-like mix; Path C — ocean-rich but not a water world.
+There is no two-moon Venus path. A single Europa impact is the only moon crash in the game; Callisto and Ganymede are reserved as captured sky moons (Mars or Wild Venus).
+
+Ocean coverage differs visibly by path (planet texture in orrery): Path A belt-only — mostly rocky, inland seas; Path A with a captured moon, or Path B — Earth-like land/ocean mix.
 
 Spillover: venus_carbonate (CO₂ removal phase) → unlocks Earth CO₂ Drawdown + Earth Ocean Acidification Reversal.
 
@@ -277,7 +277,8 @@ Star-lifting: not in V1. Without it, Europa crash + Titan nitrogen strip are per
 | Polar volatiles | Mercury shadowed craters | Life support |
 | Deuterium | Earth oceans | Fusion fuel (early era) |
 | He-3 | Jupiter/Saturn aerostats | Fusion fuel (premium era) |
-| Europa ice | Europa redirect | Mars/Venus water (mutually exclusive) |
+| Europa ice | Europa crash | Venus water + spin (single impact, Venus only) |
+| Captured moon ice | Ganymede/Callisto capture | Mars or Wild Venus water (gradual, sky moon stays) |
 | Titan nitrogen | Titan strip | Mars/Venus atmosphere (permanent) |
 | Research Points | Population (Earth + colonies) | Tech unlocks |
 
@@ -334,11 +335,11 @@ Tagged examples: Path A Mars warming = Naturalist. Mirror Mars = Architect. Wild
 ---
 
 ## EUROPA DECISION
-Game's most morally complex moment. Paths B and C Venus require Jovian moon impacts. Decision window closes Year 100 (game Year 100 = 2133) — the required multi-decade gravity assist sequence becomes geometrically unfeasible after this point. Decision is made on Venus Unlock (~Year 20); impacts arrive 20–50 years later and precede Phase 1 cooling.
+Game's most morally complex moment. The Venus Europa Spin-up path (Path B) requires a single Jovian moon impact. Decision window closes Year 100 (game Year 100 = 2133) — the required multi-decade gravity assist sequence becomes geometrically unfeasible after this point. Decision is made on Venus Unlock (~Year 20); the impact arrives 20–40 years later and precedes Phase 1 cooling.
 
 At decision time: Europa biological status formally unknown (Clipper data: organic chemistry, no definitive biosignatures).
 
-Europa redirect + shade mirror deployment are parallel early-game activities, not sequential. Player authorises the Europa mission at Venus Unlock → Mercury queues impactor packages + solar sail tugs → shade mirror proceeds in parallel → Europa impacts Venus 20–40 years later, before Phase 1 cooling begins. If Callisto + Europa path chosen, both are authorised on the same early-game horizon and Callisto arrives first.
+Europa redirect + shade mirror deployment are parallel early-game activities, not sequential. Player authorises the Europa mission at Venus Unlock → Mercury queues impactor package + solar sail tugs → shade mirror proceeds in parallel → Europa impacts Venus 20–40 years later, before Phase 1 cooling begins. There is no two-moon variant; Europa is the only crash.
 
 CE fires in two parts: warning 10-15yr before impact → impact event. Gap is where moral complexity lives.
 
@@ -357,7 +358,7 @@ Second playthrough: if player discovered Europa life in previous run, specific C
 ## PATH LOCKING
 Permanently locked (physical irreversibility): Europa crash, Titan nitrogen strip, Mars polar detonations. Physical act cannot be undone.
 
-Not locked (infrastructure is additive): adding orbital mirrors to Path A Venus mid-game. Adding magnetic umbrella to Path C Mars. Any infrastructure layered on existing path. Early choices have lasting narrative consequences via CEs + history book entries — not mechanical locks preventing improvement.
+Not locked (infrastructure is additive): adding orbital mirrors to Path A Venus mid-game. Adding magnetic umbrella to nuclear-warmed Mars. Any infrastructure layered on existing path. Early choices have lasting narrative consequences via CEs + history book entries — not mechanical locks preventing improvement.
 
 Design principle: physical acts irreversible. Infrastructure decisions not.
 

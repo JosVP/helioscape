@@ -1,0 +1,37 @@
+Note: this prompt is part of the post-playtest visual overhaul (Block 18). Stay critical — read the current code first.
+
+Create a plan for pixelate post-processing, sun glow and atmosphere glow in the orrery for Helioscape.
+
+CONTEXT
+Final visual layer for the orrery overhaul. We want a subtle pixelate filter as a signature texture (our own spin on the flat art direction), a warm volumetric-feel glow around the sun, and a soft atmospheric rim glow around planets that have atmospheres. All three must be CONFIGURABLE and cheap.
+
+Read AGENTS.md and docs/agents/ARCHITECTURE.md (Three.js, cleanup, Canvas components). Owned by:
+- src/app/features/orrery/orrery-scene.builder.ts
+- src/app/features/orrery/orrery.component.ts
+
+REQUIREMENTS
+
+1. Pixelate post-process
+   - Add an EffectComposer with the scene render pass + a pixelate pass (three/examples RenderPixelatedPass, or a small custom ShaderPass) so the whole orrery renders at a chunky, stylised resolution.
+   - Make pixel size configurable (a component input or builder param), default subtle (small pixel size — texture hint, not Minecraft). Allow it to be disabled entirely via the same config so the user can compare.
+   - The render loop must call composer.render() instead of renderer.render() when the composer is active; keep a clean fallback to plain renderer when disabled.
+   - Handle resize: update composer + pass sizes alongside the renderer/camera in the existing resize handler.
+
+2. Sun glow
+   - A warm additive glow around the sun: a billboarded sprite/quad with a radial-gradient CanvasTexture (generated, disposable), and/or a slightly larger back-sphere with additive blending. Keep it cheap — no heavy bloom required, though an optional UnrealBloomPass on the composer is acceptable if guarded behind config.
+   - Configurable: glow size, colour (token), intensity. Default warm amber.
+
+3. Atmosphere glow (per planet)
+   - A thin soft rim glow around planets flagged as having an atmosphere (read the flag/colour from public/data/planets.json — add a field if missing rather than hardcoding). Implement as a slightly larger back-facing sphere with an additive/fresnel-style material, coloured per planet's atmosphereColor.
+   - Configurable: rim thickness, intensity, on/off. Earth/Venus strong, Mars faint, Mercury none.
+
+CONFIGURABILITY SUMMARY
+Surface a single, documented config object (pixel size + enabled, sun glow size/colour/intensity, atmosphere thickness/intensity/enabled). The user explicitly wants to tune these. Pull colours from tokens / planets.json, never hardcode hex in TS.
+
+CLEANUP (non-negotiable)
+EffectComposer, all passes, render targets, glow sprites/materials and generated glow textures MUST be disposed in the orrery ngOnDestroy. Composer render targets are a common GPU leak — dispose them explicitly.
+
+RAF DISCIPLINE
+Glow sizes/colours derive from state read once into locals at the top of animate(). No per-frame allocation. Billboard the sun-glow sprite toward the camera using existing camera reference, not a new lookAt allocation each frame where avoidable.
+
+OUT OF SCOPE: orbit-ring interaction (18-5), lighting (18-3), textures (18-2), background/grid (18-1).

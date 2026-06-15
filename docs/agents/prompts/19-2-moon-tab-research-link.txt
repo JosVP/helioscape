@@ -1,0 +1,29 @@
+Note: this prompt is part of the post-playtest progression-wiring work (Block 19). Stay critical — read the current code first.
+
+Create a plan for making the Moon an Earth panel tab and scoping the Research Hub link to Earth for Helioscape.
+
+PROBLEMS OBSERVED IN PLAYTEST
+- The Moon is its own clickable orrery planet; it should be part of Earth (an Artemis/Moon outpost is inherited at game start per docs/GDD/main-gdd.md), so it belongs as a TAB on the Earth panel.
+- The Research Hub link currently is not correctly scoped — research (Earth tech tree / RP) is an Earth-side activity and its entry point should live on the Earth panel, not on every planet.
+
+Read AGENTS.md and docs/agents/ARCHITECTURE.md. Owned by:
+- src/app/features/planet-panel/* (the planet detail panel and its tabs)
+- coordinate with 19-1 (Moon removed from orrery bodies) and Block 20 (research mechanics)
+
+REQUIREMENTS
+
+1. Earth panel: Moon tab
+   - Add a "Moon" tab to the Earth planet panel showing the inherited Artemis/Shackleton outpost state per the GDD (operational base, Moon-side research tracks/options if any, population/role). Content can be modest for now but the tab must exist and be data-driven (read Moon data from JSON — extend planets.json or a dedicated moon entry rather than hardcoding).
+   - Tabs use the existing panel tab pattern. OnPush, signals, @if/@for with track, thin template (derive with computed()).
+
+2. Research Hub link only on Earth
+   - The entry point to the Research Hub / Earth tech tree appears ONLY on the Earth panel (e.g. a "Research" tab or button on Earth), not on Mars/Venus/Mercury panels.
+   - Mars/Venus panels show terraforming (Block 22); Mercury shows its base. Research is Earth's domain. Make this conditional on planet id, driven cleanly (no per-planet copy-paste).
+
+3. No Moon body in orrery
+   - Confirm the orrery no longer renders the Moon as a selectable planet (the change itself is in 19-1) and that selecting Earth is the only path to Moon content.
+
+PATTERNS
+- Standalone components, signals only, inject(), input()/output(), OnPush. No game logic in components — the panel reads state and calls services. BEM SCSS via styleUrl, tokens only.
+
+OUT OF SCOPE: research timed-track mechanics + RP capacity (Block 20); atmospheric data / terraforming phase description / vignette on the panels (19-3); the unlock chain (19-1).

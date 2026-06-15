@@ -1,0 +1,29 @@
+Note: this prompt is part of the Mercury RTS fixes (Block 25). Stay critical — read the resource/power bar (09-8) + mercury-build service first.
+
+Create a plan for the Mercury-local energy bar for Helioscape.
+
+PROBLEM OBSERVED IN PLAYTEST
+- A mercuryLocalPower value is computed but unused; there is no Mercury-local energy bar. Buildings have an energyDrawGw (mercury-buildings.json) but the player can't see local power supply vs draw.
+
+Read AGENTS.md and docs/agents/ARCHITECTURE.md (Visual value pattern for the bar). Owned by:
+- src/app/features/mercury/mercury-hud/* (the resource/power bar from docs/agents/prompts/09-8-resource-power-bar.txt)
+- src/app/core/systems/mercury-build.service.ts (power supply/draw computation)
+- public/data/mercury-buildings.json (energyDrawGw) + power-generation building data
+
+REQUIREMENTS
+
+1. Local power model
+   - Compute Mercury-local power SUPPLY (from power-generating buildings: solar/power cells, plus any Dyson contribution allocated locally) and DRAW (sum of energyDrawGw of active buildings/units). Expose as readonly signals (use/clean up the existing mercuryLocalPower computation rather than adding a parallel one).
+   - Net = supply − draw. Define behaviour when draw exceeds supply (e.g. brownout: production throttled or new builds blocked) per the GDD/economy doc — keep it data-driven and documented.
+
+2. Energy bar UI
+   - A bar showing supply, draw, and headroom (or used/total), updating live as buildings are placed/removed/activated. Use the visual-value pattern (derive bar width from the power value; tick transition). Colour cue when over-draw (token-based). 
+   - Show numeric GW values. Thin template, computed() for all derived display, OnPush, tokens-only SCSS.
+
+3. Integration
+   - Placement (25-1) and build activation should factor power: optionally warn/block placing a building that would exceed supply (coordinate with 25-1's validation reasons). Overdrive/upgrades (25-5) and miners (25-4) feed draw/supply through the same computation.
+
+PATTERNS / CLEANUP
+- Logic in the service; bar component only reads signals. No magic numbers. Save/load safe (power is derived from current buildings, not stored animation state).
+
+OUT OF SCOPE: miners (25-4), upgrades/overdrive (25-5) other than feeding this computation, conveyor (25-7).

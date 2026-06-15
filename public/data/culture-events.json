@@ -139,7 +139,7 @@
       }
     ],
     "tags": [],
-    "trigger": { "type": "year_reached", "year": 2040 },
+    "trigger": { "type": "year_reached", "year": 99999 },
     "priority": false
   },
   {

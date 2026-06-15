@@ -1,0 +1,30 @@
+Note: this prompt is part of the Mercury RTS fixes (Block 25). Stay critical — read the mercury grid + zone-select first.
+
+Create a plan for the Mercury minimap (main view + zone-select dialog) for Helioscape.
+
+PROBLEM OBSERVED IN PLAYTEST
+- The minimap is a placeholder div. The Mercury map is large (128×128 in public/data/mercury-map.json) and the player needs an overview + a way to see/jump the current viewport.
+
+Read AGENTS.md and docs/agents/ARCHITECTURE.md (Canvas components own RAF + cleanup; isometric utils). Owned by:
+- a minimap component under src/app/features/mercury/mercury-hud/ (new)
+- src/app/features/mercury/mercury-grid/mercury-grid.component.ts (expose current viewport + accept jump-to)
+- src/app/features/mercury/mercury-hud/zone-select/zone-select.component.ts (embed minimap)
+- public/data/mercury-map.json (grid size, slots, mining locations, starting zones)
+
+REQUIREMENTS
+
+1. Minimap rendering
+   - A small canvas (or lightweight SVG) showing the whole map scaled down: terrain/slot types, mining locations, placed buildings, starting zones — each a simple colour-coded dot/cell. Cheap to render; redraw only when relevant state changes (not every frame) — or a throttled redraw.
+   - A rectangle overlay shows the CURRENT VIEWPORT (the visible region of the main isometric view). It updates as the player pans/zooms the main grid.
+
+2. Click-to-jump
+   - Clicking/dragging on the minimap recentres the main grid viewport on that location. The main grid exposes a "centre viewport on tile/world point" method the minimap calls (via a shared mercury UI-state signal or output/input — keep it clean, single source of truth for viewport).
+
+3. Two placements
+   - Main HUD: persistent minimap in the corner.
+   - Zone-select dialog: the same minimap component embedded so the player can preview/choose a starting zone with spatial context (highlight the selectable starting zones from mercury-map.json).
+
+PATTERNS / CLEANUP
+- If a canvas + RAF/throttled draw is used, cancel/clean up on destroy; dispose nothing leaks; remove listeners. Reuse the minimap component in both places (DRY). OnPush, signals, computed() for derived viewport rect, tokens-only SCSS. Logic (coordinate mapping) in a util/service, not duplicated.
+
+OUT OF SCOPE: placement validation (25-1), deselect/tooltip (25-2), units (25-4), and the rest of Block 25.

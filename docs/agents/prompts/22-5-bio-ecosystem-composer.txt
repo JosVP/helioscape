@@ -1,0 +1,33 @@
+Note: this prompt is part of the terraforming build-out (Block 22). Stay critical — read the existing bio-phase service/component first.
+
+Create a plan for the bio-phase Ecosystem Composer for Helioscape.
+
+CONTEXT
+After a planet's atmosphere/water phases reach a threshold, the bio phase begins: the player composes an ecosystem. docs/GDD/bio-phase-management.md describes the design. The repo already has a bio-phase service (src/app/core/systems/bio-phase.service.ts) and an early bio-phase component (docs/agents/prompts/07-5-bio-phase.txt) — extend, don't duplicate. This prompt builds the Ecosystem Composer UI + supporting data/logic.
+
+Read AGENTS.md, docs/GDD/bio-phase-management.md and docs/agents/ARCHITECTURE.md (state in GameStateService; logic in the bio system service; no logic in components; signals; OnPush; tokens; motion; Visual value pattern for the stability meter).
+
+REQUIREMENTS
+
+1. Data (JSON, never hardcoded)
+   - public/data/bio-phases.json already exists — extend it (or add an organisms/ecosystem data file) to cover: environmental CONDITIONS the planet currently provides (temperature, moisture, atmosphere O₂, soil), COMPOSITION SLOTS to fill (e.g. producers/decomposers/consumers tiers), and an ORGANISM PALETTE (each organism: id, name, tier, condition tolerances/requirements, contribution to stability, narrator description). Add interfaces in the models.
+
+2. Three-panel composer UI
+   - Panel A — Conditions: shows the current planet conditions (derived from terraforming state, 22-1 outputs) that constrain what survives.
+   - Panel B — Composition slots: the slots the player fills; drag/drop or click-to-assign organisms from the palette into appropriate tiers. Show per-slot validity vs current conditions.
+   - Panel C — Organism palette: available organisms (unlocked by tech/phase), filterable by tier; each shows its requirements so the player can reason about fit.
+
+3. Stability meter (derived)
+   - A stability/health meter computed from how well the chosen composition matches the conditions + tier balance (a pure function in the bio service: composition + conditions → stability). Display via the visual-value pattern (derive bar from the stability value; tick-driven transition). Unstable compositions show WHY (missing decomposers, organism outside tolerance, etc.).
+   - As conditions improve over years (terraforming continues), previously-unstable compositions can become stable — the meter reflects this via derivation, save/load safe.
+
+4. Commit + progression
+   - Committing a viable composition advances the bio phase over game years (year-driven, no setTimeout), firing the bio culture events (Block 22-4 / Block 24) at milestones. Organisms/slots unlock progressively per the GDD.
+
+PATTERNS / CLEANUP
+- Logic (validity, stability, progression) in the bio system service; the composer component only reads signals and calls service methods. Split into child components to stay under ~200 lines each. Signals, computed(), @for with track, thin templates. BEM SCSS, tokens, motion rules. Any DnD listeners cleaned up on destroy.
+
+ASSETS
+- Organism/biome icons: placeholder SVGs via create-placeholder-svg at expected paths. Obvious placeholders, never blocking.
+
+OUT OF SCOPE: terraforming atmosphere/water engine (22-1), terraforming panel (22-2), phase-event dialog (22-3), culture-event service rewrite (Block 24).

@@ -1,0 +1,37 @@
+Note: this prompt is part of the terraforming build-out (Block 22). Do 22-0 and 22-1 first. Stay critical.
+
+Create a plan for the terraforming UI inside the planet panel for Helioscape.
+
+CONTEXT
+With the data (22-0) and engine (22-1) in place, build the player-facing terraforming interface on the Mars and Venus planet panels (Earth gets its lighter restoration version where applicable). This is where the player chooses paths, watches phases progress, adds boosts/infrastructure, and tunes extraction rates.
+
+Read AGENTS.md and docs/agents/ARCHITECTURE.md (components read state + call services, no logic in components; OnPush; signals; @if/@for with track; computed() for derived display; Visual value pattern for any animated bars; tokens-only SCSS; motion rules).
+
+OWNED BY
+- src/app/features/planet-panel/* (a "Terraforming" tab/section) plus small child components as needed (keep each under ~200 lines, split aggressively).
+
+REQUIREMENTS
+
+1. Phase tracker
+   - A clear phase timeline for the selected planet: completed phases, current phase with a progress bar (progress derived from year per 22-1, tick-driven 1s linear transition per ARCHITECTURE.md visual-value pattern; first-open uses the initial-load ease-out variant), and upcoming phases (locked/preview). Show current phase name + narrator description (from data).
+
+2. Path / choice selection
+   - When the current phase offers choices, present them as a choice panel/modal (reuse the existing fork-choice modal pattern, docs/agents/prompts/07-3-fork-choice-modal.txt, if suitable). Each choice shows name, description, cost, time impact, irreversibility warning. Selecting calls TerraformingService.applyChoice(...).
+   - Venus OPENING DECISION: a special two-option choice presented at Venus unlock — Wild Venus vs Europa Impact — with the GDD's day-length/ocean outcomes and a strong irreversibility + Hunt-for-Life warning on the Europa option. Exactly two options (no third/two-moon option).
+
+3. Boosts + Always-Available infrastructure panels
+   - A "Boosts" section listing this phase's available boosts (cost + effect, buildable mid-phase) and an "Ongoing Infrastructure" section for Always-Available options (e.g. Venus orbital day/night mirrors, Mars magnetic protection) with prerequisites shown. Buttons call the service; disabled with a reason when unaffordable or prereqs unmet.
+
+4. Extraction-rate sliders
+   - Sliders for the tunable rates (e.g. Venus Dyson shade %) bound to the service's rate signals. Moving a slider updates rate + shows the live trade-off (e.g. cooling speed vs Dyson output cost). Reversible. Slider values are data-driven (min/max/default from 22-0).
+
+5. Conditions readout integration
+   - Reuse/coordinate with 19-3's conditions block so the player sees temperature/pressure/ocean%/composition update as phases progress (derived values).
+
+PATTERNS / CLEANUP
+- No game logic in components — read signals, call TerraformingService. computed() for all derived display. Thin templates. BEM SCSS, tokens only, motion per ARCHITECTURE.md. Any subscriptions use takeUntilDestroyed (prefer signals).
+
+ASSETS
+- If choice/boost icons are wanted, generate placeholder SVGs (create-placeholder-svg skill) at the expected paths; never block on art.
+
+OUT OF SCOPE: the phase-event countdown dialog (22-3), culture-event content (22-4), bio composer (22-5), the engine (22-1).

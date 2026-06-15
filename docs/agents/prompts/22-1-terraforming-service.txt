@@ -1,0 +1,36 @@
+Note: this prompt is part of the terraforming build-out (Block 22). Do 22-0 (data) first. Stay critical — read the current code.
+
+Create a plan to rewrite TerraformingService for Helioscape.
+
+CONTEXT
+src/app/core/systems/terraforming.service.ts exists but has stale flat CHOICE_RATES and a simplistic processYear()/applyChoice(). It must be rewritten to consume the new terraforming data (22-0) and drive a real per-planet, per-phase progression with choices, boosts, always-available infrastructure, phase events, and cross-planet flows — per docs/GDD/terraforming-options.md v5 (TWO-PATH Venus: Wild Venus / single Europa Impact; NO two-moon path).
+
+Read AGENTS.md and docs/agents/ARCHITECTURE.md (State architecture: state in GameStateService; systems react via effect()+untracked(); GameLoopService is the only timer; Visual value pattern = pure derivation from gameYear, save/load safe).
+
+REQUIREMENTS
+
+1. State ownership
+   - All terraforming state (per planet: current phase, phase start year, chosen path/choices, active boosts, always-available infra built, pending/active phase events, extraction-rate slider values, completion flags) lives in GameStateService signals and is part of the save. TerraformingService contains the LOGIC and reads/writes via GameStateService mutation methods — it does not hold the canonical state itself.
+
+2. Phase progression (year-driven, pure)
+   - Progress within a phase derives from (phaseStartYear, effectiveDuration, currentYear). effectiveDuration = base duration (from data) adjusted by chosen choice modifiers + active boosts + event outcomes. This is pure derivation — no stored progress float that can desync on load.
+   - When a phase completes, advance to the next phase (respecting prerequisites and any cross-planet gating), fire the appropriate culture event/toast (Block 24), and unlock the next phase's choices.
+
+3. Choices, boosts, infra
+   - applyChoice(planetId, phaseId, choiceId): validate availability + cost (materials/components/Dyson), commit it, apply its duration/effect, set irreversibility where flagged. Venus Opening Decision is a special two-option choice gated at Venus unlock (Block 19 fires the unlock) and binding (Europa is irreversible + sets the Hunt-for-Life flag).
+   - addBoost / buildAlwaysAvailable: similar validation + effect, can apply mid-phase or anytime per data.
+   - Extraction-rate sliders (e.g. Venus Dyson shade %) update a signal that feeds both the cooling/delivery rate and the Dyson output cost in real time (reversible).
+
+4. Phase events (RNG, no pause)
+   - On entering/within a phase, roll for phase events using the data's weighting (the GDD implies roughly a 65–70% chance band for a phase to throw an event — read the exact probability from data, don't hardcode). A rolled event becomes a PENDING event in state with a response deadline (in game years). The dialog/UI is 22-3; this service owns the roll, the pending-event state, applying the chosen response's effect, and the default "ignored" outcome if the deadline passes. The game does NOT pause for events.
+
+5. Cross-planet flows
+   - Implement the GDD cross-planet resource flows (Venus nitrogen surplus → Mars Phase 2B; carbonate byproduct; laser array redeploy; captured-moon water for Mars or Wild Venus; Europa water+spin bundled into Venus Path B). Model as flags/effects between planets' terraforming state. Keep Venus two-path correct: captured moon (Ganymede/Callisto) feeds Wild Venus OR Mars (mutually exclusive), Europa feeds only Venus Path B.
+
+6. Visual-value outputs
+   - Expose computed() readonly signals / pure getValueAtYear() helpers for the derived conditions (temperature, pressure, ocean %, composition, day length) used by the planet panel (19-3) and orrery texture cross-fade. No animation state stored.
+
+PATTERNS / CLEANUP
+- effect()+untracked() for reactions; no setTimeout/setInterval; no logic in components; readonly signals exposed from GameStateService; strict types, interfaces from 22-0, import type. Remove the stale CHOICE_RATES.
+
+OUT OF SCOPE: terraforming UI (22-2), phase-event dialog UI (22-3), culture-event content (22-4), bio ecosystem composer (22-5). This is the engine.

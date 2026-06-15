@@ -1,0 +1,45 @@
+Note: this prompt is part of the post-playtest progression-wiring work (Block 20). Stay critical — read the current code first.
+
+Create a plan for routing tech-node activation through timed, RP-capacity-gated research tracks for Helioscape.
+
+PROBLEM OBSERVED IN PLAYTEST
+- Clicking a tech node unlocks it INSTANTLY (calls an unlockTech()-style method) instead of starting a timed research track. As a result, dependents appear immediately and there is no sense of research progression. The Research Hub already has an RP capacity bar and a startTrack path for Earth/Moon tracks, but tech-node clicks bypass it.
+
+RESEARCH POINTS MODEL (confirmed with the designer; matches docs/GDD/main-gdd.md)
+- RP is CAPACITY, not a spendable currency. The player has a total RP capacity (grows with population: early ~60, late 150+).
+- Each research track has an RP COST (simple ~20, standard ~30–40, complex ~50–80). A running track OCCUPIES that many RP of capacity for its duration, then FREES it on completion.
+- Multiple tracks can run concurrently as long as the SUM of running track costs ≤ total capacity. Example: with 30 capacity, a 10-RP track leaves 20 RP free for other tracks. A track cannot start if it would exceed remaining free capacity.
+- Tracks also take TIME (game years) to complete once started.
+
+Read AGENTS.md and docs/agents/ARCHITECTURE.md (State architecture, Visual value pattern, GameLoopService is the only timer). 
+
+LIKELY FILES
+- src/app/core/services/game-state.service.ts (RP capacity, running tracks, completed tech — state lives here)
+- src/app/core/systems/research.service.ts and tech-tree.service.ts (the logic; reconcile the two — one timed-track path, no instant unlockTech for player clicks)
+- src/app/features/research-hub/* and the tech-tree component (node click → startTrack, progress display)
+- public/data/tech-tree.json and research-tracks.json (per-node RP cost + time + prereqs)
+
+REQUIREMENTS
+
+1. Node click starts a timed track (no instant unlock)
+   - Clicking an available tech node calls startTrack(nodeId), NOT unlockTech(). The node enters an in-progress state with a year-based progress value derived from (startYear, durationYears, currentYear) — pure derivation, save/load safe.
+   - The node becomes "researched/unlocked" only when its track completes. Only then do its dependents become available.
+   - Remove or internalise any direct player-facing instant-unlock path. (An internal unlock-on-complete is fine; a debug instant-unlock may stay behind the debug service only.)
+
+2. RP capacity gating (capacity, not currency)
+   - Track remaining free capacity = totalCapacity − sum(cost of running tracks). 
+   - A node can be STARTED only if its cost ≤ remaining free capacity AND its prereqs are complete. Otherwise it is shown as "needs capacity" (disabled with a reason), not started.
+   - On completion, the track's cost is released back to free capacity. Multiple concurrent tracks supported.
+   - Total capacity is derived from population per the GDD (read the formula/inputs from JSON; expose as a readonly signal). Do not hardcode magic numbers in TS.
+
+3. Display
+   - Research Hub + tech-tree node show: in-progress (with % from year derivation + ETA year), researched, available (startable now), locked (prereqs incomplete), and "insufficient capacity". The existing RP capacity bar shows total / used / free.
+   - Reconcile Earth/Moon tracks (already routed through startTrack) with planet tech nodes so they all share ONE capacity pool and ONE track-running mechanism.
+
+4. Save/load
+   - Running tracks (id, startYear, cost), completed tech, and capacity inputs live in GameStateService and are saved. Progress recomputes from years on load — no wall-clock timers, no stored progress floats that desync.
+
+PATTERNS
+- effect()+untracked() for any service reactions; GameLoopService is the only timer; no logic in components; signals only.
+
+OUT OF SCOPE: adding the Architect branch + hidden/silhouette dependents data + visuals (20-2); terraforming choices (Block 22). This prompt is the MECHANISM; 20-2 is the DATA + reveal visuals.

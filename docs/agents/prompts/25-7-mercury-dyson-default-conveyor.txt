@@ -1,0 +1,31 @@
+Note: this prompt is part of the Mercury RTS fixes (Block 25). Stay critical — read the queue bar + mercury grid + dyson service first.
+
+Create a plan for the default Dyson swarm queue item and conveyor/chevron animation on Mercury for Helioscape.
+
+PROBLEMS / GAPS OBSERVED
+- The default Dyson-swarm production queue item is not visible — the player can't see that Mercury is continuously producing Dyson panels by default.
+- There is no conveyor/flow animation, so the factory feels static.
+
+Read AGENTS.md and docs/agents/ARCHITECTURE.md (Canvas RAF discipline, Visual value pattern, cleanup). Owned by:
+- src/app/features/mercury/mercury-hud/queue-bar/queue-bar.component.ts (default Dyson item)
+- src/app/features/mercury/mercury-grid/mercury-grid.component.ts (conveyor animation)
+- src/app/core/systems/dyson.service.ts / mercury-build.service.ts (default production stream)
+
+REQUIREMENTS
+
+1. Default Dyson queue item
+   - Mercury continuously produces Dyson panels by default (the baseline activity that grows Dyson coverage → Kardashev). Show this as a persistent, always-present item in the build queue bar (clearly marked as the ongoing default stream, not a one-off), with its current rate/progress. The player should understand "by default, this factory builds the Dyson swarm".
+   - The rate is driven by the existing Dyson/economy logic (and modified by upgrades/overdrive from 25-5). Display derived from state; save/load safe.
+
+2. Conveyor / chevron flow animation
+   - Animate conveyor belts / chevrons on the grid (or along production buildings) to convey flow — a looping marching-chevron or scrolling-belt effect. Keep it cheap: derive the animation phase from a continuous time/year value read once per frame; no per-frame allocation.
+   - Make it subtle and on-brand (matches the warm flat art direction). Configurable speed; can be disabled.
+   - If conveyors connect specific buildings (e.g. miner → refinery → mass driver), animate along those routes; otherwise a tasteful generic belt motion on production tiles is acceptable for the placeholder.
+
+PATTERNS / CLEANUP
+- RAF reads signals once into locals; animation phase from time, not stored mutable state that desyncs save/load (the belt is purely cosmetic, so derive from a clock). Cancel RAF + dispose/clear on destroy. Any sprite/image loaded once and reused. Tokens for colours.
+
+ASSETS
+- Conveyor/chevron sprite or drawn shapes: placeholder via create-placeholder-svg or canvas drawing; obvious placeholder, swappable.
+
+OUT OF SCOPE: miners (25-4), upgrades/overdrive (25-5), local energy (25-6), starting-build flow (25-8).

@@ -1,0 +1,40 @@
+Note: this prompt is part of the post-playtest visual overhaul (Block 18). Stay critical — read the current code first.
+
+Create a plan for hoverable/clickable orbit rings and removing the planet gray-out on hover in the orrery for Helioscape.
+
+CONTEXT
+Two interaction problems observed in playtest:
+1. The orbit rings are decorative only (white TorusGeometry, opacity ~0.08) — you cannot hover or click them.
+2. On hover, LOCKED planets get greyed out, which the user dislikes. The user wants hovering a planet OR its orbit ring to highlight the ORBIT RING only (no planet gray-out), and clicking either to do the same thing as clicking the planet.
+
+Read AGENTS.md and docs/agents/ARCHITECTURE.md (Three.js, raycasting, EventBus). Owned by:
+- src/app/features/orrery/orrery.component.ts (raycaster, hover/click handling, listeners)
+- src/app/features/orrery/orrery-scene.builder.ts (orbit-ring meshes, highlight material/state)
+
+REQUIREMENTS
+
+1. Orbit ring = same interaction target as its planet
+   - Each orbit ring belongs to a planet. Raycasting must hit BOTH the planet mesh and its orbit ring, and both resolve to the SAME planetId.
+   - To make a thin ring reliably hoverable, give it a wider invisible "hit" companion (e.g. a larger-radius, low-tube Torus or a flat ring with a transparent material) so the cursor does not need pixel-perfect aim. The visible ring stays thin; the hit-proxy is invisible but raycastable.
+   - Click on planet OR ring → emit the existing planet-selected event (same EventBus path the planet click already uses). One code path, no duplication.
+
+2. Hover highlight = orbit ring only
+   - On hover of a planet or its ring, brighten/thicken that planet's VISIBLE orbit ring (raise opacity and/or swap to a highlight colour token, optional slight emissive). Nothing else changes.
+   - REMOVE the existing behaviour that greys out locked planet meshes on hover. Planets keep their normal appearance on hover regardless of lock state.
+   - Only one ring highlighted at a time; clear the highlight when the cursor leaves (track currently-hovered planetId).
+   - Use a cursor change (pointer) on hover to signal interactivity.
+
+3. Locked vs unlocked
+   - Locked planets remain visually distinct via their PERSISTENT resting style (e.g. dimmer/desaturated steady state — keep whatever the resting locked look is, just do not toggle gray-out on hover). Hover highlight on the ring still works for locked planets (so the player can see "this orbit is here"), but clicking a locked planet must follow the existing locked behaviour (e.g. no panel / a "locked" cue) — do not open the normal panel for a locked planet. Coordinate with Block 19 which fixes the unlock chain; here just preserve correct locked-click behaviour.
+
+4. Highlight colours from tokens
+   - Orbit base + orbit highlight colours come from design tokens (reuse/extend --orrery-orbit from 18-1; add --orrery-orbit-hover). No hardcoded hex in TS.
+
+CLEANUP (non-negotiable)
+- Any added mousemove/mouseleave listeners on the canvas MUST be removed in ngOnDestroy (per AGENTS.md manual-listener rule).
+- New hit-proxy geometries/materials and highlight materials MUST be disposed in the existing disposal traversal.
+
+RAF / PERF
+- Raycast on pointer events, not every frame. Reuse a single Raycaster and Vector2 instance (no per-event allocation). Read signals into locals where needed.
+
+OUT OF SCOPE: the unlock-chain logic itself and what the panel shows (Block 19); visual texture/lighting/glow (18-1..18-4).

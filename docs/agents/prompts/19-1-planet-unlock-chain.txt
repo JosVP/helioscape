@@ -1,0 +1,45 @@
+Note: this prompt is part of the post-playtest progression-wiring work (Block 19). Stay critical — read the current code first.
+
+Create a plan for the planet unlock chain (mission → transit → unlock) for Helioscape.
+
+PROBLEM OBSERVED IN PLAYTEST
+- Mercury opens immediately; Mars and Venus never unlock; the Moon is a separate clickable planet. The unlock chain described in the GDD does not actually drive the planets' locked/unlocked state — planets are individually built but not gated by a progression flow.
+
+GOAL (per docs/GDD/main-gdd.md)
+- Mercury starts LOCKED. The player's first action is the Mercury mission: research/commit "Launch Mercury Mission", a rocket transit plays out over time, and only on arrival does Mercury unlock (and its isometric base becomes available).
+- Mars and Venus unlock later — gate them on reaching the Mercury industrial phase (e.g. Mercury phase 2) and/or a game-year threshold (~Year 20 for Venus unlock per GDD). Pick the GDD-consistent trigger and make it data-driven.
+- The Moon is NOT a separate clickable orrery planet. It becomes a TAB on the Earth planet panel (handled in 19-3 — here, just stop treating Moon as an unlockable orrery body and remove it from the orrery's planet set).
+
+Read AGENTS.md and docs/agents/ARCHITECTURE.md (State architecture: GameStateService owns state; system services drive it via effects wrapped in untracked()). 
+
+LIKELY FILES
+- src/app/core/services/game-state.service.ts (planet locked/unlocked signals + mutation methods; unlock state lives here ONLY)
+- a system service to drive the chain — reuse/extend an existing one (e.g. a missions/transit service) or add one; it must react via effect()+untracked(), never store logic in components
+- public/data/planets.json (unlock conditions per planet — add a structured "unlock" block; do not hardcode in TS)
+- src/app/features/orrery/* (remove Moon as a body; reflect locked/unlocked visuals — coordinate with 18-5)
+- the planets panel / planet-selection UI that currently lists planets
+
+REQUIREMENTS
+
+1. Data-driven unlock conditions
+   - Each planet in planets.json declares how it unlocks: e.g. Mercury = { type: 'mission', missionId: 'launch_mercury_mission', transitYears: N }, Mars = { type: 'phase', requires: 'mercury_phase_2' } or { type: 'year', year: X }, Venus = { type: 'year', year: 20 } (use the GDD value), Earth = unlocked from start.
+   - No unlock numbers or IDs hardcoded in TypeScript — read them from JSON. Add the fields with a clear interface in the models.
+
+2. Mercury mission + transit
+   - "Launch Mercury Mission" is committed by the player (research node or an explicit action — coordinate with Block 20 research). On commit, start a transit timer measured in GAME YEARS (driven by GameLoopService ticks via the system service effect, NOT setTimeout). 
+   - While in transit, Mercury shows a "mission en route — arrives Year N" state, not "unlocked".
+   - On arrival, set Mercury unlocked in GameStateService; fire a culture event / toast (coordinate with Block 24); the Mercury base becomes accessible.
+
+3. Mars / Venus gated unlocks
+   - The system service watches the relevant condition (Mercury phase, game year) and unlocks Mars/Venus when met. Venus unlock is the trigger for the Venus Opening Decision (the spin choice) handled in Block 22 — just fire/flag it here; do not implement the decision UI in this prompt.
+
+4. Locked behaviour
+   - Locked planets: not selectable into the normal panel (their click shows a locked cue or nothing — coordinate with orrery 18-5). Unlocked planets open their panel normally.
+
+5. Save/load safety
+   - All unlock progress (mission committed, transit start year, unlocked flags) lives in GameStateService signals and is part of the saved game state. Transit must resume correctly from a loaded save using the stored start year vs current year (pure derivation), not a wall-clock timer.
+
+CLEANUP / PATTERNS
+- effect() bodies that mutate state must be wrapped in untracked() per ARCHITECTURE.md. No game logic in components. No setTimeout/setInterval (GameLoopService is the only timer).
+
+OUT OF SCOPE: research-as-timed-track mechanics (Block 20), Earth panel tabs incl. Moon tab + research link (19-2/19-3), the Venus Opening Decision UI (Block 22), Mercury starting-build flow (Block 25).

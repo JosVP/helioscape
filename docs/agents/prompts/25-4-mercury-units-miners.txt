@@ -1,0 +1,32 @@
+Note: this prompt is part of the Mercury RTS fixes (Block 25). Stay critical — read the sidebar (Units tab) + mercury-build service + map data first.
+
+Create a plan for building and rendering miners (Units tab) on Mercury for Helioscape.
+
+PROBLEMS OBSERVED IN PLAYTEST
+- The Units tab is empty — you cannot build miners.
+- Miner assign/unassign is stubbed ("Block 9.6").
+- Miners have no sprites on the grid.
+
+Read AGENTS.md (placeholder assets) and docs/agents/ARCHITECTURE.md. Owned by:
+- src/app/features/mercury/mercury-hud/sidebar/sidebar.component.ts (Units tab)
+- src/app/features/mercury/mercury-grid/mercury-grid.component.ts (miner sprites + assign interaction)
+- src/app/features/mercury/mercury-hud/building-info/building-info.component.ts (assign/unassign at a mining location)
+- src/app/core/systems/mercury-build.service.ts (miner state + logic)
+- public/data/mercury-buildings.json / a units data entry (miner cost, build time, mining rate) and mercury-map.json (miningLocations with capacity)
+
+REQUIREMENTS
+
+1. Build miners (Units tab)
+   - The Units tab lists buildable units (miners; extend to other units later) with cost + build time, read from JSON. Building a miner queues it (reuse the existing build queue mechanism) and on completion adds a miner to the player's available pool.
+   - Miner state (count, idle vs assigned, which mining location) lives in GameStateService/MercuryBuildService signals and is saved.
+
+2. Assign / unassign
+   - Replace the stub: assign an idle miner to a mining location (respecting the location's capacity / ore ratios from mercury-map.json) and unassign back to idle. Assigned miners contribute to resource output at the location's rate (feeding the economy). Buttons live on the building-info/mining-location panel; logic in the service.
+
+3. Miner sprites on the grid
+   - Render miners on the isometric grid at their assigned mining location (or idle area). Use placeholder miner sprites (create-placeholder-svg / simple canvas-drawn shape) — obvious placeholders at the expected asset path, correctly sized, swappable later. A subtle idle/working animation is welcome but optional; if animated, derive from state and keep it cheap in the RAF loop.
+
+PATTERNS / CLEANUP
+- Logic in the service (build, assign, output); components read + render. RAF reads signals once into locals; no per-frame allocation; sprite images loaded once and reused. Listeners/resources cleaned on destroy. Content (costs/rates/capacity) from JSON, never hardcoded.
+
+OUT OF SCOPE: upgrades/overdrive (25-5), local energy bar (25-6), conveyor animation (25-7), reservation logic (25-9), multi-launchpad (25-11).

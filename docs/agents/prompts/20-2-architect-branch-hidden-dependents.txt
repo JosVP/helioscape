@@ -1,0 +1,31 @@
+Note: this prompt is part of the post-playtest progression-wiring work (Block 20). Stay critical — read the current code first.
+
+Create a plan for the Architect tech branch data and the hidden/silhouette reveal of locked dependents for Helioscape.
+
+PROBLEMS / GAPS OBSERVED
+- The Architect branch (~7 nodes) is missing from public/data/tech-tree.json.
+- Dependent tech nodes are visible and instantly reachable; there is no sense of discovery. The user wants dependents HIDDEN or shown as SILHOUETTE until their prerequisite is fully researched.
+
+Read AGENTS.md, docs/GDD/earth-tech-tree-options.md and docs/GDD/main-gdd.md (Architect vs Naturalist framing, tech identities). Owned by:
+- public/data/tech-tree.json (+ research-tracks.json if costs/time live there)
+- src/app/features/tech-tree/* (reveal visuals) and research.service.ts/tech-tree.service.ts (availability state — coordinate with 20-1)
+
+REQUIREMENTS
+
+1. Architect branch data
+   - Add the Architect branch nodes (~7) to tech-tree.json, consistent with the GDD's Architect identity (engineered/industrial solutions vs Naturalist's gentler approaches). Each node needs: id, name, narrator-voiced description, prereqs, branch tag (architect), RP cost tier (per 20-1: simple/standard/complex), duration years, and any unlock effects.
+   - Mirror the existing node schema exactly (read current nodes first; add fields via the model interface, not ad hoc). Keep all content in JSON — no hardcoding in TS.
+   - Ensure the branch wires into the existing tree (correct prereq IDs) so it is reachable and its dependents resolve.
+
+2. Hidden / silhouette dependents
+   - A node whose prerequisites are NOT yet fully researched is shown as a SILHOUETTE (shape + lock, no name/details) or hidden entirely, per a per-node or global reveal rule. Recommended: show the immediate next-step silhouettes (prereq researched-but-not-this) as "available to discover", and fully hide nodes two-or-more steps away until their parent completes — pick one consistent rule and document it.
+   - When a prerequisite track COMPLETES (from 20-1), its dependents transition from silhouette/hidden to fully visible + (if capacity allows) startable. The transition should be a clear reveal (small animation/transition is welcome — see ui-ux motion rules), derived from research state.
+   - Tooltip on a silhouette shows only "Locked — complete [prereq] to reveal", not the hidden node's details.
+
+3. Consistency with 20-1
+   - "Fully researched" = the prerequisite's TIMED TRACK has completed, not merely started. Availability/visibility must read the same completed-tech state 20-1 maintains. Do not introduce a second source of truth.
+
+PATTERNS
+- Data shapes via interfaces in the models. Tech-tree component: OnPush, signals, @for with track, computed() for per-node display state, thin template. Tokens-only SCSS; reveal transition follows ARCHITECTURE.md motion rules.
+
+OUT OF SCOPE: the timed-track + RP capacity MECHANISM (20-1, dependency); terraforming (Block 22).

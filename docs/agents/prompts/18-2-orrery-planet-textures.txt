@@ -1,0 +1,36 @@
+Note: this prompt is part of the post-playtest visual overhaul (Block 18). Stay critical — read the current code first.
+
+Create a plan for layered, canvas-generated placeholder textures for the sun and planets in the orrery for Helioscape.
+
+CONTEXT
+Planets currently use MeshStandardMaterial with a flat base colour only — they read as plain coloured balls. We want recognisable, stylised, Kurzgesgant-inspired-but-original planet looks built from simple layered shapes. Because real art does not exist yet, GENERATE PLACEHOLDER TEXTURES procedurally (see .github/skills/create-placeholder-svg and the canvas-texture approach) so nothing is blocked. They must be obvious placeholders the user can swap, but already give each body its own identity.
+
+Read AGENTS.md (Placeholder assets section) and docs/agents/ARCHITECTURE.md (Three.js, cleanup, Visual value pattern). Owned by:
+- src/app/features/orrery/orrery-scene.builder.ts (texture generation + material assignment)
+- src/app/features/orrery/orrery.component.ts (wiring + disposal)
+- public/data/planets.json is the source of per-planet colour/identity — read existing fields, do not hardcode content in TS.
+
+APPROACH
+Build each planet's texture as a CanvasTexture composited from a few simple layers drawn with the 2D canvas API (ocean base, land blobs, cloud wisps, ice caps, night-side city lights). Keep each generator a small pure function returning a disposable CanvasTexture. Map onto the existing SphereGeometry. Equirectangular 2:1 canvas sizes (e.g. 512×256) are fine for placeholders.
+
+PER-BODY PLACEHOLDER RECIPES (use planets.json colours where present; these are starting points)
+- Sun: warm radial core (white-hot centre → amber → deep orange rim) on its sphere; the outer glow itself is Block 18-4, here just the surface.
+- Earth: blue ocean field + green/brown land blobs + a few soft white cloud wisps + small white polar caps. Optionally a darker night-side variant with yellow city-light dots (used by the lighting block).
+- Mars: rust/ochre base + darker basalt regions + small white/pale polar caps + faint dust banding. Provide a SECOND "terraformed" tint set (more blue/green) so the terraforming visual-value system can cross-fade later (just expose the inputs — actual cross-fade is terraforming work, not here).
+- Venus: thick pale-yellow/cream sulphuric cloud swirls, near-featureless, high opacity. Provide a "cooled/watered" variant tint as inputs only.
+- Mercury: grey cratered look — base grey + scattered darker circle "craters" of varied size.
+- Moon (if rendered as a body anywhere): grey + maria patches + craters. NOTE: per Block 19 the Moon becomes an Earth TAB, not a clickable orrery planet — coordinate, but a texture generator is still useful.
+
+DATA-DRIVEN, NOT HARDCODED
+Pull base colours / identity hints from public/data/planets.json. If a needed field is missing, add it to the JSON (with a clear shape) rather than hardcoding values in TypeScript. Keep generator parameters (blob count, cloud opacity, cap size) configurable with sensible defaults.
+
+PLACEHOLDER MARKING
+Per AGENTS.md, placeholders must be obviously placeholders. Add a short comment block at each generator marking it PLACEHOLDER and noting the user can replace with a real equirectangular texture by swapping the material map. Optionally bake a tiny, subtle "PLACEHOLDER" watermark that is easy to find/remove — but do not let it dominate the look.
+
+CLEANUP (non-negotiable)
+Every CanvasTexture and Material created here MUST be disposed in the orrery's existing ngOnDestroy disposal. Generators must not leak detached canvases.
+
+RAF DISCIPLINE
+Textures are generated ONCE at build time, never inside the RAF loop. No per-frame allocation.
+
+OUT OF SCOPE (later blocks): day/night lighting and the night-side texture swap logic (18-3), pixelate + atmosphere/sun glow (18-4), orbit interaction (18-5), terraforming-driven texture cross-fade (Block 22).
