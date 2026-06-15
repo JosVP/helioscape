@@ -201,10 +201,8 @@ Tauri integration points**.
 
 ## What to do when a prompt is ambiguous
 
-1. Implement the most reasonable interpretation
-2. Add a `// NOTE:` comment explaining your interpretation
-3. Add a `// TODO:` comment if something was intentionally left as a stub
-4. Never ask clarifying questions mid-generation — complete the file, note assumptions
+1. Ask the user at most a few high-value clarifying questions; otherwise state assumptions explicitly
+  and proceed so the team is never blocked.
 
 ## What never to do
 
