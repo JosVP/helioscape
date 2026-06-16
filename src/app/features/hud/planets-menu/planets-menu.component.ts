@@ -23,7 +23,7 @@ interface PlanetRow {
   readonly avatarPath: string;
 }
 
-const DISPLAY_ORDER = ['earth', 'moon', 'mercury', 'mars', 'venus'] as const;
+const DISPLAY_ORDER = ['mercury', 'venus', 'earth', 'mars'] as const;
 
 @Component({
   selector: 'app-planets-menu',

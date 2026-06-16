@@ -111,7 +111,7 @@ export const DEFAULT_ORRERY_GRID_OPTIONS = {
 export const DEFAULT_ORRERY_DAY_NIGHT_LIGHTING_OPTIONS = {
   enabled: true,
   litSideBrightness: 1.0,
-  darkSideShadowOpacity: 0.7,
+  darkSideShadowOpacity: 0.9,
   darkSideShadowTint: '#000000',
   cityLightsIntensity: 1.0,
 } as const;
@@ -136,10 +136,10 @@ export interface PlanetOrreryConfig {
 }
 
 export const PLANET_ORBITS: Record<string, PlanetOrreryConfig> = {
-  earth:   { orreryRadius: 11, orbitalPeriod: 1.000, initialAngle: 0,              visualRadius: 0.70, hitRadius: 1.4 },
   mercury: { orreryRadius: 5,  orbitalPeriod: 0.241, initialAngle: Math.PI,        visualRadius: 0.35, hitRadius: 0.9 },
-  mars:    { orreryRadius: 17, orbitalPeriod: 1.881, initialAngle: Math.PI / 2,    visualRadius: 0.55, hitRadius: 1.2 },
   venus:   { orreryRadius: 8,  orbitalPeriod: 0.615, initialAngle: Math.PI * 1.5,  visualRadius: 0.60, hitRadius: 1.3 },
+  earth:   { orreryRadius: 11, orbitalPeriod: 1.000, initialAngle: 0,              visualRadius: 0.70, hitRadius: 1.4 },
+  mars:    { orreryRadius: 17, orbitalPeriod: 1.881, initialAngle: Math.PI / 2,    visualRadius: 0.55, hitRadius: 1.2 },
 };
 
 /**
@@ -182,7 +182,7 @@ void main() {
   vec3 baseColor = baseSample.rgb * uTintColor;
 
   if (!uLightingEnabled) {
-    gl_FragColor = vec4(baseColor, baseSample.a);
+    gl_FragColor = linearToOutputTexel(vec4(baseColor, baseSample.a));
     return;
   }
 
@@ -193,7 +193,7 @@ void main() {
   vec3 shadowedColor = mix(baseColor, uShadowTint, uShadowOpacity);
   vec3 finalColor = mix(litColor, shadowedColor, nightMask);
 
-  gl_FragColor = vec4(finalColor, baseSample.a);
+  gl_FragColor = linearToOutputTexel(vec4(finalColor, baseSample.a));
 }
 `;
 
@@ -214,7 +214,9 @@ void main() {
   vec4 layerSample = texture2D(uLayerTexture, vUv);
 
   if (!uLightingEnabled) {
-    gl_FragColor = vec4(layerSample.rgb * uLayerIntensity, layerSample.a * uOpacity);
+    gl_FragColor = linearToOutputTexel(
+      vec4(layerSample.rgb * uLayerIntensity, layerSample.a * uOpacity)
+    );
     return;
   }
 
@@ -225,7 +227,7 @@ void main() {
   vec3 finalColor = layerSample.rgb * brightness * uLayerIntensity;
   float finalAlpha = layerSample.a * uOpacity * visibilityMask;
 
-  gl_FragColor = vec4(finalColor, finalAlpha);
+  gl_FragColor = linearToOutputTexel(vec4(finalColor, finalAlpha));
 }
 `;
 
@@ -328,7 +330,7 @@ export function createRenderer(canvas: HTMLCanvasElement): THREE.WebGLRenderer {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMapping = THREE.NoToneMapping;
   return renderer;
 }
 
@@ -339,8 +341,8 @@ export function createRenderer(canvas: HTMLCanvasElement): THREE.WebGLRenderer {
 export function createCamera(aspect: number): THREE.PerspectiveCamera {
   const camera = new THREE.PerspectiveCamera(45, aspect, 0.1, 500);
   // Slightly off-axis: shows orbital depth while planets stay clearly separated.
-  camera.position.set(14.4, 18, 25);
-  camera.lookAt(0, -4, 0);
+  camera.position.set(14, 10, 21);
+  camera.lookAt(0, -4.5, 0);
   return camera;
 }
 

@@ -68,7 +68,7 @@
       "terraformingPhase": 0,
       "axisSpinSpeed": 0.97,
       "axisRotationDirection": "prograde",
-      "cloudRotationSpeed": 0.0,
+      "cloudRotationSpeed": 0,
       "atmosphereColor": "#cc6644",
       "atmosphereDensity": 0.05
     },

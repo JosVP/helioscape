@@ -87,7 +87,7 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
   // Arrow-function handlers stored as fields so removeEventListener works.
   private readonly _onClick      = (e: MouseEvent): void => this._handleClick(e);
   private readonly _onMouseMove  = (e: MouseEvent): void => this._handleMouseMove(e);
-  private readonly _onMouseLeave = (): void             => this._handleMouseLeave();
+  private readonly _onMouseLeave = (): void              => this._handleMouseLeave();
 
   // ---------------------------------------------------------------------------
   // Lifecycle
