@@ -15,14 +15,22 @@ import { EventBusService } from '@app/core/services/event-bus.service';
 import { GameStateService } from '@app/core/services/game-state.service';
 import {
   ORBIT_SPEED_FACTOR,
+  ORRERY_STARFIELD_ROTATION_SPEED,
   PLANET_ORBITS,
+  buildBackground,
+  buildEclipticGrid,
   buildPlanetObjects,
+  buildStarfield,
   buildSun,
   createCamera,
   createLights,
   createRenderer,
   disposeScene,
+  type OrreryBackdropPalette,
 } from './orrery-scene.builder';
+
+const ORRERY_GRID_OPACITY = 0.14;
+const ORRERY_ORBIT_OPACITY = 0.12;
 
 @Component({
   selector: 'app-orrery',
@@ -55,6 +63,10 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
   // ── Sun / Dyson ────────────────────────────────────────────────────────────
   private _dysonMaterial!: THREE.MeshStandardMaterial;
 
+  // ── Backdrop visuals ───────────────────────────────────────────────────────
+  private _starfield: THREE.Points | null = null;
+  private readonly _starfieldRotationSpeed = ORRERY_STARFIELD_ROTATION_SPEED;
+
   // ── Interaction state ──────────────────────────────────────────────────────
   /** Planet hovered by moving the mouse over the orrery canvas. */
   private _hoveredPlanetId: string | null = null;
@@ -81,7 +93,14 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
     this._renderer = createRenderer(canvas);
     this._scene    = new THREE.Scene();
     this._camera   = createCamera(aspect);
+    const backdropPalette = this._readBackdropPalette();
 
+    buildBackground(this._scene, backdropPalette);
+    this._starfield = buildStarfield(this._scene, { palette: backdropPalette });
+    // buildEclipticGrid(this._scene, PLANET_ORBITS, {
+    //   color: backdropPalette.grid,
+    //   opacity: ORRERY_GRID_OPACITY,
+    // });
     createLights(this._scene);
     this._dysonMaterial = buildSun(this._scene).dysonMaterial;
 
@@ -89,7 +108,10 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
       const config = PLANET_ORBITS[planetData.id];
       if (!config) continue; // guard against unknown planet ids in JSON
       const { planetMesh, planetMaterial, hitAreaMesh, orbitMaterial } =
-        buildPlanetObjects(this._scene, planetData.id, planetData.visual.baseColor, config);
+        buildPlanetObjects(this._scene, planetData.id, planetData.visual.baseColor, config, {
+          color: backdropPalette.orbit,
+          opacity: ORRERY_ORBIT_OPACITY,
+        });
       this._planetMeshes.set(planetData.id, planetMesh);
       this._planetMaterials.set(planetData.id, planetMaterial);
       this._hitAreaMeshes.set(planetData.id, hitAreaMesh);
@@ -124,6 +146,7 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
     this._orbitMaterials.clear();
     this._planetMaterials.clear();
     this._planetAngles.clear();
+    this._starfield = null;
   }
 
   // ---------------------------------------------------------------------------
@@ -154,6 +177,20 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
       .pipe(takeUntilDestroyed(this._destroyRef))
       .subscribe((id) => { this._externalHoveredPlanetId = id; });
     // TODO: subscribe to planetSelected$ for camera zoom post-playtest.
+  }
+
+  private _readBackdropPalette(): OrreryBackdropPalette {
+    const styles = getComputedStyle(document.documentElement);
+    const readToken = (name: string): string => styles.getPropertyValue(name).trim();
+
+    return {
+      backgroundCore: readToken('--orrery-bg-core'),
+      backgroundEdge: readToken('--orrery-bg-edge'),
+      grid: readToken('--orrery-grid'),
+      orbit: readToken('--orrery-orbit'),
+      star: readToken('--orrery-star'),
+      featureStar: readToken('--orrery-star-feature'),
+    };
   }
 
   // ---------------------------------------------------------------------------
@@ -233,7 +270,12 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
     // ── 6. Update Dyson swarm opacity ─────────────────────────────────────────
     this._dysonMaterial.opacity = (dysonCoverage / 100) * 0.4;
 
-    // ── 7. Render ─────────────────────────────────────────────────────────────
+    // ── 7. Optional backdrop drift ────────────────────────────────────────────
+    if (this._starfieldRotationSpeed !== 0 && this._starfield) {
+      this._starfield.rotation.y += this._starfieldRotationSpeed;
+    }
+
+    // ── 8. Render ─────────────────────────────────────────────────────────────
     this._renderer.render(this._scene, this._camera);
   }
 

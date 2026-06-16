@@ -1,28 +1,43 @@
 :root {
-  // Colours
-  --color-bg-base: #0d0d0f;
-  --color-bg-surface: #161618;
-  --color-bg-elevated: #1e1e22;
-  --color-bg-overlay: rgba(0, 0, 0, 0.7);
-  --color-text-primary: #e8e0d4;
-  --color-text-secondary: #8a8070;
-  --color-text-disabled: #4a4440;
-  --color-accent: #c8861e;
-  --color-accent-dim: #8a5c14;
-  --color-accent-glow: #e8a030;
-  --color-good: #5a9e5a;
-  --color-warn: #c8a020;
-  --color-bad: #9e3a2a;
-  --color-neutral: #4a6a8a;
-  --color-tag-naturalist: #4a8a4a;
-  --color-tag-architect: #4a6ab8;
+  /* 
+   * Theme: Vibrant Solar Realism (High Saturation & Luminous Space)
+   * Enhanced with richer cosmic blues and highly reflective solar tones.
+   */
 
-  // Planet accents
-  --color-earth: #3a7ab8;
-  --color-mercury: #8a7a5a;
-  --color-mars: #b84a2a;
-  --color-venus: #c8a030;
-  --color-moon: #5a5a6a;
+  // Colours
+  --color-bg-base: #060b1e;          /* Deeper, more saturated space navy than a flat dark gray */
+  --color-bg-surface: #10193a;       /* Luminous deep blue interface panels */
+  --color-bg-elevated: #1a2756;      /* High-visibility elevated UI cards */
+  --color-bg-overlay: rgba(3, 6, 20, 0.8);
+  --color-text-primary: #fff7e6;     /* Brilliant stellar cream - highly legible, warm sunlight */
+  --color-text-secondary: #c2b59b;   /* Lifted, brighter sun-bleached sand for secondary info */
+  --color-text-disabled: #615745;    /* Clearer, warm dark-bronze for inactive elements */
+  --color-accent: #ff8c2e;           /* High-octane solar flare orange (glowing rocket hull reflection) */
+  --color-accent-dim: #c75d00;       /* Saturated burnt orange for toggle states */
+  --color-accent-glow: #ffbe76;      /* Supernova orange glow effect */
+  --color-good: #2ecc71;             /* Vivid, high-visibility biosphere green */
+  --color-warn: #f1c40f;             /* Bright solar-core yellow */
+  --color-bad: #ff4757;              /* High-intensity re-entry coral crimson */
+  --color-neutral: #54a0ff;          /* Brilliant ion-engine sky blue */
+  --color-tag-naturalist: #10ac84;   /* Saturated, vibrant emerald for biology */
+  --color-tag-architect: #0ea5e9;    /* Crisp, high-contrast engineering cyan */
+
+  /* Planet Accents (Max vibrancy while remaining true to the planets) */
+  --color-earth: #00d2d3;            /* Brilliant, hyper-saturated ocean cyan */
+  --color-mercury: #cbd5e1;          /* Bright reflective metallic iron */
+  --color-mars: #ff6b6b;             /* Saturated hot-desert terracotta red */
+  --color-venus: #ffbc00;            /* Intense glowing sulfur-cloud gold */
+  --color-moon: #e2e8f0;             /* High-albedo bright lunar dust white */
+
+  /* Orrery backdrop and guide lines (Using your vibrant foundation) */
+  --orrery-bg-core: #091a41;         /* Bright, glowing nebula core */
+  --orrery-bg-edge: #000020;         /* Pure, saturated deep space abyss */
+  --orrery-grid: rgba(0, 210, 211, 0.35); /* Crisp, luminous cyan tracking grid */
+  --orrery-orbit: rgba(84, 160, 255, 0.6); /* Glowing neon orbit trajectories */
+  --orrery-star: #fff3cd;            /* Warm, intense stellar white-gold */
+  --orrery-star-feature: #ffa502;    /* Super-saturated blazing solar orange */
+
+
 
   // Typography
   --font-mono: 'Press Start 2P', 'Courier New', monospace;
