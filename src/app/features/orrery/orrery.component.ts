@@ -108,7 +108,7 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
       const config = PLANET_ORBITS[planetData.id];
       if (!config) continue; // guard against unknown planet ids in JSON
       const { planetMesh, planetMaterial, hitAreaMesh, orbitMaterial } =
-        buildPlanetObjects(this._scene, planetData.id, planetData.visual.baseColor, config, {
+        buildPlanetObjects(this._scene, planetData, config, {
           color: backdropPalette.orbit,
           opacity: ORRERY_ORBIT_OPACITY,
         });
@@ -245,16 +245,17 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
         ? this._data.getPlanet(id).visual.baseColor
         : (planetsState[id].visualParams.atmosphereColor ||
            this._data.getPlanet(id).visual.baseColor);
+      const normalHex = mat.map ? '#ffffff' : baseHex;
 
       if (isLocalHovered && isLocked) {
         // Locked planet hover: grey tint communicates "cannot interact".
         mat.color.set(0x888888);
         mat.emissiveIntensity = 0;
       } else if (isAnyHovered) {
-        mat.color.set(baseHex);
+        mat.color.set(normalHex);
         mat.emissiveIntensity = 0.25;
       } else {
-        mat.color.set(baseHex);
+        mat.color.set(normalHex);
         mat.emissiveIntensity = 0;
       }
       // TODO: update ShaderMaterial uniforms when planet surface shaders are added.

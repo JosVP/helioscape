@@ -57,6 +57,10 @@ export interface PlanetInitialState {
 export interface PlanetVisualData {
   /** Hex color for base planet material. Must include '#' prefix. */
   baseColor: string;
+  /** Equirectangular SVG texture path used by the Three.js orrery. */
+  orreryTexturePath?: string;
+  /** Future equirectangular SVG texture paths for systems that blend/swap planet states. */
+  orreryTextureVariants?: Record<string, string>;
   /** Map of layer name to asset path (e.g., { 'base': '/assets/mars_base.png' }) */
   layerTextures: Record<string, string>;
   /** UV coordinates [u, v] for water spot centers. Each component must be in [0,1]. */

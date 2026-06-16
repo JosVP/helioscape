@@ -14,6 +14,10 @@
     },
     "visual": {
       "baseColor": "#4a6fb3",
+      "orreryTexturePath": "/assets/svg/planets/textures/earth-texture.svg",
+      "orreryTextureVariants": {
+        "night": "/assets/svg/planets/textures/earth-night-texture.svg"
+      },
       "layerTextures": {
         "surface": "/assets/textures/planets/earth_surface.png",
         "water": "/assets/textures/planets/earth_water.png",
@@ -44,6 +48,7 @@
     },
     "visual": {
       "baseColor": "#8c7f73",
+      "orreryTexturePath": "/assets/svg/planets/textures/mercury-texture.svg",
       "layerTextures": {
         "surface": "/assets/textures/planets/mercury_surface.png"
       },
@@ -71,6 +76,10 @@
     },
     "visual": {
       "baseColor": "#c1440e",
+      "orreryTexturePath": "/assets/svg/planets/textures/mars-texture.svg",
+      "orreryTextureVariants": {
+        "terraformed": "/assets/svg/planets/textures/mars-terraformed-texture.svg"
+      },
       "layerTextures": {
         "surface": "/assets/textures/planets/mars_surface.png",
         "lava": "/assets/textures/planets/mars_lava.png",
@@ -121,6 +130,10 @@
     },
     "visual": {
       "baseColor": "#8f8577",
+      "orreryTexturePath": "/assets/svg/planets/textures/venus-texture.svg",
+      "orreryTextureVariants": {
+        "cooledWatered": "/assets/svg/planets/textures/venus-cooled-watered-texture.svg"
+      },
       "layerTextures": {
         "surface": "/assets/textures/planets/venus_surface.png",
         "water": "/assets/textures/planets/venus_water.png",

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 512" width="1024" height="512" preserveAspectRatio="none">
+  <!-- PLACEHOLDER: replace with final cooled/watered Venus equirectangular texture -->
+  <rect width="1024" height="512" fill="#6b9ab3"/>
+  <ellipse cx="220" cy="220" rx="175" ry="86" fill="#487a54" opacity="0.62"/>
+  <ellipse cx="560" cy="170" rx="220" ry="76" fill="#d9ead7" opacity="0.3"/>
+  <ellipse cx="720" cy="325" rx="180" ry="82" fill="#487a54" opacity="0.58"/>
+  <path d="M0 260 C135 220 245 270 375 235 S640 220 790 255 S955 280 1024 245" fill="none" stroke="#7fb5cc" stroke-width="28" stroke-opacity="0.42"/>
+  <ellipse cx="430" cy="130" rx="180" ry="18" fill="#d9ead7" opacity="0.44" transform="rotate(-8 430 130)"/>
+  <ellipse cx="770" cy="250" rx="190" ry="22" fill="#d9ead7" opacity="0.4" transform="rotate(10 770 250)"/>
+  <rect x="2" y="2" width="1020" height="508" fill="none" stroke="#ffffff" stroke-opacity="0.28" stroke-dasharray="18 12"/>
+  <text x="1004" y="492" fill="#ffffff" fill-opacity="0.24" font-family="monospace" font-size="28" text-anchor="end">PLACEHOLDER</text>
+</svg>

@@ -24,6 +24,7 @@ interface OrreryComponentAccess {
   _camera: THREE.PerspectiveCamera;
   _dysonMaterial: THREE.MeshStandardMaterial;
   _starfield: THREE.Points | null;
+  _planetMaterials: Map<string, THREE.MeshStandardMaterial>;
   _intersectionObserver: ObserverFake | null;
   _resizeObserver: ObserverFake | null;
   _readBackdropPalette(): OrreryBackdropPalette;
@@ -139,6 +140,28 @@ describe('OrreryComponent', () => {
 
     expect(starfield.rotation.y).toBe(0);
     expect(renderer.render).toHaveBeenCalledOnce();
+  });
+
+  it('keeps textured planets white during RAF so placeholder maps remain visible', () => {
+    const component = setup();
+    const access = component as unknown as OrreryComponentAccess;
+    const renderer = { render: vi.fn(), dispose: vi.fn() } as unknown as THREE.WebGLRenderer;
+    const canvas = document.createElement('canvas');
+    const texture = new THREE.CanvasTexture(canvas);
+    const texturedMaterial = new THREE.MeshStandardMaterial({ color: '#3a7ab8', map: texture });
+    vi.spyOn(globalThis, 'requestAnimationFrame').mockReturnValue(1);
+
+    access._renderer = renderer;
+    access._scene = new THREE.Scene();
+    access._camera = new THREE.PerspectiveCamera();
+    access._dysonMaterial = new THREE.MeshStandardMaterial({ transparent: true, opacity: 0 });
+    access._starfield = null;
+    access._planetMaterials.set('earth', texturedMaterial);
+
+    access._animate();
+
+    expect(`#${texturedMaterial.color.getHexString()}`).toBe('#ffffff');
+    expect(texturedMaterial.emissiveIntensity).toBe(0);
   });
 
   it('disconnects observers, removes listeners, and disposes the scene on destroy', () => {

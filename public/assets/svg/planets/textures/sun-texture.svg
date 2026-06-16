@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 512" width="1024" height="512" preserveAspectRatio="none">
+  <!-- PLACEHOLDER: replace with final Sun equirectangular texture -->
+  <defs>
+    <radialGradient id="sun-core" cx="50%" cy="50%" r="72%">
+      <stop offset="0%" stop-color="#fff8d8"/>
+      <stop offset="28%" stop-color="#ffd76a"/>
+      <stop offset="62%" stop-color="#f28a24"/>
+      <stop offset="100%" stop-color="#9f3510"/>
+    </radialGradient>
+  </defs>
+  <rect width="1024" height="512" fill="url(#sun-core)"/>
+  <ellipse cx="180" cy="160" rx="190" ry="28" fill="#fff1a4" opacity="0.22" transform="rotate(-8 180 160)"/>
+  <ellipse cx="520" cy="230" rx="260" ry="36" fill="#d65f1a" opacity="0.24" transform="rotate(7 520 230)"/>
+  <ellipse cx="850" cy="350" rx="230" ry="30" fill="#ffe39a" opacity="0.18" transform="rotate(-10 850 350)"/>
+  <ellipse cx="750" cy="115" rx="150" ry="20" fill="#b94812" opacity="0.18" transform="rotate(12 750 115)"/>
+  <rect x="2" y="2" width="1020" height="508" fill="none" stroke="#ffffff" stroke-opacity="0.28" stroke-dasharray="18 12"/>
+  <text x="1004" y="492" fill="#ffffff" fill-opacity="0.24" font-family="monospace" font-size="28" text-anchor="end">PLACEHOLDER</text>
+</svg>

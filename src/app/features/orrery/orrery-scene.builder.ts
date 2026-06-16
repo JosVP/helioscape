@@ -6,6 +6,7 @@
  * focused on lifecycle, signals, and event handling.
  */
 import * as THREE from 'three';
+import type { PlanetData } from '@app/core/models';
 
 // ---------------------------------------------------------------------------
 // Backdrop configuration (rendering-only — supplied by component from tokens)
@@ -96,6 +97,10 @@ export const PLANET_ORBITS: Record<string, PlanetOrreryConfig> = {
  */
 export const ORBIT_SPEED_FACTOR = 0.0014;
 
+const SUN_TEXTURE_PATH = '/assets/svg/planets/textures/sun-texture.svg';
+
+type TextureSlotMap = Partial<Record<string, THREE.Texture | null>>;
+
 function seededRandom(seed: number): () => number {
   let state = seed >>> 0;
   return () => {
@@ -119,9 +124,45 @@ function getCanvasContext(canvas: HTMLCanvasElement): CanvasRenderingContext2D |
   }
 }
 
+export function loadOrrerySvgTexture(texturePath: string, label: string): THREE.Texture {
+  const texture = new THREE.TextureLoader().load(texturePath);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.ClampToEdgeWrapping;
+  texture.needsUpdate = true;
+  texture.name = `${label}-svg-texture`;
+  return texture;
+}
+
 function disposeMaterial(material: THREE.Material | readonly THREE.Material[]): void {
   const materials: readonly THREE.Material[] = Array.isArray(material) ? material : [material];
-  materials.forEach((entry) => entry.dispose());
+  const textureKeys: readonly string[] = [
+    'map',
+    'alphaMap',
+    'aoMap',
+    'bumpMap',
+    'displacementMap',
+    'emissiveMap',
+    'envMap',
+    'lightMap',
+    'metalnessMap',
+    'normalMap',
+    'roughnessMap',
+  ];
+
+  materials.forEach((entry) => {
+    const textureBearingMaterial = entry as THREE.Material & TextureSlotMap;
+    const disposedTextures = new Set<THREE.Texture>();
+    textureKeys.forEach((key) => {
+      const texture = textureBearingMaterial[key];
+      if (texture && !disposedTextures.has(texture)) {
+        texture.dispose();
+        disposedTextures.add(texture);
+      }
+      textureBearingMaterial[key] = null;
+    });
+    entry.dispose();
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -335,9 +376,10 @@ export function buildSun(scene: THREE.Scene): SunObjects {
   // Visible sun sphere
   const sunGeo = new THREE.SphereGeometry(1.2, 32, 32);
   const sunMat = new THREE.MeshStandardMaterial({
-    color: 0xffcc44,
+    color: 0xffffff,
     emissive: new THREE.Color(0xff9900),
     emissiveIntensity: 1.2,
+    map: loadOrrerySvgTexture(SUN_TEXTURE_PATH, 'sun'),
   });
   scene.add(new THREE.Mesh(sunGeo, sunMat));
 
@@ -373,11 +415,11 @@ export interface PlanetObjects {
  */
 export function buildPlanetObjects(
   scene: THREE.Scene,
-  planetId: string,
-  baseColor: string,
+  planetData: PlanetData,
   config: PlanetOrreryConfig,
   orbitStyle: OrreryOrbitStyleOptions,
 ): PlanetObjects {
+  const baseColor = planetData.visual.baseColor;
   const startX = Math.cos(config.initialAngle) * config.orreryRadius;
   const startZ = Math.sin(config.initialAngle) * config.orreryRadius;
 
@@ -395,14 +437,18 @@ export function buildPlanetObjects(
 
   // Visible planet sphere.
   const planetGeo = new THREE.SphereGeometry(config.visualRadius, 32, 32);
+  const texture = planetData.visual.orreryTexturePath
+    ? loadOrrerySvgTexture(planetData.visual.orreryTexturePath, planetData.id)
+    : null;
   const planetMat = new THREE.MeshStandardMaterial({
-    color: new THREE.Color(baseColor),
+    color: new THREE.Color(texture ? '#ffffff' : baseColor),
     emissive: new THREE.Color(0xffffff),
     emissiveIntensity: 0,
+    map: texture,
   });
   const planetMesh = new THREE.Mesh(planetGeo, planetMat);
   planetMesh.position.set(startX, 0, startZ);
-  planetMesh.userData = { planetId };
+  planetMesh.userData = { planetId: planetData.id };
   scene.add(planetMesh);
 
   // Invisible hit-area sphere — larger than the visible sphere for easier clicking.
@@ -410,7 +456,7 @@ export function buildPlanetObjects(
   const hitMat = new THREE.MeshBasicMaterial({ visible: false });
   const hitAreaMesh = new THREE.Mesh(hitGeo, hitMat);
   hitAreaMesh.position.set(startX, 0, startZ);
-  hitAreaMesh.userData = { planetId };
+  hitAreaMesh.userData = { planetId: planetData.id };
   scene.add(hitAreaMesh);
 
   return { planetMesh, planetMaterial: planetMat, hitAreaMesh, orbitMaterial: ringMat };

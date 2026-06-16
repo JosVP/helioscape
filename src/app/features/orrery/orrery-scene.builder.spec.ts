@@ -2,6 +2,7 @@
 
 import { describe, expect, it, vi } from 'vitest';
 import * as THREE from 'three';
+import type { PlanetData } from '@app/core/models';
 import {
   DEFAULT_ORRERY_GRID_OPTIONS,
   PLANET_ORBITS,
@@ -10,6 +11,7 @@ import {
   buildPlanetObjects,
   buildStarfield,
   disposeScene,
+  loadOrrerySvgTexture,
   type OrreryBackdropPalette,
 } from './orrery-scene.builder';
 
@@ -25,6 +27,31 @@ const palette: OrreryBackdropPalette = {
 function attributeArray(object: THREE.Object3D): Float32Array {
   const lineSegments = object as THREE.LineSegments<THREE.BufferGeometry, THREE.LineBasicMaterial>;
   return lineSegments.geometry.getAttribute('position').array as Float32Array;
+}
+
+function makePlanetData(withTexture = false): PlanetData {
+  return {
+    id: 'earth',
+    displayName: 'Earth',
+    unlockCondition: null,
+    initialState: {
+      atmospherePressure: 1,
+      temperatureCelsius: 15,
+      terraformingPhase: 0,
+      axisSpinSpeed: 1,
+      cloudRotationSpeed: 0.002,
+      atmosphereColor: '#4488ff',
+      atmosphereDensity: 0.35,
+    },
+    visual: {
+      baseColor: '#3a7ab8',
+      orreryTexturePath: withTexture ? '/assets/svg/planets/textures/earth-texture.svg' : undefined,
+      layerTextures: {},
+      waterSpotUvs: [],
+      greenSpotUvs: [],
+    },
+    phases: [],
+  };
 }
 
 describe('orrery scene builder', () => {
@@ -89,8 +116,7 @@ describe('orrery scene builder', () => {
 
     const { orbitMaterial } = buildPlanetObjects(
       scene,
-      'earth',
-      '#3a7ab8',
+      makePlanetData(),
       PLANET_ORBITS['earth'],
       { color: '#123456', opacity: 0.33 }
     );
@@ -98,6 +124,38 @@ describe('orrery scene builder', () => {
     expect(`#${orbitMaterial.color.getHexString()}`).toBe('#123456');
     expect(orbitMaterial.opacity).toBe(0.33);
     expect(orbitMaterial.transparent).toBe(true);
+  });
+
+  it('loadOrrerySvgTexture loads and configures a disposable texture from a path', () => {
+    const loadedTexture = new THREE.Texture();
+    const loadSpy = vi
+      .spyOn(THREE.TextureLoader.prototype, 'load')
+      .mockReturnValue(loadedTexture);
+
+    const texture = loadOrrerySvgTexture('/assets/svg/planets/textures/test-world.svg', 'test-world');
+
+    expect(loadSpy).toHaveBeenCalledWith('/assets/svg/planets/textures/test-world.svg');
+    expect(texture).toBe(loadedTexture);
+    expect(texture.colorSpace).toBe(THREE.SRGBColorSpace);
+    expect(texture.wrapS).toBe(THREE.RepeatWrapping);
+    expect(texture.wrapT).toBe(THREE.ClampToEdgeWrapping);
+    expect(texture.name).toBe('test-world-svg-texture');
+  });
+
+  it('buildPlanetObjects assigns an SVG map when planet data provides a texture path', () => {
+    const scene = new THREE.Scene();
+    const loadedTexture = new THREE.Texture();
+    vi.spyOn(THREE.TextureLoader.prototype, 'load').mockReturnValue(loadedTexture);
+
+    const { planetMaterial } = buildPlanetObjects(
+      scene,
+      makePlanetData(true),
+      PLANET_ORBITS['earth'],
+      { color: '#123456', opacity: 0.33 }
+    );
+
+    expect(planetMaterial.map).toBe(loadedTexture);
+    expect(`#${planetMaterial.color.getHexString()}`).toBe('#ffffff');
   });
 
   it('disposeScene disposes background textures and non-mesh render objects', () => {
@@ -119,7 +177,9 @@ describe('orrery scene builder', () => {
     scene.add(new THREE.LineSegments(lineGeometry, lineMaterial));
 
     const meshGeometry = new THREE.SphereGeometry(1, 8, 8);
-    const meshMaterial = new THREE.MeshBasicMaterial();
+    const materialMap = new THREE.CanvasTexture(document.createElement('canvas'));
+    const materialMapDispose = vi.spyOn(materialMap, 'dispose');
+    const meshMaterial = new THREE.MeshBasicMaterial({ map: materialMap });
     const meshGeometryDispose = vi.spyOn(meshGeometry, 'dispose');
     const meshMaterialDispose = vi.spyOn(meshMaterial, 'dispose');
     scene.add(new THREE.Mesh(meshGeometry, meshMaterial));
@@ -135,6 +195,8 @@ describe('orrery scene builder', () => {
     expect(lineGeometryDispose).toHaveBeenCalledOnce();
     expect(lineMaterialDispose).toHaveBeenCalledOnce();
     expect(meshGeometryDispose).toHaveBeenCalledOnce();
+    expect(materialMapDispose).toHaveBeenCalledOnce();
+    expect(meshMaterial.map).toBeNull();
     expect(meshMaterialDispose).toHaveBeenCalledOnce();
     expect(renderer.dispose).toHaveBeenCalledOnce();
   });

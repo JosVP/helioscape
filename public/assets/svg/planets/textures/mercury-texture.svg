@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 512" width="1024" height="512" preserveAspectRatio="none">
+  <!-- PLACEHOLDER: replace with final Mercury equirectangular texture -->
+  <rect width="1024" height="512" fill="#8c7f73"/>
+  <ellipse cx="190" cy="180" rx="150" ry="92" fill="#5f564f" opacity="0.28"/>
+  <ellipse cx="595" cy="302" rx="190" ry="82" fill="#3f3935" opacity="0.22"/>
+  <ellipse cx="850" cy="160" rx="120" ry="76" fill="#b0a59b" opacity="0.2"/>
+  <g fill="none" stroke="#4f4741" stroke-opacity="0.65">
+    <circle cx="150" cy="132" r="32" stroke-width="7"/><circle cx="150" cy="132" r="15" stroke-width="4"/>
+    <circle cx="300" cy="310" r="44" stroke-width="8"/><circle cx="520" cy="170" r="26" stroke-width="6"/>
+    <circle cx="725" cy="270" r="38" stroke-width="7"/><circle cx="900" cy="365" r="30" stroke-width="6"/>
+    <circle cx="72" cy="390" r="22" stroke-width="5"/><circle cx="980" cy="92" r="26" stroke-width="6"/>
+  </g>
+  <g fill="#3f3935" opacity="0.38">
+    <circle cx="150" cy="132" r="12"/><circle cx="300" cy="310" r="17"/><circle cx="520" cy="170" r="10"/>
+    <circle cx="725" cy="270" r="15"/><circle cx="900" cy="365" r="12"/><circle cx="72" cy="390" r="8"/>
+  </g>
+  <path d="M80 250 C190 190 280 280 385 220 S600 210 760 145 S930 180 1024 125" fill="none" stroke="#5f564f" stroke-width="10" stroke-opacity="0.32"/>
+  <rect x="2" y="2" width="1020" height="508" fill="none" stroke="#ffffff" stroke-opacity="0.28" stroke-dasharray="18 12"/>
+  <text x="1004" y="492" fill="#ffffff" fill-opacity="0.22" font-family="monospace" font-size="28" text-anchor="end">PLACEHOLDER</text>
+</svg>
