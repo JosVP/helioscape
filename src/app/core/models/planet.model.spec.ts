@@ -186,6 +186,7 @@ describe('PlanetVisualParams validation', () => {
     atmosphereColor: '#87ceeb',
     cloudRotationSpeed: 0.01,
     axisSpinSpeed: 0.02,
+    axisRotationDirection: 'prograde',
     cityLightsIntensity: 0.9,
   };
 
@@ -245,16 +246,15 @@ describe('PlanetVisualData validation', () => {
     expect(result.errors).toContain('lavaHueData should only be present on Mars (found on venus)');
   });
 
-  it('should warn when Earth-specific fields appear on Mars', () => {
-    const earthVisual: PlanetVisualData = {
+  it('should accept city lights as a named layer texture', () => {
+    const cityLightsVisual: PlanetVisualData = {
       ...validMarsVisual,
-      cityLightsTexture: '/assets/city_lights.png',
+      layerTextures: {
+        surface: '/assets/svg/planets/textures/mars-surface-texture.svg',
+        cityLights: '/assets/svg/planets/textures/mars-city-lights-texture.svg',
+      },
     };
-    const result = validateVisualData(earthVisual, 'mars');
-    expect(result.valid).toBe(false);
-    expect(result.errors).toContain(
-      'cityLightsTexture should only be present on Earth (found on mars)',
-    );
+    expect(validateVisualData(cityLightsVisual, 'mars').valid).toBe(true);
   });
 
   it('should reject UV coordinates outside [0,1] range', () => {
@@ -308,6 +308,7 @@ const validState: PlanetState = {
     atmosphereColor: '#cd853f',
     cloudRotationSpeed: 0.01,
     axisSpinSpeed: 0.02,
+    axisRotationDirection: 'prograde',
     cityLightsIntensity: 0,
   },
   terraformStartYear: 2100,
@@ -416,6 +417,7 @@ describe('PlanetData validation', () => {
       temperatureCelsius: -63,
       terraformingPhase: 0,
       axisSpinSpeed: 0.015,
+      axisRotationDirection: 'prograde',
       cloudRotationSpeed: 0,
       atmosphereColor: '#ffcba4',
       atmosphereDensity: 0.01,
@@ -439,10 +441,12 @@ describe('PlanetData validation', () => {
   it('should accept null unlockCondition for Earth', () => {
     const earthVisual: PlanetVisualData = {
       baseColor: '#4169e1',
-      layerTextures: { base: '/assets/earth_base.png' },
+      layerTextures: {
+        surface: '/assets/svg/planets/textures/earth-surface-texture.svg',
+        cityLights: '/assets/svg/planets/textures/earth-city-lights-texture.svg',
+      },
       waterSpotUvs: [[0.5, 0.5]],
       greenSpotUvs: [[0.3, 0.7]],
-      cityLightsTexture: '/assets/city_lights.png',
     };
     const data = {
       ...validData,
@@ -472,6 +476,21 @@ describe('PlanetData validation', () => {
     const result = validatePlanetData(data);
     expect(result.valid).toBe(false);
     expect(result.errors[0]).toContain('baseColor must be valid hex color');
+  });
+
+  it('should reject invalid initial rotation direction', () => {
+    const data = {
+      ...validData,
+      initialState: {
+        ...validData.initialState,
+        axisRotationDirection: 'sideways' as 'prograde',
+      },
+    };
+    const result = validatePlanetData(data);
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain(
+      'initialState.axisRotationDirection must be prograde or retrograde (got sideways)',
+    );
   });
 });
 
@@ -579,6 +598,7 @@ describe('sanitizePlanetState', () => {
         atmosphereColor: '#cd853f',
         cloudRotationSpeed: 0.01,
         axisSpinSpeed: 0.02,
+        axisRotationDirection: 'prograde',
         cityLightsIntensity: 0,
       },
       terraformStartYear: 2100,

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 512" width="1024" height="512" preserveAspectRatio="none">
+  <!-- PLACEHOLDER: replace with final Mercury surface texture -->
+  <rect width="1024" height="512" fill="#8c7f73"/>
+  <g fill="none" stroke="#4c443d" stroke-opacity="0.45">
+    <circle cx="180" cy="185" r="54"/>
+    <circle cx="365" cy="300" r="36"/>
+    <circle cx="610" cy="210" r="70"/>
+    <circle cx="820" cy="318" r="48"/>
+  </g>
+  <rect x="2" y="2" width="1020" height="508" fill="none" stroke="#ffffff" stroke-opacity="0.35" stroke-dasharray="14 9"/>
+  <text x="512" y="474" fill="#ffffff" fill-opacity="0.45" font-family="monospace" font-size="24" text-anchor="middle">mercury surface placeholder</text>
+</svg>

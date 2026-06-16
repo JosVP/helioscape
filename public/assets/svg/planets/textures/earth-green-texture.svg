@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 512" width="1024" height="512" preserveAspectRatio="none">
+  <!-- PLACEHOLDER: replace with final Earth vegetation layer -->
+  <rect width="1024" height="512" fill="none"/>
+  <ellipse cx="250" cy="210" rx="120" ry="75" fill="#62b85c" fill-opacity="0.55"/>
+  <ellipse cx="570" cy="285" rx="170" ry="90" fill="#54a64f" fill-opacity="0.52"/>
+  <ellipse cx="830" cy="176" rx="82" ry="58" fill="#76c46f" fill-opacity="0.48"/>
+  <text x="512" y="474" fill="#ffffff" fill-opacity="0.35" font-family="monospace" font-size="24" text-anchor="middle">earth green placeholder</text>
+</svg>

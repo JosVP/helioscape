@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 512" width="1024" height="512" preserveAspectRatio="none">
+  <!-- PLACEHOLDER: replace with final Earth water layer -->
+  <rect width="1024" height="512" fill="none"/>
+  <path d="M0 120 C160 90 260 150 390 126 S690 94 1024 130 V512 H0 Z" fill="#2c8fd8" fill-opacity="0.28"/>
+  <path d="M0 360 C180 330 330 385 520 358 S780 315 1024 350 V512 H0 Z" fill="#6ec8ff" fill-opacity="0.16"/>
+  <text x="512" y="474" fill="#ffffff" fill-opacity="0.35" font-family="monospace" font-size="24" text-anchor="middle">earth water placeholder</text>
+</svg>

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 512" width="1024" height="512" preserveAspectRatio="none">
+  <!-- PLACEHOLDER: replace with final Earth surface texture -->
+  <rect width="1024" height="512" fill="#1f5f9b"/>
+  <ellipse cx="260" cy="210" rx="130" ry="82" fill="#4f8f48"/>
+  <ellipse cx="560" cy="290" rx="190" ry="100" fill="#487d3f"/>
+  <ellipse cx="835" cy="180" rx="95" ry="70" fill="#5e9b55"/>
+  <rect y="0" width="1024" height="34" fill="#e8f2f8"/>
+  <rect y="478" width="1024" height="34" fill="#e8f2f8"/>
+  <rect x="2" y="2" width="1020" height="508" fill="none" stroke="#ffffff" stroke-opacity="0.35" stroke-dasharray="14 9"/>
+  <text x="512" y="474" fill="#ffffff" fill-opacity="0.45" font-family="monospace" font-size="24" text-anchor="middle">earth surface placeholder</text>
+</svg>

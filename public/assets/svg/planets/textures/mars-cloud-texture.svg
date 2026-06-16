@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 512" width="1024" height="512" preserveAspectRatio="none">
+  <!-- PLACEHOLDER: replace with final Mars cloud layer -->
+  <rect width="1024" height="512" fill="none"/>
+  <g fill="#ffe8cf" fill-opacity="0.34">
+    <ellipse cx="260" cy="150" rx="90" ry="16"/>
+    <ellipse cx="540" cy="250" rx="130" ry="20"/>
+    <ellipse cx="810" cy="185" rx="100" ry="16"/>
+  </g>
+  <text x="512" y="474" fill="#ffffff" fill-opacity="0.35" font-family="monospace" font-size="24" text-anchor="middle">mars cloud placeholder</text>
+</svg>

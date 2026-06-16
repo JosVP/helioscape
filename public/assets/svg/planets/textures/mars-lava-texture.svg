@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 512" width="1024" height="512" preserveAspectRatio="none">
+  <!-- PLACEHOLDER: replace with final Mars lava layer -->
+  <rect width="1024" height="512" fill="none"/>
+  <g fill="#ff5c26" fill-opacity="0.72">
+    <ellipse cx="395" cy="178" rx="44" ry="22"/>
+    <ellipse cx="442" cy="214" rx="38" ry="18"/>
+    <ellipse cx="720" cy="292" rx="56" ry="24"/>
+  </g>
+  <g fill="#ffd15c" fill-opacity="0.75">
+    <circle cx="406" cy="180" r="8"/>
+    <circle cx="724" cy="292" r="10"/>
+  </g>
+  <text x="512" y="474" fill="#ffffff" fill-opacity="0.35" font-family="monospace" font-size="24" text-anchor="middle">mars lava placeholder</text>
+</svg>

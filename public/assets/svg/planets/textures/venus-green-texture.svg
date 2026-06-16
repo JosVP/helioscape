@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 512" width="1024" height="512" preserveAspectRatio="none">
+  <!-- PLACEHOLDER: replace with final Venus vegetation layer -->
+  <rect width="1024" height="512" fill="none"/>
+  <ellipse cx="330" cy="225" rx="80" ry="35" fill="#6fb65b" fill-opacity="0.46"/>
+  <ellipse cx="590" cy="270" rx="110" ry="45" fill="#78c96a" fill-opacity="0.42"/>
+  <ellipse cx="470" cy="340" rx="92" ry="34" fill="#5fa956" fill-opacity="0.38"/>
+  <text x="512" y="474" fill="#ffffff" fill-opacity="0.35" font-family="monospace" font-size="24" text-anchor="middle">venus green placeholder</text>
+</svg>

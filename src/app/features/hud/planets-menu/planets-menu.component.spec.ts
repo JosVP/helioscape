@@ -48,6 +48,7 @@ function makePlanetData(id: string, phases: { displayName: string; description: 
       temperatureCelsius: 0,
       terraformingPhase: 0,
       axisSpinSpeed: 1,
+      axisRotationDirection: 'prograde',
       cloudRotationSpeed: 0,
       atmosphereColor: '#000000',
       atmosphereDensity: 0,

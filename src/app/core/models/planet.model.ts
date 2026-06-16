@@ -4,6 +4,9 @@
  */
 export type PlanetId = 'earth' | 'mercury' | 'mars' | 'venus';
 
+/** Direction of a planet's visual spin around its internal axis. */
+export type PlanetRotationDirection = 'prograde' | 'retrograde';
+
 /**
  * Static planet data loaded from planets.json at startup.
  * Immutable after load — never modified at runtime.
@@ -38,8 +41,10 @@ export interface PlanetInitialState {
   temperatureCelsius: number;
   /** Starting terraforming phase (0-based). Must be non-negative integer. */
   terraformingPhase: number;
-  /** Planet rotation speed (radians/frame or similar). Must be >= 0. */
+  /** Visual planet axis spin speed used by the orrery. Must be >= 0. */
   axisSpinSpeed: number;
+  /** Visual planet axis spin direction used by the orrery. */
+  axisRotationDirection: PlanetRotationDirection;
   /** Cloud layer rotation speed. Must be >= 0. */
   cloudRotationSpeed: number;
   /** Hex color string (e.g., '#87ceeb'). Must include '#' prefix. */
@@ -57,11 +62,7 @@ export interface PlanetInitialState {
 export interface PlanetVisualData {
   /** Hex color for base planet material. Must include '#' prefix. */
   baseColor: string;
-  /** Equirectangular SVG texture path used by the Three.js orrery. */
-  orreryTexturePath?: string;
-  /** Future equirectangular SVG texture paths for systems that blend/swap planet states. */
-  orreryTextureVariants?: Record<string, string>;
-  /** Map of layer name to asset path (e.g., { 'base': '/assets/mars_base.png' }) */
+  /** Map of visual layer name to equirectangular SVG texture path. */
   layerTextures: Record<string, string>;
   /** UV coordinates [u, v] for water spot centers. Each component must be in [0,1]. */
   waterSpotUvs: [number, number][];
@@ -71,8 +72,6 @@ export interface PlanetVisualData {
   lavaSpotUvs?: [number, number][];
   /** Mars only: Hue shift data for lava cooling animation. Hues in [0,360] degrees. */
   lavaHueData?: { hotHue: number; cooledHue: number };
-  /** Earth only: Path to city lights texture overlay. */
-  cityLightsTexture?: string;
 }
 
 /**
@@ -152,6 +151,8 @@ export interface PlanetVisualParams {
   cloudRotationSpeed: number;
   /** Current planet axis spin speed. Must be >= 0. */
   axisSpinSpeed: number;
-  /** Intensity of city lights overlay [0-1]. Earth only. */
+  /** Current planet axis spin direction used by the orrery. */
+  axisRotationDirection: PlanetRotationDirection;
+  /** Intensity of city lights overlay [0-1]. */
   cityLightsIntensity: number;
 }

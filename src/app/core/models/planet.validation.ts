@@ -15,6 +15,7 @@ import type {
 
 /** Valid planet IDs for runtime checks */
 const VALID_PLANET_IDS: readonly PlanetId[] = ['earth', 'mercury', 'mars', 'venus'] as const;
+const VALID_ROTATION_DIRECTIONS = ['prograde', 'retrograde'] as const;
 
 /** Validation result with error details */
 export interface ValidationResult {
@@ -132,6 +133,12 @@ export function validateVisualParams(params: PlanetVisualParams): ValidationResu
     errors.push(`atmosphereColor must be valid hex color (got ${params.atmosphereColor})`);
   }
 
+  if (!VALID_ROTATION_DIRECTIONS.includes(params.axisRotationDirection)) {
+    errors.push(
+      `axisRotationDirection must be prograde or retrograde (got ${params.axisRotationDirection})`,
+    );
+  }
+
   return { valid: errors.length === 0, errors };
 }
 
@@ -180,10 +187,6 @@ export function validateVisualData(data: PlanetVisualData, planetId: PlanetId): 
     }
   }
 
-  if (data.cityLightsTexture && planetId !== 'earth') {
-    errors.push(`cityLightsTexture should only be present on Earth (found on ${planetId})`);
-  }
-
   return { valid: errors.length === 0, errors };
 }
 
@@ -230,6 +233,10 @@ export function validatePlanetState(state: PlanetState): ValidationResult {
   // Check for prototype pollution in terraformingChoices
   if (state.terraformingChoices) {
     const dangerousKeys = ['__proto__', 'constructor', 'prototype'];
+    const choicesPrototype = Object.getPrototypeOf(state.terraformingChoices);
+    if (choicesPrototype !== Object.prototype && choicesPrototype !== null) {
+      errors.push('terraformingChoices contains dangerous key: __proto__');
+    }
     for (const key of Object.keys(state.terraformingChoices)) {
       if (dangerousKeys.includes(key)) {
         errors.push(`terraformingChoices contains dangerous key: ${key}`);
@@ -271,6 +278,12 @@ export function validatePlanetData(data: PlanetData): ValidationResult {
     );
   }
 
+  if (!VALID_ROTATION_DIRECTIONS.includes(data.initialState.axisRotationDirection)) {
+    errors.push(
+      `initialState.axisRotationDirection must be prograde or retrograde (got ${data.initialState.axisRotationDirection})`,
+    );
+  }
+
   // Validate visual data
   const visualResult = validateVisualData(data.visual, data.id);
   errors.push(...visualResult.errors);
@@ -298,6 +311,11 @@ export function sanitizePlanetState(state: PlanetState): PlanetState {
       atmosphereDensity: Math.max(0, state.visualParams.atmosphereDensity),
       cloudRotationSpeed: Math.max(0, state.visualParams.cloudRotationSpeed),
       axisSpinSpeed: Math.max(0, state.visualParams.axisSpinSpeed),
+      axisRotationDirection: VALID_ROTATION_DIRECTIONS.includes(
+        state.visualParams.axisRotationDirection,
+      )
+        ? state.visualParams.axisRotationDirection
+        : 'prograde',
       cityLightsIntensity: Math.max(0, state.visualParams.cityLightsIntensity),
     },
     lockedOutChoices: [...new Set(state.lockedOutChoices)], // Remove duplicates

@@ -37,6 +37,7 @@ function makePlanetState(overrides: Partial<PlanetState> = {}): PlanetState {
       atmosphereColor: '#c1440e',
       cloudRotationSpeed: 0.001,
       axisSpinSpeed: 0.002,
+      axisRotationDirection: 'prograde',
       cityLightsIntensity: 0,
     },
     terraformStartYear: 2033,

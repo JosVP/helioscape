@@ -1,9 +1,17 @@
-Note: this prompt is part of the post-playtest visual overhaul (Block 18). Stay critical — read the current code first.
+Note: this prompt is part of the post-playtest visual overhaul (Block 18). Stay critical - read the current code first.
 
-Create a plan for stylized flat day/night lighting and camera framing in the orrery for Helioscape.
+Create a plan for stylized flat day/night lighting in the orrery for Helioscape.
 
 CONTEXT
-The orrery currently uses a dim AmbientLight (~0.05) + a strong DirectionalLight (~2.0), giving a realistic but muddy look, and the camera leaves ~30% dead space at the top and ~5% at the bottom with the sun off to one side. We want a STYLIZED, FLAT day/night look (Kurzgesgant-inspired, our own spin) where each planet's sun-facing side is evenly lit, the far side is flat and dark, and a thin bright rim separates them. And we want the sun better centred using the wasted vertical space.
+The orrery currently uses a dim AmbientLight (~0.05) + a strong DirectionalLight (~2.0), giving a realistic but muddy look. We want a STYLIZED, FLAT day/night look (Kurzgesagt-inspired, our own spin) where each planet's sun-facing side is evenly lit, the far side is covered by a flat transparent black shadow over the existing planet texture. Think of the dark side as roughly a 50% alpha black overlay/mask on the textured sphere, not a separate dark-side replacement texture.
+
+A separate optional city-lights texture should be supported for planets that have night-side civilization lights. This city-lights texture is not the dark-side texture itself. It should only be visible inside the currently dark hemisphere, as if masked by the active night-side region. In CSS terms: the base planet texture remains visible everywhere, the dark side gets a semi-transparent black shadow, and the city-lights texture is revealed only where that dark-side mask is active.
+
+A thin bright rim separates the lit and dark regions at the edge where sunlight begins, similar to a CSS inset box-shadow of 3-5% on the light side.
+
+Planets should also rotate based on their rotation speed defined in the planet data. If no suitable rotation-speed property exists, plan a new planet-data property for it. The rotation direction should support prograde and retrograde rotation based on the real planet rotations.
+
+Earth, Mars and Venus need city-lights/night textures. If those textures do not exist yet, the plan should include creating obvious placeholder assets at the paths the orrery will consume.
 
 Read AGENTS.md and docs/agents/ARCHITECTURE.md (Three.js, Canvas components, Visual value pattern). Owned by:
 - src/app/features/orrery/orrery-scene.builder.ts
@@ -12,25 +20,33 @@ Read AGENTS.md and docs/agents/ARCHITECTURE.md (Three.js, Canvas components, Vis
 REQUIREMENTS
 
 1. Orbit-based day/night shading (flat, not realistic)
-   - For each planet, the lit hemisphere is the one facing the sun (origin). Compute the sun direction per planet from its current orbital position (sun at origin → planet position vector). This is pure and derived from position — no stored animation state (Visual value pattern).
-   - Lit side: flat, even illumination of the planet's texture (no strong specular, no falloff gradient across the disc — keep it graphic and even). Dark side: the texture rendered flat and dark (toward the night-side variant where one exists, e.g. Earth city lights from 18-2).
-   - Between lit and dark: a THIN bright highlight rim (configurable width, default ~3–5% of the disc) along the terminator — a signature stylised edge, not a soft gradient.
-   - Implement with whichever approach is cleanest and disposable: a custom ShaderMaterial with a sun-direction uniform updated per frame is the natural fit (flat term = step/smoothstep on dot(normal, sunDir) with a narrow highlight band). If a shader is used, keep uniforms minimal and update them in the RAF loop from locals.
+   - For each planet, the lit hemisphere is the one facing the sun (origin). Compute the sun direction per planet from its current orbital position (sun at origin -> planet position vector). This is pure and derived from position - no stored animation state (Visual value pattern).
+   - Lit side: flat, even illumination of the planet's base texture. No strong specular, no falloff gradient across the disc - keep it graphic and even.
+   - Dark side: the same base planet texture remains on the sphere, but a flat semi-transparent black shadow is applied over the dark hemisphere. Default target: about 50% alpha black, configurable.
+   - City lights: support a separate city-lights texture/map per planet. This texture should be visible only on the dark hemisphere, masked by the same day/night calculation. It should not replace the base planet texture and should not appear on the lit side.
+   - Earth, Mars and Venus must have city-lights/night texture support. If the assets do not exist, include placeholder city-lights/night texture creation in the plan.
+   - At the edge of the light side: a THIN bright highlight rim (configurable width, default ~3-5% of the disc) - a signature stylised edge, not a soft gradient.
+   - Implement with whichever approach is cleanest and disposable: a custom ShaderMaterial with a sun-direction uniform updated per frame is the natural fit. Suggested shader behavior: use dot(normal, sunDir) to compute a flat day/night mask, apply a configurable dark overlay on the night side, reveal the optional city-lights texture only through the night mask, and add a narrow highlight band near the terminator/light edge.
+   - The planet rotates around its internal axis using the rotation speed and direction from planets.json. If those fields are missing, plan the data-model and JSON additions.
 
 2. Configurability
-   - Expose: highlight rim width, lit-side brightness, dark-side brightness/tint, and a master toggle, as builder/material parameters with documented defaults. The user wants to tune this without editing shader internals.
+   - Expose: master toggle, highlight rim width, lit-side brightness, dark-side shadow opacity, dark-side shadow tint, city-lights intensity, and reasonable defaults as builder/material parameters. The user wants to tune this without editing shader internals.
 
-3. Lighting rig cleanup
-   - Replace or retune the AmbientLight/DirectionalLight so the new flat shading dominates and planets are not double-lit. If the shader fully controls planet appearance, reduce scene lights to whatever the sun glow/other meshes still need. Keep it intentional and documented.
+3. Planet data and assets
+   - Check the existing planet model and planets.json for rotation-speed and rotation-direction fields.
+   - If missing, plan a typed schema addition for rotation speed and direction, with values for each planet.
+   - Confirm how texture paths are represented today. Add or plan a city-lights/night texture reference for Earth, Mars and Venus.
+   - If Earth, Mars or Venus city-lights/night textures are missing, create obvious placeholder textures using the placeholder SVG asset workflow. These should be named and located exactly where the orrery material code expects them.
 
-4. Camera framing — use the dead space, centre the sun
-   - Re-frame so the sun sits closer to the visual centre and the ~30% top / ~5% bottom dead space is used (orbits fill the frame more symmetrically). Adjust camera position/target and/or fov in the builder. Keep the existing "camera does not move except planet zoom" rule — this is a one-time framing change, not controls.
-   - Verify all four orbits remain fully visible at the default canvas aspect, and that the framing still works when the canvas resizes (respect the existing resize handling).
+4. Lighting rig cleanup
+   - Replace or retune the AmbientLight/DirectionalLight so the new flat shader-driven shading dominates and planets are not double-lit.
+   - If the shader fully controls planet appearance, reduce scene lights to whatever the sun glow/other meshes still need.
+   - Keep the lighting choices intentional and documented.
 
 RAF DISCIPLINE (non-negotiable)
-Read signals once into locals at the top of animate(). Update the sun-direction uniform(s) from planet positions already computed that frame. No allocation inside the loop. Per ARCHITECTURE.md never call signal getters mid-render.
+Read signals once into locals at the top of animate(). Update the sun-direction uniform(s), rotation values, and city-lights/night-mask uniforms from planet positions already computed that frame. No allocation inside the loop. Per ARCHITECTURE.md never call signal getters mid-render.
 
 CLEANUP
-Any new ShaderMaterial / uniforms / lights MUST be disposed in the existing ngOnDestroy traversal.
+Any new ShaderMaterial, uniforms, textures, city-lights maps, or lights MUST be disposed in the existing ngOnDestroy traversal.
 
-OUT OF SCOPE (later blocks): pixelate post-process + sun/atmosphere glow (18-4), orbit-ring interaction + removing the planet gray-out (18-5), planet texture generation (18-2, dependency — assume textures incl. night-side variants exist).
+OUT OF SCOPE (later blocks): pixelate post-process + sun/atmosphere glow (18-4), orbit-ring interaction + removing the planet gray-out (18-5), procedural final planet texture generation. This block may create placeholder city-lights/night assets only where required for Earth, Mars and Venus.

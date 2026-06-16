@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 512" width="1024" height="512" preserveAspectRatio="none">
+  <!-- PLACEHOLDER: replace with final Venus surface texture -->
+  <rect width="1024" height="512" fill="#8f8577"/>
+  <ellipse cx="260" cy="230" rx="150" ry="70" fill="#6f665c" fill-opacity="0.45"/>
+  <ellipse cx="650" cy="280" rx="210" ry="84" fill="#a0927f" fill-opacity="0.38"/>
+  <rect x="2" y="2" width="1020" height="508" fill="none" stroke="#ffffff" stroke-opacity="0.35" stroke-dasharray="14 9"/>
+  <text x="512" y="474" fill="#ffffff" fill-opacity="0.45" font-family="monospace" font-size="24" text-anchor="middle">venus surface placeholder</text>
+</svg>

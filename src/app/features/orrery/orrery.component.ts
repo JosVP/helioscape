@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import * as THREE from 'three';
+import type { PlanetData, PlanetVisualParams } from '@app/core/models';
 import { DataService } from '@app/core/services/data.service';
 import { EventBusService } from '@app/core/services/event-bus.service';
 import { GameStateService } from '@app/core/services/game-state.service';
@@ -27,10 +28,13 @@ import {
   createRenderer,
   disposeScene,
   type OrreryBackdropPalette,
+  type OrreryPlanetLayerObject,
+  type OrreryPlanetMaterial,
 } from './orrery-scene.builder';
 
 const ORRERY_GRID_OPACITY = 0.14;
 const ORRERY_ORBIT_OPACITY = 0.12;
+const EMPTY_PLANET_LAYERS: readonly OrreryPlanetLayerObject[] = [];
 
 @Component({
   selector: 'app-orrery',
@@ -57,8 +61,11 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
   private readonly _planetAngles   = new Map<string, number>();
   private readonly _planetMeshes   = new Map<string, THREE.Mesh>();
   private readonly _hitAreaMeshes  = new Map<string, THREE.Mesh>();
-  private readonly _orbitMaterials = new Map<string, THREE.MeshStandardMaterial>();
-  private readonly _planetMaterials = new Map<string, THREE.MeshStandardMaterial>();
+  private readonly _orbitMaterials = new Map<string, THREE.MeshBasicMaterial>();
+  private readonly _planetMaterials = new Map<string, OrreryPlanetMaterial>();
+  private readonly _planetLayers = new Map<string, readonly OrreryPlanetLayerObject[]>();
+  private readonly _planetData = new Map<string, PlanetData>();
+  private readonly _planetOrbitEntries = Object.entries(PLANET_ORBITS);
 
   // ── Sun / Dyson ────────────────────────────────────────────────────────────
   private _dysonMaterial!: THREE.MeshStandardMaterial;
@@ -107,13 +114,15 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
     for (const planetData of this._data.getAllPlanets()) {
       const config = PLANET_ORBITS[planetData.id];
       if (!config) continue; // guard against unknown planet ids in JSON
-      const { planetMesh, planetMaterial, hitAreaMesh, orbitMaterial } =
+      this._planetData.set(planetData.id, planetData);
+      const { planetMesh, planetMaterial, layerObjects, hitAreaMesh, orbitMaterial } =
         buildPlanetObjects(this._scene, planetData, config, {
           color: backdropPalette.orbit,
           opacity: ORRERY_ORBIT_OPACITY,
         });
       this._planetMeshes.set(planetData.id, planetMesh);
       this._planetMaterials.set(planetData.id, planetMaterial);
+      this._planetLayers.set(planetData.id, layerObjects);
       this._hitAreaMeshes.set(planetData.id, hitAreaMesh);
       this._orbitMaterials.set(planetData.id, orbitMaterial);
       this._planetAngles.set(planetData.id, config.initialAngle);
@@ -145,7 +154,9 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
     this._hitAreaMeshes.clear();
     this._orbitMaterials.clear();
     this._planetMaterials.clear();
+    this._planetLayers.clear();
     this._planetAngles.clear();
+    this._planetData.clear();
     this._starfield = null;
   }
 
@@ -219,46 +230,85 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
 
     // ── 2. Advance orbit angles (skip when game is paused) ────────────────────
     if (!isPaused) {
-      for (const [id, config] of Object.entries(PLANET_ORBITS)) {
+      for (const [id, config] of this._planetOrbitEntries) {
         const prev = this._planetAngles.get(id) ?? config.initialAngle;
         this._planetAngles.set(id, prev + (1 / config.orbitalPeriod) * ORBIT_SPEED_FACTOR);
       }
     }
 
     // ── 3. Update planet positions ────────────────────────────────────────────
-    for (const [id, config] of Object.entries(PLANET_ORBITS)) {
+    for (const [id, config] of this._planetOrbitEntries) {
       const angle = this._planetAngles.get(id) ?? config.initialAngle;
       const x = Math.cos(angle) * config.orreryRadius;
       const z = Math.sin(angle) * config.orreryRadius;
-      this._planetMeshes.get(id)?.position.set(x, 0, z);
+      const planetMesh = this._planetMeshes.get(id);
+      planetMesh?.position.set(x, 0, z);
+      const layerObjects = this._planetLayers.get(id) ?? EMPTY_PLANET_LAYERS;
+      for (const layerObject of layerObjects) {
+        layerObject.mesh.position.set(x, 0, z);
+      }
       this._hitAreaMeshes.get(id)?.position.set(x, 0, z);
-    }
 
-    // ── 4. Update planet visual state ─────────────────────────────────────────
-    for (const [id, mat] of this._planetMaterials) {
+      const material = this._planetMaterials.get(id);
+      const staticPlanet = this._planetData.get(id);
+      if (!material || !staticPlanet) continue;
+
       const isLocked         = planetsState[id] === undefined;
       const isLocalHovered   = this._hoveredPlanetId === id;
       const isExternalHovered = this._externalHoveredPlanetId === id && !isLocalHovered;
       const isAnyHovered     = isLocalHovered || isExternalHovered;
 
       const baseHex = isLocked
-        ? this._data.getPlanet(id).visual.baseColor
+        ? staticPlanet.visual.baseColor
         : (planetsState[id].visualParams.atmosphereColor ||
-           this._data.getPlanet(id).visual.baseColor);
-      const normalHex = mat.map ? '#ffffff' : baseHex;
+           staticPlanet.visual.baseColor);
+      const visualParams = planetsState[id]?.visualParams;
+      const rotationSpeed = visualParams?.axisSpinSpeed ?? staticPlanet.initialState.axisSpinSpeed;
+      const cloudRotationSpeed =
+        visualParams?.cloudRotationSpeed ?? staticPlanet.initialState.cloudRotationSpeed;
+      const rotationDirection =
+        visualParams?.axisRotationDirection ?? staticPlanet.initialState.axisRotationDirection;
+      const cityLightsIntensity =
+        visualParams?.cityLightsIntensity ?? (staticPlanet.visual.layerTextures['cityLights'] ? 1 : 0);
 
       if (isLocalHovered && isLocked) {
         // Locked planet hover: grey tint communicates "cannot interact".
-        mat.color.set(0x888888);
-        mat.emissiveIntensity = 0;
+        material.uniforms.uTintColor.value.set(0x888888);
+        material.uniforms.uLitBrightness.value = 1;
       } else if (isAnyHovered) {
-        mat.color.set(normalHex);
-        mat.emissiveIntensity = 0.25;
+        material.uniforms.uTintColor.value.set('#ffffff');
+        material.uniforms.uLitBrightness.value = 1.18;
       } else {
-        mat.color.set(normalHex);
-        mat.emissiveIntensity = 0;
+        material.uniforms.uTintColor.value.set('#ffffff');
+        material.uniforms.uLitBrightness.value = 1;
       }
-      // TODO: update ShaderMaterial uniforms when planet surface shaders are added.
+
+      material.uniforms.uBaseColor.value.set(baseHex);
+      material.uniforms.uSunDirection.value.set(-x, 0, -z).normalize();
+      for (const layerObject of layerObjects) {
+        layerObject.material.uniforms.uSunDirection.value.copy(material.uniforms.uSunDirection.value);
+        layerObject.material.uniforms.uLitBrightness.value = material.uniforms.uLitBrightness.value;
+        layerObject.material.uniforms.uOpacity.value = this._getLayerOpacity(
+          layerObject.key,
+          visualParams,
+          staticPlanet
+        );
+        layerObject.material.uniforms.uLayerIntensity.value =
+          layerObject.key === 'cityLights' ? cityLightsIntensity : 1;
+      }
+
+      if (!isPaused && planetMesh) {
+        const directionMultiplier = rotationDirection === 'retrograde' ? -1 : 1;
+        const planetRotationDelta = rotationSpeed * directionMultiplier * ORBIT_SPEED_FACTOR;
+        planetMesh.rotation.y += planetRotationDelta;
+        for (const layerObject of layerObjects) {
+          const layerRotationDelta =
+            layerObject.key === 'cloud'
+              ? planetRotationDelta + cloudRotationSpeed * directionMultiplier
+              : planetRotationDelta;
+          layerObject.mesh.rotation.y += layerRotationDelta;
+        }
+      }
     }
 
     // ── 5. Update orbit ring opacity ──────────────────────────────────────────
@@ -278,6 +328,21 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
 
     // ── 8. Render ─────────────────────────────────────────────────────────────
     this._renderer.render(this._scene, this._camera);
+  }
+
+  private _getLayerOpacity(
+    key: string,
+    visualParams: PlanetVisualParams | undefined,
+    staticPlanet: PlanetData
+  ): number {
+    if (key === 'water') return visualParams?.waterOpacity ?? 1;
+    if (key === 'green') return visualParams?.greenOpacity ?? 1;
+    if (key === 'lava') return visualParams?.lavaOpacity ?? 1;
+    if (key === 'cloud') return visualParams?.cloudOpacity ?? (staticPlanet.id === 'earth' ? 1 : 0.85);
+    if (key === 'cityLights') {
+      return visualParams?.cityLightsIntensity ?? (staticPlanet.visual.layerTextures['cityLights'] ? 1 : 0);
+    }
+    return 1;
   }
 
   // ---------------------------------------------------------------------------

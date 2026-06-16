@@ -10,7 +10,12 @@ import { DataService } from '@app/core/services/data.service';
 import { EventBusService } from '@app/core/services/event-bus.service';
 import { GameStateService } from '@app/core/services/game-state.service';
 import { OrreryComponent } from './orrery.component';
-import type { OrreryBackdropPalette } from './orrery-scene.builder';
+import type {
+  OrreryBackdropPalette,
+  OrreryLayerMaterial,
+  OrreryPlanetLayerObject,
+  OrreryPlanetMaterial,
+} from './orrery-scene.builder';
 
 interface ObserverFake {
   readonly observe: ReturnType<typeof vi.fn>;
@@ -24,7 +29,10 @@ interface OrreryComponentAccess {
   _camera: THREE.PerspectiveCamera;
   _dysonMaterial: THREE.MeshStandardMaterial;
   _starfield: THREE.Points | null;
-  _planetMaterials: Map<string, THREE.MeshStandardMaterial>;
+  _planetMaterials: Map<string, OrreryPlanetMaterial>;
+  _planetLayers: Map<string, readonly OrreryPlanetLayerObject[]>;
+  _planetMeshes: Map<string, THREE.Mesh>;
+  _planetData: Map<string, PlanetData>;
   _intersectionObserver: ObserverFake | null;
   _resizeObserver: ObserverFake | null;
   _readBackdropPalette(): OrreryBackdropPalette;
@@ -41,6 +49,7 @@ function makePlanetData(id: PlanetData['id'], baseColor: string): PlanetData {
       temperatureCelsius: 0,
       terraformingPhase: 0,
       axisSpinSpeed: 0.01,
+      axisRotationDirection: 'prograde',
       cloudRotationSpeed: 0.01,
       atmosphereColor: baseColor,
       atmosphereDensity: 0,
@@ -142,13 +151,37 @@ describe('OrreryComponent', () => {
     expect(renderer.render).toHaveBeenCalledOnce();
   });
 
-  it('keeps textured planets white during RAF so placeholder maps remain visible', () => {
+  it('updates shader uniforms and planet rotation during RAF', () => {
     const component = setup();
     const access = component as unknown as OrreryComponentAccess;
     const renderer = { render: vi.fn(), dispose: vi.fn() } as unknown as THREE.WebGLRenderer;
-    const canvas = document.createElement('canvas');
-    const texture = new THREE.CanvasTexture(canvas);
-    const texturedMaterial = new THREE.MeshStandardMaterial({ color: '#3a7ab8', map: texture });
+    const planetMesh = new THREE.Mesh(new THREE.SphereGeometry(1, 8, 8));
+    const shaderMaterial = new THREE.ShaderMaterial({
+      uniforms: {
+        uBaseTexture: { value: new THREE.Texture() },
+        uHasBaseTexture: { value: false },
+        uBaseColor: { value: new THREE.Color('#3a7ab8') },
+        uTintColor: { value: new THREE.Color('#ffffff') },
+        uSunDirection: { value: new THREE.Vector3() },
+        uLitBrightness: { value: 1 },
+        uShadowOpacity: { value: 0.5 },
+        uShadowTint: { value: new THREE.Color('#000000') },
+        uLightingEnabled: { value: true },
+      },
+    }) as OrreryPlanetMaterial;
+    const cloudLayerMesh = new THREE.Mesh(new THREE.SphereGeometry(1, 8, 8));
+    const cloudLayerMaterial = new THREE.ShaderMaterial({
+      uniforms: {
+        uLayerTexture: { value: new THREE.Texture() },
+        uSunDirection: { value: new THREE.Vector3() },
+        uOpacity: { value: 0 },
+        uLitBrightness: { value: 1 },
+        uShadowOpacity: { value: 0.5 },
+        uLayerIntensity: { value: 1 },
+        uNightOnly: { value: false },
+        uLightingEnabled: { value: true },
+      },
+    }) as OrreryLayerMaterial;
     vi.spyOn(globalThis, 'requestAnimationFrame').mockReturnValue(1);
 
     access._renderer = renderer;
@@ -156,12 +189,20 @@ describe('OrreryComponent', () => {
     access._camera = new THREE.PerspectiveCamera();
     access._dysonMaterial = new THREE.MeshStandardMaterial({ transparent: true, opacity: 0 });
     access._starfield = null;
-    access._planetMaterials.set('earth', texturedMaterial);
+    access._planetMeshes.set('earth', planetMesh);
+    access._planetData.set('earth', makePlanetData('earth', '#3a7ab8'));
+    access._planetMaterials.set('earth', shaderMaterial);
+    access._planetLayers.set('earth', [
+      { key: 'cloud', mesh: cloudLayerMesh, material: cloudLayerMaterial },
+    ]);
 
     access._animate();
 
-    expect(`#${texturedMaterial.color.getHexString()}`).toBe('#ffffff');
-    expect(texturedMaterial.emissiveIntensity).toBe(0);
+    expect(`#${shaderMaterial.uniforms.uBaseColor.value.getHexString()}`).toBe('#3a7ab8');
+    expect(shaderMaterial.uniforms.uSunDirection.value.length()).toBeCloseTo(1);
+    expect(cloudLayerMaterial.uniforms.uSunDirection.value.length()).toBeCloseTo(1);
+    expect(planetMesh.rotation.y).toBe(0);
+    expect(renderer.render).toHaveBeenCalledOnce();
   });
 
   it('disconnects observers, removes listeners, and disposes the scene on destroy', () => {

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 512" width="1024" height="512" preserveAspectRatio="none">
+  <!-- PLACEHOLDER: replace with final Venus city-lights texture -->
+  <rect width="1024" height="512" fill="#070604"/>
+  <g fill="#ffe48a" opacity="0.9">
+    <ellipse cx="226" cy="214" rx="7" ry="3"/>
+    <ellipse cx="260" cy="220" rx="5" ry="2"/>
+    <ellipse cx="294" cy="228" rx="6" ry="2.5"/>
+    <ellipse cx="498" cy="260" rx="8" ry="3"/>
+    <ellipse cx="536" cy="266" rx="5" ry="2"/>
+    <ellipse cx="574" cy="274" rx="6" ry="2.5"/>
+    <ellipse cx="748" cy="202" rx="7" ry="3"/>
+    <ellipse cx="788" cy="210" rx="5" ry="2"/>
+    <ellipse cx="826" cy="218" rx="6" ry="2.5"/>
+  </g>
+  <g fill="#fff4bd" opacity="0.55">
+    <circle cx="205" cy="244" r="1.5"/>
+    <circle cx="320" cy="252" r="1.5"/>
+    <circle cx="462" cy="292" r="1.5"/>
+    <circle cx="604" cy="304" r="1.5"/>
+    <circle cx="720" cy="238" r="1.5"/>
+    <circle cx="852" cy="246" r="1.5"/>
+  </g>
+  <rect x="2" y="2" width="1020" height="508" fill="none" stroke="#ffffff" stroke-opacity="0.35" stroke-dasharray="16 10"/>
+  <text x="512" y="478" fill="#ffffff" fill-opacity="0.5" font-family="monospace" font-size="26" text-anchor="middle">venus city lights placeholder</text>
+</svg>

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 512" width="1024" height="512" preserveAspectRatio="none">
+  <!-- PLACEHOLDER: replace with final Earth cloud layer -->
+  <rect width="1024" height="512" fill="none"/>
+  <g fill="#ffffff" fill-opacity="0.48">
+    <ellipse cx="180" cy="150" rx="95" ry="22"/>
+    <ellipse cx="470" cy="235" rx="135" ry="28"/>
+    <ellipse cx="780" cy="170" rx="115" ry="24"/>
+    <ellipse cx="640" cy="365" rx="155" ry="26"/>
+  </g>
+  <text x="512" y="474" fill="#ffffff" fill-opacity="0.35" font-family="monospace" font-size="24" text-anchor="middle">earth cloud placeholder</text>
+</svg>

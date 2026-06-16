@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 512" width="1024" height="512" preserveAspectRatio="none">
+  <!-- PLACEHOLDER: replace with final Mars water layer -->
+  <rect width="1024" height="512" fill="none"/>
+  <ellipse cx="310" cy="250" rx="80" ry="38" fill="#3278b8" fill-opacity="0.45"/>
+  <ellipse cx="612" cy="205" rx="120" ry="46" fill="#4fa3dc" fill-opacity="0.35"/>
+  <ellipse cx="735" cy="320" rx="95" ry="36" fill="#2c82c6" fill-opacity="0.38"/>
+  <text x="512" y="474" fill="#ffffff" fill-opacity="0.35" font-family="monospace" font-size="24" text-anchor="middle">mars water placeholder</text>
+</svg>

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 512" width="1024" height="512" preserveAspectRatio="none">
+  <!-- PLACEHOLDER: replace with final Venus cloud layer -->
+  <rect width="1024" height="512" fill="none"/>
+  <g fill="#ffd86f" fill-opacity="0.42">
+    <ellipse cx="190" cy="140" rx="135" ry="24"/>
+    <ellipse cx="510" cy="228" rx="180" ry="30"/>
+    <ellipse cx="790" cy="166" rx="150" ry="24"/>
+    <ellipse cx="660" cy="360" rx="190" ry="28"/>
+  </g>
+  <text x="512" y="474" fill="#ffffff" fill-opacity="0.35" font-family="monospace" font-size="24" text-anchor="middle">venus cloud placeholder</text>
+</svg>

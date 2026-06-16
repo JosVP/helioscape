@@ -21,6 +21,7 @@ function makeVisualParams(overrides: Partial<PlanetVisualParams> = {}): PlanetVi
     atmosphereColor: '#000000', cloudRotationSpeed: 0,
     axisSpinSpeed: 1,     cityLightsIntensity: 0,
     ...overrides,
+    axisRotationDirection: overrides.axisRotationDirection ?? 'prograde',
   };
 }
 

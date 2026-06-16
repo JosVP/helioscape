@@ -43,6 +43,49 @@ export interface OrreryOrbitStyleOptions {
   readonly opacity?: number;
 }
 
+export interface OrreryDayNightLightingOptions {
+  readonly enabled?: boolean;
+  readonly litSideBrightness?: number;
+  readonly darkSideShadowOpacity?: number;
+  readonly darkSideShadowTint?: string;
+  readonly cityLightsIntensity?: number;
+}
+
+export interface OrreryPlanetUniforms {
+  readonly [key: string]: THREE.IUniform<unknown>;
+  readonly uBaseTexture: THREE.IUniform<THREE.Texture>;
+  readonly uHasBaseTexture: THREE.IUniform<boolean>;
+  readonly uBaseColor: THREE.IUniform<THREE.Color>;
+  readonly uTintColor: THREE.IUniform<THREE.Color>;
+  readonly uSunDirection: THREE.IUniform<THREE.Vector3>;
+  readonly uLitBrightness: THREE.IUniform<number>;
+  readonly uShadowOpacity: THREE.IUniform<number>;
+  readonly uShadowTint: THREE.IUniform<THREE.Color>;
+  readonly uLightingEnabled: THREE.IUniform<boolean>;
+}
+
+export type OrreryPlanetMaterial = THREE.ShaderMaterial & { uniforms: OrreryPlanetUniforms };
+
+export interface OrreryLayerUniforms {
+  readonly [key: string]: THREE.IUniform<unknown>;
+  readonly uLayerTexture: THREE.IUniform<THREE.Texture>;
+  readonly uSunDirection: THREE.IUniform<THREE.Vector3>;
+  readonly uOpacity: THREE.IUniform<number>;
+  readonly uLitBrightness: THREE.IUniform<number>;
+  readonly uShadowOpacity: THREE.IUniform<number>;
+  readonly uLayerIntensity: THREE.IUniform<number>;
+  readonly uNightOnly: THREE.IUniform<boolean>;
+  readonly uLightingEnabled: THREE.IUniform<boolean>;
+}
+
+export type OrreryLayerMaterial = THREE.ShaderMaterial & { uniforms: OrreryLayerUniforms };
+
+export interface OrreryPlanetLayerObject {
+  readonly key: string;
+  readonly mesh: THREE.Mesh;
+  readonly material: OrreryLayerMaterial;
+}
+
 export interface OrreryBackdropObjects {
   readonly backgroundTexture: THREE.CanvasTexture;
   readonly starfield: THREE.Points;
@@ -63,6 +106,14 @@ export const DEFAULT_ORRERY_GRID_OPTIONS = {
   showRadialSpokes: true,
   radialSpokeCount: 12,
   yOffset: -0.035,
+} as const;
+
+export const DEFAULT_ORRERY_DAY_NIGHT_LIGHTING_OPTIONS = {
+  enabled: true,
+  litSideBrightness: 1.0,
+  darkSideShadowOpacity: 0.7,
+  darkSideShadowTint: '#000000',
+  cityLightsIntensity: 1.0,
 } as const;
 
 export const ORRERY_STARFIELD_ROTATION_SPEED = 0;
@@ -101,6 +152,83 @@ const SUN_TEXTURE_PATH = '/assets/svg/planets/textures/sun-texture.svg';
 
 type TextureSlotMap = Partial<Record<string, THREE.Texture | null>>;
 
+const PLANET_DAY_NIGHT_VERTEX_SHADER = `
+varying vec2 vUv;
+varying vec3 vWorldNormal;
+
+void main() {
+  vUv = uv;
+  vWorldNormal = normalize(mat3(modelMatrix) * normal);
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}
+`;
+
+const PLANET_DAY_NIGHT_FRAGMENT_SHADER = `
+uniform sampler2D uBaseTexture;
+uniform bool uHasBaseTexture;
+uniform vec3 uBaseColor;
+uniform vec3 uTintColor;
+uniform vec3 uSunDirection;
+uniform float uLitBrightness;
+uniform float uShadowOpacity;
+uniform vec3 uShadowTint;
+uniform bool uLightingEnabled;
+
+varying vec2 vUv;
+varying vec3 vWorldNormal;
+
+void main() {
+  vec4 baseSample = uHasBaseTexture ? texture2D(uBaseTexture, vUv) : vec4(uBaseColor, 1.0);
+  vec3 baseColor = baseSample.rgb * uTintColor;
+
+  if (!uLightingEnabled) {
+    gl_FragColor = vec4(baseColor, baseSample.a);
+    return;
+  }
+
+  float sunAmount = dot(normalize(vWorldNormal), normalize(uSunDirection));
+  float nightMask = step(sunAmount, 0.0);
+  float litMask = 1.0 - nightMask;
+  vec3 litColor = baseColor * uLitBrightness;
+  vec3 shadowedColor = mix(baseColor, uShadowTint, uShadowOpacity);
+  vec3 finalColor = mix(litColor, shadowedColor, nightMask);
+
+  gl_FragColor = vec4(finalColor, baseSample.a);
+}
+`;
+
+const PLANET_LAYER_FRAGMENT_SHADER = `
+uniform sampler2D uLayerTexture;
+uniform vec3 uSunDirection;
+uniform float uOpacity;
+uniform float uLitBrightness;
+uniform float uShadowOpacity;
+uniform float uLayerIntensity;
+uniform bool uNightOnly;
+uniform bool uLightingEnabled;
+
+varying vec2 vUv;
+varying vec3 vWorldNormal;
+
+void main() {
+  vec4 layerSample = texture2D(uLayerTexture, vUv);
+
+  if (!uLightingEnabled) {
+    gl_FragColor = vec4(layerSample.rgb * uLayerIntensity, layerSample.a * uOpacity);
+    return;
+  }
+
+  float sunAmount = dot(normalize(vWorldNormal), normalize(uSunDirection));
+  float nightMask = step(sunAmount, 0.0);
+  float visibilityMask = uNightOnly ? nightMask : 1.0;
+  float brightness = uNightOnly ? 1.0 : mix(uLitBrightness, max(0.0, 1.0 - uShadowOpacity), nightMask);
+  vec3 finalColor = layerSample.rgb * brightness * uLayerIntensity;
+  float finalAlpha = layerSample.a * uOpacity * visibilityMask;
+
+  gl_FragColor = vec4(finalColor, finalAlpha);
+}
+`;
+
 function seededRandom(seed: number): () => number {
   let state = seed >>> 0;
   return () => {
@@ -114,6 +242,20 @@ function createCanvas(width: number, height: number): HTMLCanvasElement {
   canvas.width = width;
   canvas.height = height;
   return canvas;
+}
+
+function createSolidTexture(color: string, label: string): THREE.CanvasTexture {
+  const canvas = createCanvas(1, 1);
+  const context = getCanvasContext(canvas);
+  if (context) {
+    context.fillStyle = color;
+    context.fillRect(0, 0, 1, 1);
+  }
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.name = `${label}-fallback-texture`;
+  return texture;
 }
 
 function getCanvasContext(canvas: HTMLCanvasElement): CanvasRenderingContext2D | null {
@@ -153,14 +295,27 @@ function disposeMaterial(material: THREE.Material | readonly THREE.Material[]): 
   materials.forEach((entry) => {
     const textureBearingMaterial = entry as THREE.Material & TextureSlotMap;
     const disposedTextures = new Set<THREE.Texture>();
-    textureKeys.forEach((key) => {
-      const texture = textureBearingMaterial[key];
+    const disposeTexture = (texture: THREE.Texture | null | undefined): void => {
       if (texture && !disposedTextures.has(texture)) {
         texture.dispose();
         disposedTextures.add(texture);
       }
+    };
+
+    textureKeys.forEach((key) => {
+      const texture = textureBearingMaterial[key];
+      disposeTexture(texture);
       textureBearingMaterial[key] = null;
     });
+
+    if (entry instanceof THREE.ShaderMaterial) {
+      Object.values(entry.uniforms).forEach((uniform) => {
+        if (uniform.value instanceof THREE.Texture) {
+          disposeTexture(uniform.value);
+        }
+      });
+    }
+
     entry.dispose();
   });
 }
@@ -194,13 +349,8 @@ export function createCamera(aspect: number): THREE.PerspectiveCamera {
 // ---------------------------------------------------------------------------
 
 export function createLights(scene: THREE.Scene): void {
-  // Very dim fill — scene is dark space, sun provides the key light.
-  scene.add(new THREE.AmbientLight(0xffffff, 0.05));
-
-  // Warm directional from sun position (origin) outward.
-  const sun = new THREE.DirectionalLight(0xfff4e0, 2.0);
-  sun.position.set(0, 5, 0);
-  scene.add(sun);
+  // Planets are shader-lit. Keep only a minimal fill for non-shader meshes.
+  scene.add(new THREE.AmbientLight(0xffffff, 0.08));
 }
 
 // ---------------------------------------------------------------------------
@@ -375,11 +525,10 @@ export interface SunObjects {
 export function buildSun(scene: THREE.Scene): SunObjects {
   // Visible sun sphere
   const sunGeo = new THREE.SphereGeometry(1.2, 32, 32);
-  const sunMat = new THREE.MeshStandardMaterial({
+  const sunMat = new THREE.MeshBasicMaterial({
     color: 0xffffff,
-    emissive: new THREE.Color(0xff9900),
-    emissiveIntensity: 1.2,
     map: loadOrrerySvgTexture(SUN_TEXTURE_PATH, 'sun'),
+    toneMapped: false,
   });
   scene.add(new THREE.Mesh(sunGeo, sunMat));
 
@@ -404,9 +553,90 @@ export function buildSun(scene: THREE.Scene): SunObjects {
 
 export interface PlanetObjects {
   planetMesh: THREE.Mesh;
-  planetMaterial: THREE.MeshStandardMaterial;
+  planetMaterial: OrreryPlanetMaterial;
+  layerObjects: readonly OrreryPlanetLayerObject[];
   hitAreaMesh: THREE.Mesh;
-  orbitMaterial: THREE.MeshStandardMaterial;
+  orbitMaterial: THREE.MeshBasicMaterial;
+}
+
+export function createPlanetDayNightMaterial(
+  planetData: PlanetData,
+  options: OrreryDayNightLightingOptions = {},
+): OrreryPlanetMaterial {
+  const surfaceTexturePath = planetData.visual.layerTextures['surface'];
+  const baseTexture = surfaceTexturePath
+    ? loadOrrerySvgTexture(surfaceTexturePath, `${planetData.id}-surface`)
+    : createSolidTexture('#ffffff', `${planetData.id}-base`);
+  const uniforms: OrreryPlanetUniforms = {
+    uBaseTexture: { value: baseTexture },
+    uHasBaseTexture: { value: surfaceTexturePath !== undefined },
+    uBaseColor: { value: new THREE.Color(planetData.visual.baseColor) },
+    uTintColor: { value: new THREE.Color('#ffffff') },
+    uSunDirection: { value: new THREE.Vector3(1, 0, 0) },
+    uLitBrightness: {
+      value: options.litSideBrightness ?? DEFAULT_ORRERY_DAY_NIGHT_LIGHTING_OPTIONS.litSideBrightness,
+    },
+    uShadowOpacity: {
+      value:
+        options.darkSideShadowOpacity ??
+        DEFAULT_ORRERY_DAY_NIGHT_LIGHTING_OPTIONS.darkSideShadowOpacity,
+    },
+    uShadowTint: {
+      value: new THREE.Color(
+        options.darkSideShadowTint ?? DEFAULT_ORRERY_DAY_NIGHT_LIGHTING_OPTIONS.darkSideShadowTint,
+      ),
+    },
+    uLightingEnabled: { value: options.enabled ?? DEFAULT_ORRERY_DAY_NIGHT_LIGHTING_OPTIONS.enabled },
+  };
+
+  const material = new THREE.ShaderMaterial({
+    uniforms,
+    vertexShader: PLANET_DAY_NIGHT_VERTEX_SHADER,
+    fragmentShader: PLANET_DAY_NIGHT_FRAGMENT_SHADER,
+  }) as OrreryPlanetMaterial;
+  material.name = `${planetData.id}-day-night-material`;
+  return material;
+}
+
+function createPlanetLayerMaterial(
+  planetId: string,
+  key: string,
+  texturePath: string,
+  options: OrreryDayNightLightingOptions = {},
+): OrreryLayerMaterial {
+  const isCityLights = key === 'cityLights';
+  const uniforms: OrreryLayerUniforms = {
+    uLayerTexture: { value: loadOrrerySvgTexture(texturePath, `${planetId}-${key}`) },
+    uSunDirection: { value: new THREE.Vector3(1, 0, 0) },
+    uOpacity: { value: 1 },
+    uLitBrightness: {
+      value: options.litSideBrightness ?? DEFAULT_ORRERY_DAY_NIGHT_LIGHTING_OPTIONS.litSideBrightness,
+    },
+    uShadowOpacity: {
+      value:
+        options.darkSideShadowOpacity ??
+        DEFAULT_ORRERY_DAY_NIGHT_LIGHTING_OPTIONS.darkSideShadowOpacity,
+    },
+    uLayerIntensity: {
+      value: isCityLights
+        ? (options.cityLightsIntensity ?? DEFAULT_ORRERY_DAY_NIGHT_LIGHTING_OPTIONS.cityLightsIntensity)
+        : 1,
+    },
+    uNightOnly: { value: isCityLights },
+    uLightingEnabled: { value: options.enabled ?? DEFAULT_ORRERY_DAY_NIGHT_LIGHTING_OPTIONS.enabled },
+  };
+  const material = new THREE.ShaderMaterial({
+    uniforms,
+    vertexShader: PLANET_DAY_NIGHT_VERTEX_SHADER,
+    fragmentShader: PLANET_LAYER_FRAGMENT_SHADER,
+    transparent: true,
+    depthWrite: false,
+  }) as OrreryLayerMaterial;
+  material.name = `${planetId}-${key}-layer-material`;
+  if (isCityLights) {
+    material.blending = THREE.AdditiveBlending;
+  }
+  return material;
 }
 
 /**
@@ -425,10 +655,11 @@ export function buildPlanetObjects(
 
   // Orbit ring — static, never moved after creation.
   const ringGeo = new THREE.TorusGeometry(config.orreryRadius, 0.04, 8, 128);
-  const ringMat = new THREE.MeshStandardMaterial({
+  const ringMat = new THREE.MeshBasicMaterial({
     color: new THREE.Color(orbitStyle.color),
     transparent: true,
     opacity: orbitStyle.opacity ?? DEFAULT_ORRERY_GRID_OPTIONS.orbitOpacity,
+    depthWrite: false,
   });
   // Orbit ring lies flat on the ecliptic (XZ) plane.
   const ringMesh = new THREE.Mesh(ringGeo, ringMat);
@@ -437,19 +668,28 @@ export function buildPlanetObjects(
 
   // Visible planet sphere.
   const planetGeo = new THREE.SphereGeometry(config.visualRadius, 32, 32);
-  const texture = planetData.visual.orreryTexturePath
-    ? loadOrrerySvgTexture(planetData.visual.orreryTexturePath, planetData.id)
-    : null;
-  const planetMat = new THREE.MeshStandardMaterial({
-    color: new THREE.Color(texture ? '#ffffff' : baseColor),
-    emissive: new THREE.Color(0xffffff),
-    emissiveIntensity: 0,
-    map: texture,
-  });
+  const planetMat = createPlanetDayNightMaterial(planetData);
   const planetMesh = new THREE.Mesh(planetGeo, planetMat);
   planetMesh.position.set(startX, 0, startZ);
   planetMesh.userData = { planetId: planetData.id };
   scene.add(planetMesh);
+
+  const layerOrder = ['water', 'green', 'lava', 'cloud', 'cityLights'];
+  const layerObjects = layerOrder
+    .map((key, index): OrreryPlanetLayerObject | null => {
+      const texturePath = planetData.visual.layerTextures[key];
+      if (!texturePath) return null;
+
+      const layerGeo = new THREE.SphereGeometry(config.visualRadius * (1 + (index + 1) * 0.006), 32, 32);
+      const layerMat = createPlanetLayerMaterial(planetData.id, key, texturePath);
+      const layerMesh = new THREE.Mesh(layerGeo, layerMat);
+      layerMesh.position.set(startX, 0, startZ);
+      layerMesh.renderOrder = index + 1;
+      layerMesh.userData = { planetId: planetData.id, layerKey: key };
+      scene.add(layerMesh);
+      return { key, mesh: layerMesh, material: layerMat };
+    })
+    .filter((entry): entry is OrreryPlanetLayerObject => entry !== null);
 
   // Invisible hit-area sphere — larger than the visible sphere for easier clicking.
   const hitGeo = new THREE.SphereGeometry(config.hitRadius, 16, 16);
@@ -459,7 +699,7 @@ export function buildPlanetObjects(
   hitAreaMesh.userData = { planetId: planetData.id };
   scene.add(hitAreaMesh);
 
-  return { planetMesh, planetMaterial: planetMat, hitAreaMesh, orbitMaterial: ringMat };
+  return { planetMesh, planetMaterial: planetMat, layerObjects, hitAreaMesh, orbitMaterial: ringMat };
 }
 
 // ---------------------------------------------------------------------------

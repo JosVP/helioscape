@@ -8,25 +8,22 @@
       "temperatureCelsius": 15,
       "terraformingPhase": 0,
       "axisSpinSpeed": 1.0,
+      "axisRotationDirection": "prograde",
       "cloudRotationSpeed": 0.002,
       "atmosphereColor": "#4488ff",
       "atmosphereDensity": 0.35
     },
     "visual": {
       "baseColor": "#4a6fb3",
-      "orreryTexturePath": "/assets/svg/planets/textures/earth-texture.svg",
-      "orreryTextureVariants": {
-        "night": "/assets/svg/planets/textures/earth-night-texture.svg"
-      },
       "layerTextures": {
-        "surface": "/assets/textures/planets/earth_surface.png",
-        "water": "/assets/textures/planets/earth_water.png",
-        "green": "/assets/textures/planets/earth_green.png",
-        "cloud": "/assets/textures/planets/earth_cloud.png"
+        "surface": "/assets/svg/planets/textures/earth-surface-texture.svg",
+        "water": "/assets/svg/planets/textures/earth-water-texture.svg",
+        "green": "/assets/svg/planets/textures/earth-green-texture.svg",
+        "cloud": "/assets/svg/planets/textures/earth-cloud-texture.svg",
+        "cityLights": "/assets/svg/planets/textures/earth-city-lights-texture.svg"
       },
       "waterSpotUvs": [],
-      "greenSpotUvs": [],
-      "cityLightsTexture": "/assets/textures/planets/earth_city_lights.png"
+      "greenSpotUvs": []
     },
     "phases": [
       { "displayName": "Industrial Age", "description": "We are mastering the fundamentals of civilisation — energy, industry, and the first reach toward the stars." },
@@ -42,15 +39,15 @@
       "temperatureCelsius": 430,
       "terraformingPhase": 0,
       "axisSpinSpeed": 0.017,
+      "axisRotationDirection": "prograde",
       "cloudRotationSpeed": 0.0,
       "atmosphereColor": "#000000",
       "atmosphereDensity": 0.0
     },
     "visual": {
       "baseColor": "#8c7f73",
-      "orreryTexturePath": "/assets/svg/planets/textures/mercury-texture.svg",
       "layerTextures": {
-        "surface": "/assets/textures/planets/mercury_surface.png"
+        "surface": "/assets/svg/planets/textures/mercury-surface-texture.svg"
       },
       "waterSpotUvs": [],
       "greenSpotUvs": []
@@ -70,22 +67,20 @@
       "temperatureCelsius": -60,
       "terraformingPhase": 0,
       "axisSpinSpeed": 0.97,
+      "axisRotationDirection": "prograde",
       "cloudRotationSpeed": 0.0,
       "atmosphereColor": "#cc6644",
       "atmosphereDensity": 0.05
     },
     "visual": {
       "baseColor": "#c1440e",
-      "orreryTexturePath": "/assets/svg/planets/textures/mars-texture.svg",
-      "orreryTextureVariants": {
-        "terraformed": "/assets/svg/planets/textures/mars-terraformed-texture.svg"
-      },
       "layerTextures": {
-        "surface": "/assets/textures/planets/mars_surface.png",
-        "lava": "/assets/textures/planets/mars_lava.png",
-        "water": "/assets/textures/planets/mars_water.png",
-        "green": "/assets/textures/planets/mars_green.png",
-        "cloud": "/assets/textures/planets/mars_cloud.png"
+        "surface": "/assets/svg/planets/textures/mars-surface-texture.svg",
+        "lava": "/assets/svg/planets/textures/mars-lava-texture.svg",
+        "water": "/assets/svg/planets/textures/mars-water-texture.svg",
+        "green": "/assets/svg/planets/textures/mars-green-texture.svg",
+        "cloud": "/assets/svg/planets/textures/mars-cloud-texture.svg",
+        "cityLights": "/assets/svg/planets/textures/mars-city-lights-texture.svg"
       },
       "waterSpotUvs": [
         [0.3, 0.5],
@@ -124,21 +119,19 @@
       "temperatureCelsius": 465,
       "terraformingPhase": 0,
       "axisSpinSpeed": 0.004,
-      "cloudRotationSpeed": 0.012,
+      "axisRotationDirection": "retrograde",
+      "cloudRotationSpeed": 0.02,
       "atmosphereColor": "#ffcc44",
       "atmosphereDensity": 0.95
     },
     "visual": {
       "baseColor": "#8f8577",
-      "orreryTexturePath": "/assets/svg/planets/textures/venus-texture.svg",
-      "orreryTextureVariants": {
-        "cooledWatered": "/assets/svg/planets/textures/venus-cooled-watered-texture.svg"
-      },
       "layerTextures": {
-        "surface": "/assets/textures/planets/venus_surface.png",
-        "water": "/assets/textures/planets/venus_water.png",
-        "green": "/assets/textures/planets/venus_green.png",
-        "cloud": "/assets/textures/planets/venus_cloud.png"
+        "surface": "/assets/svg/planets/textures/venus-surface-texture.svg",
+        "water": "/assets/svg/planets/textures/venus-water-texture.svg",
+        "green": "/assets/svg/planets/textures/venus-green-texture.svg",
+        "cloud": "/assets/svg/planets/textures/venus-cloud-texture.svg",
+        "cityLights": "/assets/svg/planets/textures/venus-city-lights-texture.svg"
       },
       "waterSpotUvs": [],
       "greenSpotUvs": [

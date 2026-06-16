@@ -10,9 +10,12 @@ import {
   buildEclipticGrid,
   buildPlanetObjects,
   buildStarfield,
+  buildSun,
   disposeScene,
   loadOrrerySvgTexture,
   type OrreryBackdropPalette,
+  type OrreryLayerMaterial,
+  type OrreryPlanetMaterial,
 } from './orrery-scene.builder';
 
 const palette: OrreryBackdropPalette = {
@@ -39,14 +42,20 @@ function makePlanetData(withTexture = false): PlanetData {
       temperatureCelsius: 15,
       terraformingPhase: 0,
       axisSpinSpeed: 1,
+      axisRotationDirection: 'prograde',
       cloudRotationSpeed: 0.002,
       atmosphereColor: '#4488ff',
       atmosphereDensity: 0.35,
     },
     visual: {
       baseColor: '#3a7ab8',
-      orreryTexturePath: withTexture ? '/assets/svg/planets/textures/earth-texture.svg' : undefined,
-      layerTextures: {},
+      layerTextures: withTexture
+        ? {
+            surface: '/assets/svg/planets/textures/earth-surface-texture.svg',
+            cloud: '/assets/svg/planets/textures/earth-cloud-texture.svg',
+            cityLights: '/assets/svg/planets/textures/earth-city-lights-texture.svg',
+          }
+        : {},
       waterSpotUvs: [],
       greenSpotUvs: [],
     },
@@ -121,13 +130,28 @@ describe('orrery scene builder', () => {
       { color: '#123456', opacity: 0.33 }
     );
 
+    expect(orbitMaterial).toBeInstanceOf(THREE.MeshBasicMaterial);
     expect(`#${orbitMaterial.color.getHexString()}`).toBe('#123456');
     expect(orbitMaterial.opacity).toBe(0.33);
     expect(orbitMaterial.transparent).toBe(true);
+    expect(orbitMaterial.depthWrite).toBe(false);
+  });
+
+  it('buildSun renders the sun with an unlit visible texture', () => {
+    const scene = new THREE.Scene();
+    const sunTexture = new THREE.Texture(new Image());
+    vi.spyOn(THREE.TextureLoader.prototype, 'load').mockReturnValue(sunTexture);
+
+    buildSun(scene);
+
+    const sunMesh = scene.children[0] as THREE.Mesh<THREE.SphereGeometry, THREE.MeshBasicMaterial>;
+    expect(sunMesh.material).toBeInstanceOf(THREE.MeshBasicMaterial);
+    expect(sunMesh.material.map).toBe(sunTexture);
+    expect(sunMesh.material.toneMapped).toBe(false);
   });
 
   it('loadOrrerySvgTexture loads and configures a disposable texture from a path', () => {
-    const loadedTexture = new THREE.Texture();
+    const loadedTexture = new THREE.Texture(new Image());
     const loadSpy = vi
       .spyOn(THREE.TextureLoader.prototype, 'load')
       .mockReturnValue(loadedTexture);
@@ -142,20 +166,49 @@ describe('orrery scene builder', () => {
     expect(texture.name).toBe('test-world-svg-texture');
   });
 
-  it('buildPlanetObjects assigns an SVG map when planet data provides a texture path', () => {
+  it('buildPlanetObjects assigns shader uniforms and layer meshes from layer textures', () => {
     const scene = new THREE.Scene();
-    const loadedTexture = new THREE.Texture();
-    vi.spyOn(THREE.TextureLoader.prototype, 'load').mockReturnValue(loadedTexture);
+    const baseTexture = new THREE.Texture(new Image());
+    const cloudTexture = new THREE.Texture(new Image());
+    const cityLightsTexture = new THREE.Texture(new Image());
+    vi.spyOn(THREE.TextureLoader.prototype, 'load')
+      .mockReturnValueOnce(baseTexture)
+      .mockReturnValueOnce(cloudTexture)
+      .mockReturnValueOnce(cityLightsTexture);
 
-    const { planetMaterial } = buildPlanetObjects(
+    const { planetMaterial, layerObjects } = buildPlanetObjects(
       scene,
       makePlanetData(true),
       PLANET_ORBITS['earth'],
       { color: '#123456', opacity: 0.33 }
     );
 
-    expect(planetMaterial.map).toBe(loadedTexture);
-    expect(`#${planetMaterial.color.getHexString()}`).toBe('#ffffff');
+    expect(planetMaterial).toBeInstanceOf(THREE.ShaderMaterial);
+    expect(planetMaterial.uniforms.uBaseTexture.value).toBe(baseTexture);
+    expect(planetMaterial.uniforms.uHasBaseTexture.value).toBe(true);
+    expect(`#${planetMaterial.uniforms.uBaseColor.value.getHexString()}`).toBe('#3a7ab8');
+    expect(layerObjects.map((layer) => layer.key)).toEqual(['cloud', 'cityLights']);
+    expect(layerObjects[0].material.uniforms.uLayerTexture.value).toBe(cloudTexture);
+    expect(layerObjects[1].material.uniforms.uLayerTexture.value).toBe(cityLightsTexture);
+    expect(layerObjects[1].material.uniforms.uNightOnly.value).toBe(true);
+    expect(layerObjects[1].material.blending).toBe(THREE.AdditiveBlending);
+    expect(layerObjects[1].mesh.renderOrder).toBeGreaterThan(layerObjects[0].mesh.renderOrder);
+    expect(layerObjects[1].material.fragmentShader).toContain('float brightness = uNightOnly ? 1.0');
+  });
+
+  it('buildPlanetObjects falls back to base color when no texture path exists', () => {
+    const scene = new THREE.Scene();
+
+    const { planetMaterial } = buildPlanetObjects(
+      scene,
+      makePlanetData(false),
+      PLANET_ORBITS['earth'],
+      { color: '#123456', opacity: 0.33 }
+    );
+
+    expect(planetMaterial).toBeInstanceOf(THREE.ShaderMaterial);
+    expect(planetMaterial.uniforms.uHasBaseTexture.value).toBe(false);
+    expect(`#${planetMaterial.uniforms.uBaseColor.value.getHexString()}`).toBe('#3a7ab8');
   });
 
   it('disposeScene disposes background textures and non-mesh render objects', () => {
@@ -184,6 +237,19 @@ describe('orrery scene builder', () => {
     const meshMaterialDispose = vi.spyOn(meshMaterial, 'dispose');
     scene.add(new THREE.Mesh(meshGeometry, meshMaterial));
 
+    const shaderBaseTexture = new THREE.Texture();
+    const shaderLayerTexture = new THREE.Texture();
+    const shaderBaseDispose = vi.spyOn(shaderBaseTexture, 'dispose');
+    const shaderLayerDispose = vi.spyOn(shaderLayerTexture, 'dispose');
+    const shaderMaterial = new THREE.ShaderMaterial({
+      uniforms: {
+        uBaseTexture: { value: shaderBaseTexture },
+        uLayerTexture: { value: shaderLayerTexture },
+      },
+    }) as OrreryPlanetMaterial | OrreryLayerMaterial;
+    const shaderMaterialDispose = vi.spyOn(shaderMaterial, 'dispose');
+    scene.add(new THREE.Mesh(new THREE.BufferGeometry(), shaderMaterial));
+
     const renderer = { dispose: vi.fn() } as unknown as THREE.WebGLRenderer;
 
     disposeScene(scene, renderer);
@@ -198,6 +264,9 @@ describe('orrery scene builder', () => {
     expect(materialMapDispose).toHaveBeenCalledOnce();
     expect(meshMaterial.map).toBeNull();
     expect(meshMaterialDispose).toHaveBeenCalledOnce();
+    expect(shaderBaseDispose).toHaveBeenCalledOnce();
+    expect(shaderLayerDispose).toHaveBeenCalledOnce();
+    expect(shaderMaterialDispose).toHaveBeenCalledOnce();
     expect(renderer.dispose).toHaveBeenCalledOnce();
   });
 });
