@@ -10,30 +10,40 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import * as THREE from 'three';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
+import { RenderPixelatedPass } from 'three/examples/jsm/postprocessing/RenderPixelatedPass.js';
 import type { PlanetData, PlanetVisualParams } from '@app/core/models';
 import { DataService } from '@app/core/services/data.service';
 import { EventBusService } from '@app/core/services/event-bus.service';
 import { GameStateService } from '@app/core/services/game-state.service';
 import {
+  DEFAULT_ORRERY_VISUAL_EFFECTS_CONFIG,
   ORBIT_SPEED_FACTOR,
   ORRERY_STARFIELD_ROTATION_SPEED,
   PLANET_ORBITS,
+  buildAtmosphereGlow,
   buildBackground,
   buildEclipticGrid,
   buildPlanetObjects,
   buildStarfield,
   buildSun,
+  buildSunGlow,
   createCamera,
   createLights,
   createRenderer,
   disposeScene,
+  type OrreryAtmosphereGlowObject,
   type OrreryBackdropPalette,
   type OrreryPlanetLayerObject,
   type OrreryPlanetMaterial,
+  type OrrerySunGlowObjects,
+  type OrreryVisualEffectsConfig,
 } from './orrery-scene.builder';
 
 const ORRERY_GRID_OPACITY = 0.14;
 const ORRERY_ORBIT_OPACITY = 0.12;
+const ORRERY_BASE_FRAME_MS = 1000 / 60;
 const EMPTY_PLANET_LAYERS: readonly OrreryPlanetLayerObject[] = [];
 
 @Component({
@@ -56,6 +66,13 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
   private _scene!: THREE.Scene;
   private _camera!: THREE.PerspectiveCamera;
   private _rafId: number | null = null;
+  private _lastRenderedFrameTimeMs: number | null = null;
+
+  // ── Post-processing ───────────────────────────────────────────────────────
+  private _composer: EffectComposer | null = null;
+  private _pixelatePass: RenderPixelatedPass | null = null;
+  private _outputPass: OutputPass | null = null;
+  private _visualEffectsConfig: OrreryVisualEffectsConfig = DEFAULT_ORRERY_VISUAL_EFFECTS_CONFIG;
 
   // ── Per-planet tracking ────────────────────────────────────────────────────
   private readonly _planetAngles   = new Map<string, number>();
@@ -64,11 +81,13 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
   private readonly _orbitMaterials = new Map<string, THREE.MeshBasicMaterial>();
   private readonly _planetMaterials = new Map<string, OrreryPlanetMaterial>();
   private readonly _planetLayers = new Map<string, readonly OrreryPlanetLayerObject[]>();
+  private readonly _atmosphereGlows = new Map<string, OrreryAtmosphereGlowObject>();
   private readonly _planetData = new Map<string, PlanetData>();
   private readonly _planetOrbitEntries = Object.entries(PLANET_ORBITS);
 
   // ── Sun / Dyson ────────────────────────────────────────────────────────────
   private _dysonMaterial!: THREE.MeshStandardMaterial;
+  private _sunGlow: OrrerySunGlowObjects | null = null;
 
   // ── Backdrop visuals ───────────────────────────────────────────────────────
   private _starfield: THREE.Points | null = null;
@@ -101,6 +120,7 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
     this._scene    = new THREE.Scene();
     this._camera   = createCamera(aspect);
     const backdropPalette = this._readBackdropPalette();
+    this._visualEffectsConfig = this._readVisualEffectsConfig();
 
     buildBackground(this._scene, backdropPalette);
     this._starfield = buildStarfield(this._scene, { palette: backdropPalette });
@@ -110,6 +130,7 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
     // });
     createLights(this._scene);
     this._dysonMaterial = buildSun(this._scene).dysonMaterial;
+    this._sunGlow = buildSunGlow(this._scene, this._visualEffectsConfig.sunGlow);
 
     for (const planetData of this._data.getAllPlanets()) {
       const config = PLANET_ORBITS[planetData.id];
@@ -126,8 +147,18 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
       this._hitAreaMeshes.set(planetData.id, hitAreaMesh);
       this._orbitMaterials.set(planetData.id, orbitMaterial);
       this._planetAngles.set(planetData.id, config.initialAngle);
+      const atmosphereGlow = buildAtmosphereGlow(
+        this._scene,
+        planetData,
+        config,
+        this._visualEffectsConfig.atmosphereGlow
+      );
+      if (atmosphereGlow) {
+        this._atmosphereGlows.set(planetData.id, atmosphereGlow);
+      }
     }
 
+    this._setupPostProcessing(canvas);
     this._setupEventListeners(canvas);
     this._setupObservers(canvas);
     this._setupBusSubscriptions();
@@ -146,6 +177,8 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
       canvas.removeEventListener('mouseleave', this._onMouseLeave);
     }
 
+    this._disposePostProcessing();
+
     if (this._scene && this._renderer) {
       disposeScene(this._scene, this._renderer);
     }
@@ -155,9 +188,11 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
     this._orbitMaterials.clear();
     this._planetMaterials.clear();
     this._planetLayers.clear();
+    this._atmosphereGlows.clear();
     this._planetAngles.clear();
     this._planetData.clear();
     this._starfield = null;
+    this._sunGlow = null;
   }
 
   // ---------------------------------------------------------------------------
@@ -204,12 +239,61 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
     };
   }
 
+  private _readVisualEffectsConfig(): OrreryVisualEffectsConfig {
+    const styles = getComputedStyle(document.documentElement);
+    const readToken = (name: string): string => styles.getPropertyValue(name).trim();
+    const sunGlowColor = readToken('--orrery-sun-glow') || readToken('--color-accent-glow');
+
+    return {
+      fps: this._resolveFpsCap(DEFAULT_ORRERY_VISUAL_EFFECTS_CONFIG.fps),
+      pixelate: {
+        ...DEFAULT_ORRERY_VISUAL_EFFECTS_CONFIG.pixelate,
+        pixelSize: Math.max(1, Math.floor(DEFAULT_ORRERY_VISUAL_EFFECTS_CONFIG.pixelate.pixelSize)),
+      },
+      sunGlow: {
+        ...DEFAULT_ORRERY_VISUAL_EFFECTS_CONFIG.sunGlow,
+        color: sunGlowColor,
+      },
+      atmosphereGlow: DEFAULT_ORRERY_VISUAL_EFFECTS_CONFIG.atmosphereGlow,
+    };
+  }
+
+  private _resolveFpsCap(fps: number | null): number | null {
+    return fps === null ? null : Math.max(1, Math.floor(fps));
+  }
+
+  private _setupPostProcessing(canvas: HTMLCanvasElement): void {
+    const pixelate = this._visualEffectsConfig.pixelate;
+    if (!pixelate.enabled || pixelate.pixelSize <= 0) return;
+
+    this._composer = new EffectComposer(this._renderer);
+    this._composer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this._composer.setSize(canvas.clientWidth, canvas.clientHeight);
+    this._pixelatePass = new RenderPixelatedPass(pixelate.pixelSize, this._scene, this._camera, {
+      normalEdgeStrength: 0.01,
+      depthEdgeStrength: 0.01,
+    });
+    this._outputPass = new OutputPass();
+    this._composer.addPass(this._pixelatePass);
+    this._composer.addPass(this._outputPass);
+  }
+
+  private _disposePostProcessing(): void {
+    this._pixelatePass?.dispose();
+    this._pixelatePass = null;
+    this._outputPass?.dispose();
+    this._outputPass = null;
+    this._composer?.dispose();
+    this._composer = null;
+  }
+
   // ---------------------------------------------------------------------------
   // RAF loop
   // ---------------------------------------------------------------------------
 
   private _startRAF(): void {
     if (this._rafId !== null) return;
+    this._lastRenderedFrameTimeMs = null;
     this._animate();
   }
 
@@ -218,10 +302,28 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
       cancelAnimationFrame(this._rafId);
       this._rafId = null;
     }
+    this._lastRenderedFrameTimeMs = null;
   }
 
-  private _animate(): void {
-    this._rafId = requestAnimationFrame(() => this._animate());
+  private _animate(timestampMs = performance.now()): void {
+    this._rafId = requestAnimationFrame((nextTimestampMs) => this._animate(nextTimestampMs));
+
+    const fps = this._visualEffectsConfig.fps;
+    const previousFrameTimeMs = this._lastRenderedFrameTimeMs;
+    let visualFrameTimeMs = timestampMs;
+    if (fps !== null) {
+      const frameIntervalMs = 1000 / fps;
+      if (previousFrameTimeMs !== null && timestampMs - previousFrameTimeMs < frameIntervalMs) {
+        return;
+      }
+      visualFrameTimeMs = previousFrameTimeMs === null
+        ? timestampMs
+        : timestampMs - ((timestampMs - previousFrameTimeMs) % frameIntervalMs);
+    }
+    this._lastRenderedFrameTimeMs = visualFrameTimeMs;
+    const frameMultiplier = previousFrameTimeMs === null
+      ? 1
+      : Math.max(0, (visualFrameTimeMs - previousFrameTimeMs) / ORRERY_BASE_FRAME_MS);
 
     // ── 1. Read ALL signals into locals — never call signal getters mid-render ──
     const isPaused      = this._gameState.isPaused();
@@ -232,7 +334,7 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
     if (!isPaused) {
       for (const [id, config] of this._planetOrbitEntries) {
         const prev = this._planetAngles.get(id) ?? config.initialAngle;
-        this._planetAngles.set(id, prev + (1 / config.orbitalPeriod) * ORBIT_SPEED_FACTOR);
+        this._planetAngles.set(id, prev + (1 / config.orbitalPeriod) * ORBIT_SPEED_FACTOR * frameMultiplier);
       }
     }
 
@@ -243,6 +345,7 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
       const z = Math.sin(angle) * config.orreryRadius;
       const planetMesh = this._planetMeshes.get(id);
       planetMesh?.position.set(x, 0, z);
+      this._atmosphereGlows.get(id)?.mesh.position.set(x, 0, z);
       const layerObjects = this._planetLayers.get(id) ?? EMPTY_PLANET_LAYERS;
       for (const layerObject of layerObjects) {
         layerObject.mesh.position.set(x, 0, z);
@@ -270,6 +373,18 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
         visualParams?.axisRotationDirection ?? staticPlanet.initialState.axisRotationDirection;
       const cityLightsIntensity =
         visualParams?.cityLightsIntensity ?? (staticPlanet.visual.layerTextures['cityLights'] ? 1 : 0);
+      const atmosphereGlow = this._atmosphereGlows.get(id);
+      if (atmosphereGlow) {
+        const glowColor = staticPlanet.visual.atmosphereGlow?.color ??
+          visualParams?.atmosphereColor ??
+          staticPlanet.initialState.atmosphereColor;
+        const atmosphereDensity = visualParams?.atmosphereDensity ?? staticPlanet.initialState.atmosphereDensity;
+        atmosphereGlow.material.uniforms.uColor.value.set(glowColor);
+        atmosphereGlow.material.uniforms.uIntensity.value =
+          atmosphereDensity *
+          atmosphereGlow.staticIntensity *
+          this._visualEffectsConfig.atmosphereGlow.intensity;
+      }
 
       if (isLocalHovered && isLocked) {
         // Locked planet hover: grey tint communicates "cannot interact".
@@ -299,12 +414,12 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
 
       if (!isPaused && planetMesh) {
         const directionMultiplier = rotationDirection === 'retrograde' ? -1 : 1;
-        const planetRotationDelta = rotationSpeed * directionMultiplier * ORBIT_SPEED_FACTOR;
+        const planetRotationDelta = rotationSpeed * directionMultiplier * ORBIT_SPEED_FACTOR * frameMultiplier;
         planetMesh.rotation.y += planetRotationDelta;
         for (const layerObject of layerObjects) {
           const layerRotationDelta =
             layerObject.key === 'cloud'
-              ? planetRotationDelta + cloudRotationSpeed * directionMultiplier
+              ? planetRotationDelta + cloudRotationSpeed * directionMultiplier * frameMultiplier
               : planetRotationDelta;
           layerObject.mesh.rotation.y += layerRotationDelta;
         }
@@ -323,11 +438,19 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
 
     // ── 7. Optional backdrop drift ────────────────────────────────────────────
     if (this._starfieldRotationSpeed !== 0 && this._starfield) {
-      this._starfield.rotation.y += this._starfieldRotationSpeed;
+      this._starfield.rotation.y += this._starfieldRotationSpeed * frameMultiplier;
+    }
+
+    if (this._sunGlow) {
+      this._sunGlow.sprite.quaternion.copy(this._camera.quaternion);
     }
 
     // ── 8. Render ─────────────────────────────────────────────────────────────
-    this._renderer.render(this._scene, this._camera);
+    if (this._composer) {
+      this._composer.render();
+    } else {
+      this._renderer.render(this._scene, this._camera);
+    }
   }
 
   private _getLayerOpacity(
@@ -404,6 +527,8 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
     this._renderer.setSize(width, height, false);
     this._camera.aspect = width / height;
     this._camera.updateProjectionMatrix();
+    this._composer?.setSize(width, height);
+    this._pixelatePass?.setSize(width, height);
   }
 
   // Raycaster pointer — reused across frames to avoid allocation.

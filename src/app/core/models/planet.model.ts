@@ -64,6 +64,8 @@ export interface PlanetVisualData {
   baseColor: string;
   /** Map of visual layer name to equirectangular SVG texture path. */
   layerTextures: Record<string, string>;
+  /** Static render metadata for the orrery atmosphere rim glow. */
+  atmosphereGlow?: PlanetAtmosphereGlowData;
   /** UV coordinates [u, v] for water spot centers. Each component must be in [0,1]. */
   waterSpotUvs: [number, number][];
   /** UV coordinates [u, v] for vegetation spot centers. Each component must be in [0,1]. */
@@ -72,6 +74,15 @@ export interface PlanetVisualData {
   lavaSpotUvs?: [number, number][];
   /** Mars only: Hue shift data for lava cooling animation. Hues in [0,360] degrees. */
   lavaHueData?: { hotHue: number; cooledHue: number };
+}
+
+export interface PlanetAtmosphereGlowData {
+  /** Whether the orrery should draw an additive atmosphere rim for this planet. */
+  enabled: boolean;
+  /** Optional static override. Runtime visualParams.atmosphereColor usually wins. */
+  color?: string;
+  /** Per-planet glow strength multiplier. Must be >= 0. */
+  intensity?: number;
 }
 
 /**

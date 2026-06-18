@@ -51,6 +51,34 @@ export interface OrreryDayNightLightingOptions {
   readonly cityLightsIntensity?: number;
 }
 
+export interface OrreryPixelateConfig {
+  readonly enabled: boolean;
+  readonly pixelSize: number;
+}
+
+export interface OrrerySunGlowConfig {
+  readonly enabled: boolean;
+  /** Resolved CSS token color. */
+  readonly color: string;
+  readonly size: number;
+  readonly intensity: number;
+  readonly textureSize?: number;
+}
+
+export interface OrreryAtmosphereGlowConfig {
+  readonly enabled: boolean;
+  readonly thickness: number;
+  readonly intensity: number;
+}
+
+export interface OrreryVisualEffectsConfig {
+  /** Target render/update FPS for the visual scene; null keeps browser-native RAF cadence. */
+  readonly fps: number | null;
+  readonly pixelate: OrreryPixelateConfig;
+  readonly sunGlow: OrrerySunGlowConfig;
+  readonly atmosphereGlow: OrreryAtmosphereGlowConfig;
+}
+
 export interface OrreryPlanetUniforms {
   readonly [key: string]: THREE.IUniform<unknown>;
   readonly uBaseTexture: THREE.IUniform<THREE.Texture>;
@@ -80,10 +108,33 @@ export interface OrreryLayerUniforms {
 
 export type OrreryLayerMaterial = THREE.ShaderMaterial & { uniforms: OrreryLayerUniforms };
 
+export interface OrreryAtmosphereGlowUniforms {
+  readonly [key: string]: THREE.IUniform<unknown>;
+  readonly uColor: THREE.IUniform<THREE.Color>;
+  readonly uIntensity: THREE.IUniform<number>;
+}
+
+export type OrreryAtmosphereGlowMaterial = THREE.ShaderMaterial & {
+  uniforms: OrreryAtmosphereGlowUniforms;
+};
+
 export interface OrreryPlanetLayerObject {
   readonly key: string;
   readonly mesh: THREE.Mesh;
   readonly material: OrreryLayerMaterial;
+}
+
+export interface OrrerySunGlowObjects {
+  readonly sprite: THREE.Sprite;
+  readonly material: THREE.SpriteMaterial;
+  readonly texture: THREE.CanvasTexture;
+}
+
+export interface OrreryAtmosphereGlowObject {
+  readonly planetId: string;
+  readonly mesh: THREE.Mesh<THREE.SphereGeometry, OrreryAtmosphereGlowMaterial>;
+  readonly material: OrreryAtmosphereGlowMaterial;
+  readonly staticIntensity: number;
 }
 
 export interface OrreryBackdropObjects {
@@ -115,6 +166,26 @@ export const DEFAULT_ORRERY_DAY_NIGHT_LIGHTING_OPTIONS = {
   darkSideShadowTint: '#000000',
   cityLightsIntensity: 1.0,
 } as const;
+
+export const DEFAULT_ORRERY_VISUAL_EFFECTS_CONFIG: OrreryVisualEffectsConfig = {
+  fps: null,
+  pixelate: {
+    enabled: false,
+    pixelSize: 3,
+  },
+  sunGlow: {
+    enabled: true,
+    color: '',
+    size: 15,
+    intensity: 0.4,
+    textureSize: 256,
+  },
+  atmosphereGlow: {
+    enabled: false,
+    thickness: 0.1,
+    intensity: 0.75,
+  },
+};
 
 export const ORRERY_STARFIELD_ROTATION_SPEED = 0;
 
@@ -228,6 +299,33 @@ void main() {
   float finalAlpha = layerSample.a * uOpacity * visibilityMask;
 
   gl_FragColor = linearToOutputTexel(vec4(finalColor, finalAlpha));
+}
+`;
+
+const ATMOSPHERE_GLOW_VERTEX_SHADER = `
+varying vec3 vWorldNormal;
+varying vec3 vWorldPosition;
+
+void main() {
+  vec4 worldPosition = modelMatrix * vec4(position, 1.0);
+  vWorldPosition = worldPosition.xyz;
+  vWorldNormal = normalize(mat3(modelMatrix) * normal);
+  gl_Position = projectionMatrix * viewMatrix * worldPosition;
+}
+`;
+
+const ATMOSPHERE_GLOW_FRAGMENT_SHADER = `
+uniform vec3 uColor;
+uniform float uIntensity;
+
+varying vec3 vWorldNormal;
+varying vec3 vWorldPosition;
+
+void main() {
+  vec3 viewDirection = normalize(cameraPosition - vWorldPosition);
+  float rim = pow(1.0 - abs(dot(normalize(vWorldNormal), viewDirection)), 2.6);
+  float alpha = rim * uIntensity;
+  gl_FragColor = linearToOutputTexel(vec4(uColor * alpha, alpha));
 }
 `;
 
@@ -549,6 +647,53 @@ export function buildSun(scene: THREE.Scene): SunObjects {
   return { dysonMaterial: dysonMat };
 }
 
+export function buildSunGlow(
+  scene: THREE.Scene,
+  options: OrrerySunGlowConfig
+): OrrerySunGlowObjects | null {
+  if (!options.enabled || options.intensity <= 0 || options.size <= 0 || options.color === '') {
+    return null;
+  }
+
+  const textureSize = Math.max(16, Math.floor(options.textureSize ?? 256));
+  const canvas = createCanvas(textureSize, textureSize);
+  const context = getCanvasContext(canvas);
+  if (context) {
+    const color = new THREE.Color(options.color);
+    const colorStop = (alpha: number): string =>
+      `rgba(${Math.round(color.r * 255)},${Math.round(color.g * 255)},${Math.round(color.b * 255)},${alpha})`;
+    const center = textureSize / 2;
+    const gradient = context.createRadialGradient(center, center, 0, center, center, center);
+    gradient.addColorStop(0, colorStop(1));
+    gradient.addColorStop(0.22, colorStop(0.82));
+    gradient.addColorStop(0.72, colorStop(0.12));
+    gradient.addColorStop(1, colorStop(0));
+    context.fillStyle = gradient;
+    context.fillRect(0, 0, textureSize, textureSize);
+  }
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.name = 'sun-glow-texture';
+  const material = new THREE.SpriteMaterial({
+    map: texture,
+    transparent: true,
+    opacity: options.intensity,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+    depthTest: false,
+    toneMapped: false,
+  });
+  material.name = 'sun-glow-material';
+  const sprite = new THREE.Sprite(material);
+  sprite.name = 'sun-glow-sprite';
+  sprite.scale.set(options.size, options.size, 1);
+  sprite.renderOrder = 20;
+  scene.add(sprite);
+
+  return { sprite, material, texture };
+}
+
 // ---------------------------------------------------------------------------
 // Planet objects
 // ---------------------------------------------------------------------------
@@ -559,6 +704,41 @@ export interface PlanetObjects {
   layerObjects: readonly OrreryPlanetLayerObject[];
   hitAreaMesh: THREE.Mesh;
   orbitMaterial: THREE.MeshBasicMaterial;
+}
+
+export function buildAtmosphereGlow(
+  scene: THREE.Scene,
+  planetData: PlanetData,
+  config: PlanetOrreryConfig,
+  options: OrreryAtmosphereGlowConfig
+): OrreryAtmosphereGlowObject | null {
+  const staticGlow = planetData.visual.atmosphereGlow;
+  const staticIntensity = staticGlow?.intensity ?? 1;
+  if (!options.enabled || staticGlow?.enabled !== true || staticIntensity <= 0) {
+    return null;
+  }
+
+  const thickness = Math.max(0, options.thickness);
+  const geometry = new THREE.SphereGeometry(config.visualRadius * (1 + thickness), 32, 32);
+  const material = new THREE.ShaderMaterial({
+    uniforms: {
+      uColor: { value: new THREE.Color(staticGlow.color ?? planetData.initialState.atmosphereColor) },
+      uIntensity: { value: staticIntensity * options.intensity },
+    },
+    vertexShader: ATMOSPHERE_GLOW_VERTEX_SHADER,
+    fragmentShader: ATMOSPHERE_GLOW_FRAGMENT_SHADER,
+    transparent: true,
+    depthWrite: false,
+    side: THREE.BackSide,
+    blending: THREE.AdditiveBlending,
+  }) as OrreryAtmosphereGlowMaterial;
+  material.name = `${planetData.id}-atmosphere-glow-material`;
+  const mesh = new THREE.Mesh(geometry, material);
+  mesh.name = `${planetData.id}-atmosphere-glow`;
+  mesh.userData = { planetId: planetData.id, layerKey: 'atmosphereGlow' };
+  scene.add(mesh);
+
+  return { planetId: planetData.id, mesh, material, staticIntensity };
 }
 
 export function createPlanetDayNightMaterial(

@@ -10,11 +10,15 @@ import { DataService } from '@app/core/services/data.service';
 import { EventBusService } from '@app/core/services/event-bus.service';
 import { GameStateService } from '@app/core/services/game-state.service';
 import { OrreryComponent } from './orrery.component';
+import { ORBIT_SPEED_FACTOR } from './orrery-scene.builder';
 import type {
+  OrreryAtmosphereGlowObject,
   OrreryBackdropPalette,
   OrreryLayerMaterial,
   OrreryPlanetLayerObject,
   OrreryPlanetMaterial,
+  OrrerySunGlowObjects,
+  OrreryVisualEffectsConfig,
 } from './orrery-scene.builder';
 
 interface ObserverFake {
@@ -29,14 +33,23 @@ interface OrreryComponentAccess {
   _camera: THREE.PerspectiveCamera;
   _dysonMaterial: THREE.MeshStandardMaterial;
   _starfield: THREE.Points | null;
+  _composer: { render: ReturnType<typeof vi.fn>; setSize: ReturnType<typeof vi.fn>; dispose: ReturnType<typeof vi.fn> } | null;
+  _pixelatePass: { setSize: ReturnType<typeof vi.fn>; dispose: ReturnType<typeof vi.fn> } | null;
+  _outputPass: { dispose: ReturnType<typeof vi.fn> } | null;
+  _visualEffectsConfig: OrreryVisualEffectsConfig;
+  _sunGlow: OrrerySunGlowObjects | null;
   _planetMaterials: Map<string, OrreryPlanetMaterial>;
   _planetLayers: Map<string, readonly OrreryPlanetLayerObject[]>;
   _planetMeshes: Map<string, THREE.Mesh>;
+  _planetAngles: Map<string, number>;
+  _atmosphereGlows: Map<string, OrreryAtmosphereGlowObject>;
   _planetData: Map<string, PlanetData>;
   _intersectionObserver: ObserverFake | null;
   _resizeObserver: ObserverFake | null;
   _readBackdropPalette(): OrreryBackdropPalette;
-  _animate(): void;
+  _readVisualEffectsConfig(): OrreryVisualEffectsConfig;
+  _onResize(rect: DOMRectReadOnly): void;
+  _animate(timestampMs?: number): void;
 }
 
 function makePlanetData(id: PlanetData['id'], baseColor: string): PlanetData {
@@ -72,6 +85,38 @@ function setup(): OrreryComponent {
         provide: GameStateService,
         useValue: {
           isPaused: signal(true).asReadonly(),
+          planets: signal({}).asReadonly(),
+          dysonCoveragePercent: signal(0).asReadonly(),
+        },
+      },
+      {
+        provide: DataService,
+        useValue: {
+          getAllPlanets: () => [makePlanetData('earth', '#3a7ab8')],
+          getPlanet: () => makePlanetData('earth', '#3a7ab8'),
+        },
+      },
+      {
+        provide: EventBusService,
+        useValue: {
+          planetHovered$: new Subject<string | null>(),
+          planetSelected$: new Subject<string>(),
+        },
+      },
+    ],
+  });
+
+  return TestBed.createComponent(OrreryComponent).componentInstance;
+}
+
+function setupUnpaused(): OrreryComponent {
+  TestBed.configureTestingModule({
+    imports: [OrreryComponent],
+    providers: [
+      {
+        provide: GameStateService,
+        useValue: {
+          isPaused: signal(false).asReadonly(),
           planets: signal({}).asReadonly(),
           dysonCoveragePercent: signal(0).asReadonly(),
         },
@@ -132,6 +177,87 @@ describe('OrreryComponent', () => {
     });
   });
 
+  it('reads the sun glow color from design tokens', () => {
+    const component = setup();
+    const access = component as unknown as OrreryComponentAccess;
+    vi.spyOn(window, 'getComputedStyle').mockReturnValue({
+      getPropertyValue: (name: string) => {
+        const tokens: Record<string, string> = {
+          '--orrery-sun-glow': ' #ffcc44 ',
+          '--color-accent-glow': ' #ffbe76 ',
+        };
+        return tokens[name] ?? '';
+      },
+    } as CSSStyleDeclaration);
+
+    const config = access._readVisualEffectsConfig();
+
+    expect(config.sunGlow.color).toBe('#ffcc44');
+    expect(config.fps).toBe(24);
+    expect(config.pixelate.enabled).toBe(true);
+    expect(config.pixelate.pixelSize).toBe(3);
+  });
+
+  it('skips rendering until the configured FPS interval elapses', () => {
+    const component = setup();
+    const access = component as unknown as OrreryComponentAccess;
+    const renderer = { render: vi.fn(), dispose: vi.fn() } as unknown as THREE.WebGLRenderer;
+    vi.spyOn(globalThis, 'requestAnimationFrame').mockReturnValue(1);
+
+    access._renderer = renderer;
+    access._scene = new THREE.Scene();
+    access._camera = new THREE.PerspectiveCamera();
+    access._dysonMaterial = new THREE.MeshStandardMaterial({ transparent: true, opacity: 0 });
+    access._starfield = null;
+
+    access._animate(0);
+    access._animate(10);
+    access._animate(42);
+
+    expect(renderer.render).toHaveBeenCalledTimes(2);
+  });
+
+  it('keeps orbital speed while visually rendering at a lower FPS', () => {
+    const component = setupUnpaused();
+    const access = component as unknown as OrreryComponentAccess;
+    const renderer = { render: vi.fn(), dispose: vi.fn() } as unknown as THREE.WebGLRenderer;
+    vi.spyOn(globalThis, 'requestAnimationFrame').mockReturnValue(1);
+
+    access._renderer = renderer;
+    access._scene = new THREE.Scene();
+    access._camera = new THREE.PerspectiveCamera();
+    access._dysonMaterial = new THREE.MeshStandardMaterial({ transparent: true, opacity: 0 });
+    access._starfield = null;
+    access._planetAngles.set('earth', 0);
+
+    access._animate(0);
+    access._animate(10);
+    access._animate(42);
+
+    expect(access._planetAngles.get('earth')).toBeCloseTo(ORBIT_SPEED_FACTOR * 3.5);
+    expect(renderer.render).toHaveBeenCalledTimes(2);
+  });
+
+  it('renders every RAF tick when the FPS cap is null', () => {
+    const component = setup();
+    const access = component as unknown as OrreryComponentAccess;
+    const renderer = { render: vi.fn(), dispose: vi.fn() } as unknown as THREE.WebGLRenderer;
+    vi.spyOn(globalThis, 'requestAnimationFrame').mockReturnValue(1);
+
+    access._renderer = renderer;
+    access._scene = new THREE.Scene();
+    access._camera = new THREE.PerspectiveCamera();
+    access._dysonMaterial = new THREE.MeshStandardMaterial({ transparent: true, opacity: 0 });
+    access._starfield = null;
+    access._visualEffectsConfig = { ...access._visualEffectsConfig, fps: null };
+
+    access._animate(0);
+    access._animate(10);
+    access._animate(20);
+
+    expect(renderer.render).toHaveBeenCalledTimes(3);
+  });
+
   it('does not rotate the starfield when rotation speed is zero', () => {
     const component = setup();
     const access = component as unknown as OrreryComponentAccess;
@@ -149,6 +275,46 @@ describe('OrreryComponent', () => {
 
     expect(starfield.rotation.y).toBe(0);
     expect(renderer.render).toHaveBeenCalledOnce();
+  });
+
+  it('renders through the composer when post-processing is active', () => {
+    const component = setup();
+    const access = component as unknown as OrreryComponentAccess;
+    const renderer = { render: vi.fn(), dispose: vi.fn() } as unknown as THREE.WebGLRenderer;
+    const composer = { render: vi.fn(), setSize: vi.fn(), dispose: vi.fn() };
+    vi.spyOn(globalThis, 'requestAnimationFrame').mockReturnValue(1);
+
+    access._renderer = renderer;
+    access._scene = new THREE.Scene();
+    access._camera = new THREE.PerspectiveCamera();
+    access._dysonMaterial = new THREE.MeshStandardMaterial({ transparent: true, opacity: 0 });
+    access._starfield = null;
+    access._composer = composer;
+
+    access._animate();
+
+    expect(composer.render).toHaveBeenCalledOnce();
+    expect(renderer.render).not.toHaveBeenCalled();
+  });
+
+  it('updates composer and pixel pass size on resize', () => {
+    const component = setup();
+    const access = component as unknown as OrreryComponentAccess;
+    const renderer = { setSize: vi.fn(), dispose: vi.fn() } as unknown as THREE.WebGLRenderer;
+    const composer = { render: vi.fn(), setSize: vi.fn(), dispose: vi.fn() };
+    const pixelatePass = { setSize: vi.fn(), dispose: vi.fn() };
+
+    access._renderer = renderer;
+    access._camera = new THREE.PerspectiveCamera();
+    access._composer = composer;
+    access._pixelatePass = pixelatePass;
+
+    access._onResize({ width: 320, height: 180 } as DOMRectReadOnly);
+
+    expect(renderer.setSize).toHaveBeenCalledWith(320, 180, false);
+    expect(composer.setSize).toHaveBeenCalledWith(320, 180);
+    expect(pixelatePass.setSize).toHaveBeenCalledWith(320, 180);
+    expect(access._camera.aspect).toBeCloseTo(320 / 180);
   });
 
   it('updates shader uniforms and planet rotation during RAF', () => {
@@ -195,12 +361,31 @@ describe('OrreryComponent', () => {
     access._planetLayers.set('earth', [
       { key: 'cloud', mesh: cloudLayerMesh, material: cloudLayerMaterial },
     ]);
+    const atmosphereMaterial = new THREE.ShaderMaterial({
+      uniforms: {
+        uColor: { value: new THREE.Color('#000000') },
+        uIntensity: { value: 0 },
+      },
+    }) as OrreryAtmosphereGlowObject['material'];
+    const atmosphereMesh = new THREE.Mesh(
+      new THREE.SphereGeometry(1, 8, 8),
+      atmosphereMaterial
+    ) as OrreryAtmosphereGlowObject['mesh'];
+    access._atmosphereGlows.set('earth', {
+      planetId: 'earth',
+      mesh: atmosphereMesh,
+      material: atmosphereMaterial,
+      staticIntensity: 0.85,
+    });
 
     access._animate();
 
     expect(`#${shaderMaterial.uniforms.uBaseColor.value.getHexString()}`).toBe('#3a7ab8');
     expect(shaderMaterial.uniforms.uSunDirection.value.length()).toBeCloseTo(1);
     expect(cloudLayerMaterial.uniforms.uSunDirection.value.length()).toBeCloseTo(1);
+    expect(atmosphereMesh.position.length()).toBeGreaterThan(0);
+    expect(`#${atmosphereMaterial.uniforms.uColor.value.getHexString()}`).toBe('#3a7ab8');
+    expect(atmosphereMaterial.uniforms.uIntensity.value).toBe(0);
     expect(planetMesh.rotation.y).toBe(0);
     expect(renderer.render).toHaveBeenCalledOnce();
   });
@@ -211,6 +396,9 @@ describe('OrreryComponent', () => {
     const canvas = document.createElement('canvas');
     const removeListenerSpy = vi.spyOn(canvas, 'removeEventListener');
     const renderer = { dispose: vi.fn() } as unknown as THREE.WebGLRenderer;
+    const composer = { render: vi.fn(), setSize: vi.fn(), dispose: vi.fn() };
+    const pixelatePass = { setSize: vi.fn(), dispose: vi.fn() };
+    const outputPass = { dispose: vi.fn() };
     const scene = new THREE.Scene();
     const material = new THREE.MeshBasicMaterial();
     scene.add(new THREE.Mesh(new THREE.BufferGeometry(), material));
@@ -218,6 +406,9 @@ describe('OrreryComponent', () => {
     access._canvasRef = new ElementRef(canvas);
     access._renderer = renderer;
     access._scene = scene;
+    access._composer = composer;
+    access._pixelatePass = pixelatePass;
+    access._outputPass = outputPass;
     access._intersectionObserver = { observe: vi.fn(), disconnect: vi.fn() };
     access._resizeObserver = { observe: vi.fn(), disconnect: vi.fn() };
 
@@ -228,6 +419,9 @@ describe('OrreryComponent', () => {
     expect(removeListenerSpy).toHaveBeenCalledWith('click', expect.any(Function));
     expect(removeListenerSpy).toHaveBeenCalledWith('mousemove', expect.any(Function));
     expect(removeListenerSpy).toHaveBeenCalledWith('mouseleave', expect.any(Function));
+    expect(pixelatePass.dispose).toHaveBeenCalledOnce();
+    expect(outputPass.dispose).toHaveBeenCalledOnce();
+    expect(composer.dispose).toHaveBeenCalledOnce();
     expect(renderer.dispose).toHaveBeenCalledOnce();
   });
 });

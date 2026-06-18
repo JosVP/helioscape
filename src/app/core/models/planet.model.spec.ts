@@ -228,6 +228,7 @@ describe('PlanetVisualData validation', () => {
   const validMarsVisual: PlanetVisualData = {
     baseColor: '#cd5c5c',
     layerTextures: { base: '/assets/mars_base.png' },
+    atmosphereGlow: { enabled: true, intensity: 0.28 },
     waterSpotUvs: [[0.5, 0.5]],
     greenSpotUvs: [[0.3, 0.7]],
     lavaSpotUvs: [[0.8, 0.2]],
@@ -255,6 +256,37 @@ describe('PlanetVisualData validation', () => {
       },
     };
     expect(validateVisualData(cityLightsVisual, 'mars').valid).toBe(true);
+  });
+
+  it('should accept disabled atmosphere glow metadata', () => {
+    const visual: PlanetVisualData = {
+      baseColor: '#8c7f73',
+      layerTextures: { surface: '/assets/svg/planets/textures/mercury-surface-texture.svg' },
+      atmosphereGlow: { enabled: false, intensity: 0 },
+      waterSpotUvs: [],
+      greenSpotUvs: [],
+    };
+    expect(validateVisualData(visual, 'mercury').valid).toBe(true);
+  });
+
+  it('should reject invalid atmosphere glow color', () => {
+    const visual: PlanetVisualData = {
+      ...validMarsVisual,
+      atmosphereGlow: { enabled: true, color: 'blue', intensity: 0.5 },
+    };
+    const result = validateVisualData(visual, 'earth');
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain('atmosphereGlow.color must be valid hex color (got blue)');
+  });
+
+  it('should reject negative atmosphere glow intensity', () => {
+    const visual: PlanetVisualData = {
+      ...validMarsVisual,
+      atmosphereGlow: { enabled: true, intensity: -0.2 },
+    };
+    const result = validateVisualData(visual, 'venus');
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain('atmosphereGlow.intensity must be non-negative (got -0.2)');
   });
 
   it('should reject UV coordinates outside [0,1] range', () => {
@@ -425,6 +457,7 @@ describe('PlanetData validation', () => {
     visual: {
       baseColor: '#cd5c5c',
       layerTextures: { base: '/assets/mars_base.png' },
+      atmosphereGlow: { enabled: true, intensity: 0.28 },
       waterSpotUvs: [[0.5, 0.5]],
       greenSpotUvs: [[0.3, 0.7]],
       lavaSpotUvs: [[0.8, 0.2]],
@@ -445,6 +478,7 @@ describe('PlanetData validation', () => {
         surface: '/assets/svg/planets/textures/earth-surface-texture.svg',
         cityLights: '/assets/svg/planets/textures/earth-city-lights-texture.svg',
       },
+      atmosphereGlow: { enabled: true, intensity: 0.85 },
       waterSpotUvs: [[0.5, 0.5]],
       greenSpotUvs: [[0.3, 0.7]],
     };

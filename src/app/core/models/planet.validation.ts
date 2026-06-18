@@ -187,6 +187,25 @@ export function validateVisualData(data: PlanetVisualData, planetId: PlanetId): 
     }
   }
 
+  if (data.atmosphereGlow) {
+    if (typeof data.atmosphereGlow.enabled !== 'boolean') {
+      errors.push(`atmosphereGlow.enabled must be boolean (got ${data.atmosphereGlow.enabled})`);
+    }
+
+    if (data.atmosphereGlow.color !== undefined && !isValidHexColor(data.atmosphereGlow.color)) {
+      errors.push(`atmosphereGlow.color must be valid hex color (got ${data.atmosphereGlow.color})`);
+    }
+
+    if (
+      data.atmosphereGlow.intensity !== undefined &&
+      !isNonNegative(data.atmosphereGlow.intensity)
+    ) {
+      errors.push(
+        `atmosphereGlow.intensity must be non-negative (got ${data.atmosphereGlow.intensity})`,
+      );
+    }
+  }
+
   return { valid: errors.length === 0, errors };
 }
 

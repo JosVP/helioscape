@@ -4,15 +4,19 @@ import { describe, expect, it, vi } from 'vitest';
 import * as THREE from 'three';
 import type { PlanetData } from '@app/core/models';
 import {
+  DEFAULT_ORRERY_VISUAL_EFFECTS_CONFIG,
   DEFAULT_ORRERY_GRID_OPTIONS,
   PLANET_ORBITS,
+  buildAtmosphereGlow,
   buildBackground,
   buildEclipticGrid,
   buildPlanetObjects,
   buildStarfield,
   buildSun,
+  buildSunGlow,
   disposeScene,
   loadOrrerySvgTexture,
+  type OrreryAtmosphereGlowMaterial,
   type OrreryBackdropPalette,
   type OrreryLayerMaterial,
   type OrreryPlanetMaterial,
@@ -56,6 +60,7 @@ function makePlanetData(withTexture = false): PlanetData {
             cityLights: '/assets/svg/planets/textures/earth-city-lights-texture.svg',
           }
         : {},
+      atmosphereGlow: { enabled: true, intensity: 0.85 },
       waterSpotUvs: [],
       greenSpotUvs: [],
     },
@@ -148,6 +153,72 @@ describe('orrery scene builder', () => {
     expect(sunMesh.material).toBeInstanceOf(THREE.MeshBasicMaterial);
     expect(sunMesh.material.map).toBe(sunTexture);
     expect(sunMesh.material.toneMapped).toBe(false);
+  });
+
+  it('buildSunGlow creates an additive sprite with a canvas texture', () => {
+    const scene = new THREE.Scene();
+
+    const glow = buildSunGlow(scene, {
+      ...DEFAULT_ORRERY_VISUAL_EFFECTS_CONFIG.sunGlow,
+      color: '#ffbe76',
+    });
+
+    expect(glow).not.toBeNull();
+    expect(glow?.sprite).toBeInstanceOf(THREE.Sprite);
+    expect(glow?.texture).toBeInstanceOf(THREE.CanvasTexture);
+    expect(glow?.material.blending).toBe(THREE.AdditiveBlending);
+    expect(glow?.material.depthWrite).toBe(false);
+    expect(glow?.material.depthTest).toBe(false);
+    expect(scene.children).toContain(glow?.sprite);
+  });
+
+  it('buildSunGlow returns null when disabled', () => {
+    const scene = new THREE.Scene();
+
+    const glow = buildSunGlow(scene, {
+      ...DEFAULT_ORRERY_VISUAL_EFFECTS_CONFIG.sunGlow,
+      enabled: false,
+      color: '#ffbe76',
+    });
+
+    expect(glow).toBeNull();
+    expect(scene.children).toHaveLength(0);
+  });
+
+  it('buildAtmosphereGlow creates a larger additive back-side shell when enabled', () => {
+    const scene = new THREE.Scene();
+
+    const glow = buildAtmosphereGlow(
+      scene,
+      makePlanetData(),
+      PLANET_ORBITS['earth'],
+      { ...DEFAULT_ORRERY_VISUAL_EFFECTS_CONFIG.atmosphereGlow, enabled: true }
+    );
+
+    expect(glow).not.toBeNull();
+    expect(glow?.mesh).toBeInstanceOf(THREE.Mesh);
+    expect(glow?.material).toBeInstanceOf(THREE.ShaderMaterial);
+    expect(glow?.material.blending).toBe(THREE.AdditiveBlending);
+    expect(glow?.material.side).toBe(THREE.BackSide);
+    expect(glow?.material.depthWrite).toBe(false);
+    expect(glow?.mesh.geometry.parameters.radius).toBeGreaterThan(PLANET_ORBITS['earth'].visualRadius);
+    expect(scene.children).toContain(glow?.mesh);
+  });
+
+  it('buildAtmosphereGlow returns null when planet data disables it', () => {
+    const scene = new THREE.Scene();
+    const planetData = makePlanetData();
+    planetData.visual.atmosphereGlow = { enabled: false, intensity: 0 };
+
+    const glow = buildAtmosphereGlow(
+      scene,
+      planetData,
+      PLANET_ORBITS['earth'],
+      DEFAULT_ORRERY_VISUAL_EFFECTS_CONFIG.atmosphereGlow
+    );
+
+    expect(glow).toBeNull();
+    expect(scene.children).toHaveLength(0);
   });
 
   it('loadOrrerySvgTexture loads and configures a disposable texture from a path', () => {
@@ -250,6 +321,21 @@ describe('orrery scene builder', () => {
     const shaderMaterialDispose = vi.spyOn(shaderMaterial, 'dispose');
     scene.add(new THREE.Mesh(new THREE.BufferGeometry(), shaderMaterial));
 
+    const spriteTexture = new THREE.CanvasTexture(document.createElement('canvas'));
+    const spriteTextureDispose = vi.spyOn(spriteTexture, 'dispose');
+    const spriteMaterial = new THREE.SpriteMaterial({ map: spriteTexture });
+    const spriteMaterialDispose = vi.spyOn(spriteMaterial, 'dispose');
+    scene.add(new THREE.Sprite(spriteMaterial));
+
+    const atmosphereMaterial = new THREE.ShaderMaterial({
+      uniforms: {
+        uColor: { value: new THREE.Color('#4488ff') },
+        uIntensity: { value: 1 },
+      },
+    }) as OrreryAtmosphereGlowMaterial;
+    const atmosphereMaterialDispose = vi.spyOn(atmosphereMaterial, 'dispose');
+    scene.add(new THREE.Mesh(new THREE.SphereGeometry(1, 8, 8), atmosphereMaterial));
+
     const renderer = { dispose: vi.fn() } as unknown as THREE.WebGLRenderer;
 
     disposeScene(scene, renderer);
@@ -267,6 +353,9 @@ describe('orrery scene builder', () => {
     expect(shaderBaseDispose).toHaveBeenCalledOnce();
     expect(shaderLayerDispose).toHaveBeenCalledOnce();
     expect(shaderMaterialDispose).toHaveBeenCalledOnce();
+    expect(spriteTextureDispose).toHaveBeenCalledOnce();
+    expect(spriteMaterialDispose).toHaveBeenCalledOnce();
+    expect(atmosphereMaterialDispose).toHaveBeenCalledOnce();
     expect(renderer.dispose).toHaveBeenCalledOnce();
   });
 });
