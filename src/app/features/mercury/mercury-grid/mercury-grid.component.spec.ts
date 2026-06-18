@@ -127,6 +127,13 @@ function setup(buildings: PlacedBuilding[] = []): TestEnv {
   const gameStateFake = makeGameStateFake(buildings);
   const dataFake = makeDataFake();
   const ctx = mockCanvasContext();
+  class MockResizeObserver {
+    observe(): void {}
+    unobserve(): void {}
+    disconnect(): void {}
+  }
+
+  vi.stubGlobal('ResizeObserver', MockResizeObserver);
 
   TestBed.configureTestingModule({
     imports: [MercuryGridComponent],
@@ -194,45 +201,37 @@ describe('MercuryGridComponent', () => {
   });
 
   it('emits tileClicked with hasBuilding: true when clicking an occupied tile', () => {
-    const placedBuilding = makePlacedBuilding({ col: 3, row: 3 });
+    const placedBuilding = makePlacedBuilding({ col: 42, row: 32 });
     const { component, canvas } = setup([placedBuilding]);
 
     const emitted: Array<{ col: number; row: number; hasBuilding: boolean; terrain: string; slotId: string | null }> = [];
     component.tileClicked.subscribe((e) => emitted.push(e));
 
-    // toScreen(3, 3, originX, 80): x = originX + 0*32 = originX, y = 80 + 6*16 = 176
-    // originX = CANVAS_WIDTH / 2 = 4288 / 2 = 2144
+    // Initial camera pan starts at VIEW_TOP_Y, so click a visible inner-zone tile.
     const clickEvent = new MouseEvent('click', { bubbles: true });
-    Object.defineProperty(clickEvent, 'offsetX', { value: 2144 });
-    Object.defineProperty(clickEvent, 'offsetY', { value: 176 });
+    Object.defineProperty(clickEvent, 'offsetX', { value: 320 });
+    Object.defineProperty(clickEvent, 'offsetY', { value: 16 });
     canvas.dispatchEvent(clickEvent);
 
     expect(emitted).toHaveLength(1);
     expect(emitted[0].hasBuilding).toBe(true);
-    expect(emitted[0].col).toBe(3);
-    expect(emitted[0].row).toBe(3);
+    expect(emitted[0].col).toBe(42);
+    expect(emitted[0].row).toBe(32);
   });
 
   it('calls placeMercuryBuilding when clicking an empty tile with selectedBuildingId set', () => {
-    const { component, canvas, gameStateFake } = setup([]);
-    TestBed.runInInjectionContext(() => {
-      // Set the input signal value by using the fixture's input setter pattern
-    });
-
-    // Simulate selectedBuildingId being 'mining_outpost' (allowedSlotType: 'any')
-    const { fixture } = setup([]);
+    const { fixture, gameStateFake } = setup([]);
     fixture.componentRef.setInput('selectedBuildingId', 'mining_outpost');
     fixture.detectChanges();
 
     const emitted: Array<{ col: number; row: number; hasBuilding: boolean; terrain: string; slotId: string | null }> = [];
     fixture.componentInstance.tileClicked.subscribe((e) => emitted.push(e));
 
-    // Click on an empty flat tile (col=4, row=4)
-    // toScreen(4, 4, 2144, 80) → x=2144, y=80+8*16=208
+    // Click on an empty visible flat tile (col=44, row=34).
     const clickEvent = new MouseEvent('click', { bubbles: true });
     const canvas2 = fixture.nativeElement.querySelector('canvas') as HTMLCanvasElement;
-    Object.defineProperty(clickEvent, 'offsetX', { value: 2144 });
-    Object.defineProperty(clickEvent, 'offsetY', { value: 208 });
+    Object.defineProperty(clickEvent, 'offsetX', { value: 320 });
+    Object.defineProperty(clickEvent, 'offsetY', { value: 80 });
     canvas2.dispatchEvent(clickEvent);
 
     expect(gameStateFake._placeMock).toHaveBeenCalled();
@@ -254,9 +253,9 @@ describe('MercuryGridComponent', () => {
     expect(gameStateFake._placeMock).not.toHaveBeenCalled();
   });
 
-  it('exposes canvasWidth and canvasHeight as positive numbers', () => {
-    const { component } = setup();
-    expect(component.canvasWidth).toBeGreaterThan(0);
-    expect(component.canvasHeight).toBeGreaterThan(0);
+  it('renders an accessible canvas surface', () => {
+    const { canvas } = setup();
+    expect(canvas.getAttribute('role')).toBe('application');
+    expect(canvas.getAttribute('tabindex')).toBe('0');
   });
 });

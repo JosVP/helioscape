@@ -137,7 +137,17 @@ function mockFetchFor(service: DataService, overrides: Record<string, unknown> =
     '/data/kardashev-milestones.json': fakeMilestones,
     '/data/resources.json': fakeResources,
     '/data/mercury-buildings.json': [],
+    '/data/mercury-components.json': [],
     '/data/bio-phases.json': {},
+    '/data/mercury-map.json': {
+      gridCols: 128,
+      gridRows: 128,
+      terrainRules: [],
+      craterOverrides: [],
+      slots: [],
+      miningLocations: [],
+      startingZones: [],
+    },
     ...overrides,
   };
 
@@ -177,18 +187,20 @@ describe('DataService', () => {
   });
 
   describe('loadAll()', () => {
-    it('fetches all 8 JSON files in parallel and logs success', async () => {
+    it('fetches all JSON files in parallel and logs success', async () => {
       mockFetchFor(service);
       const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
       const fetchMock = vi.mocked(fetch);
 
       await service.loadAll();
 
-      expect(fetchMock).toHaveBeenCalledTimes(8);
+      expect(fetchMock).toHaveBeenCalledTimes(10);
       expect(fetchMock).toHaveBeenCalledWith('/data/planets.json');
       expect(fetchMock).toHaveBeenCalledWith('/data/tech-tree.json');
       expect(fetchMock).toHaveBeenCalledWith('/data/mercury-buildings.json');
+      expect(fetchMock).toHaveBeenCalledWith('/data/mercury-components.json');
       expect(fetchMock).toHaveBeenCalledWith('/data/bio-phases.json');
+      expect(fetchMock).toHaveBeenCalledWith('/data/mercury-map.json');
       expect(consoleSpy).toHaveBeenCalledWith('DataService: all game data loaded');
 
       consoleSpy.mockRestore();

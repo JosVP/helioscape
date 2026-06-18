@@ -161,12 +161,12 @@ describe('PlanetPanelComponent', () => {
 
   // ── Tabs ─────────────────────────────────────────────────────────────────
 
-  it('defaults to tech-tree tab', () => {
+  it('defaults to overview tab', () => {
     planetsSignal.set({ earth: makePlanetState({ id: 'earth' }) });
     const fixture = setup();
     fixture.componentRef.setInput('planetId', 'earth');
     fixture.detectChanges();
-    expect(fixture.componentInstance.activeTab()).toBe('tech-tree');
+    expect(fixture.componentInstance.activeTab()).toBe('overview');
   });
 
   it('Moon tab is present only for Earth', () => {

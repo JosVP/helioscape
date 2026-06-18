@@ -128,7 +128,7 @@ describe('ResourcePowerBarComponent', () => {
 
   it('should not count rates from non-operational buildings', () => {
     const def = makeMercuryBuildingDef();
-    const buildings: PlacedBuilding[] = [makeBuilding({ status: 'under_construction', buildingId: def.id })];
+    const buildings: PlacedBuilding[] = [makeBuilding({ status: 'building', buildingId: def.id })];
     TestBed.overrideProvider(GameStateService, {
       useValue: makeGameStateFake({ buildings }),
     });

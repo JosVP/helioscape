@@ -1,6 +1,6 @@
-import { TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import type { CultureEventEntry } from '@app/core/models';
 import { DataService } from '@app/core/services/data.service';
 import { CultureEventService } from '@app/core/systems/culture-event.service';
@@ -64,11 +64,18 @@ function setup(
 // ---------------------------------------------------------------------------
 
 describe('CultureEventToastComponent', () => {
-  beforeEach(() => TestBed.resetTestingModule());
+  beforeEach(() => {
+    vi.useFakeTimers();
+    TestBed.resetTestingModule();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
 
   // ── Toast spawn ───────────────────────────────────────────────────────────
 
-  it('spawns a toast when notification queue grows', fakeAsync(() => {
+  it('spawns a toast when notification queue grows', () => {
     const { fixture, fakeCultureEventService } = setup([], { ce_001: 'Test Event' });
 
     fakeCultureEventService._setNotifications([makeEntry('ce_001')]);
@@ -79,22 +86,22 @@ describe('CultureEventToastComponent', () => {
     expect(fixture.componentInstance._toasts()[0].visible).toBe(false);
 
     // After microtask, visible: true
-    tick(0);
+    vi.advanceTimersByTime(0);
     fixture.detectChanges();
     expect(fixture.componentInstance._toasts()[0].visible).toBe(true);
 
     // Clean up auto-dismiss timers
-    tick(8000);
-    tick(350); // COLLAPSE_MS
-  }));
+    vi.advanceTimersByTime(8000);
+    vi.advanceTimersByTime(350); // COLLAPSE_MS
+  });
 
-  it('does not spawn a toast when notification queue shrinks', fakeAsync(() => {
+  it('does not spawn a toast when notification queue shrinks', () => {
     const { fixture, fakeCultureEventService } = setup(
       [makeEntry('ce_001'), makeEntry('ce_002')],
       { ce_001: 'First', ce_002: 'Second' },
     );
 
-    tick(0);
+    vi.advanceTimersByTime(0);
     fixture.detectChanges();
     const initialCount = fixture.componentInstance._toasts().length;
 
@@ -104,39 +111,40 @@ describe('CultureEventToastComponent', () => {
 
     expect(fixture.componentInstance._toasts().length).toBe(initialCount);
 
-    tick(8000);
-    tick(350);
-  }));
+    vi.advanceTimersByTime(8000);
+    vi.advanceTimersByTime(350);
+  });
 
   // ── Auto-dismiss ──────────────────────────────────────────────────────────
 
-  it('auto-dismisses toast: sets visible:false at 8s, removes from DOM after collapse', fakeAsync(() => {
+  it('auto-dismisses toast: sets visible:false at 8s, removes from DOM after collapse', () => {
     const { fixture, fakeCultureEventService } = setup([], { ce_001: 'Temp Event' });
 
     fakeCultureEventService._setNotifications([makeEntry('ce_001')]);
     fixture.detectChanges();
-    tick(0); // rampIn
+    vi.advanceTimersByTime(0); // rampIn
 
     expect(fixture.componentInstance._toasts().length).toBe(1);
 
-    tick(8000); // auto-dismiss → visible: false, dismissing: true starts
+    vi.advanceTimersByTime(8000); // auto-dismiss -> visible: false
+    vi.advanceTimersToNextTimer(); // collapse timer -> dismissing: true
     fixture.detectChanges();
     expect(fixture.componentInstance._toasts()[0].visible).toBe(false);
     expect(fixture.componentInstance._toasts()[0].dismissing).toBe(true);
 
-    tick(350); // COLLAPSE_MS → removal
+    vi.advanceTimersByTime(350); // COLLAPSE_MS -> removal
     fixture.detectChanges();
     expect(fixture.componentInstance._toasts().length).toBe(0);
-  }));
+  });
 
   // ── Toast click ───────────────────────────────────────────────────────────
 
-  it('calls showEvent() with the correct eventId and dismisses toast on click', fakeAsync(() => {
+  it('calls showEvent() with the correct eventId and dismisses toast on click', () => {
     const { fixture, fakeCultureEventService } = setup([], { ce_001: 'Clickable' });
 
     fakeCultureEventService._setNotifications([makeEntry('ce_001')]);
     fixture.detectChanges();
-    tick(0);
+    vi.advanceTimersByTime(0);
     fixture.detectChanges();
 
     const toastEl = fixture.nativeElement.querySelector('.toast__item');
@@ -147,42 +155,42 @@ describe('CultureEventToastComponent', () => {
     expect(fakeCultureEventService.showEvent).toHaveBeenCalledWith('ce_001');
     expect(fixture.componentInstance._toasts()[0].visible).toBe(false);
 
-    tick(350);
-  }));
+    vi.advanceTimersByTime(350);
+  });
 
   // ── Smooth dismiss state ──────────────────────────────────────────────────
 
-  it('sets dismissing:true on the wrapper after click', fakeAsync(() => {
+  it('sets dismissing:true on the wrapper after click', () => {
     const { fixture, fakeCultureEventService } = setup([], { ce_001: 'Dismiss Test' });
 
     fakeCultureEventService._setNotifications([makeEntry('ce_001')]);
     fixture.detectChanges();
-    tick(0);
+    vi.advanceTimersByTime(0);
     fixture.detectChanges();
 
     fixture.nativeElement.querySelector('.toast__item').click();
-    tick(0); // collapseTimer
+    vi.advanceTimersByTime(0); // collapseTimer
     fixture.detectChanges();
 
     expect(fixture.componentInstance._toasts()[0].dismissing).toBe(true);
 
-    tick(350);
-  }));
+    vi.advanceTimersByTime(350);
+  });
 
   // ── Destroy cleanup ───────────────────────────────────────────────────────
 
-  it('clears all timers on destroy', fakeAsync(() => {
+  it('clears all timers on destroy', () => {
     const { fixture, fakeCultureEventService } = setup([], { ce_001: 'Temp' });
 
     fakeCultureEventService._setNotifications([makeEntry('ce_001')]);
     fixture.detectChanges();
-    tick(0);
+    vi.advanceTimersByTime(0);
 
     // Destroy before auto-dismiss fires
     fixture.destroy();
 
     // Remaining timers should not throw
-    tick(8000);
-    tick(350);
-  }));
+    vi.advanceTimersByTime(8000);
+    vi.advanceTimersByTime(350);
+  });
 });

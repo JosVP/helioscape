@@ -124,18 +124,10 @@ beforeEach(() => {
 // ---------------------------------------------------------------------------
 
 describe('PlanetsMenuComponent', () => {
-  it('renders 5 rows in correct order (earth, moon, mercury, mars, venus)', () => {
+  it('renders rows in display order (mercury, venus, earth, mars)', () => {
     const fixture = setup();
     const rows = fixture.componentInstance.rows();
-    expect(rows.map((r) => r.id)).toEqual(['earth', 'moon', 'mercury', 'mars', 'venus']);
-  });
-
-  it('Moon row is indented, labelled "Moon", status active', () => {
-    const fixture = setup();
-    const moon = fixture.componentInstance.rows().find((r) => r.id === 'moon')!;
-    expect(moon.isIndented).toBe(true);
-    expect(moon.displayName).toBe('Moon');
-    expect(moon.status).toBe('active');
+    expect(rows.map((r) => r.id)).toEqual(['mercury', 'venus', 'earth', 'mars']);
   });
 
   it('Mercury row is locked when absent from planets signal', () => {
@@ -219,11 +211,4 @@ describe('PlanetsMenuComponent', () => {
     expect(mercury.isSelected).toBe(false);
   });
 
-  it('Moon row isSelected when selectedPlanetId input is "earth"', () => {
-    const fixture = setup();
-    fixture.componentRef.setInput('selectedPlanetId', 'earth');
-    fixture.detectChanges();
-    const moon = fixture.componentInstance.rows().find((r) => r.id === 'moon')!;
-    expect(moon.isSelected).toBe(true);
-  });
 });

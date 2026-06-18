@@ -60,8 +60,13 @@ function makeMarsPhases(): BioPhaseState[] {
 }
 
 const MARS_DEFS: BioPhaseDef[] = [
-  makePhaseDef({ id: 'mars-bio-1', displayName: 'Pioneer Microbes', durationYears: 20, nominalDurationYears: 20 } as BioPhaseDef),
-  makePhaseDef({ id: 'mars-bio-2', displayName: 'Chemolithotrophs & Fixers', durationYears: 25, nominalDurationYears: 25, canStartAtPreviousPercent: 0.5 }),
+  makePhaseDef({ id: 'mars-bio-1', displayName: 'Pioneer Microbes', nominalDurationYears: 20 }),
+  makePhaseDef({
+    id: 'mars-bio-2',
+    displayName: 'Chemolithotrophs & Fixers',
+    nominalDurationYears: 25,
+    canStartAtPreviousPercent: 0.5,
+  }),
   makePhaseDef({
     id: 'mars-bio-3',
     displayName: 'Early Plants & Aquatics',

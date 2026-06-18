@@ -7,6 +7,8 @@ import { GameStateService } from '@app/core/services/game-state.service';
 import { GameLoopService } from '@app/core/services/game-loop.service';
 import { SaveService } from '@app/core/services/save.service';
 import { EventBusService } from '@app/core/services/event-bus.service';
+import { DataService } from '@app/core/services/data.service';
+import { CultureEventService } from '@app/core/systems/culture-event.service';
 
 describe('HudComponent', () => {
   const autosaveSignal = signal(0);
@@ -15,6 +17,8 @@ describe('HudComponent', () => {
   const isPausedSignal = signal(false);
   const kardashevSignal = signal(0.73);
   const isFirstPlaythroughSignal = signal(true);
+  const cultureEventHistorySignal = signal([]);
+  const notificationQueueSignal = signal([]);
 
   const mockGameState = {
     gameYear: gameYearSignal.asReadonly(),
@@ -22,6 +26,7 @@ describe('HudComponent', () => {
     isPaused: isPausedSignal.asReadonly(),
     kardashevLevel: kardashevSignal.asReadonly(),
     isFirstPlaythrough: isFirstPlaythroughSignal.asReadonly(),
+    cultureEventHistory: cultureEventHistorySignal.asReadonly(),
   };
 
   const mockGameLoop = {
@@ -36,6 +41,16 @@ describe('HudComponent', () => {
 
   const mockEventBus = {
     milestoneReached$: new Subject<string>(),
+    researchHubRequested$: new Subject<void>(),
+  };
+
+  const mockData = {
+    getCultureEvent: vi.fn(() => undefined),
+  };
+
+  const mockCultureEventService = {
+    notificationQueue: notificationQueueSignal.asReadonly(),
+    showEvent: vi.fn(),
   };
 
   function setup(): ComponentFixture<HudComponent> {
@@ -46,6 +61,8 @@ describe('HudComponent', () => {
         { provide: GameLoopService, useValue: mockGameLoop },
         { provide: SaveService, useValue: mockSave },
         { provide: EventBusService, useValue: mockEventBus },
+        { provide: DataService, useValue: mockData },
+        { provide: CultureEventService, useValue: mockCultureEventService },
       ],
     });
     const fixture = TestBed.createComponent(HudComponent);
@@ -55,6 +72,8 @@ describe('HudComponent', () => {
 
   beforeEach(() => {
     autosaveSignal.set(0);
+    cultureEventHistorySignal.set([]);
+    notificationQueueSignal.set([]);
     vi.clearAllMocks();
     TestBed.resetTestingModule();
   });

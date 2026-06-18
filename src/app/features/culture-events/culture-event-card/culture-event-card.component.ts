@@ -41,6 +41,8 @@ export class CultureEventCardComponent {
     // Reset choice index and manage focus when visibility changes.
     effect(() => {
       const visible = this.isVisible();
+      const eventId = this.event()?.id ?? null;
+      void eventId;
       untracked(() => {
         if (visible) {
           this._previousFocus = document.activeElement as HTMLElement | null;

@@ -94,6 +94,9 @@ function makeGameStateFake(opts: {
     shiftEventQueue: vi.fn(() => {
       queueSignal.update((q) => q.slice(1));
     }),
+    removeEventFromQueue: vi.fn((eventId: string) => {
+      queueSignal.update((q) => q.filter((entry) => entry.eventId !== eventId));
+    }),
     recordEventHistory: vi.fn((entry: CultureEventHistoryEntry) => {
       historySignal.update((h) => [...h, entry]);
     }),
@@ -114,6 +117,7 @@ function makeEventBusFake() {
     techUnlocked$: new Subject<{ planetId: string; nodeId: string }>(),
     milestoneReached$: new Subject<string>(),
     terraformingChoiceApplied$: new Subject<{ planetId: string; choiceId: string }>(),
+    terraformingPhaseChanged$: new Subject<{ planetId: string; phase: number }>(),
     bioPhaseCompleted$: new Subject<{ planetId: string; phaseId: string }>(),
     bioPhaseCollapsed$: new Subject<{ planetId: string; phaseId: string }>(),
     cultureEventTriggered$: new Subject<string>(),
@@ -162,7 +166,10 @@ describe('CultureEventService', () => {
 
   describe('queueEvent (normal, non-priority)', () => {
     it('adds entry to back of queue when no event is currently displaying', () => {
-      const event = makeCultureEvent({ id: 'ce_a' });
+      const event = makeCultureEvent({
+        id: 'ce_a',
+        choices: [{ id: 'c1', label: 'Continue', tag: '', effects: [] }],
+      });
       const { service, gameState } = setup({ gameYear: 2040 }, [event]);
 
       service.queueEvent('ce_a');
@@ -181,7 +188,10 @@ describe('CultureEventService', () => {
     });
 
     it('shows the event immediately when queue was empty and nothing is displaying', () => {
-      const event = makeCultureEvent({ id: 'ce_a' });
+      const event = makeCultureEvent({
+        id: 'ce_a',
+        choices: [{ id: 'c1', label: 'Continue', tag: '', effects: [] }],
+      });
       const entry = makeCultureEventEntry({ eventId: 'ce_a' });
       const { service, gameState } = setup({ gameYear: 2040, queue: [] }, [event]);
 
@@ -210,8 +220,7 @@ describe('CultureEventService', () => {
       gameState.addToEventQueue.mockImplementation(() => {});
       // Force first display
       gameState._setQueue([existingEntry]);
-      // Directly trigger _tryShowNext by queue being populated at service init
-      TestBed.flushEffects();
+      (service as any)._displayEvent(existingEntry);
 
       // The service should now be displaying ce_a
       // Queue ce_b — it should NOT jump to front
@@ -273,7 +282,7 @@ describe('CultureEventService', () => {
 
       service.closeCurrentEvent();
 
-      expect(gameState.shiftEventQueue).not.toHaveBeenCalled();
+      expect(gameState.removeEventFromQueue).not.toHaveBeenCalled();
     });
 
     it('shifts the queue and clears current entry immediately', () => {
@@ -285,7 +294,7 @@ describe('CultureEventService', () => {
 
       service.closeCurrentEvent();
 
-      expect(gameState.shiftEventQueue).toHaveBeenCalled();
+      expect(gameState.removeEventFromQueue).toHaveBeenCalledWith('ce_a');
       expect(service.isDisplayingEvent()).toBe(false);
       expect(service.currentEvent()).toBeNull();
     });
@@ -719,7 +728,7 @@ describe('CultureEventService', () => {
       service.applyChoice(makeChoice('naturalist'));
 
       expect(incrementNaturalistSpy).toHaveBeenCalledOnce();
-      expect(gameState.shiftEventQueue).toHaveBeenCalled();
+      expect(gameState.removeEventFromQueue).toHaveBeenCalledWith('ce_a');
       expect(service.isDisplayingEvent()).toBe(false);
     });
 
@@ -733,7 +742,7 @@ describe('CultureEventService', () => {
       service.applyChoice(makeChoice('architect'));
 
       expect(incrementArchitectSpy).toHaveBeenCalledOnce();
-      expect(gameState.shiftEventQueue).toHaveBeenCalled();
+      expect(gameState.removeEventFromQueue).toHaveBeenCalledWith('ce_a');
       expect(service.isDisplayingEvent()).toBe(false);
     });
 
@@ -749,7 +758,7 @@ describe('CultureEventService', () => {
 
       expect(incrementNaturalistSpy).not.toHaveBeenCalled();
       expect(incrementArchitectSpy).not.toHaveBeenCalled();
-      expect(gameState.shiftEventQueue).toHaveBeenCalled();
+      expect(gameState.removeEventFromQueue).toHaveBeenCalledWith('ce_a');
     });
   });
 });
