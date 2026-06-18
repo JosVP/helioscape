@@ -337,21 +337,27 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
     this._rafId = requestAnimationFrame((nextTimestampMs) => this._animate(nextTimestampMs));
 
     const fps = this._visualEffectsConfig.fps;
-    const previousFrameTimeMs = this._lastRenderedFrameTimeMs;
-    let visualFrameTimeMs = timestampMs;
+    let frameMultiplier = 1;
+
     if (fps !== null) {
-      const frameIntervalMs = 1000 / fps;
-      if (previousFrameTimeMs !== null && timestampMs - previousFrameTimeMs < frameIntervalMs) {
-        return;
+      const previousFrameTimeMs = this._lastRenderedFrameTimeMs;
+      let visualFrameTimeMs = timestampMs;
+      if (fps !== null) {
+        const frameIntervalMs = 1000 / fps;
+        if (previousFrameTimeMs !== null && timestampMs - previousFrameTimeMs < frameIntervalMs) {
+          return;
+        }
+        visualFrameTimeMs = previousFrameTimeMs === null
+          ? timestampMs
+          : timestampMs - ((timestampMs - previousFrameTimeMs) % frameIntervalMs);
       }
-      visualFrameTimeMs = previousFrameTimeMs === null
-        ? timestampMs
-        : timestampMs - ((timestampMs - previousFrameTimeMs) % frameIntervalMs);
+      this._lastRenderedFrameTimeMs = visualFrameTimeMs;
+      frameMultiplier = previousFrameTimeMs === null
+        ? 1
+        : Math.max(0, (visualFrameTimeMs - previousFrameTimeMs) / ORRERY_BASE_FRAME_MS);
     }
-    this._lastRenderedFrameTimeMs = visualFrameTimeMs;
-    const frameMultiplier = previousFrameTimeMs === null
-      ? 1
-      : Math.max(0, (visualFrameTimeMs - previousFrameTimeMs) / ORRERY_BASE_FRAME_MS);
+
+    // const frameMultiplier = 1;
 
     // ── 1. Read ALL signals into locals — never call signal getters mid-render ──
     const isPaused      = this._gameState.isPaused();
