@@ -15,6 +15,7 @@ import type {
   OrreryAtmosphereGlowObject,
   OrreryBackdropPalette,
   OrreryLayerMaterial,
+  OrreryOrbitMaterial,
   OrreryPlanetLayerObject,
   OrreryPlanetMaterial,
   OrrerySunGlowObjects,
@@ -41,13 +42,23 @@ interface OrreryComponentAccess {
   _planetMaterials: Map<string, OrreryPlanetMaterial>;
   _planetLayers: Map<string, readonly OrreryPlanetLayerObject[]>;
   _planetMeshes: Map<string, THREE.Mesh>;
+  _orbitMaterials: Map<string, OrreryOrbitMaterial>;
+  _hitAreaMeshes: Map<string, THREE.Mesh>;
+  _orbitHitMeshes: Map<string, THREE.Mesh>;
+  _raycastTargets: THREE.Object3D[];
   _planetAngles: Map<string, number>;
   _atmosphereGlows: Map<string, OrreryAtmosphereGlowObject>;
   _planetData: Map<string, PlanetData>;
+  _hoveredPlanetId: string | null;
+  _externalHoveredPlanetId: string | null;
+  _raycaster: THREE.Raycaster;
   _intersectionObserver: ObserverFake | null;
   _resizeObserver: ObserverFake | null;
   _readBackdropPalette(): OrreryBackdropPalette;
   _readVisualEffectsConfig(): OrreryVisualEffectsConfig;
+  _handleClick(event: MouseEvent): void;
+  _handleMouseMove(event: MouseEvent): void;
+  _handleMouseLeave(): void;
   _onResize(rect: DOMRectReadOnly): void;
   _animate(timestampMs?: number): void;
 }
@@ -157,6 +168,7 @@ describe('OrreryComponent', () => {
           '--orrery-bg-edge': ' #040609 ',
           '--orrery-grid': ' rgba(96, 145, 170, 0.68) ',
           '--orrery-orbit': ' #5f91aa ',
+          '--orrery-orbit-hover': ' #ffbe76 ',
           '--orrery-star': ' #f4ead1 ',
           '--orrery-star-feature': ' #ffc766 ',
         };
@@ -172,6 +184,7 @@ describe('OrreryComponent', () => {
       backgroundEdge: '#040609',
       grid: 'rgba(96, 145, 170, 0.68)',
       orbit: '#5f91aa',
+      orbitHover: '#ffbe76',
       star: '#f4ead1',
       featureStar: '#ffc766',
     });
@@ -275,6 +288,145 @@ describe('OrreryComponent', () => {
 
     expect(starfield.rotation.y).toBe(0);
     expect(renderer.render).toHaveBeenCalledOnce();
+  });
+
+  it('highlights only the active orbit ring during RAF', () => {
+    const component = setup();
+    const access = component as unknown as OrreryComponentAccess;
+    const renderer = { render: vi.fn(), dispose: vi.fn() } as unknown as THREE.WebGLRenderer;
+    const earthOrbitMaterial = new THREE.ShaderMaterial({
+      uniforms: {
+        uColor: { value: new THREE.Color('#5f91aa') },
+        uOpacity: { value: 0.12 },
+        uRadius: { value: 11 },
+        uLineWidthPx: { value: 3 },
+      },
+    }) as OrreryOrbitMaterial;
+    const marsOrbitMaterial = new THREE.ShaderMaterial({
+      uniforms: {
+        uColor: { value: new THREE.Color('#5f91aa') },
+        uOpacity: { value: 0.12 },
+        uRadius: { value: 17 },
+        uLineWidthPx: { value: 3 },
+      },
+    }) as OrreryOrbitMaterial;
+    vi.spyOn(globalThis, 'requestAnimationFrame').mockReturnValue(1);
+
+    access._renderer = renderer;
+    access._scene = new THREE.Scene();
+    access._camera = new THREE.PerspectiveCamera();
+    access._dysonMaterial = new THREE.MeshStandardMaterial({ transparent: true, opacity: 0 });
+    access._starfield = null;
+    access._orbitMaterials.set('earth', earthOrbitMaterial);
+    access._orbitMaterials.set('mars', marsOrbitMaterial);
+    access._hoveredPlanetId = 'earth';
+
+    access._animate();
+
+    expect(`#${earthOrbitMaterial.uniforms.uColor.value.getHexString()}`).toBe('#ffbe76');
+    expect(earthOrbitMaterial.uniforms.uOpacity.value).toBe(0.32);
+    expect(`#${marsOrbitMaterial.uniforms.uColor.value.getHexString()}`).toBe('#5f91aa');
+    expect(marsOrbitMaterial.uniforms.uOpacity.value).toBe(0.12);
+  });
+
+  it('does not grey out a locked hovered planet during RAF', () => {
+    const component = setup();
+    const access = component as unknown as OrreryComponentAccess;
+    const renderer = { render: vi.fn(), dispose: vi.fn() } as unknown as THREE.WebGLRenderer;
+    const planetMesh = new THREE.Mesh(new THREE.SphereGeometry(1, 8, 8));
+    const shaderMaterial = new THREE.ShaderMaterial({
+      uniforms: {
+        uBaseTexture: { value: new THREE.Texture() },
+        uHasBaseTexture: { value: false },
+        uBaseColor: { value: new THREE.Color('#3a7ab8') },
+        uTintColor: { value: new THREE.Color('#222222') },
+        uSunDirection: { value: new THREE.Vector3() },
+        uLitBrightness: { value: 0.5 },
+        uShadowOpacity: { value: 0.5 },
+        uShadowTint: { value: new THREE.Color('#000000') },
+        uLightingEnabled: { value: true },
+      },
+    }) as OrreryPlanetMaterial;
+    vi.spyOn(globalThis, 'requestAnimationFrame').mockReturnValue(1);
+
+    access._renderer = renderer;
+    access._scene = new THREE.Scene();
+    access._camera = new THREE.PerspectiveCamera();
+    access._dysonMaterial = new THREE.MeshStandardMaterial({ transparent: true, opacity: 0 });
+    access._starfield = null;
+    access._planetMeshes.set('earth', planetMesh);
+    access._planetData.set('earth', makePlanetData('earth', '#3a7ab8'));
+    access._planetMaterials.set('earth', shaderMaterial);
+    access._hoveredPlanetId = 'earth';
+
+    access._animate();
+
+    expect(`#${shaderMaterial.uniforms.uTintColor.value.getHexString()}`).toBe('#ffffff');
+    expect(shaderMaterial.uniforms.uLitBrightness.value).toBe(1);
+  });
+
+  it('uses one cached target list for planet and orbit pointer resolution', () => {
+    const component = setup();
+    const access = component as unknown as OrreryComponentAccess;
+    const canvas = document.createElement('canvas');
+    const hitAreaMesh = new THREE.Mesh(new THREE.SphereGeometry(1, 8, 8));
+    const orbitHitMesh = new THREE.Mesh(new THREE.TorusGeometry(2, 0.2, 6, 16));
+    const selected: string[] = [];
+    const eventBus = TestBed.inject(EventBusService);
+    eventBus.planetSelected$.subscribe((id) => selected.push(id));
+    hitAreaMesh.userData = { planetId: 'earth' };
+    orbitHitMesh.userData = { planetId: 'mars' };
+    Object.defineProperty(canvas, 'clientWidth', { value: 100 });
+    Object.defineProperty(canvas, 'clientHeight', { value: 100 });
+
+    access._canvasRef = new ElementRef(canvas);
+    access._camera = new THREE.PerspectiveCamera();
+    access._raycastTargets.push(hitAreaMesh, orbitHitMesh);
+    const orbitIntersection = {
+      distance: 1,
+      point: new THREE.Vector3(),
+      object: orbitHitMesh,
+    } as THREE.Intersection;
+    const intersectSpy = vi
+      .spyOn(access._raycaster, 'intersectObjects')
+      .mockReturnValue([orbitIntersection]);
+
+    access._handleClick(new MouseEvent('click'));
+
+    expect(intersectSpy).toHaveBeenCalledWith(access._raycastTargets);
+    expect(selected).toEqual(['mars']);
+  });
+
+  it('uses pointer cursor for locked orbit hits and clears hover on leave', () => {
+    const component = setup();
+    const access = component as unknown as OrreryComponentAccess;
+    const canvas = document.createElement('canvas');
+    const orbitHitMesh = new THREE.Mesh(new THREE.TorusGeometry(2, 0.2, 6, 16));
+    const hovered: Array<string | null> = [];
+    const eventBus = TestBed.inject(EventBusService);
+    orbitHitMesh.userData = { planetId: 'mars' };
+    Object.defineProperty(canvas, 'clientWidth', { value: 100 });
+    Object.defineProperty(canvas, 'clientHeight', { value: 100 });
+    eventBus.planetHovered$.subscribe((id) => hovered.push(id));
+
+    access._canvasRef = new ElementRef(canvas);
+    access._camera = new THREE.PerspectiveCamera();
+    access._raycastTargets.push(orbitHitMesh);
+    const orbitIntersection = {
+      distance: 1,
+      point: new THREE.Vector3(),
+      object: orbitHitMesh,
+    } as THREE.Intersection;
+    vi.spyOn(access._raycaster, 'intersectObjects')
+      .mockReturnValue([orbitIntersection]);
+
+    access._handleMouseMove(new MouseEvent('mousemove'));
+    expect(canvas.style.cursor).toBe('pointer');
+    access._handleMouseLeave();
+
+    expect(access._hoveredPlanetId).toBeNull();
+    expect(hovered).toEqual(['mars', null]);
+    expect(canvas.style.cursor).toBe('default');
   });
 
   it('renders through the composer when post-processing is active', () => {

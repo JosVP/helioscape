@@ -35,6 +35,7 @@ import {
   disposeScene,
   type OrreryAtmosphereGlowObject,
   type OrreryBackdropPalette,
+  type OrreryOrbitMaterial,
   type OrreryPlanetLayerObject,
   type OrreryPlanetMaterial,
   type OrrerySunGlowObjects,
@@ -42,7 +43,8 @@ import {
 } from './orrery-scene.builder';
 
 const ORRERY_GRID_OPACITY = 0.14;
-const ORRERY_ORBIT_OPACITY = 0.12;
+const ORRERY_ORBIT_OPACITY = 0.2;
+const ORRERY_ORBIT_HOVER_OPACITY = 0.5;
 const ORRERY_BASE_FRAME_MS = 1000 / 60;
 const EMPTY_PLANET_LAYERS: readonly OrreryPlanetLayerObject[] = [];
 
@@ -77,13 +79,18 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
   // ── Per-planet tracking ────────────────────────────────────────────────────
   private readonly _planetAngles   = new Map<string, number>();
   private readonly _planetMeshes   = new Map<string, THREE.Mesh>();
+  private readonly _orbitMeshes    = new Map<string, THREE.Object3D>();
   private readonly _hitAreaMeshes  = new Map<string, THREE.Mesh>();
-  private readonly _orbitMaterials = new Map<string, THREE.MeshBasicMaterial>();
+  private readonly _orbitHitMeshes = new Map<string, THREE.Mesh>();
+  private readonly _orbitMaterials = new Map<string, OrreryOrbitMaterial>();
   private readonly _planetMaterials = new Map<string, OrreryPlanetMaterial>();
   private readonly _planetLayers = new Map<string, readonly OrreryPlanetLayerObject[]>();
   private readonly _atmosphereGlows = new Map<string, OrreryAtmosphereGlowObject>();
   private readonly _planetData = new Map<string, PlanetData>();
   private readonly _planetOrbitEntries = Object.entries(PLANET_ORBITS);
+  private readonly _raycastTargets: THREE.Object3D[] = [];
+  private _orbitBaseColor = '';
+  private _orbitHoverColor = '';
 
   // ── Sun / Dyson ────────────────────────────────────────────────────────────
   private _dysonMaterial!: THREE.MeshStandardMaterial;
@@ -120,6 +127,8 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
     this._scene    = new THREE.Scene();
     this._camera   = createCamera(aspect);
     const backdropPalette = this._readBackdropPalette();
+    this._orbitBaseColor = backdropPalette.orbit;
+    this._orbitHoverColor = backdropPalette.orbitHover;
     this._visualEffectsConfig = this._readVisualEffectsConfig();
 
     buildBackground(this._scene, backdropPalette);
@@ -136,16 +145,27 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
       const config = PLANET_ORBITS[planetData.id];
       if (!config) continue; // guard against unknown planet ids in JSON
       this._planetData.set(planetData.id, planetData);
-      const { planetMesh, planetMaterial, layerObjects, hitAreaMesh, orbitMaterial } =
+      const {
+        orbitMesh,
+        planetMesh,
+        planetMaterial,
+        layerObjects,
+        hitAreaMesh,
+        orbitHitMesh,
+        orbitMaterial,
+      } =
         buildPlanetObjects(this._scene, planetData, config, {
           color: backdropPalette.orbit,
           opacity: ORRERY_ORBIT_OPACITY,
         });
       this._planetMeshes.set(planetData.id, planetMesh);
+      this._orbitMeshes.set(planetData.id, orbitMesh);
       this._planetMaterials.set(planetData.id, planetMaterial);
       this._planetLayers.set(planetData.id, layerObjects);
       this._hitAreaMeshes.set(planetData.id, hitAreaMesh);
+      this._orbitHitMeshes.set(planetData.id, orbitHitMesh);
       this._orbitMaterials.set(planetData.id, orbitMaterial);
+      this._raycastTargets.push(hitAreaMesh, planetMesh, orbitHitMesh, orbitMesh);
       this._planetAngles.set(planetData.id, config.initialAngle);
       const atmosphereGlow = buildAtmosphereGlow(
         this._scene,
@@ -184,13 +204,16 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
     }
 
     this._planetMeshes.clear();
+    this._orbitMeshes.clear();
     this._hitAreaMeshes.clear();
+    this._orbitHitMeshes.clear();
     this._orbitMaterials.clear();
     this._planetMaterials.clear();
     this._planetLayers.clear();
     this._atmosphereGlows.clear();
     this._planetAngles.clear();
     this._planetData.clear();
+    this._raycastTargets.length = 0;
     this._starfield = null;
     this._sunGlow = null;
   }
@@ -234,6 +257,7 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
       backgroundEdge: readToken('--orrery-bg-edge'),
       grid: readToken('--orrery-grid'),
       orbit: readToken('--orrery-orbit'),
+      orbitHover: readToken('--orrery-orbit-hover'),
       star: readToken('--orrery-star'),
       featureStar: readToken('--orrery-star-feature'),
     };
@@ -356,10 +380,7 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
       const staticPlanet = this._planetData.get(id);
       if (!material || !staticPlanet) continue;
 
-      const isLocked         = planetsState[id] === undefined;
-      const isLocalHovered   = this._hoveredPlanetId === id;
-      const isExternalHovered = this._externalHoveredPlanetId === id && !isLocalHovered;
-      const isAnyHovered     = isLocalHovered || isExternalHovered;
+      const isLocked = planetsState[id] === undefined;
 
       const baseHex = isLocked
         ? staticPlanet.visual.baseColor
@@ -386,17 +407,8 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
           this._visualEffectsConfig.atmosphereGlow.intensity;
       }
 
-      if (isLocalHovered && isLocked) {
-        // Locked planet hover: grey tint communicates "cannot interact".
-        material.uniforms.uTintColor.value.set(0x888888);
-        material.uniforms.uLitBrightness.value = 1;
-      } else if (isAnyHovered) {
-        material.uniforms.uTintColor.value.set('#ffffff');
-        material.uniforms.uLitBrightness.value = 1.18;
-      } else {
-        material.uniforms.uTintColor.value.set('#ffffff');
-        material.uniforms.uLitBrightness.value = 1;
-      }
+      material.uniforms.uTintColor.value.set('#ffffff');
+      material.uniforms.uLitBrightness.value = 1;
 
       material.uniforms.uBaseColor.value.set(baseHex);
       material.uniforms.uSunDirection.value.set(-x, 0, -z).normalize();
@@ -427,10 +439,11 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
     }
 
     // ── 5. Update orbit ring opacity ──────────────────────────────────────────
+    const activeOrbitId = this._hoveredPlanetId ?? this._externalHoveredPlanetId;
     for (const [id, orbitMat] of this._orbitMaterials) {
-      const isHovered =
-        this._hoveredPlanetId === id || this._externalHoveredPlanetId === id;
-      orbitMat.opacity = isHovered ? 0.25 : 0.08;
+      const isHovered = activeOrbitId === id;
+      orbitMat.uniforms.uColor.value.set(isHovered ? this._orbitHoverColor : this._orbitBaseColor);
+      orbitMat.uniforms.uOpacity.value = isHovered ? ORRERY_ORBIT_HOVER_OPACITY : ORRERY_ORBIT_OPACITY;
     }
 
     // ── 6. Update Dyson swarm opacity ─────────────────────────────────────────
@@ -473,13 +486,7 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
   // ---------------------------------------------------------------------------
 
   private _handleClick(event: MouseEvent): void {
-    const canvas = this._canvasRef.nativeElement;
-    this._pointer.x =  (event.offsetX / canvas.clientWidth)  * 2 - 1;
-    this._pointer.y = -(event.offsetY / canvas.clientHeight) * 2 + 1;
-    this._raycaster.setFromCamera(this._pointer, this._camera);
-
-    const hits = this._raycaster.intersectObjects([...this._hitAreaMeshes.values()]);
-    const planetId = hits[0]?.object.userData['planetId'] as string | undefined;
+    const planetId = this._resolvePlanetIdFromPointerEvent(event);
     if (planetId) {
       this._eventBus.planetSelected$.next(planetId);
     }
@@ -488,27 +495,24 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
 
   private _handleMouseMove(event: MouseEvent): void {
     const canvas = this._canvasRef.nativeElement;
-    this._pointer.x =  (event.offsetX / canvas.clientWidth)  * 2 - 1;
-    this._pointer.y = -(event.offsetY / canvas.clientHeight) * 2 + 1;
-    this._raycaster.setFromCamera(this._pointer, this._camera);
-
-    const hits = this._raycaster.intersectObjects([...this._hitAreaMeshes.values()]);
-    const newId: string | null =
-      (hits[0]?.object.userData['planetId'] as string | undefined) ?? null;
+    const newId = this._resolvePlanetIdFromPointerEvent(event);
 
     if (newId === this._hoveredPlanetId) return; // no change
 
     this._hoveredPlanetId = newId;
     this._eventBus.planetHovered$.next(newId);
 
-    // Cursor feedback: locked planet → not-allowed, unlocked → pointer.
-    if (newId === null) {
-      canvas.style.cursor = 'default';
-    } else if (this._gameState.planets()[newId] === undefined) {
-      canvas.style.cursor = 'not-allowed';
-    } else {
-      canvas.style.cursor = 'pointer';
-    }
+    canvas.style.cursor = newId === null ? 'default' : 'pointer';
+  }
+
+  private _resolvePlanetIdFromPointerEvent(event: MouseEvent): string | null {
+    const canvas = this._canvasRef.nativeElement;
+    this._pointer.x =  (event.offsetX / canvas.clientWidth)  * 2 - 1;
+    this._pointer.y = -(event.offsetY / canvas.clientHeight) * 2 + 1;
+    this._raycaster.setFromCamera(this._pointer, this._camera);
+
+    const hits = this._raycaster.intersectObjects(this._raycastTargets);
+    return (hits[0]?.object.userData['planetId'] as string | undefined) ?? null;
   }
 
   private _handleMouseLeave(): void {

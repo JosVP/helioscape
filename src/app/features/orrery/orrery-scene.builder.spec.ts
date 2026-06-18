@@ -27,6 +27,7 @@ const palette: OrreryBackdropPalette = {
   backgroundEdge: '#040609',
   grid: '#6091aa',
   orbit: '#5f91aa',
+  orbitHover: '#ffbe76',
   star: '#f4ead1',
   featureStar: '#ffc766',
 };
@@ -128,18 +129,47 @@ describe('orrery scene builder', () => {
   it('buildPlanetObjects uses passed orbit color and opacity', () => {
     const scene = new THREE.Scene();
 
-    const { orbitMaterial } = buildPlanetObjects(
+    const { orbitMesh, orbitMaterial } = buildPlanetObjects(
       scene,
       makePlanetData(),
       PLANET_ORBITS['earth'],
       { color: '#123456', opacity: 0.33 }
     );
 
-    expect(orbitMaterial).toBeInstanceOf(THREE.MeshBasicMaterial);
-    expect(`#${orbitMaterial.color.getHexString()}`).toBe('#123456');
-    expect(orbitMaterial.opacity).toBe(0.33);
+    expect(orbitMesh).toBeInstanceOf(THREE.Mesh);
+    expect(orbitMesh.geometry).toBeInstanceOf(THREE.RingGeometry);
+    expect(orbitMesh.userData['planetId']).toBe('earth');
+    expect(orbitMesh.userData['interactionKind']).toBe('orbit');
+    expect(orbitMaterial).toBeInstanceOf(THREE.ShaderMaterial);
+    expect(`#${orbitMaterial.uniforms.uColor.value.getHexString()}`).toBe('#123456');
+    expect(orbitMaterial.uniforms.uOpacity.value).toBe(0.33);
+    expect(orbitMaterial.uniforms.uRadius.value).toBe(PLANET_ORBITS['earth'].orreryRadius);
+    expect(orbitMaterial.uniforms.uLineWidthPx.value).toBe(3);
     expect(orbitMaterial.transparent).toBe(true);
     expect(orbitMaterial.depthWrite).toBe(false);
+    expect(orbitMaterial.side).toBe(THREE.DoubleSide);
+    expect(scene.children).toContain(orbitMesh);
+  });
+
+  it('buildPlanetObjects adds a wider invisible orbit hit proxy with the planet id', () => {
+    const scene = new THREE.Scene();
+
+    const { orbitHitMesh } = buildPlanetObjects(
+      scene,
+      makePlanetData(),
+      PLANET_ORBITS['earth'],
+      { color: '#123456', opacity: 0.33 }
+    );
+
+    expect(orbitHitMesh).toBeInstanceOf(THREE.Mesh);
+    expect(orbitHitMesh.visible).toBe(true);
+    expect(orbitHitMesh.userData['planetId']).toBe('earth');
+    expect(orbitHitMesh.userData['interactionKind']).toBe('orbit-hit');
+    expect(orbitHitMesh.material.opacity).toBe(0);
+    expect(orbitHitMesh.material.transparent).toBe(true);
+    expect(orbitHitMesh.material.colorWrite).toBe(false);
+    expect(orbitHitMesh.geometry.parameters.tube).toBeGreaterThan(0);
+    expect(scene.children).toContain(orbitHitMesh);
   });
 
   it('buildSun renders the sun with an unlit visible texture', () => {

@@ -17,6 +17,7 @@ export interface OrreryBackdropPalette {
   readonly backgroundEdge: string;
   readonly grid: string;
   readonly orbit: string;
+  readonly orbitHover: string;
   readonly star: string;
   readonly featureStar: string;
 }
@@ -117,6 +118,16 @@ export interface OrreryAtmosphereGlowUniforms {
 export type OrreryAtmosphereGlowMaterial = THREE.ShaderMaterial & {
   uniforms: OrreryAtmosphereGlowUniforms;
 };
+
+export interface OrreryOrbitUniforms {
+  readonly [key: string]: THREE.IUniform<unknown>;
+  readonly uColor: THREE.IUniform<THREE.Color>;
+  readonly uOpacity: THREE.IUniform<number>;
+  readonly uRadius: THREE.IUniform<number>;
+  readonly uLineWidthPx: THREE.IUniform<number>;
+}
+
+export type OrreryOrbitMaterial = THREE.ShaderMaterial & { uniforms: OrreryOrbitUniforms };
 
 export interface OrreryPlanetLayerObject {
   readonly key: string;
@@ -326,6 +337,36 @@ void main() {
   float rim = pow(1.0 - abs(dot(normalize(vWorldNormal), viewDirection)), 2.6);
   float alpha = rim * uIntensity;
   gl_FragColor = linearToOutputTexel(vec4(uColor * alpha, alpha));
+}
+`;
+
+const ORBIT_RING_VERTEX_SHADER = `
+varying vec2 vLocalPosition;
+
+void main() {
+  vLocalPosition = position.xy;
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}
+`;
+
+const ORBIT_RING_FRAGMENT_SHADER = `
+uniform vec3 uColor;
+uniform float uOpacity;
+uniform float uRadius;
+uniform float uLineWidthPx;
+
+varying vec2 vLocalPosition;
+
+void main() {
+  float distanceFromSun = length(vLocalPosition);
+  float signedDistance = abs(distanceFromSun - uRadius);
+  float pixelWidth = max(fwidth(distanceFromSun), 0.0001);
+  float halfLineWidth = max(uLineWidthPx * 0.5 * pixelWidth, pixelWidth);
+  float alpha = 1.0 - smoothstep(halfLineWidth, halfLineWidth + pixelWidth, signedDistance);
+
+  if (alpha <= 0.001) discard;
+
+  gl_FragColor = linearToOutputTexel(vec4(uColor, alpha * uOpacity));
 }
 `;
 
@@ -699,12 +740,19 @@ export function buildSunGlow(
 // ---------------------------------------------------------------------------
 
 export interface PlanetObjects {
+  orbitMesh: THREE.Mesh<THREE.RingGeometry, OrreryOrbitMaterial>;
   planetMesh: THREE.Mesh;
   planetMaterial: OrreryPlanetMaterial;
   layerObjects: readonly OrreryPlanetLayerObject[];
   hitAreaMesh: THREE.Mesh;
-  orbitMaterial: THREE.MeshBasicMaterial;
+  orbitHitMesh: THREE.Mesh<THREE.TorusGeometry, THREE.MeshBasicMaterial>;
+  orbitMaterial: OrreryOrbitMaterial;
 }
+
+const ORBIT_RING_SEGMENTS = 160;
+const ORBIT_RING_GEOMETRY_WIDTH = 0.9;
+const ORBIT_RING_LINE_WIDTH_PX = 2;
+const ORBIT_HIT_TUBE_RADIUS = 0.28;
 
 export function buildAtmosphereGlow(
   scene: THREE.Scene,
@@ -836,17 +884,40 @@ export function buildPlanetObjects(
   const startZ = Math.sin(config.initialAngle) * config.orreryRadius;
 
   // Orbit ring — static, never moved after creation.
-  const ringGeo = new THREE.TorusGeometry(config.orreryRadius, 0.04, 8, 128);
-  const ringMat = new THREE.MeshBasicMaterial({
-    color: new THREE.Color(orbitStyle.color),
+  const ringGeo = new THREE.RingGeometry(
+    config.orreryRadius - ORBIT_RING_GEOMETRY_WIDTH / 2,
+    config.orreryRadius + ORBIT_RING_GEOMETRY_WIDTH / 2,
+    ORBIT_RING_SEGMENTS
+  );
+  const ringMat = new THREE.ShaderMaterial({
+    uniforms: {
+      uColor: { value: new THREE.Color(orbitStyle.color) },
+      uOpacity: { value: orbitStyle.opacity ?? DEFAULT_ORRERY_GRID_OPTIONS.orbitOpacity },
+      uRadius: { value: config.orreryRadius },
+      uLineWidthPx: { value: ORBIT_RING_LINE_WIDTH_PX },
+    },
+    vertexShader: ORBIT_RING_VERTEX_SHADER,
+    fragmentShader: ORBIT_RING_FRAGMENT_SHADER,
     transparent: true,
-    opacity: orbitStyle.opacity ?? DEFAULT_ORRERY_GRID_OPTIONS.orbitOpacity,
     depthWrite: false,
-  });
-  // Orbit ring lies flat on the ecliptic (XZ) plane.
+    side: THREE.DoubleSide,
+  }) as OrreryOrbitMaterial;
   const ringMesh = new THREE.Mesh(ringGeo, ringMat);
   ringMesh.rotation.x = Math.PI / 2;
+  ringMesh.userData = { planetId: planetData.id, interactionKind: 'orbit' };
   scene.add(ringMesh);
+
+  const orbitHitGeo = new THREE.TorusGeometry(config.orreryRadius, ORBIT_HIT_TUBE_RADIUS, 6, 96);
+  const orbitHitMat = new THREE.MeshBasicMaterial({
+    transparent: true,
+    opacity: 0,
+    depthWrite: false,
+    colorWrite: false,
+  });
+  const orbitHitMesh = new THREE.Mesh(orbitHitGeo, orbitHitMat);
+  orbitHitMesh.rotation.x = Math.PI / 2;
+  orbitHitMesh.userData = { planetId: planetData.id, interactionKind: 'orbit-hit' };
+  scene.add(orbitHitMesh);
 
   // Visible planet sphere.
   const planetGeo = new THREE.SphereGeometry(config.visualRadius, 32, 32);
@@ -881,7 +952,15 @@ export function buildPlanetObjects(
   hitAreaMesh.userData = { planetId: planetData.id };
   scene.add(hitAreaMesh);
 
-  return { planetMesh, planetMaterial: planetMat, layerObjects, hitAreaMesh, orbitMaterial: ringMat };
+  return {
+    orbitMesh: ringMesh,
+    planetMesh,
+    planetMaterial: planetMat,
+    layerObjects,
+    hitAreaMesh,
+    orbitHitMesh,
+    orbitMaterial: ringMat,
+  };
 }
 
 // ---------------------------------------------------------------------------
