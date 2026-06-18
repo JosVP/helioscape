@@ -10,7 +10,7 @@ import { DataService } from '@app/core/services/data.service';
 import { EventBusService } from '@app/core/services/event-bus.service';
 import { GameStateService } from '@app/core/services/game-state.service';
 import { OrreryComponent } from './orrery.component';
-import { ORBIT_SPEED_FACTOR } from './orrery-scene.builder';
+import { ORBIT_SPEED_FACTOR } from './orrery-scene.config';
 import type {
   OrreryAtmosphereGlowObject,
   OrreryBackdropPalette,
@@ -20,7 +20,7 @@ import type {
   OrreryPlanetMaterial,
   OrrerySunGlowObjects,
   OrreryVisualEffectsConfig,
-} from './orrery-scene.builder';
+} from './orrery-scene.types';
 
 interface ObserverFake {
   readonly observe: ReturnType<typeof vi.fn>;

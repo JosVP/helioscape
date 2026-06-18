@@ -22,6 +22,8 @@ import {
   ORBIT_SPEED_FACTOR,
   ORRERY_STARFIELD_ROTATION_SPEED,
   PLANET_ORBITS,
+} from './orrery-scene.config';
+import {
   buildAtmosphereGlow,
   buildBackground,
   buildEclipticGrid,
@@ -33,14 +35,16 @@ import {
   createLights,
   createRenderer,
   disposeScene,
-  type OrreryAtmosphereGlowObject,
-  type OrreryBackdropPalette,
-  type OrreryOrbitMaterial,
-  type OrreryPlanetLayerObject,
-  type OrreryPlanetMaterial,
-  type OrrerySunGlowObjects,
-  type OrreryVisualEffectsConfig,
 } from './orrery-scene.builder';
+import type {
+  OrreryAtmosphereGlowObject,
+  OrreryBackdropPalette,
+  OrreryOrbitMaterial,
+  OrreryPlanetLayerObject,
+  OrreryPlanetMaterial,
+  OrrerySunGlowObjects,
+  OrreryVisualEffectsConfig,
+} from './orrery-scene.types';
 
 const ORRERY_GRID_OPACITY = 0.14;
 const ORRERY_ORBIT_OPACITY = 0.2;

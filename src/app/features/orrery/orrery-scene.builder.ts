@@ -7,230 +7,70 @@
  */
 import * as THREE from 'three';
 import type { PlanetData } from '@app/core/models';
+import {
+  DEFAULT_ORRERY_DAY_NIGHT_LIGHTING_OPTIONS,
+  DEFAULT_ORRERY_GRID_OPTIONS,
+  DEFAULT_ORRERY_STARFIELD_OPTIONS,
+  ORRERY_ASSET_PATHS,
+  ORRERY_ORBIT_RING_CONFIG,
+} from './orrery-scene.config';
+import type {
+  OrreryAtmosphereGlowConfig,
+  OrreryAtmosphereGlowMaterial,
+  OrreryAtmosphereGlowObject,
+  OrreryBackdropPalette,
+  OrreryDayNightLightingOptions,
+  OrreryGridOptions,
+  OrreryLayerMaterial,
+  OrreryLayerUniforms,
+  OrreryOrbitMaterial,
+  OrreryOrbitStyleOptions,
+  OrreryPlanetLayerObject,
+  OrreryPlanetMaterial,
+  OrreryPlanetUniforms,
+  OrreryStarfieldOptions,
+  OrrerySunGlowConfig,
+  OrrerySunGlowObjects,
+  PlanetObjects,
+  PlanetOrreryConfig,
+  SunObjects,
+} from './orrery-scene.types';
 
-// ---------------------------------------------------------------------------
-// Backdrop configuration (rendering-only — supplied by component from tokens)
-// ---------------------------------------------------------------------------
-
-export interface OrreryBackdropPalette {
-  readonly backgroundCore: string;
-  readonly backgroundEdge: string;
-  readonly grid: string;
-  readonly orbit: string;
-  readonly orbitHover: string;
-  readonly star: string;
-  readonly featureStar: string;
-}
-
-export interface OrreryStarfieldOptions {
-  readonly palette: OrreryBackdropPalette;
-  readonly starCount?: number;
-  readonly featureStarCount?: number;
-  readonly radius?: number;
-  readonly depth?: number;
-  readonly opacity?: number;
-}
-
-export interface OrreryGridOptions {
-  readonly color: string;
-  readonly opacity?: number;
-  readonly showRadialSpokes?: boolean;
-  readonly radialSpokeCount?: number;
-  readonly yOffset?: number;
-}
-
-export interface OrreryOrbitStyleOptions {
-  readonly color: string;
-  readonly opacity?: number;
-}
-
-export interface OrreryDayNightLightingOptions {
-  readonly enabled?: boolean;
-  readonly litSideBrightness?: number;
-  readonly darkSideShadowOpacity?: number;
-  readonly darkSideShadowTint?: string;
-  readonly cityLightsIntensity?: number;
-}
-
-export interface OrreryPixelateConfig {
-  readonly enabled: boolean;
-  readonly pixelSize: number;
-}
-
-export interface OrrerySunGlowConfig {
-  readonly enabled: boolean;
-  /** Resolved CSS token color. */
-  readonly color: string;
-  readonly size: number;
-  readonly intensity: number;
-  readonly textureSize?: number;
-}
-
-export interface OrreryAtmosphereGlowConfig {
-  readonly enabled: boolean;
-  readonly thickness: number;
-  readonly intensity: number;
-}
-
-export interface OrreryVisualEffectsConfig {
-  /** Target render/update FPS for the visual scene; null keeps browser-native RAF cadence. */
-  readonly fps: number | null;
-  readonly pixelate: OrreryPixelateConfig;
-  readonly sunGlow: OrrerySunGlowConfig;
-  readonly atmosphereGlow: OrreryAtmosphereGlowConfig;
-}
-
-export interface OrreryPlanetUniforms {
-  readonly [key: string]: THREE.IUniform<unknown>;
-  readonly uBaseTexture: THREE.IUniform<THREE.Texture>;
-  readonly uHasBaseTexture: THREE.IUniform<boolean>;
-  readonly uBaseColor: THREE.IUniform<THREE.Color>;
-  readonly uTintColor: THREE.IUniform<THREE.Color>;
-  readonly uSunDirection: THREE.IUniform<THREE.Vector3>;
-  readonly uLitBrightness: THREE.IUniform<number>;
-  readonly uShadowOpacity: THREE.IUniform<number>;
-  readonly uShadowTint: THREE.IUniform<THREE.Color>;
-  readonly uLightingEnabled: THREE.IUniform<boolean>;
-}
-
-export type OrreryPlanetMaterial = THREE.ShaderMaterial & { uniforms: OrreryPlanetUniforms };
-
-export interface OrreryLayerUniforms {
-  readonly [key: string]: THREE.IUniform<unknown>;
-  readonly uLayerTexture: THREE.IUniform<THREE.Texture>;
-  readonly uSunDirection: THREE.IUniform<THREE.Vector3>;
-  readonly uOpacity: THREE.IUniform<number>;
-  readonly uLitBrightness: THREE.IUniform<number>;
-  readonly uShadowOpacity: THREE.IUniform<number>;
-  readonly uLayerIntensity: THREE.IUniform<number>;
-  readonly uNightOnly: THREE.IUniform<boolean>;
-  readonly uLightingEnabled: THREE.IUniform<boolean>;
-}
-
-export type OrreryLayerMaterial = THREE.ShaderMaterial & { uniforms: OrreryLayerUniforms };
-
-export interface OrreryAtmosphereGlowUniforms {
-  readonly [key: string]: THREE.IUniform<unknown>;
-  readonly uColor: THREE.IUniform<THREE.Color>;
-  readonly uIntensity: THREE.IUniform<number>;
-}
-
-export type OrreryAtmosphereGlowMaterial = THREE.ShaderMaterial & {
-  uniforms: OrreryAtmosphereGlowUniforms;
-};
-
-export interface OrreryOrbitUniforms {
-  readonly [key: string]: THREE.IUniform<unknown>;
-  readonly uColor: THREE.IUniform<THREE.Color>;
-  readonly uOpacity: THREE.IUniform<number>;
-  readonly uRadius: THREE.IUniform<number>;
-  readonly uLineWidthPx: THREE.IUniform<number>;
-}
-
-export type OrreryOrbitMaterial = THREE.ShaderMaterial & { uniforms: OrreryOrbitUniforms };
-
-export interface OrreryPlanetLayerObject {
-  readonly key: string;
-  readonly mesh: THREE.Mesh;
-  readonly material: OrreryLayerMaterial;
-}
-
-export interface OrrerySunGlowObjects {
-  readonly sprite: THREE.Sprite;
-  readonly material: THREE.SpriteMaterial;
-  readonly texture: THREE.CanvasTexture;
-}
-
-export interface OrreryAtmosphereGlowObject {
-  readonly planetId: string;
-  readonly mesh: THREE.Mesh<THREE.SphereGeometry, OrreryAtmosphereGlowMaterial>;
-  readonly material: OrreryAtmosphereGlowMaterial;
-  readonly staticIntensity: number;
-}
-
-export interface OrreryBackdropObjects {
-  readonly backgroundTexture: THREE.CanvasTexture;
-  readonly starfield: THREE.Points;
-  readonly eclipticGrid: THREE.Object3D;
-}
-
-export const DEFAULT_ORRERY_STARFIELD_OPTIONS = {
-  starCount: 320,
-  featureStarCount: 8,
-  radius: 78,
-  depth: -34,
-  opacity: 0.82,
-} as const;
-
-export const DEFAULT_ORRERY_GRID_OPTIONS = {
-  gridOpacity: 0.14,
-  orbitOpacity: 0.12,
-  showRadialSpokes: true,
-  radialSpokeCount: 12,
-  yOffset: -0.035,
-} as const;
-
-export const DEFAULT_ORRERY_DAY_NIGHT_LIGHTING_OPTIONS = {
-  enabled: true,
-  litSideBrightness: 1.0,
-  darkSideShadowOpacity: 0.9,
-  darkSideShadowTint: '#000000',
-  cityLightsIntensity: 1.0,
-} as const;
-
-export const DEFAULT_ORRERY_VISUAL_EFFECTS_CONFIG: OrreryVisualEffectsConfig = {
-  fps: null,
-  pixelate: {
-    enabled: false,
-    pixelSize: 3,
-  },
-  sunGlow: {
-    enabled: true,
-    color: '',
-    size: 15,
-    intensity: 0.4,
-    textureSize: 256,
-  },
-  atmosphereGlow: {
-    enabled: false,
-    thickness: 0.1,
-    intensity: 0.75,
-  },
-};
-
-export const ORRERY_STARFIELD_ROTATION_SPEED = 0;
-
-// ---------------------------------------------------------------------------
-// Orbital configuration (rendering-only — not saved, not read by services)
-// ---------------------------------------------------------------------------
-
-export interface PlanetOrreryConfig {
-  /** Distance from the sun in Three.js units. */
-  readonly orreryRadius: number;
-  /** Orbital period relative to Earth = 1.0. Used to derive angular velocity. */
-  readonly orbitalPeriod: number;
-  /** Starting angle in radians, spreads planets visually at game start. */
-  readonly initialAngle: number;
-  /** Radius of the visible planet sphere. */
-  readonly visualRadius: number;
-  /** Radius of the invisible hit-area sphere used for raycasting (~2× visual). */
-  readonly hitRadius: number;
-}
-
-export const PLANET_ORBITS: Record<string, PlanetOrreryConfig> = {
-  mercury: { orreryRadius: 5,  orbitalPeriod: 0.241, initialAngle: Math.PI,        visualRadius: 0.35, hitRadius: 0.9 },
-  venus:   { orreryRadius: 8,  orbitalPeriod: 0.615, initialAngle: Math.PI * 1.5,  visualRadius: 0.60, hitRadius: 1.3 },
-  earth:   { orreryRadius: 11, orbitalPeriod: 1.000, initialAngle: 0,              visualRadius: 0.70, hitRadius: 1.4 },
-  mars:    { orreryRadius: 17, orbitalPeriod: 1.881, initialAngle: Math.PI / 2,    visualRadius: 0.55, hitRadius: 1.2 },
-};
-
-/**
- * Multiplier converting (1/orbitalPeriod) into radians-per-frame at ~60 fps.
- * Tune post-playtest; has zero gameplay effect.
- */
-export const ORBIT_SPEED_FACTOR = 0.0014;
-
-const SUN_TEXTURE_PATH = '/assets/svg/planets/textures/sun-texture.svg';
+export {
+  DEFAULT_ORRERY_DAY_NIGHT_LIGHTING_OPTIONS,
+  DEFAULT_ORRERY_GRID_OPTIONS,
+  DEFAULT_ORRERY_STARFIELD_OPTIONS,
+  DEFAULT_ORRERY_VISUAL_EFFECTS_CONFIG,
+  ORBIT_SPEED_FACTOR,
+  ORRERY_STARFIELD_ROTATION_SPEED,
+  PLANET_ORBITS,
+} from './orrery-scene.config';
+export type {
+  OrreryAtmosphereGlowConfig,
+  OrreryAtmosphereGlowMaterial,
+  OrreryAtmosphereGlowObject,
+  OrreryAtmosphereGlowUniforms,
+  OrreryBackdropObjects,
+  OrreryBackdropPalette,
+  OrreryDayNightLightingOptions,
+  OrreryGridOptions,
+  OrreryLayerMaterial,
+  OrreryLayerUniforms,
+  OrreryOrbitMaterial,
+  OrreryOrbitStyleOptions,
+  OrreryOrbitUniforms,
+  OrreryPlanetLayerObject,
+  OrreryPlanetMaterial,
+  OrreryPlanetUniforms,
+  OrreryPixelateConfig,
+  OrreryStarfieldOptions,
+  OrrerySunGlowConfig,
+  OrrerySunGlowObjects,
+  OrreryVisualEffectsConfig,
+  PlanetObjects,
+  PlanetOrreryConfig,
+  SunObjects,
+} from './orrery-scene.types';
 
 type TextureSlotMap = Partial<Record<string, THREE.Texture | null>>;
 
@@ -658,17 +498,12 @@ export function buildEclipticGrid(
 // Sun + Dyson swarm placeholder
 // ---------------------------------------------------------------------------
 
-export interface SunObjects {
-  /** The Dyson swarm material — opacity driven by dysonCoveragePercent in RAF. */
-  dysonMaterial: THREE.MeshStandardMaterial;
-}
-
 export function buildSun(scene: THREE.Scene): SunObjects {
   // Visible sun sphere
   const sunGeo = new THREE.SphereGeometry(1.2, 32, 32);
   const sunMat = new THREE.MeshBasicMaterial({
     color: 0xffffff,
-    map: loadOrrerySvgTexture(SUN_TEXTURE_PATH, 'sun'),
+    map: loadOrrerySvgTexture(ORRERY_ASSET_PATHS.sunTexture, 'sun'),
     toneMapped: false,
   });
   scene.add(new THREE.Mesh(sunGeo, sunMat));
@@ -738,21 +573,6 @@ export function buildSunGlow(
 // ---------------------------------------------------------------------------
 // Planet objects
 // ---------------------------------------------------------------------------
-
-export interface PlanetObjects {
-  orbitMesh: THREE.Mesh<THREE.RingGeometry, OrreryOrbitMaterial>;
-  planetMesh: THREE.Mesh;
-  planetMaterial: OrreryPlanetMaterial;
-  layerObjects: readonly OrreryPlanetLayerObject[];
-  hitAreaMesh: THREE.Mesh;
-  orbitHitMesh: THREE.Mesh<THREE.TorusGeometry, THREE.MeshBasicMaterial>;
-  orbitMaterial: OrreryOrbitMaterial;
-}
-
-const ORBIT_RING_SEGMENTS = 160;
-const ORBIT_RING_GEOMETRY_WIDTH = 0.9;
-const ORBIT_RING_LINE_WIDTH_PX = 2;
-const ORBIT_HIT_TUBE_RADIUS = 0.28;
 
 export function buildAtmosphereGlow(
   scene: THREE.Scene,
@@ -885,16 +705,16 @@ export function buildPlanetObjects(
 
   // Orbit ring — static, never moved after creation.
   const ringGeo = new THREE.RingGeometry(
-    config.orreryRadius - ORBIT_RING_GEOMETRY_WIDTH / 2,
-    config.orreryRadius + ORBIT_RING_GEOMETRY_WIDTH / 2,
-    ORBIT_RING_SEGMENTS
+    config.orreryRadius - ORRERY_ORBIT_RING_CONFIG.geometryWidth / 2,
+    config.orreryRadius + ORRERY_ORBIT_RING_CONFIG.geometryWidth / 2,
+    ORRERY_ORBIT_RING_CONFIG.segments
   );
   const ringMat = new THREE.ShaderMaterial({
     uniforms: {
       uColor: { value: new THREE.Color(orbitStyle.color) },
       uOpacity: { value: orbitStyle.opacity ?? DEFAULT_ORRERY_GRID_OPTIONS.orbitOpacity },
       uRadius: { value: config.orreryRadius },
-      uLineWidthPx: { value: ORBIT_RING_LINE_WIDTH_PX },
+      uLineWidthPx: { value: ORRERY_ORBIT_RING_CONFIG.lineWidthPx },
     },
     vertexShader: ORBIT_RING_VERTEX_SHADER,
     fragmentShader: ORBIT_RING_FRAGMENT_SHADER,
@@ -907,7 +727,12 @@ export function buildPlanetObjects(
   ringMesh.userData = { planetId: planetData.id, interactionKind: 'orbit' };
   scene.add(ringMesh);
 
-  const orbitHitGeo = new THREE.TorusGeometry(config.orreryRadius, ORBIT_HIT_TUBE_RADIUS, 6, 96);
+  const orbitHitGeo = new THREE.TorusGeometry(
+    config.orreryRadius,
+    ORRERY_ORBIT_RING_CONFIG.hitTubeRadius,
+    6,
+    96
+  );
   const orbitHitMat = new THREE.MeshBasicMaterial({
     transparent: true,
     opacity: 0,

@@ -6,7 +6,10 @@ import type { PlanetData } from '@app/core/models';
 import {
   DEFAULT_ORRERY_VISUAL_EFFECTS_CONFIG,
   DEFAULT_ORRERY_GRID_OPTIONS,
+  ORRERY_ORBIT_RING_CONFIG,
   PLANET_ORBITS,
+} from './orrery-scene.config';
+import {
   buildAtmosphereGlow,
   buildBackground,
   buildEclipticGrid,
@@ -16,11 +19,13 @@ import {
   buildSunGlow,
   disposeScene,
   loadOrrerySvgTexture,
-  type OrreryAtmosphereGlowMaterial,
-  type OrreryBackdropPalette,
-  type OrreryLayerMaterial,
-  type OrreryPlanetMaterial,
 } from './orrery-scene.builder';
+import type {
+  OrreryAtmosphereGlowMaterial,
+  OrreryBackdropPalette,
+  OrreryLayerMaterial,
+  OrreryPlanetMaterial,
+} from './orrery-scene.types';
 
 const palette: OrreryBackdropPalette = {
   backgroundCore: '#21180f',
@@ -144,7 +149,7 @@ describe('orrery scene builder', () => {
     expect(`#${orbitMaterial.uniforms.uColor.value.getHexString()}`).toBe('#123456');
     expect(orbitMaterial.uniforms.uOpacity.value).toBe(0.33);
     expect(orbitMaterial.uniforms.uRadius.value).toBe(PLANET_ORBITS['earth'].orreryRadius);
-    expect(orbitMaterial.uniforms.uLineWidthPx.value).toBe(3);
+    expect(orbitMaterial.uniforms.uLineWidthPx.value).toBe(ORRERY_ORBIT_RING_CONFIG.lineWidthPx);
     expect(orbitMaterial.transparent).toBe(true);
     expect(orbitMaterial.depthWrite).toBe(false);
     expect(orbitMaterial.side).toBe(THREE.DoubleSide);
