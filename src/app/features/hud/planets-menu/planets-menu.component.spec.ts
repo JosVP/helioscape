@@ -147,10 +147,10 @@ beforeEach(() => {
 // ---------------------------------------------------------------------------
 
 describe('PlanetsMenuComponent', () => {
-  it('renders rows in display order (earth, moon, mercury, mars, venus)', () => {
+  it('renders rows in display order (mercury, venus, earth, mars)', () => {
     const component = setup();
     const rows = component.rows();
-    expect(rows.map((r) => r.id)).toEqual(['earth', 'moon', 'mercury', 'mars', 'venus']);
+    expect(rows.map((r) => r.id)).toEqual(['mercury', 'venus', 'earth', 'mars']);
   });
 
   it('Mercury row is mission available before transit starts', () => {
