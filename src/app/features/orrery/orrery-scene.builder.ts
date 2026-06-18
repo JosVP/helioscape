@@ -8,6 +8,7 @@
 import * as THREE from 'three';
 import type { PlanetData } from '@app/core/models';
 import {
+  DEFAULT_ORRERY_CAMERA_CONFIG,
   DEFAULT_ORRERY_DAY_NIGHT_LIGHTING_OPTIONS,
   DEFAULT_ORRERY_GRID_OPTIONS,
   DEFAULT_ORRERY_STARFIELD_OPTIONS,
@@ -320,8 +321,10 @@ export function createRenderer(canvas: HTMLCanvasElement): THREE.WebGLRenderer {
 export function createCamera(aspect: number): THREE.PerspectiveCamera {
   const camera = new THREE.PerspectiveCamera(45, aspect, 0.1, 500);
   // Slightly off-axis: shows orbital depth while planets stay clearly separated.
-  camera.position.set(14, 10, 21);
-  camera.lookAt(0, -4.5, 0);
+  const { x: positionX, y: positionY, z: positionZ } = DEFAULT_ORRERY_CAMERA_CONFIG.position;
+  const { x: lookAtX, y: lookAtY, z: lookAtZ } = DEFAULT_ORRERY_CAMERA_CONFIG.lookAt;
+  camera.position.set(positionX, positionY, positionZ);
+  camera.lookAt(lookAtX, lookAtY, lookAtZ);
   return camera;
 }
 

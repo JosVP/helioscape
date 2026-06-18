@@ -1,11 +1,24 @@
 import type { OrreryVisualEffectsConfig, PlanetOrreryConfig } from './orrery-scene.types';
 
+export const DEFAULT_ORRERY_CAMERA_CONFIG = {
+  position: {
+    x: 10,
+    y: 9.7,
+    z: 21,
+  },
+  lookAt: {
+    x: 0,
+    y: -5.2,
+    z: 0,
+  }
+} as const;
+
 export const DEFAULT_ORRERY_STARFIELD_OPTIONS = {
-  starCount: 320,
-  featureStarCount: 8,
+  starCount: 1999,
+  featureStarCount: 0,
   radius: 78,
-  depth: -34,
-  opacity: 0.82,
+  depth: -47,
+  opacity: 0.8,
 } as const;
 
 export const DEFAULT_ORRERY_GRID_OPTIONS = {
@@ -69,7 +82,7 @@ export const PLANET_ORBITS: Record<string, PlanetOrreryConfig> = {
     hitRadius: 1.4,
   },
   mars: {
-    orreryRadius: 17,
+    orreryRadius: 15.8,
     orbitalPeriod: 1.881,
     initialAngle: Math.PI / 2,
     visualRadius: 0.55,
