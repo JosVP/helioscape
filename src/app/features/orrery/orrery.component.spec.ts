@@ -49,6 +49,8 @@ interface OrreryComponentAccess {
   _planetAngles: Map<string, number>;
   _atmosphereGlows: Map<string, OrreryAtmosphereGlowObject>;
   _planetData: Map<string, PlanetData>;
+  _orbitBaseColor: string;
+  _orbitHoverColor: string;
   _hoveredPlanetId: string | null;
   _externalHoveredPlanetId: string | null;
   _raycaster: THREE.Raycaster;
@@ -90,7 +92,6 @@ function makePlanetData(id: PlanetData['id'], baseColor: string): PlanetData {
 
 function setup(): OrreryComponent {
   TestBed.configureTestingModule({
-    imports: [OrreryComponent],
     providers: [
       {
         provide: GameStateService,
@@ -117,12 +118,11 @@ function setup(): OrreryComponent {
     ],
   });
 
-  return TestBed.createComponent(OrreryComponent).componentInstance;
+  return TestBed.runInInjectionContext(() => new OrreryComponent());
 }
 
 function setupUnpaused(): OrreryComponent {
   TestBed.configureTestingModule({
-    imports: [OrreryComponent],
     providers: [
       {
         provide: GameStateService,
@@ -149,7 +149,7 @@ function setupUnpaused(): OrreryComponent {
     ],
   });
 
-  return TestBed.createComponent(OrreryComponent).componentInstance;
+  return TestBed.runInInjectionContext(() => new OrreryComponent());
 }
 
 describe('OrreryComponent', () => {
@@ -206,8 +206,8 @@ describe('OrreryComponent', () => {
     const config = access._readVisualEffectsConfig();
 
     expect(config.sunGlow.color).toBe('#ffcc44');
-    expect(config.fps).toBe(24);
-    expect(config.pixelate.enabled).toBe(true);
+    expect(config.fps).toBeNull();
+    expect(config.pixelate.enabled).toBe(false);
     expect(config.pixelate.pixelSize).toBe(3);
   });
 
@@ -222,6 +222,7 @@ describe('OrreryComponent', () => {
     access._camera = new THREE.PerspectiveCamera();
     access._dysonMaterial = new THREE.MeshStandardMaterial({ transparent: true, opacity: 0 });
     access._starfield = null;
+    access._visualEffectsConfig = { ...access._visualEffectsConfig, fps: 24 };
 
     access._animate(0);
     access._animate(10);
@@ -242,6 +243,7 @@ describe('OrreryComponent', () => {
     access._dysonMaterial = new THREE.MeshStandardMaterial({ transparent: true, opacity: 0 });
     access._starfield = null;
     access._planetAngles.set('earth', 0);
+    access._visualEffectsConfig = { ...access._visualEffectsConfig, fps: 24 };
 
     access._animate(0);
     access._animate(10);
@@ -320,13 +322,15 @@ describe('OrreryComponent', () => {
     access._orbitMaterials.set('earth', earthOrbitMaterial);
     access._orbitMaterials.set('mars', marsOrbitMaterial);
     access._hoveredPlanetId = 'earth';
+    access._orbitBaseColor = '#5f91aa';
+    access._orbitHoverColor = '#ffbe76';
 
     access._animate();
 
     expect(`#${earthOrbitMaterial.uniforms.uColor.value.getHexString()}`).toBe('#ffbe76');
-    expect(earthOrbitMaterial.uniforms.uOpacity.value).toBe(0.32);
+    expect(earthOrbitMaterial.uniforms.uOpacity.value).toBe(0.5);
     expect(`#${marsOrbitMaterial.uniforms.uColor.value.getHexString()}`).toBe('#5f91aa');
-    expect(marsOrbitMaterial.uniforms.uOpacity.value).toBe(0.12);
+    expect(marsOrbitMaterial.uniforms.uOpacity.value).toBe(0.2);
   });
 
   it('does not grey out a locked hovered planet during RAF', () => {
