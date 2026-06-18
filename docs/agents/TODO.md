@@ -111,6 +111,15 @@ No inline `// TODO:` comments in code - all tracking happens here to avoid dupli
 - **Prompt block**: TBD (culture event choices block)
 - **Added**: 2026-06-11 | **Partial**: 2026-06-13 (tag increment done)
 
+### Venus Opening Decision — Consume unlock-chain flag
+
+- **File**: New/updated Venus decision UI under `src/app/features/planet-panel/` and/or a Block 22 system service
+- **Location**: On Venus unlock after Block 19-1 sets `venus_opening_decision_available`
+- **TODO**: Present the Venus Opening Decision (Wild Venus vs Europa retrograde impact) when the planet-unlock chain raises the data-driven Venus availability flag/event. Do not implement this inside Block 19-1; it should only set the trigger.
+- **Depends on**: Planet unlock chain persisted flag/event from Block 19-1; Venus terraforming decision flow from Block 22
+- **Prompt block**: Block 22
+- **Added**: 2026-06-18
+
 ### PlanetPanelComponent — Orbit view + city lights (Earth, Mars, Venus)
 
 - **File**: src/app/features/planet-panel/planet-panel.component.ts (and orrery)

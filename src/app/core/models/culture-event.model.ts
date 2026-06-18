@@ -37,6 +37,7 @@ export type CultureEventTrigger =
   | { type: 'tech_completed'; techId: string }
   | { type: 'milestone_reached'; milestoneId: string }
   | { type: 'year_reached'; year: number }
+  | { type: 'planet_unlocked'; planet: string }
   | { type: 'terraforming_choice_applied'; planet: string; choiceId: string }
   | { type: 'terraforming_phase_complete'; planet: string; phase: number }
   | { type: 'dyson_percent_reached'; percent: number }

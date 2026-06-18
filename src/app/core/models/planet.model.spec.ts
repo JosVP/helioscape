@@ -443,7 +443,7 @@ describe('PlanetData validation', () => {
   const validData: PlanetData = {
     id: 'mars',
     displayName: 'Mars',
-    unlockCondition: 'mercury_phase_2',
+    unlock: { type: 'phase', planetId: 'mercury', phase: 2 },
     initialState: {
       atmospherePressure: 0.006,
       temperatureCelsius: -63,
@@ -471,7 +471,7 @@ describe('PlanetData validation', () => {
     expect(result.valid).toBe(true);
   });
 
-  it('should accept null unlockCondition for Earth', () => {
+  it('should accept start_unlocked for Earth', () => {
     const earthVisual: PlanetVisualData = {
       baseColor: '#4169e1',
       layerTextures: {
@@ -485,7 +485,7 @@ describe('PlanetData validation', () => {
     const data = {
       ...validData,
       id: 'earth' as PlanetId,
-      unlockCondition: null,
+      unlock: { type: 'start_unlocked' as const },
       visual: earthVisual,
     };
     const result = validatePlanetData(data);

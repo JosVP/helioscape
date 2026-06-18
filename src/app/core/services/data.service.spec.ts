@@ -10,7 +10,7 @@ const fakePlanets: PlanetData[] = [
   {
     id: 'earth',
     displayName: 'Earth',
-    unlockCondition: null,
+    unlock: { type: 'start_unlocked' },
     initialState: {
       atmospherePressure: 1.0,
       temperatureCelsius: 15,
@@ -32,7 +32,7 @@ const fakePlanets: PlanetData[] = [
   {
     id: 'mars',
     displayName: 'Mars',
-    unlockCondition: 'mercury_phase_2_complete',
+    unlock: { type: 'phase', planetId: 'mercury', phase: 2 },
     initialState: {
       atmospherePressure: 0.006,
       temperatureCelsius: -60,

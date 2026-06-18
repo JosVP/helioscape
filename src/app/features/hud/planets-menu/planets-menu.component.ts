@@ -8,7 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import type { PlanetState } from '@app/core/models';
+import type { PlanetState, PlanetUnlockStatus } from '@app/core/models';
 import { DataService } from '@app/core/services/data.service';
 import { EventBusService } from '@app/core/services/event-bus.service';
 import { GameStateService } from '@app/core/services/game-state.service';
@@ -17,7 +17,10 @@ interface PlanetRow {
   readonly id: string;
   readonly displayName: string;
   readonly phaseName: string;
-  readonly status: 'locked' | 'active' | 'flourishing';
+  readonly status: 'locked' | 'mission' | 'in_transit' | 'active' | 'flourishing';
+  readonly unlockStatus: PlanetUnlockStatus;
+  readonly arrivalYear: number | null;
+  readonly isLocked: boolean;
   readonly isIndented: boolean;
   readonly isSelected: boolean;
   readonly avatarPath: string;
@@ -52,17 +55,29 @@ export class PlanetsMenuComponent {
 
   readonly rows = computed<PlanetRow[]>(() => {
     const planets  = this.gameState.planets();
+    const unlocks = this.gameState.planetUnlocks();
     const selected = this.selectedPlanetId();
-    return DISPLAY_ORDER.map((id) => this._buildRow(id, planets, selected));
+    return DISPLAY_ORDER.map((id) => this._buildRow(id, planets, unlocks, selected));
   });
 
   onRowClick(id: string): void {
     if (id === 'moon') {
       this.eventBus.planetSelected$.next('earth');
       this.eventBus.moonTabRequested$.next();
-    } else {
-      this.eventBus.planetSelected$.next(id);
+      return;
     }
+
+    const row = this.rows().find((entry) => entry.id === id);
+    if (row?.isLocked) {
+      this.eventBus.lockedPlanetSelected$.next({
+        planetId: id,
+        status: row.unlockStatus,
+        arrivalYear: row.arrivalYear ?? undefined,
+      });
+      return;
+    }
+
+    this.eventBus.planetSelected$.next(id);
   }
 
   onRowMouseEnter(id: string): void {
@@ -78,6 +93,7 @@ export class PlanetsMenuComponent {
   private _buildRow(
     id: string,
     planets: Record<string, PlanetState>,
+    unlocks: Record<string, { status: PlanetUnlockStatus; arrivalYear?: number }>,
     selected: string | null,
   ): PlanetRow {
     if (id === 'moon') {
@@ -86,6 +102,9 @@ export class PlanetsMenuComponent {
         displayName: 'Moon',
         phaseName: 'Research Base',
         status: 'active',
+        unlockStatus: 'unlocked',
+        arrivalYear: null,
+        isLocked: false,
         isIndented: true,
         isSelected: selected === 'earth',
         avatarPath: '/assets/svg/planets/moon.svg',
@@ -94,13 +113,43 @@ export class PlanetsMenuComponent {
 
     const planetData = this.data.getPlanet(id);
     const state = planets[id];
+    const unlockState = unlocks[id];
+
+    if (!unlockState || unlockState.status !== 'unlocked') {
+      const arrivalYear = unlockState?.arrivalYear ?? null;
+      const phaseName = unlockState?.status === 'in_transit' && arrivalYear !== null
+        ? `En route - arrives Year ${arrivalYear}`
+        : unlockState?.status === 'mission_available'
+          ? 'Mission available'
+          : 'Locked';
+
+      return {
+        id,
+        displayName: planetData.displayName,
+        phaseName,
+        status: unlockState?.status === 'in_transit'
+          ? 'in_transit'
+          : unlockState?.status === 'mission_available'
+            ? 'mission'
+            : 'locked',
+        unlockStatus: unlockState?.status ?? 'locked',
+        arrivalYear,
+        isLocked: true,
+        isIndented: false,
+        isSelected: id === selected,
+        avatarPath: `/assets/svg/planets/${id}.svg`,
+      };
+    }
 
     if (!state) {
       return {
         id,
         displayName: planetData.displayName,
-        phaseName: 'Locked',
+        phaseName: 'Unknown state',
         status: 'locked',
+        unlockStatus: 'locked',
+        arrivalYear: null,
+        isLocked: true,
         isIndented: false,
         isSelected: id === selected,
         avatarPath: `/assets/svg/planets/${id}.svg`,
@@ -117,6 +166,9 @@ export class PlanetsMenuComponent {
       displayName: planetData.displayName,
       phaseName,
       status: isFlourishing ? 'flourishing' : 'active',
+      unlockStatus: 'unlocked',
+      arrivalYear: null,
+      isLocked: false,
       isIndented: false,
       isSelected: id === selected,
       avatarPath: `/assets/svg/planets/${id}.svg`,

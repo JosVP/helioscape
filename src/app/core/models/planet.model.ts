@@ -23,12 +23,45 @@ export interface PlanetPhase {
 export interface PlanetData {
   id: PlanetId;
   displayName: string;
-  /** null = always unlocked (Earth only), otherwise references a tech/milestone ID */
-  unlockCondition: string | null;
+  /** Data-driven progression gate for normal selection/base access. */
+  unlock: PlanetUnlockDefinition;
   initialState: PlanetInitialState;
   visual: PlanetVisualData;
   /** Ordered phase display names, indexed by terraformingPhase. */
   phases: PlanetPhase[];
+}
+
+export type PlanetUnlockDefinition =
+  | PlanetStartUnlockedDefinition
+  | PlanetMissionUnlockDefinition
+  | PlanetPhaseUnlockDefinition
+  | PlanetYearUnlockDefinition;
+
+export interface PlanetStartUnlockedDefinition {
+  type: 'start_unlocked';
+}
+
+export interface PlanetMissionUnlockDefinition {
+  type: 'mission';
+  missionId: string;
+  transitYears: number;
+  arrivalEventId?: string;
+}
+
+export interface PlanetPhaseUnlockDefinition {
+  type: 'phase';
+  planetId: PlanetId;
+  phase: number;
+  minOperationalYears?: number;
+  eventId?: string;
+  setFlag?: string;
+}
+
+export interface PlanetYearUnlockDefinition {
+  type: 'year';
+  year: number;
+  eventId?: string;
+  setFlag?: string;
 }
 
 /**

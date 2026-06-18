@@ -6,7 +6,27 @@
     "portrait": "/assets/svg/portraits/ce_mercury_landing.svg",
     "choices": [],
     "tags": [],
-    "trigger": { "type": "tech_completed", "techId": "earth_launch_mercury_mission" },
+    "trigger": { "type": "planet_unlocked", "planet": "mercury" },
+    "priority": false
+  },
+  {
+    "id": "ce_mars_unlocked",
+    "title": "Mars Comes Within Reach",
+    "narratorText": "Mercury's industry has matured enough to carry our ambitions outward. Mars is no longer a distant red question; it is a destination we can begin to answer.",
+    "portrait": "/assets/svg/portraits/ce_mars_phase_1.svg",
+    "choices": [],
+    "tags": [],
+    "trigger": { "type": "planet_unlocked", "planet": "mars" },
+    "priority": false
+  },
+  {
+    "id": "ce_venus_unlocked",
+    "title": "The Morning Star Awaits",
+    "narratorText": "Venus is no longer beyond our planning horizon. We can now study the twin world closely enough to choose what kind of future we mean to give it.",
+    "portrait": "/assets/svg/portraits/ce_venus_phase_1.svg",
+    "choices": [],
+    "tags": [],
+    "trigger": { "type": "planet_unlocked", "planet": "venus" },
     "priority": false
   },
   {

@@ -6,6 +6,7 @@ import {
   signal,
 } from '@angular/core';
 import { Router } from '@angular/router';
+import { GameStateService } from '@app/core/services/game-state.service';
 import { SaveService } from '@app/core/services/save.service';
 import type { SlotInfo } from '@app/core/services/save.service';
 import { SaveSlotPanelComponent, SaveSlotMode } from './save-slot-panel/save-slot-panel.component';
@@ -26,6 +27,7 @@ interface RecentSlot {
 })
 export class TitleScreenComponent implements AfterViewInit {
   private readonly saveService = inject(SaveService);
+  private readonly gameState = inject(GameStateService);
   private readonly router = inject(Router);
 
   // Async-resolved save state — start false so Continue is hidden until we know.
@@ -70,6 +72,7 @@ export class TitleScreenComponent implements AfterViewInit {
       this.saveMode.set('NEW_GAME');
       this.showSavePanel.set(true);
     } else {
+      this.gameState.reset();
       this.router.navigate(['/game'], { queryParams: { slot: 1 } });
     }
   }

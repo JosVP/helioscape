@@ -46,7 +46,7 @@ function makePlanetData(withTexture = false): PlanetData {
   return {
     id: 'earth',
     displayName: 'Earth',
-    unlockCondition: null,
+    unlock: { type: 'start_unlocked' },
     initialState: {
       atmospherePressure: 1,
       temperatureCelsius: 15,

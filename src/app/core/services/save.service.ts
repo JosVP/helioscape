@@ -6,7 +6,7 @@ import { GameStateService } from './game-state.service';
 // Constants
 // ---------------------------------------------------------------------------
 
-const SAVE_VERSION = 1;
+const SAVE_VERSION = 2;
 const MAX_SLOTS = 3;
 const AUTOSAVE_SLOT = 0;
 
@@ -253,14 +253,14 @@ export class SaveService {
    *
    * Never remove old cases — a player could be loading a very old save.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private _migrate(data: any, fromVersion: number): SerializedGameState {
-    // NOTE: Stub — add version-keyed migration blocks here as the format evolves.
-    // Example:
-    // if (fromVersion < 2) {
-    //   data = { ...data, newField: defaultValue };
-    // }
+  private _migrate(data: Partial<SerializedGameState>, fromVersion: number): SerializedGameState {
+    let migrated: Partial<SerializedGameState> = { ...data };
+
+    if (fromVersion < 2) {
+      migrated = { ...migrated, version: 2 };
+    }
+
     console.warn(`[SaveService] Migrating save from version ${fromVersion} → ${SAVE_VERSION}`);
-    return data as SerializedGameState;
+    return migrated as SerializedGameState;
   }
 }

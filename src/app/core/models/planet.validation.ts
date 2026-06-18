@@ -11,10 +11,11 @@ import type {
   PlanetVisualData,
   PlanetVisualParams,
   TerraformingChoice,
+  PlanetUnlockDefinition,
 } from './planet.model';
 
 /** Valid planet IDs for runtime checks */
-const VALID_PLANET_IDS: readonly PlanetId[] = ['earth', 'mercury', 'mars', 'venus'] as const;
+const VALID_PLANET_IDS: readonly PlanetId[] = ['mercury', 'venus', 'earth', 'mars'] as const;
 const VALID_ROTATION_DIRECTIONS = ['prograde', 'retrograde'] as const;
 
 /** Validation result with error details */
@@ -274,6 +275,68 @@ export function validatePlanetState(state: PlanetState): ValidationResult {
   return { valid: errors.length === 0, errors };
 }
 
+function validatePlanetUnlockDefinition(unlock: PlanetUnlockDefinition): ValidationResult {
+  const errors: string[] = [];
+
+  switch (unlock.type) {
+    case 'start_unlocked':
+      break;
+
+    case 'mission':
+      if (!unlock.missionId || typeof unlock.missionId !== 'string') {
+        errors.push('unlock.missionId must be a non-empty string');
+      }
+      if (!Number.isInteger(unlock.transitYears) || unlock.transitYears < 0) {
+        errors.push(`unlock.transitYears must be a non-negative integer (got ${unlock.transitYears})`);
+      }
+      if (unlock.arrivalEventId !== undefined && typeof unlock.arrivalEventId !== 'string') {
+        errors.push('unlock.arrivalEventId must be a string when present');
+      }
+      break;
+
+    case 'phase':
+      if (!isPlanetId(unlock.planetId)) {
+        errors.push(`unlock.planetId must be a valid planet ID (got ${unlock.planetId})`);
+      }
+      if (!Number.isInteger(unlock.phase) || unlock.phase < 0) {
+        errors.push(`unlock.phase must be a non-negative integer (got ${unlock.phase})`);
+      }
+      if (
+        unlock.minOperationalYears !== undefined &&
+        (!Number.isInteger(unlock.minOperationalYears) || unlock.minOperationalYears < 0)
+      ) {
+        errors.push(
+          `unlock.minOperationalYears must be a non-negative integer (got ${unlock.minOperationalYears})`,
+        );
+      }
+      if (unlock.eventId !== undefined && typeof unlock.eventId !== 'string') {
+        errors.push('unlock.eventId must be a string when present');
+      }
+      if (unlock.setFlag !== undefined && typeof unlock.setFlag !== 'string') {
+        errors.push('unlock.setFlag must be a string when present');
+      }
+      break;
+
+    case 'year':
+      if (!Number.isInteger(unlock.year) || unlock.year < 0) {
+        errors.push(`unlock.year must be a non-negative integer (got ${unlock.year})`);
+      }
+      if (unlock.eventId !== undefined && typeof unlock.eventId !== 'string') {
+        errors.push('unlock.eventId must be a string when present');
+      }
+      if (unlock.setFlag !== undefined && typeof unlock.setFlag !== 'string') {
+        errors.push('unlock.setFlag must be a string when present');
+      }
+      break;
+
+    default:
+      errors.push('unlock.type must be start_unlocked, mission, phase, or year');
+      break;
+  }
+
+  return { valid: errors.length === 0, errors };
+}
+
 /** Validates PlanetData for runtime safety */
 export function validatePlanetData(data: PlanetData): ValidationResult {
   const errors: string[] = [];
@@ -286,9 +349,8 @@ export function validatePlanetData(data: PlanetData): ValidationResult {
     errors.push('displayName must be a non-empty string');
   }
 
-  if (data.unlockCondition !== null && typeof data.unlockCondition !== 'string') {
-    errors.push('unlockCondition must be string or null');
-  }
+  const unlockResult = validatePlanetUnlockDefinition(data.unlock);
+  errors.push(...unlockResult.errors);
 
   // Validate initialState colors
   if (!isValidHexColor(data.initialState.atmosphereColor)) {

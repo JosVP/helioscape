@@ -2,7 +2,7 @@
   {
     "id": "earth",
     "displayName": "Earth",
-    "unlockCondition": null,
+    "unlock": { "type": "start_unlocked" },
     "initialState": {
       "atmospherePressure": 1.0,
       "temperatureCelsius": 15,
@@ -34,7 +34,12 @@
   {
     "id": "mercury",
     "displayName": "Mercury",
-    "unlockCondition": "earth_launch_mercury_mission",
+    "unlock": {
+      "type": "mission",
+      "missionId": "earth_launch_mercury_mission",
+      "transitYears": 4,
+      "arrivalEventId": "ce_mercury_landing"
+    },
     "initialState": {
       "atmospherePressure": 0.0,
       "temperatureCelsius": 430,
@@ -63,7 +68,13 @@
   {
     "id": "mars",
     "displayName": "Mars",
-    "unlockCondition": "mercury_phase_2_complete",
+    "unlock": {
+      "type": "phase",
+      "planetId": "mercury",
+      "phase": 2,
+      "minOperationalYears": 20,
+      "eventId": "ce_mars_unlocked"
+    },
     "initialState": {
       "atmospherePressure": 0.006,
       "temperatureCelsius": -60,
@@ -116,7 +127,14 @@
   {
     "id": "venus",
     "displayName": "Venus",
-    "unlockCondition": "mercury_phase_2_complete",
+    "unlock": {
+      "type": "phase",
+      "planetId": "mercury",
+      "phase": 2,
+      "minOperationalYears": 20,
+      "eventId": "ce_venus_unlocked",
+      "setFlag": "venus_opening_decision_available"
+    },
     "initialState": {
       "atmospherePressure": 92.0,
       "temperatureCelsius": 465,

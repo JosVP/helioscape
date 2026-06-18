@@ -2,6 +2,7 @@ import { Injectable, inject, computed, signal } from '@angular/core';
 import type { Signal } from '@angular/core';
 import type {
   PlanetState,
+  PlanetUnlockState,
   PlanetVisualParams,
   PlanetBioState,
   BioPhaseState,
@@ -84,6 +85,7 @@ export class GameStateService {
   private readonly _completedTechs = signal<string[]>([]);
   private readonly _activeResearch = signal<ActiveResearchTrack[]>([]);
   private readonly _pendingFork = signal<PendingFork | null>(null);
+  private readonly _planetUnlocks = signal<Record<string, PlanetUnlockState>>({});
 
   private readonly _mercuryResources = signal<ResourceStore>({ ...INITIAL_RESOURCES });
   private readonly _mercuryBuildings = signal<PlacedBuilding[]>([]);
@@ -133,6 +135,7 @@ export class GameStateService {
   readonly completedTechs: Signal<string[]> = this._completedTechs.asReadonly();
   readonly activeResearch: Signal<ActiveResearchTrack[]> = this._activeResearch.asReadonly();
   readonly pendingFork: Signal<PendingFork | null> = this._pendingFork.asReadonly();
+  readonly planetUnlocks: Signal<Record<string, PlanetUnlockState>> = this._planetUnlocks.asReadonly();
 
   readonly mercuryResources: Signal<ResourceStore> = this._mercuryResources.asReadonly();
   readonly mercuryBuildings: Signal<PlacedBuilding[]> = this._mercuryBuildings.asReadonly();
@@ -294,6 +297,84 @@ export class GameStateService {
     if (!forkEffect?.choices.find((c) => c.id === choiceId)) return;
 
     this._pendingFork.set(null);
+  }
+
+  // -------------------------------------------------------------------------
+  // Planet unlock mutations
+  // -------------------------------------------------------------------------
+
+  getPlanetUnlockState(planetId: string): PlanetUnlockState | null {
+    return this._planetUnlocks()[planetId] ?? null;
+  }
+
+  isPlanetUnlocked(planetId: string): boolean {
+    return this._planetUnlocks()[planetId]?.status === 'unlocked';
+  }
+
+  isPlanetInTransit(planetId: string): boolean {
+    return this._planetUnlocks()[planetId]?.status === 'in_transit';
+  }
+
+  getPlanetArrivalYear(planetId: string): number | null {
+    return this._planetUnlocks()[planetId]?.arrivalYear ?? null;
+  }
+
+  commitPlanetMission(
+    planetId: string,
+    missionId: string,
+    transitStartYear: number,
+    arrivalYear: number
+  ): void {
+    this._planetUnlocks.update((states) => {
+      const current = states[planetId];
+      if (!current || current.status === 'in_transit' || current.status === 'unlocked') {
+        return states;
+      }
+      if (current.missionId !== undefined && current.missionId !== missionId) {
+        return states;
+      }
+
+      return {
+        ...states,
+        [planetId]: {
+          ...current,
+          status: 'in_transit',
+          missionId,
+          committedYear: transitStartYear,
+          transitStartYear,
+          arrivalYear,
+        },
+      };
+    });
+  }
+
+  unlockPlanet(planetId: string, unlockedYear: number): void {
+    this._planetUnlocks.update((states) => {
+      const current = states[planetId];
+      if (!current || current.status === 'unlocked') return states;
+      return {
+        ...states,
+        [planetId]: {
+          ...current,
+          status: 'unlocked',
+          unlockedYear,
+        },
+      };
+    });
+  }
+
+  markPlanetUnlockFlagFired(planetId: string, flagOrEventId: string): void {
+    this._planetUnlocks.update((states) => {
+      const current = states[planetId];
+      if (!current || current.firedFlags.includes(flagOrEventId)) return states;
+      return {
+        ...states,
+        [planetId]: {
+          ...current,
+          firedFlags: [...current.firedFlags, flagOrEventId],
+        },
+      };
+    });
   }
 
   // -------------------------------------------------------------------------
@@ -777,6 +858,7 @@ export class GameStateService {
     this._completedTechs.set([]);
     this._activeResearch.set([]);
     this._pendingFork.set(null);
+    this._planetUnlocks.set(this.buildInitialPlanetUnlocksRecord());
     this._mercuryResources.set({ ...INITIAL_RESOURCES });
     this._mercuryBuildings.set([]);
     this._mercuryBuildQueue.set([]);
@@ -801,6 +883,11 @@ export class GameStateService {
     // _currentSaveSlot intentionally NOT reset — see docstring above.
   }
 
+  ensureInitialised(): void {
+    if (Object.keys(this._planetUnlocks()).length > 0) return;
+    this.reset();
+  }
+
   /** Restores all signals from a loaded save file. */
   hydrate(state: SerializedGameState): void {
     this._gameYear.set(state.gameYear);
@@ -812,6 +899,7 @@ export class GameStateService {
     this._completedTechs.set(state.completedTechs);
     this._activeResearch.set(state.activeResearch);
     this._pendingFork.set(state.pendingFork);
+    this._planetUnlocks.set(state.planetUnlocks ?? this.buildInitialPlanetUnlocksRecord());
     this._mercuryResources.set(state.mercuryResources);
     this._mercuryBuildings.set(state.mercuryBuildings);
     this._mercuryBuildQueue.set(state.mercuryBuildQueue);
@@ -849,6 +937,7 @@ export class GameStateService {
       completedTechs: this._completedTechs(),
       activeResearch: this._activeResearch(),
       pendingFork: this._pendingFork(),
+      planetUnlocks: this._planetUnlocks(),
       mercuryResources: this._mercuryResources(),
       mercuryBuildings: this._mercuryBuildings(),
       mercuryBuildQueue: this._mercuryBuildQueue(),
@@ -916,6 +1005,32 @@ export class GameStateService {
         return acc;
       },
       {} as Record<string, PlanetState>
+    );
+  }
+
+  private buildInitialPlanetUnlocksRecord(): Record<string, PlanetUnlockState> {
+    return this.data.getAllPlanets().reduce(
+      (acc, planet) => {
+        const unlock = planet.unlock;
+        if (unlock.type === 'start_unlocked') {
+          acc[planet.id] = {
+            planetId: planet.id,
+            status: 'unlocked',
+            unlockedYear: INITIAL_YEAR,
+            firedFlags: [],
+          };
+          return acc;
+        }
+
+        acc[planet.id] = {
+          planetId: planet.id,
+          status: unlock.type === 'mission' ? 'mission_available' : 'locked',
+          missionId: unlock.type === 'mission' ? unlock.missionId : undefined,
+          firedFlags: [],
+        };
+        return acc;
+      },
+      {} as Record<string, PlanetUnlockState>
     );
   }
 

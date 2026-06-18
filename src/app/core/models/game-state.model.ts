@@ -1,4 +1,4 @@
-import type { PlanetState } from './planet.model';
+import type { PlanetId, PlanetState } from './planet.model';
 import type { ActiveResearchTrack } from './tech-tree.model';
 import type { CultureEventEntry, CultureEventHistoryEntry } from './culture-event.model';
 
@@ -36,6 +36,7 @@ export interface SerializedGameState {
   completedTechs: string[];
   activeResearch: ActiveResearchTrack[];
   pendingFork: PendingFork | null;
+  planetUnlocks: Record<string, PlanetUnlockState>;
   mercuryResources: ResourceStore;
   mercuryBuildings: PlacedBuilding[];
   mercuryBuildQueue: MercuryQueueEntry[];
@@ -71,6 +72,19 @@ export interface PendingFork {
   techId: string;
   planetId: string;
   forkId: string;
+}
+
+export type PlanetUnlockStatus = 'locked' | 'mission_available' | 'in_transit' | 'unlocked';
+
+export interface PlanetUnlockState {
+  planetId: PlanetId;
+  status: PlanetUnlockStatus;
+  missionId?: string;
+  committedYear?: number;
+  transitStartYear?: number;
+  arrivalYear?: number;
+  unlockedYear?: number;
+  firedFlags: string[];
 }
 
 /**
@@ -173,4 +187,22 @@ export interface BioPhaseEvent {
 export interface ForkPresentedEvent {
   planetId: string;
   techId: string;
+}
+
+export interface PlanetTransitEvent {
+  planetId: string;
+  missionId: string;
+  departureYear: number;
+  arrivalYear: number;
+}
+
+export interface PlanetUnlockEvent {
+  planetId: string;
+  unlockedYear: number;
+}
+
+export interface LockedPlanetSelectedEvent {
+  planetId: string;
+  status: PlanetUnlockStatus;
+  arrivalYear?: number;
 }

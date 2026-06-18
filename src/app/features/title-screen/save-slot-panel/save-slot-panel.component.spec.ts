@@ -25,6 +25,7 @@ describe('SaveSlotPanelComponent', () => {
   let saveFn: ReturnType<typeof vi.fn>;
   let deleteFn: ReturnType<typeof vi.fn>;
   let getAllSlotInfosFn: ReturnType<typeof vi.fn>;
+  let resetFn: ReturnType<typeof vi.fn>;
 
   async function setup(
     infos: SlotInfo[],
@@ -35,6 +36,7 @@ describe('SaveSlotPanelComponent', () => {
     saveFn = vi.fn(() => Promise.resolve());
     deleteFn = vi.fn(() => Promise.resolve());
     getAllSlotInfosFn = vi.fn(() => Promise.resolve(infos));
+    resetFn = vi.fn();
 
     await TestBed.configureTestingModule({
       imports: [SaveSlotPanelComponent],
@@ -49,7 +51,7 @@ describe('SaveSlotPanelComponent', () => {
           },
         },
         { provide: Router, useValue: { navigate: navigateSpy } },
-        { provide: GameStateService, useValue: {} },
+        { provide: GameStateService, useValue: { reset: resetFn } },
       ],
     }).compileComponents();
     fixture = TestBed.createComponent(SaveSlotPanelComponent);
@@ -187,6 +189,7 @@ describe('SaveSlotPanelComponent', () => {
     const emitted: number[] = [];
     component.slotSelected.subscribe((s) => emitted.push(s));
     component.onAction(1, infos[1]);
+    expect(resetFn).toHaveBeenCalledOnce();
     expect(emitted).toEqual([1]);
     expect(navigateSpy).toHaveBeenCalledWith(['/game'], { queryParams: { slot: 1 } });
   });
@@ -211,6 +214,7 @@ describe('SaveSlotPanelComponent', () => {
     component.slotSelected.subscribe((s) => emitted.push(s));
     component.onAction(1, infos[1]); // triggers overwrite confirm
     component.onConfirmOverwrite(1);
+    expect(resetFn).toHaveBeenCalledOnce();
     expect(emitted).toEqual([1]);
     expect(navigateSpy).toHaveBeenCalledWith(['/game'], { queryParams: { slot: 1 } });
     expect(component.pendingConfirm()).toBeNull();

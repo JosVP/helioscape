@@ -48,7 +48,7 @@ graph TD
 - **Fixed display order**: A local const `DISPLAY_ORDER` drives row construction so the order is
   never implicit:
   ```ts
-  const DISPLAY_ORDER = ['earth', 'moon', 'mercury', 'mars', 'venus'] as const;
+  const DISPLAY_ORDER = ['mercury', 'venus', 'earth', 'mars'] as const;
   ```
 
 - **`selectedPlanetId` as `input()`**: Already wired in `game-shell.component.html`. The component
@@ -130,7 +130,7 @@ click handler ──► EventBusService.planetSelected$.next(id)
     readonly isSelected: boolean;
   }
 
-  const DISPLAY_ORDER = ['earth', 'moon', 'mercury', 'mars', 'venus'] as const;
+  const DISPLAY_ORDER = ['mercury', 'venus', 'earth', 'mars'] as const;
 
   @Component({ selector: 'app-planets-panel', standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush, ... })

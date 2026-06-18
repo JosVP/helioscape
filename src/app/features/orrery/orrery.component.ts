@@ -356,6 +356,7 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
     // ── 1. Read ALL signals into locals — never call signal getters mid-render ──
     const isPaused      = this._gameState.isPaused();
     const planetsState  = this._gameState.planets();
+    const planetUnlocks = this._gameState.planetUnlocks();
     const dysonCoverage = this._gameState.dysonCoveragePercent();
 
     // ── 2. Advance orbit angles (skip when game is paused) ────────────────────
@@ -384,13 +385,12 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
       const staticPlanet = this._planetData.get(id);
       if (!material || !staticPlanet) continue;
 
-      const isLocked = planetsState[id] === undefined;
+      const isLocked = planetUnlocks[id]?.status !== 'unlocked';
 
+      const visualParams = planetsState[id]?.visualParams;
       const baseHex = isLocked
         ? staticPlanet.visual.baseColor
-        : (planetsState[id].visualParams.atmosphereColor ||
-           staticPlanet.visual.baseColor);
-      const visualParams = planetsState[id]?.visualParams;
+        : (visualParams?.atmosphereColor || staticPlanet.visual.baseColor);
       const rotationSpeed = visualParams?.axisSpinSpeed ?? staticPlanet.initialState.axisSpinSpeed;
       const cloudRotationSpeed =
         visualParams?.cloudRotationSpeed ?? staticPlanet.initialState.cloudRotationSpeed;
@@ -411,8 +411,8 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
           this._visualEffectsConfig.atmosphereGlow.intensity;
       }
 
-      material.uniforms.uTintColor.value.set('#ffffff');
-      material.uniforms.uLitBrightness.value = 1;
+      material.uniforms.uTintColor.value.set(isLocked ? '#8a929b' : '#ffffff');
+      material.uniforms.uLitBrightness.value = isLocked ? 0.45 : 1;
 
       material.uniforms.uBaseColor.value.set(baseHex);
       material.uniforms.uSunDirection.value.set(-x, 0, -z).normalize();

@@ -321,6 +321,7 @@ export class CultureEventService {
       case 'terraforming_phase_complete':
       case 'bio_phase_complete':
       case 'bio_phase_collapsed':
+      case 'planet_unlocked':
         return t.planet;
       default:
         return '';

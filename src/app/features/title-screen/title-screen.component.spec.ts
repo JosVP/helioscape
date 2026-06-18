@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { describe, it, expect, vi } from 'vitest';
+import { GameStateService } from '@app/core/services/game-state.service';
 import { SaveService, SlotInfo } from '@app/core/services/save.service';
 import { TitleScreenComponent } from './title-screen.component';
 
@@ -28,14 +29,17 @@ describe('TitleScreenComponent', () => {
   let fixture: ComponentFixture<TitleScreenComponent>;
   let component: TitleScreenComponent;
   let navigateSpy: ReturnType<typeof vi.fn>;
+  let resetSpy: ReturnType<typeof vi.fn>;
 
   async function setup(hasSave: boolean, infos?: SlotInfo[]): Promise<void> {
     navigateSpy = vi.fn();
+    resetSpy = vi.fn();
     const allInfos = infos ?? [0, 1, 2, 3].map(emptySlot);
     await TestBed.configureTestingModule({
       imports: [TitleScreenComponent],
       providers: [
         { provide: SaveService, useValue: makeSaveServiceMock(hasSave, allInfos) },
+        { provide: GameStateService, useValue: { reset: resetSpy } },
         { provide: Router, useValue: { navigate: navigateSpy } },
       ],
     }).compileComponents();
@@ -83,6 +87,7 @@ describe('TitleScreenComponent', () => {
     await setup(false);
     await flushPromises();
     component.onNewGame();
+    expect(resetSpy).toHaveBeenCalledOnce();
     expect(navigateSpy).toHaveBeenCalledWith(['/game'], { queryParams: { slot: 1 } });
     expect(component.showSavePanel()).toBe(false);
   });

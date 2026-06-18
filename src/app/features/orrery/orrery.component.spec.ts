@@ -5,7 +5,7 @@ import { TestBed } from '@angular/core/testing';
 import { Subject } from 'rxjs';
 import * as THREE from 'three';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { PlanetData } from '@app/core/models';
+import type { PlanetData, PlanetUnlockState } from '@app/core/models';
 import { DataService } from '@app/core/services/data.service';
 import { EventBusService } from '@app/core/services/event-bus.service';
 import { GameStateService } from '@app/core/services/game-state.service';
@@ -69,7 +69,7 @@ function makePlanetData(id: PlanetData['id'], baseColor: string): PlanetData {
   return {
     id,
     displayName: id,
-    unlockCondition: null,
+    unlock: { type: 'start_unlocked' },
     initialState: {
       atmospherePressure: 1,
       temperatureCelsius: 0,
@@ -90,6 +90,10 @@ function makePlanetData(id: PlanetData['id'], baseColor: string): PlanetData {
   };
 }
 
+const planetUnlocksSignal = signal<Record<string, PlanetUnlockState>>({
+  earth: { planetId: 'earth', status: 'unlocked', unlockedYear: 2033, firedFlags: [] },
+});
+
 function setup(): OrreryComponent {
   TestBed.configureTestingModule({
     providers: [
@@ -98,6 +102,7 @@ function setup(): OrreryComponent {
         useValue: {
           isPaused: signal(true).asReadonly(),
           planets: signal({}).asReadonly(),
+          planetUnlocks: planetUnlocksSignal.asReadonly(),
           dysonCoveragePercent: signal(0).asReadonly(),
         },
       },
@@ -129,6 +134,7 @@ function setupUnpaused(): OrreryComponent {
         useValue: {
           isPaused: signal(false).asReadonly(),
           planets: signal({}).asReadonly(),
+          planetUnlocks: planetUnlocksSignal.asReadonly(),
           dysonCoveragePercent: signal(0).asReadonly(),
         },
       },
@@ -155,6 +161,9 @@ function setupUnpaused(): OrreryComponent {
 describe('OrreryComponent', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    planetUnlocksSignal.set({
+      earth: { planetId: 'earth', status: 'unlocked', unlockedYear: 2033, firedFlags: [] },
+    });
     TestBed.resetTestingModule();
   });
 
@@ -333,7 +342,7 @@ describe('OrreryComponent', () => {
     expect(marsOrbitMaterial.uniforms.uOpacity.value).toBe(0.2);
   });
 
-  it('does not grey out a locked hovered planet during RAF', () => {
+  it('dims a locked hovered planet during RAF', () => {
     const component = setup();
     const access = component as unknown as OrreryComponentAccess;
     const renderer = { render: vi.fn(), dispose: vi.fn() } as unknown as THREE.WebGLRenderer;
@@ -362,11 +371,14 @@ describe('OrreryComponent', () => {
     access._planetData.set('earth', makePlanetData('earth', '#3a7ab8'));
     access._planetMaterials.set('earth', shaderMaterial);
     access._hoveredPlanetId = 'earth';
+    planetUnlocksSignal.set({
+      earth: { planetId: 'earth', status: 'locked', firedFlags: [] },
+    });
 
     access._animate();
 
-    expect(`#${shaderMaterial.uniforms.uTintColor.value.getHexString()}`).toBe('#ffffff');
-    expect(shaderMaterial.uniforms.uLitBrightness.value).toBe(1);
+    expect(`#${shaderMaterial.uniforms.uTintColor.value.getHexString()}`).toBe('#8a929b');
+    expect(shaderMaterial.uniforms.uLitBrightness.value).toBe(0.45);
   });
 
   it('uses one cached target list for planet and orbit pointer resolution', () => {

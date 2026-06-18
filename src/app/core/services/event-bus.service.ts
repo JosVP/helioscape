@@ -6,6 +6,9 @@ import type {
   TerraformPhaseEvent,
   BioPhaseEvent,
   ForkPresentedEvent,
+  LockedPlanetSelectedEvent,
+  PlanetTransitEvent,
+  PlanetUnlockEvent,
 } from '@app/core/models';
 
 /**
@@ -61,6 +64,15 @@ export class EventBusService {
 
   /** The active planet selection has changed. Payload: planetId. */
   readonly planetSelected$ = new Subject<string>();
+
+  /** A planet mission has entered transit. */
+  readonly planetTransitStarted$ = new Subject<PlanetTransitEvent>();
+
+  /** A planet has become normally selectable/unlocked. */
+  readonly planetUnlocked$ = new Subject<PlanetUnlockEvent>();
+
+  /** The player attempted to select a locked or in-transit planet. */
+  readonly lockedPlanetSelected$ = new Subject<LockedPlanetSelectedEvent>();
 
   /**
    * A planet is being hovered (in the orrery canvas or the planets panel).

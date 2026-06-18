@@ -69,6 +69,7 @@ export class SaveSlotPanelComponent {
         if (info.exists) {
           this._pendingConfirm.set({ slot, type: 'overwrite' });
         } else {
+          this.gameState.reset();
           this.slotSelected.emit(slot);
           this.router.navigate(['/game'], { queryParams: { slot } });
         }
@@ -91,6 +92,7 @@ export class SaveSlotPanelComponent {
 
   onConfirmOverwrite(slot: number): void {
     this._pendingConfirm.set(null);
+    this.gameState.reset();
     this.slotSelected.emit(slot);
     this.router.navigate(['/game'], { queryParams: { slot } });
   }

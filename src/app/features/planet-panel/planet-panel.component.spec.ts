@@ -32,7 +32,7 @@ function makePlanetData(id: string, phases: { displayName: string; description: 
   return {
     id: id as PlanetData['id'],
     displayName: id.charAt(0).toUpperCase() + id.slice(1),
-    unlockCondition: id === 'earth' ? null : 'some_tech',
+    unlock: id === 'earth' ? { type: 'start_unlocked' } : { type: 'year', year: 2100 },
     initialState: {
       atmospherePressure: 0,
       temperatureCelsius: 0,

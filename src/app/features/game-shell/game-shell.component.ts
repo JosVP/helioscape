@@ -13,6 +13,7 @@ import { AudioService } from '@app/core/services/audio.service';
 import { EventBusService } from '@app/core/services/event-bus.service';
 import { GameLoopService } from '@app/core/services/game-loop.service';
 import { GameStateService } from '@app/core/services/game-state.service';
+import { PlanetUnlockService } from '@app/core/systems/planet-unlock.service';
 import { CultureEventCardComponent } from '@app/features/culture-events/culture-event-card/culture-event-card.component';
 import { CultureEventToastComponent } from '@app/features/culture-events/culture-event-toast/culture-event-toast.component';
 import { HudComponent } from '@app/features/hud/hud.component';
@@ -49,6 +50,7 @@ export class GameShellComponent implements OnInit, OnDestroy {
   readonly gameState = inject(GameStateService);
   private readonly eventBus = inject(EventBusService);
   private readonly audioService = inject(AudioService);
+  private readonly planetUnlockService = inject(PlanetUnlockService);
   private readonly destroyRef = inject(DestroyRef);
 
   // ---------------------------------------------------------------------------
@@ -70,19 +72,12 @@ export class GameShellComponent implements OnInit, OnDestroy {
   // ---------------------------------------------------------------------------
 
   ngOnInit(): void {
+    this.gameState.ensureInitialised();
     this.gameLoop.start();
 
     this.eventBus.planetSelected$
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((id) => {
-        if (id === 'mercury') {
-          this.activeView.set('mercury');
-          this.selectedPlanetId.set(null);
-        } else {
-          this.activeView.set('orrery');
-          this.selectedPlanetId.set(id);
-        }
-      });
+      .subscribe((id) => this.handlePlanetSelection(id));
 
     this.eventBus.moonTabRequested$
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -132,6 +127,28 @@ export class GameShellComponent implements OnInit, OnDestroy {
 
   closeResearchHub(): void {
     this.isResearchHubOpen.set(false);
+  }
+
+  private handlePlanetSelection(id: string): void {
+    const unlockState = this.gameState.getPlanetUnlockState(id);
+    const isUnlocked = id === 'earth' || unlockState?.status === 'unlocked';
+
+    if (!isUnlocked) {
+      this.eventBus.lockedPlanetSelected$.next({
+        planetId: id,
+        status: unlockState?.status ?? 'locked',
+        arrivalYear: unlockState?.arrivalYear,
+      });
+      return;
+    }
+
+    if (id === 'mercury') {
+      this.activeView.set('mercury');
+      this.selectedPlanetId.set(null);
+    } else {
+      this.activeView.set('orrery');
+      this.selectedPlanetId.set(id);
+    }
   }
 }
 

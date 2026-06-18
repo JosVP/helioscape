@@ -7,7 +7,7 @@
     "spilloverPrerequisites": [],
     "rpCost": 0,
     "durationYears": 0,
-    "effects": [{ "type": "emit_event", "eventId": "ce_mercury_landing" }]
+    "effects": []
   },
   {
     "id": "earth_advanced_renewables",
