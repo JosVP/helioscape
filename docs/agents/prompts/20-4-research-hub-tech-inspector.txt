@@ -1,0 +1,101 @@
+Note: this prompt follows Block 20-1 timed research and should assume Block 20-3 may add completed-research years. Stay critical — read the current code first.
+
+Create a plan for a Research Hub tech details inspector, replacing click-to-start with click-to-select + explicit Start Research.
+
+PROBLEMS / GAPS OBSERVED
+- Tech tree cards currently show only a title, small icon/illustration, RP cost, and duration.
+- The player cannot read what a tech is about or what it gains before committing RP capacity.
+- Clicks currently start research too eagerly; the commitment should be deliberate.
+- Completed tech nodes should always remain selectable and readable.
+- The inspector should show the same small tech icon/illustration the node card already uses.
+
+Read AGENTS.md, docs/agents/ARCHITECTURE.md, docs/GDD/main-gdd.md, docs/GDD/earth-tech-tree-options.md, and current Research Hub files first. Owned by:
+- public/data/tech-tree.json (description/outcome copy)
+- src/app/core/models/tech-tree.model.ts (TechNode data shape)
+- src/app/features/research-hub/research-hub.component.ts/html/scss
+- src/app/features/research-hub/tech-node-card/*
+- new inspector component under src/app/features/research-hub/tech-node-inspector/
+- optional shared/extracted tech icon component if needed to reuse the current card illustration cleanly
+- specs for ResearchHubComponent, TechNodeCardComponent, and the new inspector
+
+REQUIREMENTS
+
+1. TechNode detail data
+   - Extend TechNode with player-facing data:
+     - `description: string` — narrator-voiced explanation of what the technology is about.
+     - `outcomeSummary: string[]` — concise gains/effects the player can scan before committing.
+   - Populate all existing tech nodes in public/data/tech-tree.json with meaningful copy.
+   - Keep content in JSON; do not hardcode descriptions or outcomes in TypeScript.
+   - Outcome summaries should explain real gains where possible: unlocks, RP boosts, culture event, terraforming choice, branch tag, spillover, or enabling later tech.
+
+2. Layout: stacked Mars/Venus + right-side inspector
+   - Rework the desktop Research Hub layout so Mars and Venus stack above each other in a left rail.
+   - Keep Earth + Moon as the main central research area.
+   - Add a persistent right-side inspector panel for the selected tech.
+   - Suggested desktop layout:
+
+     Mars/Venus rail | Earth + Moon tree | Selected tech inspector
+
+   - On narrow/mobile layouts, the inspector may become a bottom drawer/panel rather than a modal.
+   - Do not use a tooltip as the primary detail surface; tooltips remain for quick prerequisite hints only.
+   - Do not use a modal for ordinary inspection; reserve modals for culture events and fork choices.
+
+3. Selection-first interaction
+   - Clicking or keyboard-activating a visible node selects it in the inspector.
+   - Selecting a node must NOT start research.
+   - The inspector's Start Research button is the only commit action for available tech nodes.
+   - Start Research calls `ResearchService.startTechTrack(node.id, node.planet)`.
+   - Preserve keyboard accessibility: cards are focusable/selectable, and the Start button is reachable and labelled.
+
+4. Inspector content
+   The inspector shows, at minimum:
+   - the tech's existing icon/small illustration (reuse/extract the same visual as TechNodeCard; do not invent a separate icon system)
+   - title
+   - planet
+   - status: available, in progress, needs capacity, completed, locked/hint
+   - branch tag when present
+   - description
+   - RP cost
+   - duration
+   - ETA / estimated completion year if started now
+   - progress + ETA if already in progress
+   - "Completed in Year X" if completed and completed-year state exists
+   - prerequisite list with met/unmet state
+   - outcome summary list
+   - capacity warning when RP is insufficient
+   - Start Research button only when the node is available and has enough capacity
+
+5. Completed and locked node rules
+   - Completed nodes are always selectable and readable.
+   - Completed nodes do not show a Start Research button.
+   - In-progress nodes show progress and estimated completion, not a second Start button.
+   - Needs-capacity nodes show why they cannot start yet.
+   - Hint/silhouette nodes show limited locked information only: prerequisite clue(s), no hidden description/outcome unless the reveal rule explicitly allows it.
+   - Fully hidden nodes remain unselectable because they are not rendered.
+
+6. Tech icon reuse
+   - The existing TechNodeCard inline SVG/icon treatment should also appear in the inspector.
+   - Prefer extracting a small standalone `TechNodeIconComponent` if that avoids duplicating SVG/template logic.
+   - The extracted component should take `planetId`, `visibility`, and any selected/size variant inputs needed by both card and inspector.
+
+7. Tests
+   - Selecting a node updates the inspector and does not start research.
+   - Start Research button calls ResearchService only for an available node.
+   - Completed nodes are selectable/readable and show completion year when provided.
+   - In-progress nodes show progress/ETA.
+   - Needs-capacity nodes show a warning and no enabled Start button.
+   - Hint nodes do not reveal hidden details.
+   - Keyboard selection works.
+
+PATTERNS
+- Standalone components, OnPush, signals, inject(), input()/output().
+- Thin templates; derive display state with computed() in classes.
+- Tokens-only SCSS; no hardcoded colours/spacing.
+- Keep game content in JSON.
+- Do not put game logic in the inspector/card; components call services and display state.
+
+OUT OF SCOPE
+- Completion feedback culture-event routing (Block 20-3).
+- Reveal animation polish (Block 20-5).
+- Full tech tree content expansion beyond descriptions/outcome summaries for nodes that already exist.
+- Full Block 24 culture-event trigger overhaul.

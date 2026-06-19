@@ -1,0 +1,67 @@
+Note: this prompt follows Block 20-1 timed research and Block 20-2 research reveal work. Stay critical — read the current code first.
+
+Create a plan for research completion feedback, landmark tech culture events, and completed-research year tracking for Helioscape.
+
+PROBLEMS / GAPS OBSERVED
+- Timed research now correctly frees RP capacity when a track completes, but the player receives little feedback beyond the capacity bar changing.
+- Landmark techs such as Fusion Ignition Theory should feel like civilisation moments, similar to existing culture event cards.
+- Ordinary tech completions should be visible, but should not constantly interrupt the player with modal cards.
+- The game will later need completion years for a history book / chronology feature, and the Research Hub inspector should be able to show "Completed in Year X" for already researched nodes.
+
+Read AGENTS.md, docs/agents/ARCHITECTURE.md, docs/GDD/main-gdd.md, and the current files first. Owned by:
+- src/app/core/models/tech-tree.model.ts and/or game-state.model.ts (completion-year state shape if needed)
+- src/app/core/services/game-state.service.ts (completed research years stored as state)
+- src/app/core/services/save.service.ts (save migration if a new saved field/version is needed)
+- src/app/core/services/event-bus.service.ts (completion notification event only if the existing events are insufficient)
+- src/app/core/systems/research.service.ts (single completion source)
+- src/app/core/systems/tech-tree.service.ts (effect application + emit_event routing)
+- src/app/core/systems/culture-event.service.ts (modal vs notification presentation)
+- public/data/culture-events.json (landmark completion events and presentation metadata)
+- related specs for all touched files
+
+REQUIREMENTS
+
+1. Store research completion years
+   - Add save/load-safe state for completed research years, keyed by track/tech id, e.g. `completedResearchYears: Record<string, number>`.
+   - The year must be recorded at the single completion point, not inferred later from UI.
+   - Record years for both ResearchTrack ids and TechNode ids completed through the timed research path.
+   - Expose a read signal from GameStateService so the Research Hub inspector can show "Completed in Year X".
+   - Include the new state in serialisation/hydration and migrate old saves with an empty record.
+   - Do not replace `completedTechs`; this is additional history metadata.
+
+2. Landmark-only culture event modal policy
+   - Only landmark techs should auto-open culture event cards. Ordinary completed techs should use lightweight feedback.
+   - Add a presentation distinction to culture events, e.g. `presentation: 'modal' | 'notification'`.
+   - `presentation: 'modal'` should auto-show the existing CultureEventCard without requiring `priority: true`.
+   - `presentation: 'notification'` should stay in the existing notification/bell/toast flow.
+   - Keep `priority: true` for events that should interrupt/displace a current event, not for every important event.
+   - Set existing landmark research events such as `ce_fusion_theory_complete` to modal presentation.
+
+3. Clean up tech `emit_event` routing
+   - `TechTreeService` currently handles `emit_event` by writing directly to GameStateService's culture event queue.
+   - Route this through CultureEventService or an EventBus event that CultureEventService handles, so validation, duplicate prevention, and presentation rules are centralised.
+   - Preserve existing behaviour for events that are already queued by `tech_completed` triggers; do not double-fire if a node has both a `tech_completed` culture trigger and an `emit_event` effect.
+
+4. Lightweight feedback for ordinary completions
+   - Completion should still be visible when no landmark culture event exists.
+   - Use existing UI surfaces where possible: Research Hub node completed state, newly revealed dependents, notification/toast/bell entry, and completion highlight in Block 20-5.
+   - Do not create a second modal component for research completion.
+
+5. Tests
+   - ResearchService/GameStateService: completion records the current game year.
+   - SaveService: old saves hydrate with an empty completed-year record; new saves persist and restore it.
+   - CultureEventService: modal presentation auto-shows; notification presentation does not auto-show; priority still interrupts.
+   - TechTreeService / routing: `emit_event` is routed through the culture event system and does not duplicate events.
+
+PATTERNS
+- State belongs in GameStateService.
+- System services may react with effect()+untracked(), but no new game timers.
+- Player-facing content belongs in JSON.
+- Use existing CultureEventCard / CultureEventToast / bell surfaces.
+- Keep ordinary research completions non-interruptive.
+
+OUT OF SCOPE
+- Research Hub details inspector UI (Block 20-4).
+- Reveal / animation polish beyond basic completion feedback (Block 20-5).
+- Full Block 24 structured culture-event trigger overhaul.
+- Writing culture events for every tech node.

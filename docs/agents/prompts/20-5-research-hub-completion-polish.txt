@@ -1,0 +1,68 @@
+Note: this prompt follows Block 20-1 timed research, Block 20-3 completion feedback, and Block 20-4 tech inspector. Stay critical — read the current code first.
+
+Create a plan for Research Hub completion polish: completed-node highlight, dependent reveal feedback, inspector integration, and non-modal completion clarity.
+
+PROBLEMS / GAPS OBSERVED
+- Once research completes, the player needs clear local feedback inside the Research Hub, not only a culture event or notification.
+- Newly available dependent nodes should feel discovered without turning every completion into a modal interruption.
+- The inspector should remain useful after completion: completed techs are always readable and show completion year when available.
+- The feedback should be subtle and readable, not noisy.
+
+Read AGENTS.md, docs/agents/ARCHITECTURE.md, docs/GDD/main-gdd.md, and the current Research Hub files first. Owned by:
+- src/app/features/research-hub/research-hub.component.ts/html/scss
+- src/app/features/research-hub/tech-node-card/*
+- src/app/features/research-hub/tech-node-inspector/* (from Block 20-4)
+- EventBusService/ResearchService only if an additional UI event is genuinely needed
+- related specs
+
+REQUIREMENTS
+
+1. Completed-node highlight
+   - When a tech completes while the Research Hub is open, the completed card should get a short, visible highlight/pulse.
+   - The highlight is UI-only transient state in ResearchHubComponent, not saved game state.
+   - It must clean up timers on destroy.
+   - Do not use this as the only completion feedback; it complements notifications/culture events from Block 20-3.
+
+2. Dependent reveal feedback
+   - When a completed tech causes dependents to move from hidden/hint/needs-prereq to visible/available, show a brief "new" or reveal treatment.
+   - Use existing `newlyUnlockedIds` behaviour if it still fits; otherwise adjust it to distinguish:
+     - just completed node
+     - newly revealed dependent nodes
+   - Reveal state should be derived from completedTechs/visibility and kept UI-only.
+   - Do not create a second source of truth for availability.
+
+3. Inspector update on completion
+   - If the selected node completes while selected, the inspector updates automatically to completed state.
+   - It should show "Completed in Year X" when completed-year state exists.
+   - Start button disappears.
+   - Outcome summary remains readable.
+   - If the selected node unlocks/reveals dependents, those dependents should be visibly highlighted in the tree.
+
+4. Non-modal completion clarity
+   - Ordinary completions should be clear through local UI + notification, not a modal.
+   - Landmark completions are handled by culture event modal policy from Block 20-3.
+   - Do not add a separate research-complete modal.
+
+5. Motion and accessibility
+   - Use short, purposeful animations only.
+   - Follow token/motion patterns and respect layout stability: no card size changes that break tree lines.
+   - Completed/reveal highlights must not rely solely on colour; include icon/badge/outline treatment.
+   - Avoid persistent flashing or looping animations except existing hint pulse if already present.
+
+6. Tests
+   - ResearchHub reacts to `techUnlocked$` / completion signal by marking the completed node briefly.
+   - Dependent nodes get reveal/new treatment when they become available.
+   - Timers are cleared in `ngOnDestroy`.
+   - Inspector updates from in-progress to completed and shows completion year.
+   - Completed nodes remain selectable/readable after highlight ends.
+
+PATTERNS
+- UI-only transient state belongs in ResearchHubComponent, not GameStateService.
+- Persisted facts like completion year belong in GameStateService (from Block 20-3).
+- Use OnPush, signals, @for with track, and tokens-only SCSS.
+- No direct DOM mutation except the existing SVG line drawing code path.
+
+OUT OF SCOPE
+- Adding new culture event content (Block 20-3 handles landmark event routing; Block 24 handles broader trigger overhaul).
+- Reworking Research Hub layout or inspector basics (Block 20-4).
+- Audio feedback.
