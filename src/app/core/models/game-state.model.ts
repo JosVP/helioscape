@@ -34,6 +34,7 @@ export interface SerializedGameState {
   isFirstPlaythrough: boolean;
   planets: Record<string, PlanetState>;
   completedTechs: string[];
+  completedResearchYears: Record<string, number>;
   activeResearch: ActiveResearchTrack[];
   pendingFork: PendingFork | null;
   planetUnlocks: Record<string, PlanetUnlockState>;

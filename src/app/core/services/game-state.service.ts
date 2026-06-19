@@ -83,6 +83,7 @@ export class GameStateService {
 
   private readonly _planets = signal<Record<string, PlanetState>>({});
   private readonly _completedTechs = signal<string[]>([]);
+  private readonly _completedResearchYears = signal<Record<string, number>>({});
   private readonly _activeResearch = signal<ActiveResearchTrack[]>([]);
   private readonly _pendingFork = signal<PendingFork | null>(null);
   private readonly _planetUnlocks = signal<Record<string, PlanetUnlockState>>({});
@@ -133,6 +134,8 @@ export class GameStateService {
 
   readonly planets: Signal<Record<string, PlanetState>> = this._planets.asReadonly();
   readonly completedTechs: Signal<string[]> = this._completedTechs.asReadonly();
+  readonly completedResearchYears: Signal<Record<string, number>> =
+    this._completedResearchYears.asReadonly();
   readonly activeResearch: Signal<ActiveResearchTrack[]> = this._activeResearch.asReadonly();
   readonly pendingFork: Signal<PendingFork | null> = this._pendingFork.asReadonly();
   readonly planetUnlocks: Signal<Record<string, PlanetUnlockState>> = this._planetUnlocks.asReadonly();
@@ -280,9 +283,12 @@ export class GameStateService {
   }
 
   /** Removes the track from active research and adds its id to completedTechs. */
-  completeResearch(trackId: string): void {
+  completeResearch(trackId: string, completedYear: number = this._gameYear()): void {
     this._activeResearch.update((tracks) => tracks.filter((t) => t.trackId !== trackId));
     this.unlockTech(trackId);
+    this._completedResearchYears.update((years) =>
+      years[trackId] === completedYear ? years : { ...years, [trackId]: completedYear }
+    );
   }
 
   // -------------------------------------------------------------------------
@@ -870,6 +876,7 @@ export class GameStateService {
     this._isFirstPlaythrough.set(true);
     this._planets.set(this.buildInitialPlanetsRecord());
     this._completedTechs.set([]);
+    this._completedResearchYears.set({});
     this._activeResearch.set([]);
     this._pendingFork.set(null);
     this._planetUnlocks.set(this.buildInitialPlanetUnlocksRecord());
@@ -911,6 +918,7 @@ export class GameStateService {
     this._currentSaveSlot.set(state.currentSaveSlot);
     this._planets.set(state.planets);
     this._completedTechs.set(state.completedTechs);
+    this._completedResearchYears.set(state.completedResearchYears ?? {});
     this._activeResearch.set(state.activeResearch);
     this._pendingFork.set(state.pendingFork);
     this._planetUnlocks.set(state.planetUnlocks ?? this.buildInitialPlanetUnlocksRecord());
@@ -949,6 +957,7 @@ export class GameStateService {
       currentSaveSlot: this._currentSaveSlot(),
       planets: this._planets(),
       completedTechs: this._completedTechs(),
+      completedResearchYears: this._completedResearchYears(),
       activeResearch: this._activeResearch(),
       pendingFork: this._pendingFork(),
       planetUnlocks: this._planetUnlocks(),

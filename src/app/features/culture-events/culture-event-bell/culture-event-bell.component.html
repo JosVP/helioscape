@@ -6,12 +6,12 @@
     [class.bell__btn--active]="_dropdownOpen()"
     [attr.aria-expanded]="_dropdownOpen()"
     aria-haspopup="true"
-    aria-label="Culture event notifications"
+    aria-label="Notifications"
     (click)="onBellClick()"
   >
     <span class="bell__icon" aria-hidden="true">🔔</span>
     @if (unreadCount() > 0) {
-      <span class="bell__badge" [attr.aria-label]="unreadCount() + ' unread events'">
+      <span class="bell__badge" [attr.aria-label]="unreadCount() + ' unread notifications'">
         {{ unreadCount() }}
       </span>
     }
@@ -21,7 +21,7 @@
     <div
       class="bell__panel"
       role="dialog"
-      aria-label="Culture event notifications"
+      aria-label="Notifications"
     >
       <!-- Toolbar: toggle unread / all -->
       <div class="bell__toolbar">
@@ -43,7 +43,7 @@
 
       @if (hasItems()) {
         <ul class="bell__list" role="list">
-          @for (item of displayedItems(); track item.eventId) {
+          @for (item of displayedItems(); track item.id) {
             <li
               class="bell__item"
               [class.bell__item--read]="item.read"
@@ -52,7 +52,7 @@
                 <button
                   class="bell__item-btn"
                   type="button"
-                  (click)="onItemClick(item.eventId)"
+                  (click)="onItemClick(item)"
                 >
                   <span class="bell__unread-dot" aria-hidden="true"></span>
                   <span class="bell__item-label">{{ item.title }}</span>

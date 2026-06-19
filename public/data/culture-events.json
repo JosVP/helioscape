@@ -47,6 +47,7 @@
     "choices": [],
     "tags": [],
     "trigger": { "type": "tech_completed", "techId": "earth_fusion_ignition_theory" },
+    "presentation": "modal",
     "priority": false
   },
   {

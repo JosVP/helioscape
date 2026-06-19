@@ -80,6 +80,7 @@ function makeEventBusFake() {
   return {
     techUnlocked$: new Subject<{ planetId: string; nodeId: string }>(),
     forkPresented$: new Subject<{ planetId: string; techId: string }>(),
+    cultureEventRequested$: new Subject<{ eventId: string; priority?: boolean }>(),
   };
 }
 
@@ -413,12 +414,16 @@ describe('TechTreeService', () => {
       setup([node]);
     }
 
-    it('emit_event: queues the culture event', () => {
+    it('emit_event: requests the culture event through EventBus', () => {
       setupSingleEffectNode({ type: 'emit_event', eventId: 'ce_test' });
+
+      const requests: { eventId: string; priority?: boolean }[] = [];
+      eventBus.cultureEventRequested$.subscribe((event) => requests.push(event));
+
       service.unlockTech('mars', 'n1');
-      expect(gameState.addToEventQueue).toHaveBeenCalledWith(
-        expect.objectContaining({ eventId: 'ce_test', priority: false })
-      );
+
+      expect(requests).toEqual([{ eventId: 'ce_test' }]);
+      expect(gameState.addToEventQueue).not.toHaveBeenCalled();
     });
 
     it('apply_terraforming_choice: delegates to TerraformingService.applyChoice', () => {

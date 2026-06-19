@@ -111,6 +111,10 @@ export class CultureEventService {
     });
 
     // EventBus subscriptions
+    this.eventBus.cultureEventRequested$
+      .pipe(takeUntilDestroyed())
+      .subscribe(({ eventId, priority }) => this.queueEvent(eventId, priority ?? false));
+
     this.eventBus.techUnlocked$
       .pipe(takeUntilDestroyed())
       .subscribe(({ nodeId }) => this._checkTechTriggers(nodeId));
@@ -164,6 +168,8 @@ export class CultureEventService {
       return;
     }
 
+    if (this._isAlreadyFired(eventId)) return;
+
     const currentYear = untracked(() => this.gameState.gameYear());
 
     if (priority) {
@@ -186,7 +192,7 @@ export class CultureEventService {
       // Auto-advance only for events that should auto-show (has choices or
       // is priority). Pure text-only notifications sit in the queue silently
       // and are surfaced via the bell badge + notificationQueue signal.
-      const isAutoShow = eventDef.priority || eventDef.choices.length > 0;
+      const isAutoShow = eventDef.presentation === 'modal' || eventDef.priority || eventDef.choices.length > 0;
       if (isAutoShow && !this._currentEntry()) {
         this._tryShowNext();
       }
@@ -283,7 +289,7 @@ export class CultureEventService {
    */
   private _isAutoShow(entry: CultureEventEntry): boolean {
     const def = this.data.getCultureEvent(entry.eventId);
-    return !!def && (entry.priority || def.choices.length > 0);
+    return !!def && (entry.priority || def.presentation === 'modal' || def.choices.length > 0);
   }
 
   private _displayEvent(entry: CultureEventEntry): void {

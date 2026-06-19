@@ -41,6 +41,9 @@ export class EventBusService {
   /** A culture event has been triggered. Payload: eventId. */
   readonly cultureEventTriggered$ = new Subject<string>();
 
+  /** A system requests a culture event be queued through CultureEventService. */
+  readonly cultureEventRequested$ = new Subject<{ eventId: string; priority?: boolean }>();
+
   /** A Kardashev milestone has been reached. Payload: milestoneId. */
   readonly milestoneReached$ = new Subject<string>();
 

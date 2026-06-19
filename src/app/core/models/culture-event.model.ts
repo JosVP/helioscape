@@ -17,6 +17,7 @@ export interface CultureEvent {
   choices: CultureEventChoice[];
   tags: ('naturalist' | 'architect')[];
   trigger: CultureEventTrigger;
+  presentation?: 'modal' | 'notification';
   priority: boolean; // true = displaces current event
 }
 

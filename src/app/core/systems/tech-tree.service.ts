@@ -258,13 +258,9 @@ export class TechTreeService {
         break;
 
       case 'emit_event':
-        // Queue a culture event to be displayed to the player.
-        this.gameState.addToEventQueue({
-          eventId: effect.eventId,
-          queuedAtYear: this.gameState.gameYear(),
-          priority: false,
-          wasInterrupted: false,
-        });
+        // Queue through CultureEventService so validation, presentation, and
+        // duplicate prevention stay centralised.
+        this.eventBus.cultureEventRequested$.next({ eventId: effect.eventId });
         break;
 
       case 'apply_terraforming_choice':

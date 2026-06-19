@@ -80,7 +80,7 @@ export class ResearchService {
   // ---------------------------------------------------------------------------
 
   private _completeTrack(trackId: string, planetId: string): void {
-    this.gameState.completeResearch(trackId);
+    this.gameState.completeResearch(trackId, this.gameState.gameYear());
 
     const rt = this.data.getResearchTrack(trackId);
     if (rt) {

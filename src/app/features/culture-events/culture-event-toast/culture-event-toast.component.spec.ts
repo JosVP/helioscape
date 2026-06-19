@@ -4,6 +4,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import type { CultureEventEntry } from '@app/core/models';
 import { DataService } from '@app/core/services/data.service';
 import { CultureEventService } from '@app/core/systems/culture-event.service';
+import { NotificationService, type SystemNotification } from '@app/core/systems/notification.service';
 import { CultureEventToastComponent } from './culture-event-toast.component';
 
 // ---------------------------------------------------------------------------
@@ -36,6 +37,19 @@ function makeFakeCultureEventService(initialNotifications: CultureEventEntry[] =
   };
 }
 
+function makeFakeNotificationService(initialNotifications: SystemNotification[] = []) {
+  const notificationSignal = signal<SystemNotification[]>(initialNotifications);
+  return {
+    unreadNotifications: notificationSignal.asReadonly(),
+    markRead: vi.fn((notificationId: number) => {
+      notificationSignal.update((notifications) =>
+        notifications.filter((notification) => notification.id !== notificationId),
+      );
+    }),
+    _setNotifications: (notifications: SystemNotification[]) => notificationSignal.set(notifications),
+  };
+}
+
 type FakeCultureEventService = ReturnType<typeof makeFakeCultureEventService>;
 
 function setup(
@@ -44,19 +58,21 @@ function setup(
 ) {
   const fakeData = makeFakeDataService(titleMap);
   const fakeCultureEventService = makeFakeCultureEventService(initialNotifications);
+  const fakeNotificationService = makeFakeNotificationService();
 
   TestBed.configureTestingModule({
     imports: [CultureEventToastComponent],
     providers: [
       { provide: DataService, useValue: fakeData },
       { provide: CultureEventService, useValue: fakeCultureEventService },
+      { provide: NotificationService, useValue: fakeNotificationService },
     ],
   });
 
   const fixture = TestBed.createComponent(CultureEventToastComponent);
   fixture.detectChanges();
 
-  return { fixture, component: fixture.componentInstance, fakeData, fakeCultureEventService };
+  return { fixture, component: fixture.componentInstance, fakeData, fakeCultureEventService, fakeNotificationService };
 }
 
 // ---------------------------------------------------------------------------
@@ -93,6 +109,56 @@ describe('CultureEventToastComponent', () => {
     // Clean up auto-dismiss timers
     vi.advanceTimersByTime(8000);
     vi.advanceTimersByTime(350); // COLLAPSE_MS
+  });
+
+  it('spawns a toast when system notification queue grows', () => {
+    const { fixture, fakeNotificationService } = setup([], {});
+
+    fakeNotificationService._setNotifications([
+      {
+        id: 1,
+        sourceId: 'earth_advanced_renewables',
+        title: 'Research complete: Advanced Renewables Integration',
+        createdAtYear: 2042,
+        kind: 'research-completed',
+      },
+    ]);
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance._toasts()[0].title).toBe(
+      'Research complete: Advanced Renewables Integration',
+    );
+    expect(fixture.componentInstance._toasts()[0].visible).toBe(false);
+
+    vi.advanceTimersByTime(0);
+    fixture.detectChanges();
+    expect(fixture.componentInstance._toasts()[0].visible).toBe(true);
+
+    vi.advanceTimersByTime(8000);
+    vi.advanceTimersByTime(350);
+  });
+
+  it('marks a system notification read when its toast is clicked', () => {
+    const { fixture, fakeNotificationService } = setup([], {});
+
+    fakeNotificationService._setNotifications([
+      {
+        id: 1,
+        sourceId: 'earth_advanced_renewables',
+        title: 'Research complete: Advanced Renewables Integration',
+        createdAtYear: 2042,
+        kind: 'research-completed',
+      },
+    ]);
+    fixture.detectChanges();
+    vi.advanceTimersByTime(0);
+    fixture.detectChanges();
+
+    fixture.nativeElement.querySelector('.toast__item').click();
+
+    expect(fakeNotificationService.markRead).toHaveBeenCalledWith(1);
+
+    vi.advanceTimersByTime(350);
   });
 
   it('does not spawn a toast when notification queue shrinks', () => {

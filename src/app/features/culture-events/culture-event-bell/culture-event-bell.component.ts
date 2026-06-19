@@ -9,6 +9,7 @@ import {
 import { DataService } from '@app/core/services/data.service';
 import { GameStateService } from '@app/core/services/game-state.service';
 import { CultureEventService } from '@app/core/systems/culture-event.service';
+import { NotificationService } from '@app/core/systems/notification.service';
 
 // ---------------------------------------------------------------------------
 // Configuration
@@ -25,9 +26,12 @@ export const BELL_HISTORY_DISPLAY_LIMIT = 20;
 // ---------------------------------------------------------------------------
 
 interface BellItem {
-  readonly eventId: string;
+  readonly id: string;
   readonly title: string;
   readonly read: boolean;
+  readonly source: 'culture' | 'system';
+  readonly eventId?: string;
+  readonly notificationId?: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -43,6 +47,7 @@ interface BellItem {
 })
 export class CultureEventBellComponent {
   private readonly cultureEventService = inject(CultureEventService);
+  private readonly notificationService = inject(NotificationService);
   private readonly gameState = inject(GameStateService);
   private readonly data = inject(DataService);
 
@@ -57,15 +62,30 @@ export class CultureEventBellComponent {
   // Computed
   // -------------------------------------------------------------------------
 
-  readonly unreadCount = computed(() => this.cultureEventService.notificationQueue().length);
+  readonly unreadCount = computed(
+    () =>
+      this.cultureEventService.notificationQueue().length +
+      this.notificationService.unreadNotifications().length,
+  );
 
   /** Unread items: notification-type entries still in the queue. */
   private readonly _unreadItems = computed<BellItem[]>(() =>
-    this.cultureEventService.notificationQueue().map((e) => ({
-      eventId: e.eventId,
-      title: this.data.getCultureEvent(e.eventId)?.title ?? e.eventId,
-      read: false,
-    })),
+    [
+      ...this.cultureEventService.notificationQueue().map((e) => ({
+        id: `culture:${e.eventId}`,
+        source: 'culture' as const,
+        eventId: e.eventId,
+        title: this.data.getCultureEvent(e.eventId)?.title ?? e.eventId,
+        read: false,
+      })),
+      ...this.notificationService.unreadNotifications().map((notification) => ({
+        id: `system:${notification.id}`,
+        source: 'system' as const,
+        notificationId: notification.id,
+        title: notification.title,
+        read: false,
+      })),
+    ],
   );
 
   /** Read items: most recent history first, capped at BELL_HISTORY_DISPLAY_LIMIT. */
@@ -74,6 +94,8 @@ export class CultureEventBellComponent {
       .reverse()
       .slice(0, BELL_HISTORY_DISPLAY_LIMIT)
       .map((h) => ({
+        id: `culture-history:${h.eventId}`,
+        source: 'culture' as const,
         eventId: h.eventId,
         title: this.data.getCultureEvent(h.eventId)?.title ?? h.eventId,
         read: true,
@@ -101,9 +123,15 @@ export class CultureEventBellComponent {
     this._showOnlyUnread.update((v) => !v);
   }
 
-  onItemClick(eventId: string): void {
+  onItemClick(item: BellItem): void {
     this._dropdownOpen.set(false);
-    this.cultureEventService.showEvent(eventId);
+    if (item.source === 'culture' && item.eventId) {
+      this.cultureEventService.showEvent(item.eventId);
+      return;
+    }
+    if (item.source === 'system' && item.notificationId !== undefined) {
+      this.notificationService.markRead(item.notificationId);
+    }
   }
 
   /** Close dropdown on Escape. */

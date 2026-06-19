@@ -11,10 +11,10 @@
         class="toast__item"
         [class.toast__item--visible]="toast.visible"
         role="alert"
-        (click)="onToastClick(toast.id, toast.eventId)"
+        (click)="onToastClick(toast)"
       >
         <span class="toast__item-title">{{ toast.title }}</span>
-        <span class="toast__item-hint" aria-hidden="true">Click to open</span>
+        <span class="toast__item-hint" aria-hidden="true">{{ toast.hint }}</span>
       </div>
     </div>
   }

@@ -9,6 +9,7 @@ import { SaveService } from '@app/core/services/save.service';
 import { EventBusService } from '@app/core/services/event-bus.service';
 import { DataService } from '@app/core/services/data.service';
 import { CultureEventService } from '@app/core/systems/culture-event.service';
+import { NotificationService } from '@app/core/systems/notification.service';
 
 describe('HudComponent', () => {
   const autosaveSignal = signal(0);
@@ -19,6 +20,7 @@ describe('HudComponent', () => {
   const isFirstPlaythroughSignal = signal(true);
   const cultureEventHistorySignal = signal([]);
   const notificationQueueSignal = signal([]);
+  const systemNotificationSignal = signal([]);
 
   const mockGameState = {
     gameYear: gameYearSignal.asReadonly(),
@@ -53,6 +55,11 @@ describe('HudComponent', () => {
     showEvent: vi.fn(),
   };
 
+  const mockNotificationService = {
+    unreadNotifications: systemNotificationSignal.asReadonly(),
+    markRead: vi.fn(),
+  };
+
   function setup(): ComponentFixture<HudComponent> {
     TestBed.configureTestingModule({
       imports: [HudComponent],
@@ -63,6 +70,7 @@ describe('HudComponent', () => {
         { provide: EventBusService, useValue: mockEventBus },
         { provide: DataService, useValue: mockData },
         { provide: CultureEventService, useValue: mockCultureEventService },
+        { provide: NotificationService, useValue: mockNotificationService },
       ],
     });
     const fixture = TestBed.createComponent(HudComponent);
@@ -74,6 +82,7 @@ describe('HudComponent', () => {
     autosaveSignal.set(0);
     cultureEventHistorySignal.set([]);
     notificationQueueSignal.set([]);
+    systemNotificationSignal.set([]);
     vi.clearAllMocks();
     TestBed.resetTestingModule();
   });

@@ -6,7 +6,7 @@ import { GameStateService } from './game-state.service';
 // Constants
 // ---------------------------------------------------------------------------
 
-const SAVE_VERSION = 3;
+const SAVE_VERSION = 4;
 const MAX_SLOTS = 3;
 const AUTOSAVE_SLOT = 0;
 
@@ -277,6 +277,14 @@ export class SaveService {
         );
       }
       migrated = { ...migrated, version: 3 };
+    }
+
+    if (fromVersion < 4) {
+      migrated = {
+        ...migrated,
+        completedResearchYears: migrated.completedResearchYears ?? {},
+        version: 4,
+      };
     }
 
     console.warn(`[SaveService] Migrating save from version ${fromVersion} → ${SAVE_VERSION}`);

@@ -121,6 +121,7 @@ function makeEventBusFake() {
     bioPhaseCompleted$: new Subject<{ planetId: string; phaseId: string }>(),
     bioPhaseCollapsed$: new Subject<{ planetId: string; phaseId: string }>(),
     cultureEventTriggered$: new Subject<string>(),
+    cultureEventRequested$: new Subject<{ eventId: string; priority?: boolean }>(),
   };
 }
 
@@ -226,6 +227,59 @@ describe('CultureEventService', () => {
       // Queue ce_b — it should NOT jump to front
       service.queueEvent('ce_b');
       expect(service.currentEvent()?.id).toBe('ce_a');
+    });
+
+    it('auto-shows text-only events marked for modal presentation', () => {
+      const event = makeCultureEvent({ id: 'ce_modal', presentation: 'modal', choices: [] });
+      const { service, gameState } = setup({ gameYear: 2040, queue: [] }, [event]);
+
+      gameState.addToEventQueue.mockImplementation((e: CultureEventEntry) => {
+        gameState._setQueue([e]);
+      });
+
+      service.queueEvent('ce_modal');
+
+      expect(service.currentEvent()).toEqual(event);
+      expect(service.isDisplayingEvent()).toBe(true);
+    });
+
+    it('leaves text-only notification events out of the current modal', () => {
+      const event = makeCultureEvent({ id: 'ce_notice', presentation: 'notification', choices: [] });
+      const { service, gameState } = setup({ gameYear: 2040, queue: [] }, [event]);
+
+      gameState.addToEventQueue.mockImplementation((e: CultureEventEntry) => {
+        gameState._setQueue([e]);
+      });
+
+      service.queueEvent('ce_notice');
+
+      expect(service.currentEvent()).toBeNull();
+      expect(service.notificationQueue().map((entry) => entry.eventId)).toEqual(['ce_notice']);
+    });
+
+    it('does not queue duplicate events already in history or queue', () => {
+      const event = makeCultureEvent({ id: 'ce_a' });
+      const { service, gameState } = setup(
+        { history: [{ eventId: 'ce_a', year: 2040, planetContext: '' }] },
+        [event],
+      );
+
+      service.queueEvent('ce_a');
+
+      expect(gameState.addToEventQueue).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('cultureEventRequested$', () => {
+    it('queues requested events through the normal queueEvent route', () => {
+      const event = makeCultureEvent({ id: 'ce_requested' });
+      const { gameState, eventBus } = setup({ gameYear: 2040 }, [event]);
+
+      eventBus.cultureEventRequested$.next({ eventId: 'ce_requested' });
+
+      expect(gameState.addToEventQueue).toHaveBeenCalledWith(
+        expect.objectContaining({ eventId: 'ce_requested', priority: false }),
+      );
     });
   });
 

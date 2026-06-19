@@ -68,7 +68,7 @@ function makeGameStateFake(opts: {
     _setTotalRpCapacity: (v: number) => totalRpCapSig.set(v),
     _advanceYear:        () => gameYearSig.update((y) => y + 1),
 
-    completeResearch: vi.fn((trackId: string) => {
+    completeResearch: vi.fn((trackId: string, _completedYear?: number) => {
       activeResearch.update((tracks) => tracks.filter((t) => t.trackId !== trackId));
       completedTechs.update((techs) => (techs.includes(trackId) ? techs : [...techs, trackId]));
     }),
@@ -175,7 +175,7 @@ describe('ResearchService', () => {
       setup([trackDef], { activeResearch: [activeTrack], gameYear: 2033 });
       TestBed.flushEffects();
 
-      expect(gameState.completeResearch).toHaveBeenCalledWith('test_track');
+      expect(gameState.completeResearch).toHaveBeenCalledWith('test_track', 2033);
     });
 
     it('does not complete a track when elapsed is below durationYears', () => {
@@ -199,7 +199,7 @@ describe('ResearchService', () => {
       setup([trackDef], { activeResearch: [activeTrack], gameYear: 2034 });
       TestBed.flushEffects();
 
-      expect(gameState.completeResearch).toHaveBeenCalledWith('test_track');
+      expect(gameState.completeResearch).toHaveBeenCalledWith('test_track', 2034);
     });
   });
 
