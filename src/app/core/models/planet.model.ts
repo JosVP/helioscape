@@ -35,7 +35,8 @@ export type PlanetUnlockDefinition =
   | PlanetStartUnlockedDefinition
   | PlanetMissionUnlockDefinition
   | PlanetPhaseUnlockDefinition
-  | PlanetYearUnlockDefinition;
+  | PlanetYearUnlockDefinition
+  | PlanetMercuryZoneUnlockDefinition;
 
 export interface PlanetStartUnlockedDefinition {
   type: 'start_unlocked';
@@ -62,6 +63,15 @@ export interface PlanetYearUnlockDefinition {
   year: number;
   eventId?: string;
   setFlag?: string;
+}
+
+/**
+ * Unlocks as soon as the player selects a starting zone on Mercury.
+ * No parameters — the trigger is the act of committing to a zone.
+ */
+export interface PlanetMercuryZoneUnlockDefinition {
+  type: 'mercury_zone_selected';
+  eventId?: string;
 }
 
 /**

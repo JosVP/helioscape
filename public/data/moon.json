@@ -1,0 +1,28 @@
+{
+  "id": "moon",
+  "displayName": "Moon",
+  "subtitle": "Artemis Base — Shackleton Crater",
+  "description": "We inherited this outpost from the Artemis Accords programme. The base at Shackleton Crater has been operational since 2033 — a permanent crewed foothold at the lunar south pole, drawing power from near-continuous sunlight on the crater rim while the interior cold-traps hold water ice we are only beginning to use. It is modest by the standards of what we will build, but it is ours, and it is already working.",
+  "facilities": [
+    {
+      "id": "artemis_base",
+      "displayName": "Artemis Base",
+      "description": "The main crewed station sits on the sunlit rim of Shackleton Crater. Life support, communications, and the early research programmes are all rooted here. It is where we first learned to live beyond Earth without looking back."
+    },
+    {
+      "id": "shackleton_ice_extraction",
+      "displayName": "Shackleton Ice Extraction",
+      "description": "The crater floor holds water ice deposited over billions of years of comet impacts. We are drawing from that reservoir now — carefully, sustainably, because it is finite. Electrolysis splits it into hydrogen and oxygen; what we cannot use here we ship onward."
+    },
+    {
+      "id": "far_side_array",
+      "displayName": "Far-Side Radio Array",
+      "description": "The lunar far side is the quietest place in the inner solar system — no radio noise from Earth, no interference from our own transmitters. The array there listens for signals we have not yet learned to interpret and relays deep-space telemetry from our early probe missions."
+    },
+    {
+      "id": "regolith_processing",
+      "displayName": "Regolith Processing",
+      "description": "Lunar soil is not soil in any living sense — it is pulverised rock, glass beads, and traces of solar wind. We process it anyway. From it we extract oxygen, helium-3, and construction feedstock. Every kilogram we refine here is a kilogram we did not have to launch from Earth."
+    }
+  ]
+}

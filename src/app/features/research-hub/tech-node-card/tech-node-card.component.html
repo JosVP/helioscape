@@ -2,11 +2,11 @@
   class="tech-node"
   [class]="'tech-node--' + visibility()"
   [class.tech-node--new]="isNew()"
-  [class.tech-node--interactive]="interactive() && visibility() !== 'completed'"
+  [class.tech-node--interactive]="isClickable()"
   [attr.data-node-id]="node().id"
-  [attr.tabindex]="interactive() && visibility() === 'available' ? 0 : null"
-  [attr.role]="interactive() && visibility() === 'available' ? 'button' : null"
-  [attr.aria-label]="interactive() && visibility() === 'available' ? 'Unlock ' + node().displayName : null"
+  [attr.tabindex]="isClickable() ? 0 : null"
+  [attr.role]="isClickable() ? 'button' : null"
+  [attr.aria-label]="isClickable() ? 'Start research: ' + node().displayName : null"
   (click)="onClick()"
   (keydown.enter)="onClick()"
   (keydown.space)="onClick()"
@@ -52,6 +52,24 @@
           {{ branchTag() }}
         </span>
       }
+
+      @if (isInProgress()) {
+        <div class="tech-node__progress"
+             role="progressbar"
+             [attr.aria-valuenow]="progressPercent() ?? 0"
+             aria-valuemin="0"
+             aria-valuemax="100">
+          <div class="tech-node__progress-fill"
+               [style.--progress]="(progressPercent() ?? 0) / 100"></div>
+        </div>
+        @if (etaYear()) {
+          <span class="tech-node__eta">Est. {{ etaYear() }}</span>
+        }
+      }
+
+      @if (isNeedsCapacity()) {
+        <span class="tech-node__capacity-badge">⏳ Needs capacity</span>
+      }
     }
   </div>
 
@@ -74,3 +92,4 @@
     </div>
   }
 </div>
+

@@ -6,7 +6,7 @@ import { GameStateService } from './game-state.service';
 // Constants
 // ---------------------------------------------------------------------------
 
-const SAVE_VERSION = 2;
+const SAVE_VERSION = 3;
 const MAX_SLOTS = 3;
 const AUTOSAVE_SLOT = 0;
 
@@ -258,6 +258,25 @@ export class SaveService {
 
     if (fromVersion < 2) {
       migrated = { ...migrated, version: 2 };
+    }
+
+    if (fromVersion < 3) {
+      // ActiveResearchTrack shape changed: progressYears → startYear + elapsedBeforeStart.
+      // Reconstruct from the old year counter. Paused tracks store elapsed; running
+      // tracks store it as elapsedBeforeStart and set startYear = gameYear - progressYears.
+      const year: number = (migrated.gameYear as number | undefined) ?? 2033;
+      if (Array.isArray(migrated.activeResearch)) {
+        migrated.activeResearch = migrated.activeResearch.map(
+          (t: { trackId: string; planetId: string; progressYears?: number; isPaused?: boolean }) => ({
+            trackId: t.trackId,
+            planetId: t.planetId,
+            isPaused: t.isPaused ?? false,
+            startYear: t.isPaused ? year : year - (t.progressYears ?? 0),
+            elapsedBeforeStart: t.isPaused ? (t.progressYears ?? 0) : 0,
+          }),
+        );
+      }
+      migrated = { ...migrated, version: 3 };
     }
 
     console.warn(`[SaveService] Migrating save from version ${fromVersion} → ${SAVE_VERSION}`);

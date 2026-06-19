@@ -61,6 +61,8 @@
                 [visibility]="entry.visibility"
                 [interactive]="false"
                 [isNew]="newlyUnlockedIds().has(entry.node.id)"
+                [progressPercent]="entry.progressPercent"
+                [etaYear]="entry.etaYear"
                 planetId="mars"
               />
             }
@@ -93,6 +95,8 @@
                 [visibility]="entry.visibility"
                 [interactive]="entry.interactive"
                 [isNew]="newlyUnlockedIds().has(entry.node.id)"
+                [progressPercent]="entry.progressPercent"
+                [etaYear]="entry.etaYear"
                 planetId="earth"
                 (nodeClicked)="onNodeClick($event, 'earth')"
               />
@@ -124,6 +128,8 @@
                 [visibility]="entry.visibility"
                 [interactive]="entry.interactive"
                 [isNew]="newlyUnlockedIds().has(entry.node.id)"
+                [progressPercent]="entry.progressPercent"
+                [etaYear]="entry.etaYear"
                 planetId="moon"
                 (nodeClicked)="onNodeClick($event, 'moon')"
               />
@@ -157,6 +163,8 @@
                 [visibility]="entry.visibility"
                 [interactive]="false"
                 [isNew]="newlyUnlockedIds().has(entry.node.id)"
+                [progressPercent]="entry.progressPercent"
+                [etaYear]="entry.etaYear"
                 planetId="venus"
               />
             }

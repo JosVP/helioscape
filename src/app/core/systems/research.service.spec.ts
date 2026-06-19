@@ -31,8 +31,9 @@ function makeActiveTrack(overrides: Partial<ActiveResearchTrack> = {}): ActiveRe
   return {
     trackId: 'test_track',
     planetId: 'mars',
-    progressYears: 0,
     isPaused: false,
+    startYear: 2033,
+    elapsedBeforeStart: 0,
     ...overrides,
   };
 }
@@ -48,55 +49,49 @@ function makeGameStateFake(opts: {
   totalRpCapacity?: number;
   gameYear?: number;
 } = {}) {
-  const completedTechs = signal<string[]>(opts.completedTechs ?? []);
-  const activeResearch = signal<ActiveResearchTrack[]>(opts.activeResearch ?? []);
-  const gameYearSig = signal<number>(opts.gameYear ?? 2033);
-
-  // usedRpCapacity is a derived value in the real service; expose as a settable
-  // signal in tests so scenarios can control it directly.
-  const usedRpCapacitySig = signal<number>(opts.usedRpCapacity ?? 0);
-  const totalRpCapacitySig = signal<number>(opts.totalRpCapacity ?? 60);
+  const completedTechs  = signal<string[]>(opts.completedTechs ?? []);
+  const activeResearch  = signal<ActiveResearchTrack[]>(opts.activeResearch ?? []);
+  const gameYearSig     = signal<number>(opts.gameYear ?? 2033);
+  const usedRpCapSig    = signal<number>(opts.usedRpCapacity ?? 0);
+  const totalRpCapSig   = signal<number>(opts.totalRpCapacity ?? 60);
 
   return {
-    completedTechs: completedTechs.asReadonly(),
-    activeResearch: activeResearch.asReadonly(),
-    gameYear: gameYearSig.asReadonly(),
-    usedRpCapacity: usedRpCapacitySig.asReadonly(),
-    totalRpCapacity: totalRpCapacitySig.asReadonly(),
+    completedTechs:  completedTechs.asReadonly(),
+    activeResearch:  activeResearch.asReadonly(),
+    gameYear:        gameYearSig.asReadonly(),
+    usedRpCapacity:  usedRpCapSig.asReadonly(),
+    totalRpCapacity: totalRpCapSig.asReadonly(),
 
-    // Write helpers for tests.
-    _setCompletedTechs: (v: string[]) => completedTechs.set(v),
-    _setActiveResearch: (v: ActiveResearchTrack[]) => activeResearch.set(v),
-    _setUsedRpCapacity: (v: number) => usedRpCapacitySig.set(v),
-    _setTotalRpCapacity: (v: number) => totalRpCapacitySig.set(v),
-    _advanceYear: () => gameYearSig.update((y) => y + 1),
+    _setCompletedTechs:  (v: string[]) => completedTechs.set(v),
+    _setActiveResearch:  (v: ActiveResearchTrack[]) => activeResearch.set(v),
+    _setUsedRpCapacity:  (v: number) => usedRpCapSig.set(v),
+    _setTotalRpCapacity: (v: number) => totalRpCapSig.set(v),
+    _advanceYear:        () => gameYearSig.update((y) => y + 1),
 
-    // Mutation spies — simulate the real side-effect for readable assertions.
-    advanceResearch: vi.fn((trackId: string, years: number) => {
-      activeResearch.update((tracks) =>
-        tracks.map((t) =>
-          t.trackId === trackId ? { ...t, progressYears: t.progressYears + years } : t
-        )
-      );
-    }),
     completeResearch: vi.fn((trackId: string) => {
       activeResearch.update((tracks) => tracks.filter((t) => t.trackId !== trackId));
       completedTechs.update((techs) => (techs.includes(trackId) ? techs : [...techs, trackId]));
     }),
-    startResearch: vi.fn((trackId: string, planetId: string) => {
+    startResearch: vi.fn((trackId: string, planetId: string, startYear: number) => {
       activeResearch.update((tracks) => [
         ...tracks,
-        { trackId, planetId, progressYears: 0, isPaused: false },
+        { trackId, planetId, isPaused: false, startYear, elapsedBeforeStart: 0 },
       ]);
     }),
     pauseResearch: vi.fn((trackId: string) => {
+      const year = gameYearSig();
       activeResearch.update((tracks) =>
-        tracks.map((t) => (t.trackId === trackId ? { ...t, isPaused: true } : t))
+        tracks.map((t) =>
+          t.trackId === trackId
+            ? { ...t, isPaused: true, elapsedBeforeStart: t.elapsedBeforeStart + (year - t.startYear), startYear: year }
+            : t
+        )
       );
     }),
     resumeResearch: vi.fn((trackId: string) => {
+      const year = gameYearSig();
       activeResearch.update((tracks) =>
-        tracks.map((t) => (t.trackId === trackId ? { ...t, isPaused: false } : t))
+        tracks.map((t) => (t.trackId === trackId ? { ...t, isPaused: false, startYear: year } : t))
       );
     }),
   };
@@ -104,19 +99,20 @@ function makeGameStateFake(opts: {
 
 function makeDataFake(tracks: ResearchTrack[] = []) {
   return {
-    getResearchTrack: vi.fn((id: string) => tracks.find((t) => t.id === id)),
+    getResearchTrack: vi.fn((id: string) => tracks.find((t) => t.id === id) ?? null),
+    getTechNode:      vi.fn((_id: string) => null),
   };
 }
 
 function makeEventBusFake() {
-  return {
-    researchCompleted$: new Subject<string>(),
-  };
+  return { researchCompleted$: new Subject<string>() };
 }
 
 function makeTechTreeFake() {
   return {
-    applyEffects: vi.fn((_effects: TechEffect[], _planetId: string) => undefined),
+    applyEffects:          vi.fn((_effects: TechEffect[], _planetId: string) => undefined),
+    completeNodeResearch:  vi.fn((_planetId: string, _nodeId: string) => undefined),
+    canUnlock:             vi.fn((_planetId: string, _nodeId: string) => false),
   };
 }
 
@@ -133,20 +129,20 @@ describe('ResearchService', () => {
 
   function setup(
     tracks: ResearchTrack[] = [],
-    gameStateOpts: Parameters<typeof makeGameStateFake>[0] = {}
+    gameStateOpts: Parameters<typeof makeGameStateFake>[0] = {},
   ) {
     gameState = makeGameStateFake(gameStateOpts);
-    data = makeDataFake(tracks);
-    eventBus = makeEventBusFake();
-    techTree = makeTechTreeFake();
+    data      = makeDataFake(tracks);
+    eventBus  = makeEventBusFake();
+    techTree  = makeTechTreeFake();
 
     TestBed.configureTestingModule({
       providers: [
         ResearchService,
-        { provide: DataService, useValue: data },
+        { provide: DataService,      useValue: data },
         { provide: GameStateService, useValue: gameState },
-        { provide: EventBusService, useValue: eventBus },
-        { provide: TechTreeService, useValue: techTree },
+        { provide: EventBusService,  useValue: eventBus },
+        { provide: TechTreeService,  useValue: techTree },
       ],
     });
 
@@ -158,60 +154,52 @@ describe('ResearchService', () => {
   // -------------------------------------------------------------------------
 
   describe('processYear (via effect on gameYear)', () => {
-    it('advances progress by 1 for each non-paused track', () => {
-      const trackDef = makeTrackDef({ durationYears: 10 });
-      const activeTrack = makeActiveTrack({ progressYears: 2 });
-
-      setup([trackDef], {
-        activeResearch: [activeTrack],
-        completedTechs: ['prereq_tech'],
-      });
-
-      TestBed.flushEffects();
-      gameState._advanceYear();
-      TestBed.flushEffects();
-
-      expect(gameState.advanceResearch).toHaveBeenCalledWith('test_track', 1);
-    });
-
     it('skips paused tracks', () => {
-      const trackDef = makeTrackDef({ durationYears: 10 });
-      const activeTrack = makeActiveTrack({ progressYears: 2, isPaused: true });
+      const trackDef   = makeTrackDef({ durationYears: 10 });
+      const activeTrack = makeActiveTrack({ isPaused: true, startYear: 2030, elapsedBeforeStart: 2 });
 
-      setup([trackDef], { activeResearch: [activeTrack] });
-
-      TestBed.flushEffects();
-      gameState._advanceYear();
-      TestBed.flushEffects();
-
-      expect(gameState.advanceResearch).not.toHaveBeenCalled();
-    });
-
-    it('completes a track when progressYears reaches durationYears', () => {
-      // Track needs 5 years; currently at 4 — one more tick should complete it.
-      const trackDef = makeTrackDef({ durationYears: 5 });
-      const activeTrack = makeActiveTrack({ progressYears: 4 });
-
-      setup([trackDef], { activeResearch: [activeTrack] });
-
-      TestBed.flushEffects();
-      gameState._advanceYear();
-      TestBed.flushEffects();
-
-      expect(gameState.completeResearch).toHaveBeenCalledWith('test_track');
-    });
-
-    it('does not complete a track when progress is still below duration', () => {
-      const trackDef = makeTrackDef({ durationYears: 5 });
-      const activeTrack = makeActiveTrack({ progressYears: 2 });
-
-      setup([trackDef], { activeResearch: [activeTrack] });
-
+      setup([trackDef], { activeResearch: [activeTrack], gameYear: 2033 });
       TestBed.flushEffects();
       gameState._advanceYear();
       TestBed.flushEffects();
 
       expect(gameState.completeResearch).not.toHaveBeenCalled();
+    });
+
+    it('completes a track when elapsed years reaches durationYears', () => {
+      // startYear 2028, elapsedBeforeStart 0, durationYears 5
+      // at year 2033: elapsed = 2033 - 2028 = 5 >= 5 → complete
+      const trackDef    = makeTrackDef({ durationYears: 5 });
+      const activeTrack = makeActiveTrack({ startYear: 2028, elapsedBeforeStart: 0 });
+
+      setup([trackDef], { activeResearch: [activeTrack], gameYear: 2033 });
+      TestBed.flushEffects();
+
+      expect(gameState.completeResearch).toHaveBeenCalledWith('test_track');
+    });
+
+    it('does not complete a track when elapsed is below durationYears', () => {
+      // startYear 2030, durationYears 5
+      // at year 2033: elapsed = 3 < 5 → no completion
+      const trackDef    = makeTrackDef({ durationYears: 5 });
+      const activeTrack = makeActiveTrack({ startYear: 2030, elapsedBeforeStart: 0 });
+
+      setup([trackDef], { activeResearch: [activeTrack], gameYear: 2033 });
+      TestBed.flushEffects();
+
+      expect(gameState.completeResearch).not.toHaveBeenCalled();
+    });
+
+    it('counts elapsedBeforeStart when paused then resumed', () => {
+      // 2 years elapsed before pause, resumed at 2031, durationYears 5
+      // at year 2034: total = 2 + (2034 - 2031) = 5 → complete
+      const trackDef    = makeTrackDef({ durationYears: 5 });
+      const activeTrack = makeActiveTrack({ startYear: 2031, elapsedBeforeStart: 2 });
+
+      setup([trackDef], { activeResearch: [activeTrack], gameYear: 2034 });
+      TestBed.flushEffects();
+
+      expect(gameState.completeResearch).toHaveBeenCalledWith('test_track');
     });
   });
 
@@ -222,29 +210,24 @@ describe('ResearchService', () => {
   describe('_completeTrack (via processYear)', () => {
     it('calls techTree.applyEffects with the track onCompleteEffects and planetId', () => {
       const effect: TechEffect = { type: 'unlock_tech', target: 'some_tech' };
-      const trackDef = makeTrackDef({ durationYears: 5, onCompleteEffects: [effect] });
-      const activeTrack = makeActiveTrack({ progressYears: 4, planetId: 'mars' });
+      const trackDef    = makeTrackDef({ durationYears: 5, onCompleteEffects: [effect] });
+      const activeTrack = makeActiveTrack({ startYear: 2028, elapsedBeforeStart: 0, planetId: 'mars' });
 
-      setup([trackDef], { activeResearch: [activeTrack] });
-
-      TestBed.flushEffects();
-      gameState._advanceYear();
+      setup([trackDef], { activeResearch: [activeTrack], gameYear: 2033 });
       TestBed.flushEffects();
 
       expect(techTree.applyEffects).toHaveBeenCalledWith([effect], 'mars');
     });
 
     it('emits researchCompleted$ with the trackId', () => {
-      const trackDef = makeTrackDef({ durationYears: 5 });
-      const activeTrack = makeActiveTrack({ progressYears: 4 });
+      const trackDef    = makeTrackDef({ durationYears: 5 });
+      const activeTrack = makeActiveTrack({ startYear: 2028, elapsedBeforeStart: 0 });
 
-      setup([trackDef], { activeResearch: [activeTrack] });
+      setup([trackDef], { activeResearch: [activeTrack], gameYear: 2033 });
 
       const emitted: string[] = [];
       eventBus.researchCompleted$.subscribe((id) => emitted.push(id));
 
-      TestBed.flushEffects();
-      gameState._advanceYear();
       TestBed.flushEffects();
 
       expect(emitted).toEqual(['test_track']);
@@ -274,12 +257,12 @@ describe('ResearchService', () => {
     });
 
     it('returns false when the track is already running (not paused)', () => {
-      const trackDef = makeTrackDef();
+      const trackDef   = makeTrackDef();
       const activeTrack = makeActiveTrack({ isPaused: false });
       setup([trackDef], {
-        completedTechs: ['prereq_tech'],
-        activeResearch: [activeTrack],
-        usedRpCapacity: 20,
+        completedTechs:  ['prereq_tech'],
+        activeResearch:  [activeTrack],
+        usedRpCapacity:  20,
         totalRpCapacity: 60,
       });
       expect(service.canStartTrack('test_track')).toBe(false);
@@ -288,35 +271,30 @@ describe('ResearchService', () => {
     it('returns false when RP capacity would be exceeded by a new track', () => {
       const trackDef = makeTrackDef({ rpCost: 20 });
       setup([trackDef], {
-        completedTechs: ['prereq_tech'],
-        usedRpCapacity: 50,
+        completedTechs:  ['prereq_tech'],
+        usedRpCapacity:  50,
         totalRpCapacity: 60,
       });
-      // 50 + 20 = 70 > 60
       expect(service.canStartTrack('test_track')).toBe(false);
     });
 
     it('returns true when all conditions are met for a new track', () => {
       const trackDef = makeTrackDef({ rpCost: 20 });
       setup([trackDef], {
-        completedTechs: ['prereq_tech'],
-        usedRpCapacity: 30,
+        completedTechs:  ['prereq_tech'],
+        usedRpCapacity:  30,
         totalRpCapacity: 60,
       });
       expect(service.canStartTrack('test_track')).toBe(true);
     });
 
-    it('returns true for a paused track even when new rpCost would fill capacity', () => {
-      // Paused tracks are excluded from usedRpCapacity in the real service. Here we
-      // simulate that by having usedRpCapacity already near the limit, and the paused
-      // track would exceed it if it were a *new* track. canStartTrack should still
-      // return true because capacity is validated at resume time, not here.
-      const trackDef = makeTrackDef({ rpCost: 20 });
+    it('returns true for a paused track even when used capacity is near limit', () => {
+      const trackDef   = makeTrackDef({ rpCost: 20 });
       const pausedTrack = makeActiveTrack({ isPaused: true });
       setup([trackDef], {
-        completedTechs: ['prereq_tech'],
-        activeResearch: [pausedTrack],
-        usedRpCapacity: 55, // would exceed 60 if we added 20
+        completedTechs:  ['prereq_tech'],
+        activeResearch:  [pausedTrack],
+        usedRpCapacity:  55,
         totalRpCapacity: 60,
       });
       expect(service.canStartTrack('test_track')).toBe(true);
@@ -329,38 +307,37 @@ describe('ResearchService', () => {
 
   describe('startTrack()', () => {
     it('calls resumeTrack when the track is currently paused', () => {
-      const trackDef = makeTrackDef({ rpCost: 20 });
+      const trackDef   = makeTrackDef({ rpCost: 20 });
       const pausedTrack = makeActiveTrack({ isPaused: true });
       setup([trackDef], {
-        completedTechs: ['prereq_tech'],
-        activeResearch: [pausedTrack],
-        usedRpCapacity: 0,
+        completedTechs:  ['prereq_tech'],
+        activeResearch:  [pausedTrack],
+        usedRpCapacity:  0,
         totalRpCapacity: 60,
       });
 
       service.startTrack('test_track', 'mars');
 
-      // resumeTrack delegates to gameState.resumeResearch
       expect(gameState.resumeResearch).toHaveBeenCalledWith('test_track');
       expect(gameState.startResearch).not.toHaveBeenCalled();
     });
 
-    it('calls gameState.startResearch for a valid new track', () => {
+    it('calls gameState.startResearch with startYear for a valid new track', () => {
       const trackDef = makeTrackDef({ rpCost: 20 });
       setup([trackDef], {
-        completedTechs: ['prereq_tech'],
-        usedRpCapacity: 0,
+        completedTechs:  ['prereq_tech'],
+        usedRpCapacity:  0,
         totalRpCapacity: 60,
+        gameYear:        2040,
       });
 
       service.startTrack('test_track', 'mars');
 
-      expect(gameState.startResearch).toHaveBeenCalledWith('test_track', 'mars');
+      expect(gameState.startResearch).toHaveBeenCalledWith('test_track', 'mars', 2040);
     });
 
     it('is a no-op when canStartTrack returns false', () => {
       const trackDef = makeTrackDef();
-      // prerequisiteTech not met
       setup([trackDef], { completedTechs: [] });
 
       service.startTrack('test_track', 'mars');
@@ -409,8 +386,8 @@ describe('ResearchService', () => {
     it('resumes a paused track when capacity is available', () => {
       const trackDef = makeTrackDef({ rpCost: 20 });
       setup([trackDef], {
-        activeResearch: [makeActiveTrack({ isPaused: true })],
-        usedRpCapacity: 0,
+        activeResearch:  [makeActiveTrack({ isPaused: true })],
+        usedRpCapacity:  0,
         totalRpCapacity: 60,
       });
 
@@ -422,11 +399,10 @@ describe('ResearchService', () => {
     it('is a no-op when RP capacity would be exceeded', () => {
       const trackDef = makeTrackDef({ rpCost: 20 });
       setup([trackDef], {
-        activeResearch: [makeActiveTrack({ isPaused: true })],
-        usedRpCapacity: 50,
+        activeResearch:  [makeActiveTrack({ isPaused: true })],
+        usedRpCapacity:  50,
         totalRpCapacity: 60,
       });
-      // 50 + 20 = 70 > 60
 
       service.resumeTrack('test_track');
 
@@ -436,8 +412,8 @@ describe('ResearchService', () => {
     it('is a no-op when the track is not paused', () => {
       const trackDef = makeTrackDef({ rpCost: 20 });
       setup([trackDef], {
-        activeResearch: [makeActiveTrack({ isPaused: false })],
-        usedRpCapacity: 0,
+        activeResearch:  [makeActiveTrack({ isPaused: false })],
+        usedRpCapacity:  0,
         totalRpCapacity: 60,
       });
 

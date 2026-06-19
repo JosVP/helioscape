@@ -69,10 +69,7 @@
     "id": "mars",
     "displayName": "Mars",
     "unlock": {
-      "type": "phase",
-      "planetId": "mercury",
-      "phase": 2,
-      "minOperationalYears": 20,
+      "type": "mercury_zone_selected",
       "eventId": "ce_mars_unlocked"
     },
     "initialState": {
@@ -128,10 +125,7 @@
     "id": "venus",
     "displayName": "Venus",
     "unlock": {
-      "type": "phase",
-      "planetId": "mercury",
-      "phase": 2,
-      "minOperationalYears": 20,
+      "type": "mercury_zone_selected",
       "eventId": "ce_venus_unlocked",
       "setFlag": "venus_opening_decision_available"
     },

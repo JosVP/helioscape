@@ -18,6 +18,7 @@ import { DataService } from '@app/core/services/data.service';
 import { EventBusService } from '@app/core/services/event-bus.service';
 import { GameStateService } from '@app/core/services/game-state.service';
 import { TechTreeService } from '@app/core/systems/tech-tree.service';
+import { ResearchService } from '@app/core/systems/research.service';
 import {
   TechNodeCardComponent,
   type NodeVisibility,
@@ -32,6 +33,8 @@ export interface NodeEntry {
   readonly node: TechNode;
   readonly visibility: NodeVisibility;
   readonly interactive: boolean;
+  readonly progressPercent?: number;
+  readonly etaYear?: number;
 }
 
 /** Ordered map of nodeId → NodeEntry, insertion order = render order. */
@@ -53,6 +56,7 @@ export class ResearchHubComponent implements AfterViewInit, OnDestroy {
   private readonly gameState = inject(GameStateService);
   private readonly data = inject(DataService);
   private readonly techTreeService = inject(TechTreeService);
+  private readonly researchService = inject(ResearchService);
   private readonly eventBus = inject(EventBusService);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -171,8 +175,8 @@ export class ResearchHubComponent implements AfterViewInit, OnDestroy {
   }
 
   onNodeClick(nodeId: string, planetId: string): void {
-    this.techTreeService.unlockTech(planetId, nodeId);
-    // techUnlocked$ will fire if successful → our subscription handles badge + redraw
+    this.researchService.startTechTrack(nodeId, planetId);
+    // researchCompleted$ → techUnlocked$ will fire when done → badge + redraw
   }
 
   // ---------------------------------------------------------------------------
@@ -181,6 +185,8 @@ export class ResearchHubComponent implements AfterViewInit, OnDestroy {
 
   private _buildColumnStates(nodes: TechNode[], interactive: boolean): ColumnStates {
     const completed = this.gameState.completedTechs();
+    const activeResearch = this.gameState.activeResearch();
+    const currentYear = this.gameState.gameYear();
     const result = new Map<string, NodeEntry>();
 
     // Sort by tier (ascending), then by prerequisite depth for consistent ordering
@@ -191,9 +197,21 @@ export class ResearchHubComponent implements AfterViewInit, OnDestroy {
     });
 
     for (const node of sorted) {
-      const visibility = this._getVisibility(node, completed, interactive);
-      if (visibility === null) continue; // hidden — do not render
-      result.set(node.id, { node, visibility, interactive });
+      const activeTrack = activeResearch.find((t) => t.trackId === node.id);
+      const visibility = this._getVisibility(node, completed, interactive, activeTrack !== undefined);
+      if (visibility === null) continue;
+
+      let progressPercent: number | undefined;
+      let etaYear: number | undefined;
+
+      if (visibility === 'in_progress' && activeTrack && !activeTrack.isPaused) {
+        const elapsed = activeTrack.elapsedBeforeStart + (currentYear - activeTrack.startYear);
+        progressPercent = Math.min(100, Math.round((elapsed / node.durationYears) * 100));
+        const remaining = node.durationYears - elapsed;
+        etaYear = currentYear + Math.max(0, remaining);
+      }
+
+      result.set(node.id, { node, visibility, interactive, progressPercent, etaYear });
     }
 
     return result;
@@ -216,11 +234,19 @@ export class ResearchHubComponent implements AfterViewInit, OnDestroy {
     node: TechNode,
     completed: string[],
     interactive: boolean,
+    isActive: boolean,
   ): NodeVisibility | null {
     if (completed.includes(node.id)) return 'completed';
 
-    if (interactive && this.techTreeService.canUnlock(node.planet, node.id)) {
-      return 'available';
+    if (isActive) return 'in_progress';
+
+    if (interactive) {
+      if (this.techTreeService.canUnlock(node.planet, node.id)) {
+        // Check RP capacity
+        const hasCapacity =
+          this.gameState.usedRpCapacity() + node.rpCost <= this.gameState.totalRpCapacity();
+        return hasCapacity ? 'available' : 'needs_capacity';
+      }
     }
 
     // Hint: at least one prereq (direct or spillover) is completed

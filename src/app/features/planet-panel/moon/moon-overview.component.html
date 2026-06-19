@@ -1,0 +1,15 @@
+<section class="moon-overview">
+  <header class="moon-overview__header">
+    <h3 class="moon-overview__subtitle">{{ moon.subtitle }}</h3>
+    <p class="moon-overview__description">{{ moon.description }}</p>
+  </header>
+
+  <ul class="moon-overview__facilities">
+    @for (facility of moon.facilities; track facility.id) {
+      <li class="moon-overview__facility">
+        <h4 class="moon-overview__facility-name">{{ facility.displayName }}</h4>
+        <p class="moon-overview__facility-desc">{{ facility.description }}</p>
+      </li>
+    }
+  </ul>
+</section>

@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import type {
+  MoonData,
   PlanetData,
   TechNode,
   ResearchTrack,
@@ -185,6 +186,7 @@ export class DataService {
   private mercuryComponents: MercuryComponent[] = [];
   private bioPhases: Record<string, BioPhaseDef[]> = {};
   private mercuryMap: MercuryMapData | null = null;
+  private moonData: MoonData | null = null;
 
   /**
    * Fetches all game-data JSON files in parallel and stores them.
@@ -203,6 +205,7 @@ export class DataService {
         bioPhases,
         mercuryComponents,
         mercuryMap,
+        moonData,
       ] = await Promise.all([
         this.fetchJson<PlanetData[]>('/data/planets.json'),
         this.fetchJson<TechNode[]>('/data/tech-tree.json'),
@@ -214,6 +217,7 @@ export class DataService {
         this.fetchJson<Record<string, BioPhaseDef[]>>('/data/bio-phases.json'),
         this.fetchJson<MercuryComponent[]>('/data/mercury-components.json'),
         this.fetchJson<MercuryMapData>('/data/mercury-map.json'),
+        this.fetchJson<MoonData>('/data/moon.json'),
       ]);
 
       this.planets = planetsArray.reduce(
@@ -232,6 +236,7 @@ export class DataService {
       this.bioPhases = bioPhases;
       this.mercuryComponents = mercuryComponents;
       this.mercuryMap = mercuryMap;
+      this.moonData = moonData;
 
       console.log('DataService: all game data loaded');
     } catch (error) {
@@ -378,6 +383,17 @@ export class DataService {
 
   getBioPhases(planetId: string): BioPhaseDef[] {
     return this.bioPhases[planetId] ?? [];
+  }
+
+  // -------------------------------------------------------------------------
+  // Moon accessors
+  // -------------------------------------------------------------------------
+
+  getMoonData(): MoonData {
+    if (!this.moonData) {
+      throw new Error('DataService: moon data not loaded — loadAll() must complete first');
+    }
+    return this.moonData;
   }
 
   // -------------------------------------------------------------------------

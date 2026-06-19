@@ -1,6 +1,37 @@
 <div class="resource-power-bar" role="complementary" aria-label="Resources and power">
 
-  <div class="resource-power-bar__resources">
+  <!-- Left: Power -->
+  <div class="resource-power-bar__power-col" [attr.data-color]="powerBarColor()">
+    <span class="resource-power-bar__col-label">Power</span>
+    <div class="resource-power-bar__track"
+         role="progressbar"
+         [attr.aria-valuenow]="powerBarPercent()"
+         [attr.aria-valuetext]="dysonConsumptionTw() + ' TW / ' + dysonPowerTw() + ' TW'">
+      <div class="resource-power-bar__fill resource-power-bar__fill--power"
+           [style.--bar-pct]="powerBarPercent() / 100"></div>
+    </div>
+    <span class="resource-power-bar__value">
+      {{ dysonConsumptionTw() | number:'1.1-1' }} / {{ dysonPowerTw() | number:'1.1-1' }} TW
+    </span>
+  </div>
+
+  <!-- Centre: Research Points -->
+  <div class="resource-power-bar__rp-col">
+    <span class="resource-power-bar__col-label">Research Points</span>
+    <div class="resource-power-bar__track"
+         role="progressbar"
+         [attr.aria-valuenow]="rpUsed()"
+         [attr.aria-valuemax]="rpTotal()"
+         aria-label="Research point capacity">
+      <div class="resource-power-bar__fill resource-power-bar__fill--rp"
+           [style.--bar-pct]="rpBarPercent() / 100"></div>
+    </div>
+    <span class="resource-power-bar__value">{{ rpUsed() }} / {{ rpTotal() }} RP</span>
+  </div>
+
+  <!-- Right: Minerals -->
+  <div class="resource-power-bar__minerals-col">
+    <span class="resource-power-bar__col-label">Minerals</span>
     <span class="resource-power-bar__item">
       Ore: {{ resources().commonOre | number:'1.0-0' }}
       <span class="resource-power-bar__rate">(+{{ resourceRates()['commonOre'] | number:'1.1-1' }}/yr)</span>
@@ -13,36 +44,22 @@
       Vol: {{ resources().polarVolatiles | number:'1.0-0' }}
       <span class="resource-power-bar__rate">(+{{ resourceRates()['polarVolatiles'] | number:'1.1-1' }}/yr)</span>
     </span>
-  </div>
 
-  <div class="resource-power-bar__power" [attr.data-color]="powerBarColor()">
-    <span class="resource-power-bar__power-label">Power</span>
-    <div class="resource-power-bar__power-track"
-         role="progressbar"
-         [attr.aria-valuenow]="powerBarPercent()"
-         [attr.aria-valuetext]="dysonConsumptionTw() + ' TW / ' + dysonPowerTw() + ' TW'">
-      <div class="resource-power-bar__power-fill"
-           [style.--power-pct]="powerBarPercent() / 100"></div>
-    </div>
-    <span class="resource-power-bar__power-text">
-      {{ dysonConsumptionTw() | number:'1.1-1' }} / {{ dysonPowerTw() | number:'1.1-1' }} TW
-    </span>
+    @if (showReservationInputs()) {
+      <div class="resource-power-bar__reservations">
+        <span class="resource-power-bar__reserve-label">Reserves:</span>
+        @for (key of reservationKeys; track key.id) {
+          <label class="resource-power-bar__reserve-item">
+            {{ key.label }}
+            <input type="number" min="0" step="100"
+                   [value]="reservations()[key.id]"
+                   (change)="onReservationChange(key.id, $event)"
+                   class="resource-power-bar__reserve-input"
+                   [attr.aria-label]="'Minimum ' + key.label + ' reserve'" />
+          </label>
+        }
+      </div>
+    }
   </div>
-
-  @if (showReservationInputs()) {
-    <div class="resource-power-bar__reservations">
-      <span class="resource-power-bar__reserve-label">Reserves:</span>
-      @for (key of reservationKeys; track key.id) {
-        <label class="resource-power-bar__reserve-item">
-          {{ key.label }}
-          <input type="number" min="0" step="100"
-                 [value]="reservations()[key.id]"
-                 (change)="onReservationChange(key.id, $event)"
-                 class="resource-power-bar__reserve-input"
-                 [attr.aria-label]="'Minimum ' + key.label + ' reserve'" />
-        </label>
-      }
-    </div>
-  }
 
 </div>

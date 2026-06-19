@@ -58,6 +58,13 @@ export class ResourcePowerBarComponent {
     return 'green';
   });
 
+  // RP capacity (moved from ResearchComponent — shared pool visible at all times)
+  readonly rpUsed  = computed(() => this.gameState.usedRpCapacity());
+  readonly rpTotal = computed(() => this.gameState.totalRpCapacity());
+  readonly rpBarPercent = computed(() =>
+    this.rpTotal() > 0 ? Math.min(100, (this.rpUsed() / this.rpTotal()) * 100) : 0,
+  );
+
   readonly reservations = computed(() => this.gameState.resourceReservations());
 
   readonly reservationKeys: ReadonlyArray<{ id: keyof ResourceStore; label: string }> = [

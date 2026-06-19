@@ -43,7 +43,6 @@ export class PlanetPanelComponent implements OnDestroy {
   // ---------------------------------------------------------------------------
 
   readonly planetId = input<string | null>(null);
-  readonly moonTabActive = input<boolean>(false);
   readonly closed = output<void>();
 
   // ---------------------------------------------------------------------------
@@ -97,15 +96,17 @@ export class PlanetPanelComponent implements OnDestroy {
 
   readonly isEarth = computed(() => this.planetId() === 'earth');
 
-  readonly isActiveMoonTab = computed(
-    () => this.activeTab() === 'research' && this.moonTabActive(),
+  /**
+   * Planets that show inline "Current Conditions" from the overview rather than
+   * a tabbed Research / Bio Phases / Overview panel.
+   * Earth, Mars and Venus are all conditions-only (research lives in the Hub).
+   */
+  readonly isConditionsOnly = computed(() =>
+    ['earth', 'mars', 'venus'].includes(this.planetId() ?? '')
   );
 
   /** Maps the active tab to its button element id for aria-labelledby on the tabpanel. */
-  readonly activeTabId = computed(() => {
-    if (this.isActiveMoonTab()) return 'tab-moon';
-    return `tab-${this.activeTab()}`;
-  });
+  readonly activeTabId = computed(() => `tab-${this.activeTab()}`);
 
   // ---------------------------------------------------------------------------
   // Effects

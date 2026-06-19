@@ -1,3 +1,4 @@
+export * from './moon.model';
 export * from './planet.model';
 export * from './tech-tree.model';
 export * from './culture-event.model';

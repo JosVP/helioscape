@@ -148,6 +148,13 @@ function mockFetchFor(service: DataService, overrides: Record<string, unknown> =
       miningLocations: [],
       startingZones: [],
     },
+    '/data/moon.json': {
+      id: 'moon',
+      displayName: 'Moon',
+      subtitle: 'Artemis Base',
+      description: 'Test moon description.',
+      facilities: [],
+    },
     ...overrides,
   };
 
@@ -194,13 +201,14 @@ describe('DataService', () => {
 
       await service.loadAll();
 
-      expect(fetchMock).toHaveBeenCalledTimes(10);
+      expect(fetchMock).toHaveBeenCalledTimes(11);
       expect(fetchMock).toHaveBeenCalledWith('/data/planets.json');
       expect(fetchMock).toHaveBeenCalledWith('/data/tech-tree.json');
       expect(fetchMock).toHaveBeenCalledWith('/data/mercury-buildings.json');
       expect(fetchMock).toHaveBeenCalledWith('/data/mercury-components.json');
       expect(fetchMock).toHaveBeenCalledWith('/data/bio-phases.json');
       expect(fetchMock).toHaveBeenCalledWith('/data/mercury-map.json');
+      expect(fetchMock).toHaveBeenCalledWith('/data/moon.json');
       expect(consoleSpy).toHaveBeenCalledWith('DataService: all game data loaded');
 
       consoleSpy.mockRestore();
@@ -390,6 +398,21 @@ describe('DataService', () => {
       const phases = service.getBioPhases('mars');
       expect(phases).toHaveLength(1);
       expect(phases[0].id).toBe('bp_pioneer');
+    });
+  });
+
+  describe('moon accessors', () => {
+    it('getMoonData() throws before loadAll() is called', () => {
+      expect(() => service.getMoonData()).toThrow('DataService: moon data not loaded');
+    });
+
+    it('getMoonData() returns moon data after loadAll()', async () => {
+      mockFetchFor(service);
+      await service.loadAll();
+      const moon = service.getMoonData();
+      expect(moon.id).toBe('moon');
+      expect(moon.displayName).toBe('Moon');
+      expect(moon.subtitle).toBe('Artemis Base');
     });
   });
 });

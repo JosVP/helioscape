@@ -11,7 +11,7 @@ import { DataService } from '@app/core/services/data.service';
 import { GameStateService } from '@app/core/services/game-state.service';
 
 /** UI-only visibility tier for a tech node card. */
-export type NodeVisibility = 'completed' | 'available' | 'hint';
+export type NodeVisibility = 'completed' | 'in_progress' | 'available' | 'needs_capacity' | 'hint';
 
 /** A prerequisite entry shown in the tooltip. */
 export interface PrereqEntry {
@@ -42,6 +42,10 @@ export class TechNodeCardComponent {
   readonly planetId = input.required<string>();
   /** false for Mars/Venus read-only display nodes. */
   readonly interactive = input<boolean>(true);
+  /** Percent complete (0–100). Only provided when visibility is 'in_progress'. */
+  readonly progressPercent = input<number | undefined>(undefined);
+  /** ETA completion year. Only provided when visibility is 'in_progress'. */
+  readonly etaYear = input<number | undefined>(undefined);
 
   readonly nodeClicked = output<string>();
 
@@ -54,6 +58,12 @@ export class TechNodeCardComponent {
   );
 
   readonly showDetails = computed(() => this.visibility() !== 'hint');
+
+  readonly isInProgress    = computed(() => this.visibility() === 'in_progress');
+  readonly isNeedsCapacity = computed(() => this.visibility() === 'needs_capacity');
+  readonly isClickable     = computed(() =>
+    this.interactive() && this.visibility() === 'available'
+  );
 
   /** Branch tag derived from effects — naturalist, architect, or none. */
   readonly branchTag = computed<'naturalist' | 'architect' | null>(() => {
@@ -104,7 +114,7 @@ export class TechNodeCardComponent {
   // ---------------------------------------------------------------------------
 
   onClick(): void {
-    if (!this.interactive() || this.visibility() === 'completed') return;
+    if (!this.isClickable()) return;
     this.nodeClicked.emit(this.node().id);
   }
 }

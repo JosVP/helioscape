@@ -31,8 +31,9 @@ function makeActiveTrack(overrides: Partial<ActiveResearchTrack> = {}): ActiveRe
   return {
     trackId: 'track_a',
     planetId: 'mars',
-    progressYears: 0,
     isPaused: false,
+    startYear: 2050,
+    elapsedBeforeStart: 0,
     ...overrides,
   };
 }
@@ -107,29 +108,6 @@ beforeEach(() => {
 // ---------------------------------------------------------------------------
 
 describe('ResearchComponent', () => {
-  // ── RP capacity bar ──────────────────────────────────────────────────────
-
-  it('rpBarPercent is 0 when usedRp is 0', () => {
-    const fixture = setup();
-    expect(fixture.componentInstance.rpBarPercent()).toBe(0);
-  });
-
-  it('rpBarPercent reflects used / total ratio', () => {
-    usedRpCapacitySig.set(20);
-    totalRpCapacitySig.set(60);
-    const fixture = setup();
-    fixture.detectChanges();
-    expect(fixture.componentInstance.rpBarPercent()).toBeCloseTo(33.33, 1);
-  });
-
-  it('rpBarPercent does not exceed 100', () => {
-    usedRpCapacitySig.set(80);
-    totalRpCapacitySig.set(60);
-    const fixture = setup();
-    fixture.detectChanges();
-    expect(fixture.componentInstance.rpBarPercent()).toBe(100);
-  });
-
   // ── Track bucketing ──────────────────────────────────────────────────────
 
   it('available track appears in availableTracks when prerequisite is met', () => {
@@ -147,7 +125,8 @@ describe('ResearchComponent', () => {
   });
 
   it('running track appears in runningTracks', () => {
-    activeResearchSig.set([makeActiveTrack({ isPaused: false, progressYears: 3 })]);
+    // elapsed = elapsedBeforeStart(0) + (2050 - 2047) = 3 years
+    activeResearchSig.set([makeActiveTrack({ isPaused: false, startYear: 2047, elapsedBeforeStart: 0 })]);
     const fixture = setup();
     const running = fixture.componentInstance.runningTracks();
     expect(running).toHaveLength(1);
@@ -158,21 +137,14 @@ describe('ResearchComponent', () => {
   });
 
   it('paused track appears in pausedTracks', () => {
-    activeResearchSig.set([makeActiveTrack({ isPaused: true, progressYears: 5 })]);
+    // elapsed = elapsedBeforeStart(5) + 0 (paused) = 5 years
+    activeResearchSig.set([makeActiveTrack({ isPaused: true, startYear: 2050, elapsedBeforeStart: 5 })]);
     const fixture = setup();
     const paused = fixture.componentInstance.pausedTracks();
     expect(paused).toHaveLength(1);
     expect(paused[0].status).toBe('paused');
     expect(paused[0].progressPercent).toBe(50);
     expect(paused[0].completionYear).toBeNull(); // paused → no ETA
-  });
-
-  it('completed track appears in completedTracks', () => {
-    completedTechsSig.set(['prereq_tech', 'track_a']);
-    const fixture = setup();
-    const done = fixture.componentInstance.completedTracks();
-    expect(done).toHaveLength(1);
-    expect(done[0].status).toBe('completed');
   });
 
   // ── canResume ─────────────────────────────────────────────────────────────
@@ -215,8 +187,9 @@ describe('ResearchComponent', () => {
 
   // ── researchCompleted$ integration ────────────────────────────────────────
 
-  it('emitting researchCompleted$ moves a track to completedTracks', () => {
-    activeResearchSig.set([makeActiveTrack({ isPaused: false, progressYears: 10 })]);
+  it('emitting researchCompleted$ removes track from runningTracks', () => {
+    // 10 years elapsed = complete, but we simulate service completing it externally
+    activeResearchSig.set([makeActiveTrack({ isPaused: false, startYear: 2040, elapsedBeforeStart: 0 })]);
     const fixture = setup();
     fixture.detectChanges();
     expect(fixture.componentInstance.runningTracks()).toHaveLength(1);
@@ -228,6 +201,5 @@ describe('ResearchComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.componentInstance.runningTracks()).toHaveLength(0);
-    expect(fixture.componentInstance.completedTracks()).toHaveLength(1);
   });
 });

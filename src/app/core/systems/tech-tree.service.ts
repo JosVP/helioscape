@@ -186,6 +186,36 @@ export class TechTreeService {
     }
   }
 
+  /**
+   * Called by ResearchService when a TechNode track completes.
+   *
+   * Bypasses `canUnlock()` — the track-start already validated prereqs and RP
+   * capacity. Applies effects (including fork presentation) exactly as if the
+   * player had clicked an instant-unlock button, but now gated by the track timer.
+   * Not for direct player use.
+   */
+  completeNodeResearch(planetId: string, nodeId: string): void {
+    // gameState.completeResearch() already added to completedTechs; call
+    // unlockTech() only for its side-effects (fork check + emit).
+    // Temporarily bypass the canUnlock guard: the node is already in completedTechs
+    // so we apply effects directly.
+    const node = this.data.getTechNode(nodeId);
+    if (!node) return;
+
+    const forkEffect = node.effects.find(
+      (e): e is Extract<TechEffect, { type: 'present_fork' }> => e.type === 'present_fork'
+    );
+    if (forkEffect) {
+      this._presentFork(planetId, nodeId, forkEffect);
+      return;
+    }
+
+    for (const effect of node.effects) {
+      this._applyEffect(effect, planetId);
+    }
+    this.eventBus.techUnlocked$.next({ planetId, nodeId });
+  }
+
   // ---------------------------------------------------------------------------
   // Private helpers
   // ---------------------------------------------------------------------------

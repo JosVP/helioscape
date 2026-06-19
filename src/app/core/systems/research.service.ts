@@ -7,9 +7,11 @@ import { TechTreeService } from './tech-tree.service';
 /**
  * ResearchService — pure system service.
  *
- * Drives progress on all active, non-paused research tracks once per game year.
- * When a track completes, applies its onCompleteEffects via TechTreeService and
- * emits researchCompleted$ so the rest of the system can react (UI, audio, etc.).
+ * Drives progress on all active research tracks (both ResearchTrack and TechNode
+ * tracks share a single queue and a single RP capacity pool).
+ *
+ * Progress is derived from (startYear, elapsedBeforeStart, currentYear) — pure
+ * integer arithmetic, save/load safe, no stored progress floats.
  *
  * This service holds NO state. All state lives in GameStateService.
  */
@@ -28,34 +30,46 @@ export class ResearchService {
   }
 
   // ---------------------------------------------------------------------------
+  // Unified track definition lookup
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Returns duration and rpCost for either a ResearchTrack or TechNode entry.
+   * Returns null when the id is unknown in both data sources.
+   */
+  private getTrackDef(trackId: string): { durationYears: number; rpCost: number } | null {
+    const rt = this.data.getResearchTrack(trackId);
+    if (rt) return { durationYears: rt.durationYears, rpCost: rt.rpCost };
+    const tn = this.data.getTechNode(trackId);
+    if (tn) return { durationYears: tn.durationYears, rpCost: tn.rpCost };
+    return null;
+  }
+
+  /** Elapsed years for a track at the given current year. */
+  private elapsed(
+    track: { startYear: number; elapsedBeforeStart: number; isPaused: boolean },
+    year: number
+  ): number {
+    return track.elapsedBeforeStart + (track.isPaused ? 0 : year - track.startYear);
+  }
+
+  // ---------------------------------------------------------------------------
   // Tick handler
   // ---------------------------------------------------------------------------
 
   /**
-   * Called once per game-year tick. Advances every non-paused active track by 1
-   * year and completes any tracks that have reached their duration.
-   *
-   * The year parameter is accepted (but not used) to make the method easier to
-   * test without mocking signal reads inside the body.
+   * Called once per game-year tick. Checks every non-paused active track for
+   * completion using year-derived elapsed time. No stored progress is mutated
+   * per tick — completion is the only mutation.
    */
-  private processYear(_year: number): void {
-    // Snapshot the list before mutating so we process the same set per tick.
+  processYear(year: number): void {
     const tracks = this.gameState.activeResearch();
-
     for (const track of tracks) {
       if (track.isPaused) continue;
-
-      this.gameState.advanceResearch(track.trackId, 1);
-
-      const def = this.data.getResearchTrack(track.trackId);
+      const def = this.getTrackDef(track.trackId);
       if (!def) continue;
-
-      // Re-read from signal after mutation to get the true post-advance value.
-      const updated = this.gameState
-        .activeResearch()
-        .find((t) => t.trackId === track.trackId);
-
-      if (updated && updated.progressYears >= def.durationYears) {
+      const totalElapsed = this.elapsed(track, year);
+      if (totalElapsed >= def.durationYears) {
         this._completeTrack(track.trackId, track.planetId);
       }
     }
@@ -66,58 +80,46 @@ export class ResearchService {
   // ---------------------------------------------------------------------------
 
   private _completeTrack(trackId: string, planetId: string): void {
-    const def = this.data.getResearchTrack(trackId);
-    if (!def) return;
-
-    // Removes track from activeResearch and adds trackId to completedTechs.
     this.gameState.completeResearch(trackId);
 
-    // Apply any downstream effects (unlock_tech, emit_event, etc.).
-    this.techTree.applyEffects(def.onCompleteEffects, planetId);
+    const rt = this.data.getResearchTrack(trackId);
+    if (rt) {
+      // ResearchTrack path: apply onCompleteEffects directly.
+      this.techTree.applyEffects(rt.onCompleteEffects, planetId);
+      this.eventBus.researchCompleted$.next(trackId);
+      return;
+    }
 
-    this.eventBus.researchCompleted$.next(trackId);
+    if (this.data.getTechNode(trackId)) {
+      // TechNode path: delegate to TechTreeService (handles fork logic etc.).
+      this.techTree.completeNodeResearch(planetId, trackId);
+      this.eventBus.researchCompleted$.next(trackId);
+    }
   }
 
   // ---------------------------------------------------------------------------
-  // Public API
+  // Public API — ResearchTrack (research-tracks.json) path
   // ---------------------------------------------------------------------------
 
   /**
-   * Returns true if a research track can be started (or resumed if paused).
-   *
-   * Checks:
-   * 1. Track data exists.
-   * 2. Track has not already been completed.
-   * 3. Track is not already running (non-paused).
-   * 4. prerequisiteTech is in completedTechs.
-   * 5. For new tracks: enough RP capacity is available.
-   *    For paused tracks: capacity is checked by resumeTrack() at resume time.
+   * Returns true if a ResearchTrack can be started.
    */
   canStartTrack(trackId: string): boolean {
     const def = this.data.getResearchTrack(trackId);
     if (!def) return false;
 
     const completed = this.gameState.completedTechs();
-
     if (completed.includes(trackId)) return false;
     if (!completed.includes(def.prerequisiteTech)) return false;
 
     const existing = this.gameState.activeResearch().find((t) => t.trackId === trackId);
-
-    // Already running (not paused) — cannot start again.
     if (existing && !existing.isPaused) return false;
+    if (existing?.isPaused) return true; // capacity validated at resume
 
-    // Paused track: capacity is validated at resume time, so it's always "startable" here.
-    if (existing?.isPaused) return true;
-
-    // New track: check RP capacity.
     return this.gameState.usedRpCapacity() + def.rpCost <= this.gameState.totalRpCapacity();
   }
 
-  /**
-   * Starts a new research track, or resumes it if it is currently paused.
-   * Does nothing if canStartTrack returns false.
-   */
+  /** Starts or resumes a ResearchTrack. */
   startTrack(trackId: string, planetId: string): void {
     const existing = this.gameState.activeResearch().find((t) => t.trackId === trackId);
     if (existing?.isPaused) {
@@ -125,32 +127,60 @@ export class ResearchService {
       return;
     }
     if (!this.canStartTrack(trackId)) return;
-    this.gameState.startResearch(trackId, planetId);
+    this.gameState.startResearch(trackId, planetId, this.gameState.gameYear());
+  }
+
+  // ---------------------------------------------------------------------------
+  // Public API — TechNode path (called from ResearchHub)
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Returns true if a TechNode can be queued as a timed track.
+   * Prereqs are verified by TechTreeService.canUnlock(); capacity is checked here.
+   */
+  canStartTechTrack(nodeId: string, planetId: string): boolean {
+    const node = this.data.getTechNode(nodeId);
+    if (!node) return false;
+    if (this.gameState.completedTechs().includes(nodeId)) return false;
+    const alreadyActive = this.gameState.activeResearch().find((t) => t.trackId === nodeId);
+    if (alreadyActive && !alreadyActive.isPaused) return false;
+    if (!this.techTree.canUnlock(planetId, nodeId)) return false;
+    return this.gameState.usedRpCapacity() + node.rpCost <= this.gameState.totalRpCapacity();
   }
 
   /**
-   * Pauses an active, non-paused research track.
-   * The track's rpCost is freed from usedRpCapacity automatically (computed signal).
+   * Starts a TechNode as a timed track, or resumes it if paused.
+   * Does nothing if canStartTechTrack returns false.
    */
+  startTechTrack(nodeId: string, planetId: string): void {
+    const existing = this.gameState.activeResearch().find((t) => t.trackId === nodeId);
+    if (existing?.isPaused) {
+      this.resumeTrack(nodeId);
+      return;
+    }
+    if (!this.canStartTechTrack(nodeId, planetId)) return;
+    this.gameState.startResearch(nodeId, planetId, this.gameState.gameYear());
+  }
+
+  // ---------------------------------------------------------------------------
+  // Shared pause/resume
+  // ---------------------------------------------------------------------------
+
+  /** Pauses a running track (ResearchTrack or TechNode). */
   pauseTrack(trackId: string): void {
     const track = this.gameState.activeResearch().find((t) => t.trackId === trackId);
     if (!track || track.isPaused) return;
     this.gameState.pauseResearch(trackId);
   }
 
-  /**
-   * Resumes a paused research track.
-   * Guards against resuming when there is insufficient RP capacity.
-   */
+  /** Resumes a paused track, checking RP capacity first. */
   resumeTrack(trackId: string): void {
     const track = this.gameState.activeResearch().find((t) => t.trackId === trackId);
     if (!track?.isPaused) return;
-
-    const def = this.data.getResearchTrack(trackId);
+    const def = this.getTrackDef(trackId);
     if (!def) return;
-
     if (this.gameState.usedRpCapacity() + def.rpCost > this.gameState.totalRpCapacity()) return;
-
     this.gameState.resumeResearch(trackId);
   }
 }
+

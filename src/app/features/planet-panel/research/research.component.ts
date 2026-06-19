@@ -56,7 +56,9 @@ function buildVM(
     status = completed.includes(def.prerequisiteTech) ? 'available' : 'completed';
   }
 
-  const progressYears = entry?.progressYears ?? 0;
+  const progressYears = entry
+    ? entry.elapsedBeforeStart + (entry.isPaused ? 0 : currentYear - entry.startYear)
+    : 0;
   const progressPercent = Math.min(100, (progressYears / def.durationYears) * 100);
   const yearsRemaining =
     status === 'running' || status === 'paused'
@@ -96,8 +98,6 @@ export class ResearchComponent {
   private readonly destroyRef      = inject(DestroyRef);
 
   readonly planetId      = input.required<string>();
-  /** Kept for future Moon sub-tab routing. Unused here. */
-  readonly moonTabActive = input<boolean>(false);
 
   constructor() {
     // Subscribe so future side-effects (audio, toast) have a natural hook point.
@@ -110,16 +110,6 @@ export class ResearchComponent {
   }
 
   // ---------------------------------------------------------------------------
-  // RP capacity
-  // ---------------------------------------------------------------------------
-
-  readonly rpUsed       = computed(() => this.gameState.usedRpCapacity());
-  readonly rpTotal      = computed(() => this.gameState.totalRpCapacity());
-  readonly rpBarPercent = computed(() =>
-    this.rpTotal() > 0 ? Math.min(100, (this.rpUsed() / this.rpTotal()) * 100) : 0,
-  );
-
-  // ---------------------------------------------------------------------------
   // Track view-models — recompute every tick via activeResearch + gameYear
   // ---------------------------------------------------------------------------
 
@@ -128,14 +118,13 @@ export class ResearchComponent {
     const active       = this.gameState.activeResearch();
     const completed    = this.gameState.completedTechs();
     const year         = this.gameState.gameYear();
-    const freeCapacity = this.rpTotal() - this.rpUsed();
+    const freeCapacity = this.gameState.totalRpCapacity() - this.gameState.usedRpCapacity();
     return defs.map((def) => buildVM(def, active, completed, year, freeCapacity));
   });
 
   readonly runningTracks   = computed(() => this.allTracks().filter((t) => t.status === 'running'));
   readonly pausedTracks    = computed(() => this.allTracks().filter((t) => t.status === 'paused'));
   readonly availableTracks = computed(() => this.allTracks().filter((t) => t.status === 'available'));
-  readonly completedTracks = computed(() => this.allTracks().filter((t) => t.status === 'completed'));
 
   // ---------------------------------------------------------------------------
   // Actions

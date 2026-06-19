@@ -1,6 +1,7 @@
 import { Injectable, effect, inject, untracked } from '@angular/core';
 import type {
   PlanetData,
+  PlanetMercuryZoneUnlockDefinition,
   PlanetPhaseUnlockDefinition,
   PlanetState,
   PlanetUnlockDefinition,
@@ -23,7 +24,9 @@ export class PlanetUnlockService {
       const completedTechs = this.gameState.completedTechs();
       const planets = this.gameState.planets();
       const unlocks = this.gameState.planetUnlocks();
-      untracked(() => this.processUnlocks(year, completedTechs, planets, unlocks));
+      // Read mercurySelectedZone in the reactive block so a zone selection triggers the effect.
+      const selectedZone = this.gameState.mercurySelectedZone();
+      untracked(() => this.processUnlocks(year, completedTechs, planets, unlocks, selectedZone));
     });
   }
 
@@ -31,7 +34,8 @@ export class PlanetUnlockService {
     year: number,
     completedTechs: readonly string[],
     planets: Readonly<Record<string, PlanetState>>,
-    unlocks: Readonly<Record<string, PlanetUnlockState>>
+    unlocks: Readonly<Record<string, PlanetUnlockState>>,
+    selectedZone: string | null = null
   ): void {
     for (const planet of this.data.getAllPlanets()) {
       const state = unlocks[planet.id];
@@ -46,6 +50,9 @@ export class PlanetUnlockService {
           break;
         case 'year':
           this.processYearUnlock(planet, state, planet.unlock, year);
+          break;
+        case 'mercury_zone_selected':
+          this.processZoneUnlock(planet, state, planet.unlock, selectedZone, year);
           break;
         case 'start_unlocked':
           break;
@@ -151,5 +158,16 @@ export class PlanetUnlockService {
 
     this.gameState.setEarthFlag(flag, true);
     this.gameState.markPlanetUnlockFlagFired(planetId, flag);
+  }
+
+  private processZoneUnlock(
+    planet: PlanetData,
+    state: PlanetUnlockState,
+    unlock: PlanetMercuryZoneUnlockDefinition,
+    selectedZone: string | null,
+    year: number
+  ): void {
+    if (state.status !== 'locked' || selectedZone === null) return;
+    this.unlockPlanetFromDefinition(planet.id, unlock, year, unlock.eventId);
   }
 }

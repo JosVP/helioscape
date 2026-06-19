@@ -12,12 +12,14 @@
     <h2 class="planet-panel__name">{{ planetData()?.displayName }}</h2>
     <span class="planet-panel__phase-name">{{ phaseName() }}</span>
 
-    <button
-      class="planet-panel__hub-btn"
-      title="Open Research Hub"
-      aria-label="Open Research Hub"
-      (click)="openResearchHub()"
-    >⚗ Research Hub</button>
+    @if (isEarth()) {
+      <button
+        class="planet-panel__hub-btn"
+        title="Open Research Hub"
+        aria-label="Open Research Hub"
+        (click)="openResearchHub()"
+      >⚗ Research Hub</button>
+    }
 
     @if (phaseDescription()) {
       <p class="planet-panel__phase-desc">{{ phaseDescription() }}</p>
@@ -28,6 +30,11 @@
     <div class="planet-panel__locked" role="status" aria-live="polite">
       <p>This world is not yet within our reach.</p>
     </div>
+  } @else if (isConditionsOnly()) {
+    <section class="planet-panel__conditions">
+      <h3 class="planet-panel__conditions-title">Current Conditions</h3>
+      <app-planet-overview [planetId]="id" />
+    </section>
   } @else {
     <nav
       class="planet-panel__tabs"
@@ -38,22 +45,11 @@
       <button
         id="tab-research"
         role="tab"
-        [attr.aria-selected]="activeTab() === 'research' && !isActiveMoonTab()"
+        [attr.aria-selected]="activeTab() === 'research'"
         [attr.aria-controls]="'tabpanel-' + id"
-        [class.is-active]="activeTab() === 'research' && !isActiveMoonTab()"
+        [class.is-active]="activeTab() === 'research'"
         (click)="setTab('research')"
       >Research</button>
-
-      @if (isEarth()) {
-        <button
-          id="tab-moon"
-          role="tab"
-          [attr.aria-selected]="isActiveMoonTab()"
-          [attr.aria-controls]="'tabpanel-' + id"
-          [class.is-active]="isActiveMoonTab()"
-          (click)="setTab('research')"
-        >Moon</button>
-      }
 
       <button
         id="tab-bio-phases"
@@ -82,7 +78,7 @@
     >
       @switch (activeTab()) {
         @case ('research') {
-          <app-research [planetId]="id" [moonTabActive]="moonTabActive()" />
+          <app-research [planetId]="id" />
         }
         @case ('bio-phases') {
           <app-bio-phase [planetId]="id" />

@@ -62,8 +62,6 @@ export class GameShellComponent implements OnInit, OnDestroy {
   readonly isResearchHubOpen = signal(false);
   /** Controls which full-screen view is shown. Orrery is hidden (not destroyed) when Mercury is active. */
   readonly activeView = signal<'orrery' | 'mercury'>('orrery');
-  /** Set to true when the player clicks the Moon row; signals PlanetPanel to open at the Moon/research tab. */
-  readonly moonTabActive = signal(false);
 
   private audioInitialised = false;
 
@@ -78,10 +76,6 @@ export class GameShellComponent implements OnInit, OnDestroy {
     this.eventBus.planetSelected$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((id) => this.handlePlanetSelection(id));
-
-    this.eventBus.moonTabRequested$
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => this.moonTabActive.set(true));
 
     this.eventBus.researchHubRequested$
       .pipe(takeUntilDestroyed(this.destroyRef))

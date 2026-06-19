@@ -75,6 +75,13 @@ const mockData = {
     if (!p) throw new Error(`Unknown planet in test: ${id}`);
     return p;
   },
+  getMoonData: () => ({
+    id: 'moon' as const,
+    displayName: 'Moon',
+    subtitle: 'Artemis Base',
+    description: 'Test moon description.',
+    facilities: [],
+  }),
 };
 
 // ---------------------------------------------------------------------------
@@ -144,7 +151,8 @@ describe('PlanetPanelComponent', () => {
     fixture.detectChanges();
     const el = fixture.nativeElement as HTMLElement;
     expect(el.querySelector('.planet-panel__locked')).toBeNull();
-    expect(el.querySelector('.planet-panel__tabs')).not.toBeNull();
+    // Earth shows inline conditions, not tabs
+    expect(el.querySelector('.planet-panel__conditions')).not.toBeNull();
   });
 
   // ── Header ───────────────────────────────────────────────────────────────
@@ -169,29 +177,16 @@ describe('PlanetPanelComponent', () => {
     expect(fixture.componentInstance.activeTab()).toBe('overview');
   });
 
-  it('Moon tab is present only for Earth', () => {
-    planetsSignal.set({
-      earth: makePlanetState({ id: 'earth' }),
-      mars:  makePlanetState({ id: 'mars' }),
-    });
-    const earthFixture = setup();
-    earthFixture.componentRef.setInput('planetId', 'earth');
-    earthFixture.detectChanges();
-    const earthEl = earthFixture.nativeElement as HTMLElement;
-    const earthTabs = Array.from(earthEl.querySelectorAll('.planet-panel__tabs button')).map(
+  it('Moon tab is not shown (Earth has inline conditions, not tabs)', () => {
+    planetsSignal.set({ earth: makePlanetState({ id: 'earth' }) });
+    const fixture = setup();
+    fixture.componentRef.setInput('planetId', 'earth');
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    const tabs = Array.from(el.querySelectorAll('.planet-panel__tabs button')).map(
       (b) => b.textContent?.trim(),
     );
-    expect(earthTabs).toContain('Moon');
-
-    TestBed.resetTestingModule();
-    const marsFixture = setup();
-    marsFixture.componentRef.setInput('planetId', 'mars');
-    marsFixture.detectChanges();
-    const marsEl = marsFixture.nativeElement as HTMLElement;
-    const marsTabs = Array.from(marsEl.querySelectorAll('.planet-panel__tabs button')).map(
-      (b) => b.textContent?.trim(),
-    );
-    expect(marsTabs).not.toContain('Moon');
+    expect(tabs).not.toContain('Moon');
   });
 
   // ── Close output ─────────────────────────────────────────────────────────

@@ -50,8 +50,11 @@ export interface ResearchTrack {
 }
 
 export interface ActiveResearchTrack {
-  trackId: string;
-  planetId: string;
-  progressYears: number;
-  isPaused: boolean;
+  readonly trackId: string;
+  readonly planetId: string;
+  readonly isPaused: boolean;
+  /** The game year when this run (or most recent resume) began. */
+  readonly startYear: number;
+  /** Years accumulated from all paused/resumed runs before the current startYear. */
+  readonly elapsedBeforeStart: number;
 }

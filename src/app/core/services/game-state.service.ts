@@ -202,7 +202,13 @@ export class GameStateService {
   readonly usedRpCapacity = computed<number>(() =>
     this._activeResearch()
       .filter((t) => !t.isPaused)
-      .reduce((sum, t) => sum + (this.data.getResearchTrack(t.trackId)?.rpCost ?? 0), 0)
+      .reduce((sum, t) => {
+        const rpCost =
+          this.data.getResearchTrack(t.trackId)?.rpCost ??
+          this.data.getTechNode(t.trackId)?.rpCost ??
+          0;
+        return sum + rpCost;
+      }, 0)
   );
 
   /**
@@ -238,29 +244,37 @@ export class GameStateService {
     this._completedTechs.update((techs) => (techs.includes(techId) ? techs : [...techs, techId]));
   }
 
-  startResearch(trackId: string, planetId: string): void {
+  /** Starts a new research track. `startYear` is the current game year. */
+  startResearch(trackId: string, planetId: string, startYear: number): void {
     this._activeResearch.update((tracks) => [
       ...tracks,
-      { trackId, planetId, progressYears: 0, isPaused: false },
+      { trackId, planetId, isPaused: false, startYear, elapsedBeforeStart: 0 },
     ]);
   }
 
+  /**
+   * Pauses a running research track.
+   * Snapshots elapsed years so progress is not lost; resets startYear to now.
+   */
   pauseResearch(trackId: string): void {
+    const currentYear = this._gameYear();
     this._activeResearch.update((tracks) =>
-      tracks.map((t) => (t.trackId === trackId ? { ...t, isPaused: true } : t))
+      tracks.map((t) => {
+        if (t.trackId !== trackId || t.isPaused) return t;
+        const elapsed = t.elapsedBeforeStart + (currentYear - t.startYear);
+        return { ...t, isPaused: true, elapsedBeforeStart: elapsed, startYear: currentYear };
+      })
     );
   }
 
+  /** Resumes a paused research track from the current year. */
   resumeResearch(trackId: string): void {
-    this._activeResearch.update((tracks) =>
-      tracks.map((t) => (t.trackId === trackId ? { ...t, isPaused: false } : t))
-    );
-  }
-
-  advanceResearch(trackId: string, years: number): void {
+    const currentYear = this._gameYear();
     this._activeResearch.update((tracks) =>
       tracks.map((t) =>
-        t.trackId === trackId ? { ...t, progressYears: t.progressYears + years } : t
+        t.trackId === trackId && t.isPaused
+          ? { ...t, isPaused: false, startYear: currentYear }
+          : t
       )
     );
   }

@@ -59,12 +59,16 @@ function makeGameStateFake(opts: {
   const buildingsSignal = signal<PlacedBuilding[]>(opts.buildings ?? []);
   const reservationsSignal = signal<ResourceStore>(opts.reservations ?? makeResources());
   const dysonWattsSignal = signal<number>(opts.dysonWatts ?? 0);
+  const usedRpCapSignal = signal<number>(0);
+  const totalRpCapSignal = signal<number>(60);
 
   return {
     mercuryResources: resourcesSignal.asReadonly(),
     mercuryBuildings: buildingsSignal.asReadonly(),
     resourceReservations: reservationsSignal.asReadonly(),
     dysonEnergyWatts: dysonWattsSignal.asReadonly(),
+    usedRpCapacity: usedRpCapSignal.asReadonly(),
+    totalRpCapacity: totalRpCapSignal.asReadonly(),
     setResourceReservation: vi.fn(),
   };
 }
