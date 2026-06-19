@@ -38,7 +38,8 @@ export class TechNodeCardComponent {
 
   readonly node = input.required<TechNode>();
   readonly visibility = input.required<NodeVisibility>();
-  readonly isNew = input<boolean>(false);
+  readonly isCompletionRecent = input<boolean>(false);
+  readonly isRevealRecent = input<boolean>(false);
   readonly planetId = input.required<string>();
   /** false for Mars/Venus read-only display nodes. */
   readonly interactive = input<boolean>(true);
@@ -67,9 +68,14 @@ export class TechNodeCardComponent {
 
   readonly ariaLabel = computed(() => {
     if (!this.isSelectable()) return null;
+    const suffix = this.isCompletionRecent()
+      ? ', recently completed'
+      : this.isRevealRecent()
+        ? ', newly available'
+        : '';
     return this.visibility() === 'hint'
-      ? 'Select locked technology clue'
-      : `Select technology: ${this.node().displayName}`;
+      ? `Select locked technology clue${suffix}`
+      : `Select technology: ${this.node().displayName}${suffix}`;
   });
 
   /** Branch tag derived from effects — naturalist, architect, or none. */

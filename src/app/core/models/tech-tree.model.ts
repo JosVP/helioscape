@@ -15,6 +15,8 @@ export interface TechNode {
   durationYears: number;
   effects: TechEffect[];
   tier?: number;
+  iconPath?: string;
+  silhouetteIconPath?: string;
 }
 
 export type TechEffect =

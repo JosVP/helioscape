@@ -4,11 +4,17 @@ import { TechNodeIconComponent } from './tech-node-icon.component';
 describe('TechNodeIconComponent', () => {
   let fixture: ComponentFixture<TechNodeIconComponent>;
 
-  function createComponent(visibility: 'completed' | 'hint', size: 'compact' | 'large' = 'compact'): void {
+  function createComponent(
+    visibility: 'completed' | 'hint',
+    size: 'compact' | 'large' = 'compact',
+    paths: { readonly iconPath?: string; readonly silhouetteIconPath?: string } = {},
+  ): void {
     fixture = TestBed.createComponent(TechNodeIconComponent);
     fixture.componentRef.setInput('planetId', 'earth');
     fixture.componentRef.setInput('visibility', visibility);
     fixture.componentRef.setInput('size', size);
+    fixture.componentRef.setInput('iconPath', paths.iconPath);
+    fixture.componentRef.setInput('silhouetteIconPath', paths.silhouetteIconPath);
     fixture.detectChanges();
   }
 
@@ -25,6 +31,19 @@ describe('TechNodeIconComponent', () => {
     createComponent('completed');
     const circle = fixture.nativeElement.querySelector('circle');
     expect(circle.getAttribute('fill')).toContain('--color-success');
+  });
+
+  it('uses the silhouette asset for hint nodes when provided', () => {
+    createComponent('hint', 'compact', { silhouetteIconPath: '/assets/svg/tech-tree/node--silhouette.svg' });
+    const image = fixture.nativeElement.querySelector('img') as HTMLImageElement | null;
+    expect(image?.getAttribute('src')).toBe('/assets/svg/tech-tree/node--silhouette.svg');
+    expect(fixture.nativeElement.textContent).not.toContain('?');
+  });
+
+  it('uses the normal asset for non-hint nodes when provided', () => {
+    createComponent('completed', 'compact', { iconPath: '/assets/svg/tech-tree/node.svg' });
+    const image = fixture.nativeElement.querySelector('img') as HTMLImageElement | null;
+    expect(image?.getAttribute('src')).toBe('/assets/svg/tech-tree/node.svg');
   });
 
   it('applies the large variant class', () => {

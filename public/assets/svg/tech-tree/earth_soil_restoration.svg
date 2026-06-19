@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40" role="img" aria-label="Soil Restoration Network placeholder icon">
+  <!-- PLACEHOLDER -->
+  <rect x="2" y="2" width="36" height="36" rx="6" fill="none" stroke="currentColor" stroke-opacity="0.28" stroke-dasharray="3 3"/>
+  <rect x="8" y="26" width="24" height="6" fill="#2f8f6b"/>
+  <path d="M20 27V13" stroke="#23424a" stroke-width="2" stroke-linecap="round"/>
+  <ellipse cx="15" cy="16" rx="6" ry="4" fill="#74d99f" transform="rotate(-28 15 16)"/>
+  <ellipse cx="25" cy="15" rx="6" ry="4" fill="#f0d56b" transform="rotate(28 25 15)"/>
+  <circle cx="12" cy="29" r="1.5" fill="#23424a"/>
+  <circle cx="28" cy="29" r="1.5" fill="#23424a"/>
+  <text x="20" y="37" fill="currentColor" fill-opacity="0.45" font-family="monospace" font-size="4" text-anchor="middle">placeholder</text>
+</svg>

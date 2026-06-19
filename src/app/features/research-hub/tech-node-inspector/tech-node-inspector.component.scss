@@ -72,6 +72,11 @@
   color: var(--color-tag-architect);
 }
 
+.tech-inspector__status--completed {
+  border-color: color-mix(in srgb, var(--color-success) 60%, transparent);
+  color: var(--color-success);
+}
+
 .tech-inspector__description {
   margin: 0;
   color: var(--color-text-secondary);

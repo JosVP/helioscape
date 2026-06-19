@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40" role="img" aria-label="Fabricator placeholder icon">
+  <!-- PLACEHOLDER -->
+  <rect x="2" y="2" width="36" height="36" rx="6" fill="none" stroke="currentColor" stroke-opacity="0.28" stroke-dasharray="3 3"/>
+  <polygon points="9,29 20,8 31,29" fill="#b75b2f"/>
+  <rect x="8" y="29" width="24" height="4" fill="#3f2a22"/>
+  <line x1="16" y1="25" x2="24" y2="17" stroke="#ffe08a" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="27" cy="12" r="3" fill="#f0a44b"/>
+  <text x="20" y="37" fill="currentColor" fill-opacity="0.45" font-family="monospace" font-size="4" text-anchor="middle">placeholder</text>
+</svg>

@@ -3,6 +3,8 @@
     "id": "earth_launch_mercury_mission",
     "planet": "earth",
     "displayName": "Launch Mercury Mission",
+    "iconPath": "/assets/svg/tech-tree/earth_launch_mercury_mission.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/earth_launch_mercury_mission--silhouette.svg",
     "description": "We commit to Mercury: not as conquest, but as the first industrial foothold close enough to the Sun to change what civilisation can build.",
     "outcomeSummary": [
       "Opens the Mercury mission chain.",
@@ -19,6 +21,8 @@
     "id": "earth_advanced_renewables",
     "planet": "earth",
     "displayName": "Advanced Renewables Integration",
+    "iconPath": "/assets/svg/tech-tree/earth_advanced_renewables.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/earth_advanced_renewables--silhouette.svg",
     "description": "We stitch solar, wind, storage, and grid forecasting into a calmer planetary metabolism, making clean power ordinary enough to build from.",
     "outcomeSummary": [
       "Enables Deuterium Extraction From Seawater.",
@@ -35,6 +39,8 @@
     "id": "earth_dome_habitat",
     "planet": "earth",
     "displayName": "Dome Habitat Technology",
+    "iconPath": "/assets/svg/tech-tree/earth_dome_habitat.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/earth_dome_habitat--silhouette.svg",
     "description": "We learn how to make sealed worlds feel less like capsules and more like places where ordinary life can take root.",
     "outcomeSummary": [
       "Supports future Mars dome and aerogel habitat options.",
@@ -51,6 +57,8 @@
     "id": "earth_deuterium_extraction",
     "planet": "earth",
     "displayName": "Deuterium Extraction From Seawater",
+    "iconPath": "/assets/svg/tech-tree/earth_deuterium_extraction.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/earth_deuterium_extraction--silhouette.svg",
     "description": "We turn the oceans into a patient fuel source, separating rare hydrogen from abundance without treating abundance as permission to waste.",
     "outcomeSummary": [
       "Enables Fusion Ignition Theory.",
@@ -67,6 +75,8 @@
     "id": "earth_ocean_cleanup",
     "planet": "earth",
     "displayName": "Ocean Macro-Plastic Cleanup",
+    "iconPath": "/assets/svg/tech-tree/earth_ocean_cleanup.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/earth_ocean_cleanup--silhouette.svg",
     "description": "We stop treating the ocean as a place where mistakes disappear. Fleets, microbes, and law begin pulling a century of fragments home.",
     "outcomeSummary": [
       "Becomes available after Mercury Phase 1 spillover.",
@@ -83,6 +93,8 @@
     "id": "earth_fusion_ignition_theory",
     "planet": "earth",
     "displayName": "Fusion Ignition Theory",
+    "iconPath": "/assets/svg/tech-tree/earth_fusion_ignition_theory.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/earth_fusion_ignition_theory--silhouette.svg",
     "description": "We push controlled fusion from a promise into an engineering language, one careful confinement model at a time.",
     "outcomeSummary": [
       "Triggers a landmark culture event when completed.",
@@ -99,6 +111,8 @@
     "id": "earth_co2_drawdown",
     "planet": "earth",
     "displayName": "Atmospheric CO2 Drawdown",
+    "iconPath": "/assets/svg/tech-tree/earth_co2_drawdown.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/earth_co2_drawdown--silhouette.svg",
     "description": "Venus teaches us carbonate patience at planetary scale. We bring that lesson home and begin lowering the fever without pretending it was simple.",
     "outcomeSummary": [
       "Unlocked by Venus carbonate process spillover.",
@@ -115,6 +129,8 @@
     "id": "earth_soil_restoration",
     "planet": "earth",
     "displayName": "Soil Restoration Network",
+    "iconPath": "/assets/svg/tech-tree/earth_soil_restoration.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/earth_soil_restoration--silhouette.svg",
     "description": "Mars makes us humble about dirt. We relearn soil as a living fabric and coordinate repair from farms to abandoned industrial ground.",
     "outcomeSummary": [
       "Unlocked by Mars soil-study spillover.",
@@ -131,6 +147,8 @@
     "id": "earth_ocean_acidification_reversal",
     "planet": "earth",
     "displayName": "Ocean Acidification Reversal",
+    "iconPath": "/assets/svg/tech-tree/earth_ocean_acidification_reversal.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/earth_ocean_acidification_reversal--silhouette.svg",
     "description": "We give the reefs, shell-builders, and plankton time to breathe again, correcting chemistry at a pace the living ocean can survive.",
     "outcomeSummary": [
       "Requires CO2 Drawdown and Venus carbonate spillover.",
@@ -147,6 +165,8 @@
     "id": "earth_rewilding",
     "planet": "earth",
     "displayName": "Rewilding At Scale",
+    "iconPath": "/assets/svg/tech-tree/earth_rewilding.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/earth_rewilding--silhouette.svg",
     "description": "We return room to rivers, forests, pollinators, and migration. The work is not nostalgia; it is infrastructure made of living systems.",
     "outcomeSummary": [
       "Adds a Naturalist branch decision tag.",
@@ -163,6 +183,8 @@
     "id": "earth_automated_food_systems",
     "planet": "earth",
     "displayName": "Automated Food Systems",
+    "iconPath": "/assets/svg/tech-tree/earth_automated_food_systems.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/earth_automated_food_systems--silhouette.svg",
     "description": "We make food production precise enough to free land and labour, then face the harder question of what that freedom is for.",
     "outcomeSummary": [
       "Presents a fork between Naturalist rewilding and Architect development.",
@@ -206,6 +228,8 @@
     "id": "earth_vertical_megacity",
     "planet": "earth",
     "displayName": "Vertical Megacity Initiative",
+    "iconPath": "/assets/svg/tech-tree/earth_vertical_megacity.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/earth_vertical_megacity--silhouette.svg",
     "description": "We build upward with discipline, concentrating people, services, and transit so a city can grow without endlessly widening its wound.",
     "outcomeSummary": [
       "Adds an Architect branch decision tag.",
@@ -226,6 +250,8 @@
     "id": "earth_arcology_framework",
     "planet": "earth",
     "displayName": "Arcology Framework",
+    "iconPath": "/assets/svg/tech-tree/earth_arcology_framework.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/earth_arcology_framework--silhouette.svg",
     "description": "We design cities as complete habitats: dense, efficient, and humane enough that scale no longer has to mean sprawl.",
     "outcomeSummary": [
       "Adds an Architect branch decision tag.",
@@ -245,6 +271,8 @@
     "id": "earth_subsurface_city",
     "planet": "earth",
     "displayName": "Subsurface City Expansion",
+    "iconPath": "/assets/svg/tech-tree/earth_subsurface_city.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/earth_subsurface_city--silhouette.svg",
     "description": "We learn to live below the noise of weather and traffic, turning depth into shelter rather than exile.",
     "outcomeSummary": [
       "Adds an Architect branch decision tag.",
@@ -264,6 +292,8 @@
     "id": "earth_planetary_resource_grid",
     "planet": "earth",
     "displayName": "Planetary Resource Grid",
+    "iconPath": "/assets/svg/tech-tree/earth_planetary_resource_grid.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/earth_planetary_resource_grid--silhouette.svg",
     "description": "We connect supply, need, weather, harvest, transit, and waste into one visible system, then use that visibility to prevent suffering early.",
     "outcomeSummary": [
       "Adds an Architect branch decision tag.",
@@ -284,6 +314,8 @@
     "id": "earth_geoengineering_bureau",
     "planet": "earth",
     "displayName": "Geoengineering Coordination Bureau",
+    "iconPath": "/assets/svg/tech-tree/earth_geoengineering_bureau.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/earth_geoengineering_bureau--silhouette.svg",
     "description": "We coordinate climate intervention with public memory and restraint, learning to manage an atmosphere without forgetting it is shared.",
     "outcomeSummary": [
       "Adds an Architect branch decision tag.",
@@ -302,6 +334,8 @@
     "id": "earth_neural_digital_integration",
     "planet": "earth",
     "displayName": "Neural-Digital Integration Research",
+    "iconPath": "/assets/svg/tech-tree/earth_neural_digital_integration.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/earth_neural_digital_integration--silhouette.svg",
     "description": "We study the boundary between mind and system carefully, because a civilisation that thinks faster still has to decide wisely.",
     "outcomeSummary": [
       "Adds an Architect branch decision tag.",
@@ -322,6 +356,8 @@
     "id": "earth_planetary_coordination_network",
     "planet": "earth",
     "displayName": "Planetary Coordination Network",
+    "iconPath": "/assets/svg/tech-tree/earth_planetary_coordination_network.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/earth_planetary_coordination_network--silhouette.svg",
     "description": "We let the planet's logistics run with a steadier intelligence, then ask what humans choose when survival is no longer the daily assignment.",
     "outcomeSummary": [
       "Adds an Architect branch decision tag.",
@@ -342,6 +378,8 @@
     "id": "moon_low_gravity_medicine",
     "planet": "moon",
     "displayName": "Low-Gravity Medicine",
+    "iconPath": "/assets/svg/tech-tree/moon_low_gravity_medicine.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/moon_low_gravity_medicine--silhouette.svg",
     "description": "We study bodies that grow, heal, and age under one-sixth gravity, learning what care means when even weight is different.",
     "outcomeSummary": [
       "Opens later Radiation Resilience research.",
@@ -358,6 +396,8 @@
     "id": "moon_closed_loop_life_support",
     "planet": "moon",
     "displayName": "Closed-Loop Life Support",
+    "iconPath": "/assets/svg/tech-tree/moon_closed_loop_life_support.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/moon_closed_loop_life_support--silhouette.svg",
     "description": "We make small habitats patient and forgiving, cycling air, water, food, and waste until survival becomes routine rather than heroic.",
     "outcomeSummary": [
       "Opens Isolation Psychology research.",
@@ -374,6 +414,8 @@
     "id": "moon_regolith_construction",
     "planet": "moon",
     "displayName": "Regolith Construction",
+    "iconPath": "/assets/svg/tech-tree/moon_regolith_construction.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/moon_regolith_construction--silhouette.svg",
     "description": "We turn dust into shelter, learning to print, sinter, shield, and repair with the ground already under our feet.",
     "outcomeSummary": [
       "Opens Early He-3 Extraction research.",
@@ -390,6 +432,8 @@
     "id": "moon_organism_library_t1",
     "planet": "moon",
     "displayName": "Organism Library Tier 1",
+    "iconPath": "/assets/svg/tech-tree/moon_organism_library_t1.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/moon_organism_library_t1--silhouette.svg",
     "description": "We catalogue hardy pioneer life in controlled lunar systems, building a living library for worlds that are not ready yet.",
     "outcomeSummary": [
       "Provides early biological candidates for terraforming.",
@@ -406,6 +450,8 @@
     "id": "moon_radiation_resilience",
     "planet": "moon",
     "displayName": "Radiation Resilience",
+    "iconPath": "/assets/svg/tech-tree/moon_radiation_resilience.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/moon_radiation_resilience--silhouette.svg",
     "description": "We learn how cells, materials, and communities endure the invisible weather beyond Earth's magnetic shelter.",
     "outcomeSummary": [
       "Builds on Low-Gravity Medicine.",
@@ -422,6 +468,8 @@
     "id": "moon_isolation_psychology",
     "planet": "moon",
     "displayName": "Isolation Psychology",
+    "iconPath": "/assets/svg/tech-tree/moon_isolation_psychology.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/moon_isolation_psychology--silhouette.svg",
     "description": "We study the rituals, spaces, and habits that keep small crews kind when every disagreement has nowhere to go.",
     "outcomeSummary": [
       "Builds on Closed-Loop Life Support.",
@@ -438,6 +486,8 @@
     "id": "moon_he3_extraction",
     "planet": "moon",
     "displayName": "Early He-3 Extraction",
+    "iconPath": "/assets/svg/tech-tree/moon_he3_extraction.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/moon_he3_extraction--silhouette.svg",
     "description": "We test the slow chemistry of pulling rare isotopes from ordinary dust, bridging lunar industry to the fusion era ahead.",
     "outcomeSummary": [
       "Builds on Regolith Construction.",
@@ -454,6 +504,8 @@
     "id": "moon_organism_library_t2",
     "planet": "moon",
     "displayName": "Organism Library Tier 2",
+    "iconPath": "/assets/svg/tech-tree/moon_organism_library_t2.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/moon_organism_library_t2--silhouette.svg",
     "description": "With Martian water no longer theoretical, we broaden the library from survival specialists into early ecosystems.",
     "outcomeSummary": [
       "Requires Tier 1 and Mars ocean spillover.",
@@ -470,6 +522,8 @@
     "id": "mercury_landing_pad",
     "planet": "mercury",
     "displayName": "Landing Pad",
+    "iconPath": "/assets/svg/tech-tree/mercury_landing_pad.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/mercury_landing_pad--silhouette.svg",
     "description": "We mark the first safe place to arrive on Mercury, where sunlight is harsh enough to build a future and careless enough to kill one.",
     "outcomeSummary": [
       "One of three requirements for Mercury Phase 0.",
@@ -486,6 +540,8 @@
     "id": "mercury_power_cell",
     "planet": "mercury",
     "displayName": "Power Cell",
+    "iconPath": "/assets/svg/tech-tree/mercury_power_cell.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/mercury_power_cell--silhouette.svg",
     "description": "We give the first Mercury outpost a dependable heartbeat, compact enough to survive the crater rim and strong enough to start work.",
     "outcomeSummary": [
       "One of three requirements for Mercury Phase 0.",
@@ -502,6 +558,8 @@
     "id": "mercury_mining_facility",
     "planet": "mercury",
     "displayName": "Mining Facility",
+    "iconPath": "/assets/svg/tech-tree/mercury_mining_facility.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/mercury_mining_facility--silhouette.svg",
     "description": "We begin with a small bite into Mercury's crust, careful enough to survive and steady enough to feed everything that follows.",
     "outcomeSummary": [
       "One of three requirements for Mercury Phase 0.",
@@ -518,6 +576,8 @@
     "id": "mercury_phase_0_complete",
     "planet": "mercury",
     "displayName": "Mercury Phase 0 Complete",
+    "iconPath": "/assets/svg/tech-tree/mercury_phase_0_complete.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/mercury_phase_0_complete--silhouette.svg",
     "description": "The first Mercury base becomes more than a landing site. It can power itself, receive cargo, and pull material from the ground.",
     "outcomeSummary": [
       "Applies Mercury phase 0 state.",
@@ -541,6 +601,8 @@
     "id": "mercury_refinery",
     "planet": "mercury",
     "displayName": "Refinery",
+    "iconPath": "/assets/svg/tech-tree/mercury_refinery.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/mercury_refinery--silhouette.svg",
     "description": "We stop shipping raw promise and start turning ore into usable streams, separating the useful from the merely heavy.",
     "outcomeSummary": [
       "One requirement for Mercury Phase 1.",
@@ -557,6 +619,8 @@
     "id": "mercury_fabricator",
     "planet": "mercury",
     "displayName": "Fabricator",
+    "iconPath": "/assets/svg/tech-tree/mercury_fabricator.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/mercury_fabricator--silhouette.svg",
     "description": "We teach the base to make parts for itself, shifting Mercury from an outpost supplied by Earth to an outpost that can answer back.",
     "outcomeSummary": [
       "One requirement for Mercury Phase 1.",
@@ -573,6 +637,8 @@
     "id": "mercury_solar_array_expansion",
     "planet": "mercury",
     "displayName": "Solar Array Expansion",
+    "iconPath": "/assets/svg/tech-tree/mercury_solar_array_expansion.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/mercury_solar_array_expansion--silhouette.svg",
     "description": "We unfold collectors under a sun that never feels distant, converting Mercury's danger into the base's first abundance.",
     "outcomeSummary": [
       "One requirement for Mercury Phase 1.",
@@ -589,6 +655,8 @@
     "id": "mercury_rare_metals_mining",
     "planet": "mercury",
     "displayName": "Rare Metals Mining",
+    "iconPath": "/assets/svg/tech-tree/mercury_rare_metals_mining.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/mercury_rare_metals_mining--silhouette.svg",
     "description": "We move beyond common ore and begin finding the stubborn elements that make advanced machines precise, durable, and worth the trouble.",
     "outcomeSummary": [
       "One requirement for Mercury Phase 1.",
@@ -605,6 +673,8 @@
     "id": "mercury_phase_1_complete",
     "planet": "mercury",
     "displayName": "Mercury Phase 1 Complete",
+    "iconPath": "/assets/svg/tech-tree/mercury_phase_1_complete.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/mercury_phase_1_complete--silhouette.svg",
     "description": "Mercury can now refine, fabricate, power, and mine beyond survival. The base becomes an industrial organism.",
     "outcomeSummary": [
       "Applies Mercury phase 1 state.",
@@ -633,6 +703,8 @@
     "id": "mercury_mass_driver",
     "planet": "mercury",
     "displayName": "Mass Driver",
+    "iconPath": "/assets/svg/tech-tree/mercury_mass_driver.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/mercury_mass_driver--silhouette.svg",
     "description": "We build a machine that throws finished work into orbit, turning Mercury's surface into the launch rail for a solar civilisation.",
     "outcomeSummary": [
       "One requirement for Mercury Phase 2.",
@@ -649,6 +721,8 @@
     "id": "mercury_dyson_panel_production",
     "planet": "mercury",
     "displayName": "Dyson Panel Production",
+    "iconPath": "/assets/svg/tech-tree/mercury_dyson_panel_production.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/mercury_dyson_panel_production--silhouette.svg",
     "description": "We begin manufacturing the mirrored fields that will make sunlight a shared infrastructure rather than a weather condition.",
     "outcomeSummary": [
       "One requirement for Mercury Phase 2.",
@@ -665,6 +739,8 @@
     "id": "mercury_polar_volatiles_extraction",
     "planet": "mercury",
     "displayName": "Polar Volatiles Extraction",
+    "iconPath": "/assets/svg/tech-tree/mercury_polar_volatiles_extraction.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/mercury_polar_volatiles_extraction--silhouette.svg",
     "description": "We learn to work in the cold traps where Mercury hides water and carbon, treating each pocket as precious because it is.",
     "outcomeSummary": [
       "One requirement for Mercury Phase 2.",
@@ -681,6 +757,8 @@
     "id": "mercury_phase_2_complete",
     "planet": "mercury",
     "displayName": "Mercury Phase 2 Complete",
+    "iconPath": "/assets/svg/tech-tree/mercury_phase_2_complete.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/mercury_phase_2_complete--silhouette.svg",
     "description": "Mercury becomes the engine room of the inner system: launching, manufacturing, and supplying work too large for Earth alone.",
     "outcomeSummary": [
       "Applies Mercury phase 2 state.",
@@ -708,6 +786,8 @@
     "id": "mars_polar_detonation",
     "planet": "mars",
     "displayName": "Polar Detonation",
+    "iconPath": "/assets/svg/tech-tree/mars_polar_detonation.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/mars_polar_detonation--silhouette.svg",
     "description": "We choose the bluntest warming path: fast, irreversible, and impossible to pretend is only engineering.",
     "outcomeSummary": [
       "Applies the Mars polar detonation terraforming choice.",
@@ -733,6 +813,8 @@
     "id": "mars_orbital_mirrors",
     "planet": "mars",
     "displayName": "Orbital Mirrors",
+    "iconPath": "/assets/svg/tech-tree/mars_orbital_mirrors.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/mars_orbital_mirrors--silhouette.svg",
     "description": "We place patient light above Mars, warming the planet by aim and persistence rather than shock.",
     "outcomeSummary": [
       "Applies the Mars orbital mirrors terraforming choice.",
@@ -757,6 +839,8 @@
     "id": "mars_magnetic_umbrella",
     "planet": "mars",
     "displayName": "Magnetic Umbrella",
+    "iconPath": "/assets/svg/tech-tree/mars_magnetic_umbrella.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/mars_magnetic_umbrella--silhouette.svg",
     "description": "We shelter Mars from the solar wind, not by remaking its core, but by holding a protective field where the planet needs it most.",
     "outcomeSummary": [
       "Applies the Mars magnetic umbrella terraforming choice.",
@@ -781,6 +865,8 @@
     "id": "mars_aerogel_domes",
     "planet": "mars",
     "displayName": "Aerogel Domes",
+    "iconPath": "/assets/svg/tech-tree/mars_aerogel_domes.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/mars_aerogel_domes--silhouette.svg",
     "description": "We make small warm places under thin light, letting Mars host pockets of pressure and life before the whole sky is ready.",
     "outcomeSummary": [
       "Requires Mercury Phase 2 and Earth Dome Habitat Technology.",
@@ -804,6 +890,8 @@
     "id": "mars_comet_water_delivery",
     "planet": "mars",
     "displayName": "Comet Water Delivery",
+    "iconPath": "/assets/svg/tech-tree/mars_comet_water_delivery.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/mars_comet_water_delivery--silhouette.svg",
     "description": "We redirect distant ice toward a dry world, turning celestial bookkeeping into rain that will not arrive for decades.",
     "outcomeSummary": [
       "Applies the Mars comet water delivery choice.",
@@ -827,6 +915,8 @@
     "id": "mars_ocean_confirmed",
     "planet": "mars",
     "displayName": "Mars Ocean Confirmed",
+    "iconPath": "/assets/svg/tech-tree/mars_ocean_confirmed.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/mars_ocean_confirmed--silhouette.svg",
     "description": "For the first time, Martian water is no longer a mineral memory or sealed tank. It gathers under open sky.",
     "outcomeSummary": [
       "Triggers the first liquid water culture event.",
@@ -850,6 +940,8 @@
     "id": "mars_biological_seeding",
     "planet": "mars",
     "displayName": "Biological Seeding",
+    "iconPath": "/assets/svg/tech-tree/mars_biological_seeding.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/mars_biological_seeding--silhouette.svg",
     "description": "We introduce life as a promise with safeguards, choosing organisms humble enough to begin and resilient enough to matter.",
     "outcomeSummary": [
       "Applies the Mars biological seeding choice.",
@@ -874,6 +966,8 @@
     "id": "mars_soil_study_complete",
     "planet": "mars",
     "displayName": "Mars Soil Study Complete",
+    "iconPath": "/assets/svg/tech-tree/mars_soil_study_complete.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/mars_soil_study_complete--silhouette.svg",
     "description": "The first Martian soils become readable: chemistry, microbes, failure, promise, and the slow grammar of a living ground.",
     "outcomeSummary": [
       "Spillover unlocks Earth's Soil Restoration Network.",
@@ -896,6 +990,8 @@
     "id": "mars_coastal_stable",
     "planet": "mars",
     "displayName": "Mars Coastal Ecosystems Stable",
+    "iconPath": "/assets/svg/tech-tree/mars_coastal_stable.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/mars_coastal_stable--silhouette.svg",
     "description": "The coasts hold through seasons. Not paradise, not yet, but stable enough that life can start making its own weather of habit.",
     "outcomeSummary": [
       "Spillover unlocks Earth's Rewilding At Scale.",
@@ -914,6 +1010,8 @@
     "id": "venus_orbital_shade_mirror",
     "planet": "venus",
     "displayName": "Orbital Shade Mirror",
+    "iconPath": "/assets/svg/tech-tree/venus_orbital_shade_mirror.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/venus_orbital_shade_mirror--silhouette.svg",
     "description": "We begin by giving Venus shade, placing a deliberate dusk between the planet and the furnace that made it unlivable.",
     "outcomeSummary": [
       "Applies the Venus orbital shade mirror choice.",
@@ -939,6 +1037,8 @@
     "id": "venus_carbonate_sequestration",
     "planet": "venus",
     "displayName": "Carbonate Sequestration",
+    "iconPath": "/assets/svg/tech-tree/venus_carbonate_sequestration.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/venus_carbonate_sequestration--silhouette.svg",
     "description": "We turn atmosphere into stone carefully, lowering pressure through chemistry rather than pretending Venus can be hurried safely.",
     "outcomeSummary": [
       "Applies the Venus carbonate sequestration choice.",
@@ -963,6 +1063,8 @@
     "id": "venus_carbonate_process_started",
     "planet": "venus",
     "displayName": "Venus Carbonate Process Started",
+    "iconPath": "/assets/svg/tech-tree/venus_carbonate_process_started.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/venus_carbonate_process_started--silhouette.svg",
     "description": "Venus begins teaching Earth in return. The same chemistry that quiets one atmosphere can help repair another.",
     "outcomeSummary": [
       "Spillover unlocks Earth's Atmospheric CO2 Drawdown.",
@@ -986,6 +1088,8 @@
     "id": "venus_europa_impact",
     "planet": "venus",
     "displayName": "Europa Impact",
+    "iconPath": "/assets/svg/tech-tree/venus_europa_impact.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/venus_europa_impact--silhouette.svg",
     "description": "We commit to a terrible precision: using a moon's ice and momentum to remake Venus, knowing the decision will echo for centuries.",
     "outcomeSummary": [
       "Applies the Venus Europa impact choice permanently.",
@@ -1010,6 +1114,8 @@
     "id": "venus_sky_cities",
     "planet": "venus",
     "displayName": "Sky Cities",
+    "iconPath": "/assets/svg/tech-tree/venus_sky_cities.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/venus_sky_cities--silhouette.svg",
     "description": "Before the surface can welcome us, the clouds can hold us. We design cities that float where pressure and temperature briefly become kind.",
     "outcomeSummary": [
       "Applies the Venus sky cities choice.",
@@ -1034,6 +1140,8 @@
     "id": "venus_sky_city_descent",
     "planet": "venus",
     "displayName": "Sky City Descent",
+    "iconPath": "/assets/svg/tech-tree/venus_sky_city_descent.svg",
+    "silhouetteIconPath": "/assets/svg/tech-tree/venus_sky_city_descent--silhouette.svg",
     "description": "As Venus changes beneath them, the cities must descend, adapt, or surrender buoyancy to a world becoming less hostile.",
     "outcomeSummary": [
       "Applies the Venus sky city descent choice.",

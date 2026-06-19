@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40" role="img" aria-label="Ocean Acidification Reversal silhouette placeholder icon">
+  <!-- PLACEHOLDER -->
+  <rect x="2" y="2" width="36" height="36" rx="6" fill="currentColor" fill-opacity="0.08" stroke="currentColor" stroke-opacity="0.34" stroke-dasharray="3 3"/>
+  <g opacity="0.58">
+      <path d="M7 24c4-5 8-5 13 0s9 5 13 0v8H7Z" fill="currentColor"/>
+      <path d="M7 18c4-5 8-5 13 0s9 5 13 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="14" cy="13" r="3" fill="currentColor"/>
+      <rect x="22" y="10" width="7" height="5" fill="currentColor" transform="rotate(16 25.5 12.5)"/>
+  </g>
+  <path d="M8 31h24" stroke="currentColor" stroke-opacity="0.35" stroke-width="2" stroke-linecap="round"/>
+  <text x="20" y="37" fill="currentColor" fill-opacity="0.34" font-family="monospace" font-size="4" text-anchor="middle">placeholder</text>
+</svg>

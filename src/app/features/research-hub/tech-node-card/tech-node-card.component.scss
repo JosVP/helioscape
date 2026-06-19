@@ -1,25 +1,23 @@
-// Animated gradient-border angle — drives the spinning conic-gradient on --new cards.
-// Using @property so the angle can be transitioned/animated natively by the browser
-// without needing to rotate a pseudo-element (which would overflow the card bounds).
-@property --tech-node-spin-angle {
-  syntax: '<angle>';
-  initial-value: 0deg;
-  inherits: false;
-}
-
 @keyframes hint-pulse {
   0%, 100% { opacity: 0.45; }
   50%       { opacity: 0.65; }
 }
 
-@keyframes new-badge-pop {
+@keyframes feedback-badge-pop {
   0%   { transform: scale(0.6); opacity: 0; }
   70%  { transform: scale(1.15); opacity: 1; }
   100% { transform: scale(1); }
 }
 
-@keyframes gradient-spin {
-  to { --tech-node-spin-angle: 360deg; }
+@keyframes completion-pulse {
+  0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-success) 45%, transparent); }
+  70%  { box-shadow: 0 0 0 7px color-mix(in srgb, var(--color-success) 0%, transparent); }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+@keyframes reveal-bloom {
+  0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-accent-glow) 48%, transparent); }
+  100% { box-shadow: 0 0 14px 0 color-mix(in srgb, var(--color-accent-glow) 22%, transparent); }
 }
 
 :host {
@@ -88,7 +86,6 @@
   &--hint {
     border-color: var(--color-bg-elevated);
     background: var(--color-bg-surface);
-    pointer-events: none;
     animation: hint-pulse 2.4s ease-in-out infinite;
 
     .tech-node__name { color: var(--color-text-disabled); }
@@ -126,50 +123,27 @@
                 inset 0 1px 0 color-mix(in srgb, var(--color-accent-glow) 18%, transparent);
   }
 
-  // ---------------------------------------------------------------------------
-  // "New" animated border — spinning conic-gradient as a background-clip border.
-  // Uses @property --tech-node-spin-angle so the gradient rotates without a
-  // pseudo-element extending outside the card (avoids overflow into adjacent tiles).
-  // ---------------------------------------------------------------------------
+  &--completion-recent {
+    outline: 1px solid var(--color-success);
+    outline-offset: 2px;
+    animation: completion-pulse 0.85s ease-out both;
+  }
 
-  &--new {
-    // Two-layer background: gradient fills the border area, solid fill covers the inside.
-    // --card-bg mirrors the active visibility variant's background colour so the inner
-    // fill stays visually correct regardless of which visibility state is combined with --new.
-    --card-bg: var(--color-bg-elevated);
-    border: 2px solid transparent;
-    background-image:
-      conic-gradient(
-        from var(--tech-node-spin-angle),
-        var(--color-accent-glow),
-        var(--color-accent-dim) 40%,
-        transparent 60%,
-        var(--color-accent-glow)
-      ),
-      linear-gradient(var(--card-bg), var(--card-bg));
-    background-clip: border-box, padding-box;
-    background-origin: border-box;
-    animation: gradient-spin 1.2s linear infinite;
-
-    // Override --card-bg for each visibility variant so the inner fill stays consistent
-    &.tech-node--available { --card-bg: color-mix(in srgb, var(--color-accent) 8%, var(--color-bg-elevated)); }
-    &.tech-node--completed { --card-bg: color-mix(in srgb, var(--color-success) 12%, var(--color-bg-elevated)); }
-    &.tech-node--hint      { --card-bg: var(--color-bg-surface); }
-
-    // Remove the old pseudo-element approach (no longer needed)
-    &::before { display: none; }
+  &--reveal-recent {
+    outline: 1px solid var(--color-accent-glow);
+    outline-offset: 2px;
+    animation: reveal-bloom 0.75s ease-out both;
   }
 }
 
 // ---------------------------------------------------------------------------
-// New badge
+// Feedback badge
 // ---------------------------------------------------------------------------
 
-.tech-node__new-badge {
+.tech-node__feedback-badge {
   position: absolute;
   top: -9px;
   right: -9px;
-  background: var(--color-accent-glow);
   color: var(--color-bg-base);
   font-family: var(--font-mono);
   font-size: 8px;
@@ -180,7 +154,15 @@
   letter-spacing: 0.05em;
   pointer-events: none;
   z-index: 2;
-  animation: new-badge-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation: feedback-badge-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+
+  &--completed {
+    background: var(--color-success);
+  }
+
+  &--revealed {
+    background: var(--color-accent-glow);
+  }
 }
 
 // ---------------------------------------------------------------------------

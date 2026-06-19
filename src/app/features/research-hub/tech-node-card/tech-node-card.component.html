@@ -1,7 +1,8 @@
 <div
   class="tech-node"
   [class]="'tech-node--' + visibility()"
-  [class.tech-node--new]="isNew()"
+  [class.tech-node--completion-recent]="isCompletionRecent()"
+  [class.tech-node--reveal-recent]="isRevealRecent()"
   [class.tech-node--interactive]="isSelectable()"
   [class.tech-node--selected]="selected()"
   [attr.data-node-id]="node().id"
@@ -12,12 +13,23 @@
   (click)="onSelect()"
   (keydown)="onKeydown($event)"
 >
-  @if (isNew()) {
-    <span class="tech-node__new-badge" aria-label="Newly unlocked">New</span>
+  @if (isCompletionRecent()) {
+    <span class="tech-node__feedback-badge tech-node__feedback-badge--completed" aria-label="Recently completed">
+      Completed
+    </span>
+  } @else if (isRevealRecent()) {
+    <span class="tech-node__feedback-badge tech-node__feedback-badge--revealed" aria-label="Newly available">
+      New
+    </span>
   }
 
   <div class="tech-node__icon" aria-hidden="true">
-    <app-tech-node-icon [planetId]="planetId()" [visibility]="visibility()" />
+    <app-tech-node-icon
+      [planetId]="planetId()"
+      [visibility]="visibility()"
+      [iconPath]="node().iconPath"
+      [silhouetteIconPath]="node().silhouetteIconPath"
+    />
   </div>
 
   <div class="tech-node__body">

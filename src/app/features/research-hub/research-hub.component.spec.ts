@@ -18,6 +18,15 @@ class ResizeObserverStub {
 
 const TECH_NODES: TechNode[] = [
   makeNode({
+    id: 'earth_launch_mercury_mission',
+    displayName: 'Launch Mercury Mission',
+    description: 'We open the first path outward.',
+    outcomeSummary: ['Unlocks early Moon research tracks.'],
+    tier: 0,
+    rpCost: 0,
+    durationYears: 0,
+  }),
+  makeNode({
     id: 'earth_completed',
     displayName: 'Completed Foundations',
     description: 'The first foundation is already finished.',
@@ -64,6 +73,23 @@ const TECH_NODES: TechNode[] = [
     outcomeSummary: ['Keeps the current selection stable.'],
     prerequisites: ['earth_available'],
     tier: 2,
+  }),
+  makeNode({
+    id: 'earth_preview_child',
+    displayName: 'Second-Layer Hidden Child',
+    description: 'This should not appear from another preview card.',
+    outcomeSummary: ['This outcome should remain hidden.'],
+    prerequisites: ['earth_newly_available'],
+    tier: 3,
+  }),
+  makeNode({
+    id: 'moon_low_gravity_medicine',
+    planet: 'moon',
+    displayName: 'Low Gravity Medicine',
+    description: 'This Moon track should begin as a shrouded preview.',
+    outcomeSummary: ['Supports life in low gravity.'],
+    spilloverPrerequisites: ['earth_launch_mercury_mission'],
+    tier: 1,
   }),
 ];
 
@@ -112,6 +138,7 @@ function makeGameStateFake() {
     totalRpCapacity: totalRpCapacity.asReadonly(),
     pendingFork: pendingFork.asReadonly(),
     setCompletedTechs: (techIds: string[]) => completedTechs.set(techIds),
+    setCompletedResearchYears: (years: Record<string, number>) => completedResearchYears.set(years),
     setActiveResearch: (tracks: ActiveResearchTrack[]) => activeResearch.set(tracks),
   };
 }
@@ -124,21 +151,38 @@ function makeDataFake(): Pick<DataService, 'getTechNode' | 'getTechNodesForPlane
   };
 }
 
-function makeTechTreeFake(): Pick<TechTreeService, 'canUnlock'> {
+function makeTechTreeFake(gameState: ReturnType<typeof makeGameStateFake>): Pick<TechTreeService, 'canUnlock'> {
   return {
-    canUnlock: (_planetId: string, nodeId: string) =>
-      nodeId === 'earth_available' || nodeId === 'earth_blocked_capacity' || nodeId === 'earth_newly_available',
+    canUnlock: (_planetId: string, nodeId: string) => {
+      const node = TECH_NODES.find((candidate) => candidate.id === nodeId);
+      if (!node) return false;
+
+      const completed = gameState.completedTechs();
+      if (completed.includes(nodeId)) return false;
+
+      const directPrereqsMet =
+        node.prerequisites.length === 0 ||
+        (node.prerequisiteMode === 'any'
+          ? node.prerequisites.some((id) => completed.includes(id))
+          : node.prerequisites.every((id) => completed.includes(id)));
+      const spilloverMet = node.spilloverPrerequisites.every((id) => completed.includes(id));
+      return directPrereqsMet && spilloverMet;
+    },
   };
 }
 
-function makeEventBusFake(): Pick<EventBusService, 'techUnlocked$'> {
-  return { techUnlocked$: new Subject<TechUnlockedEvent>() };
+function makeEventBusFake(): Pick<EventBusService, 'techUnlocked$' | 'researchCompleted$'> {
+  return {
+    techUnlocked$: new Subject<TechUnlockedEvent>(),
+    researchCompleted$: new Subject<string>(),
+  };
 }
 
 describe('ResearchHubComponent', () => {
   let fixture: ComponentFixture<ResearchHubComponent>;
   let gameState: ReturnType<typeof makeGameStateFake>;
   let researchService: Pick<ResearchService, 'startTechTrack'>;
+  let eventBus: ReturnType<typeof makeEventBusFake>;
 
   beforeEach(async () => {
     vi.stubGlobal('ResizeObserver', ResizeObserverStub);
@@ -149,14 +193,15 @@ describe('ResearchHubComponent', () => {
 
     researchService = { startTechTrack: vi.fn() };
     gameState = makeGameStateFake();
+    eventBus = makeEventBusFake();
 
     await TestBed.configureTestingModule({
       imports: [ResearchHubComponent],
       providers: [
         { provide: DataService, useValue: makeDataFake() },
         { provide: GameStateService, useValue: gameState },
-        { provide: TechTreeService, useValue: makeTechTreeFake() },
-        { provide: EventBusService, useValue: makeEventBusFake() },
+        { provide: TechTreeService, useValue: makeTechTreeFake(gameState) },
+        { provide: EventBusService, useValue: eventBus },
         { provide: ResearchService, useValue: researchService },
       ],
     }).compileComponents();
@@ -174,6 +219,10 @@ describe('ResearchHubComponent', () => {
     expect(card).not.toBeNull();
     card?.click();
     fixture.detectChanges();
+  }
+
+  function nodeCard(nodeId: string): HTMLElement | null {
+    return fixture.nativeElement.querySelector(`[data-node-id="${nodeId}"]`) as HTMLElement | null;
   }
 
   function inspectorText(): string {
@@ -221,12 +270,12 @@ describe('ResearchHubComponent', () => {
   });
 
   it('keeps hint node details hidden while showing known prerequisites', () => {
-    clickNode('earth_hint');
+    clickNode('earth_newly_available');
 
     expect(inspectorText()).toContain('Locked technology');
-    expect(inspectorText()).toContain('Completed Foundations');
-    expect(inspectorText()).not.toContain('This description should stay hidden');
-    expect(inspectorText()).not.toContain('This outcome should stay hidden');
+    expect(inspectorText()).toContain('Available Energy Grid');
+    expect(inspectorText()).not.toContain('This should not steal the inspector selection');
+    expect(inspectorText()).not.toContain('Keeps the current selection stable');
   });
 
   it('does not auto-select a newly available node after the current selection completes', () => {
@@ -239,5 +288,71 @@ describe('ResearchHubComponent', () => {
 
     expect(inspectorText()).toContain('Available Energy Grid');
     expect(inspectorText()).not.toContain('Newly Available Follow-Up');
+  });
+
+  it('previews Moon tracks unlocked by an available launch node as hint cards', () => {
+    const moonPreview = nodeCard('moon_low_gravity_medicine');
+
+    expect(moonPreview).not.toBeNull();
+    expect(moonPreview?.classList).toContain('tech-node--hint');
+    expect(moonPreview?.textContent).toContain('???');
+    expect(moonPreview?.textContent).not.toContain('Low Gravity Medicine');
+  });
+
+  it('previews direct follow-up nodes but does not cascade through hinted nodes', () => {
+    const directPreview = nodeCard('earth_newly_available');
+    const secondLayerPreview = nodeCard('earth_preview_child');
+
+    expect(directPreview).not.toBeNull();
+    expect(directPreview?.classList).toContain('tech-node--hint');
+    expect(secondLayerPreview).toBeNull();
+  });
+
+  it('marks completed cards briefly after researchCompleted emits', () => {
+    vi.useFakeTimers();
+
+    eventBus.researchCompleted$.next('earth_available');
+    fixture.detectChanges();
+
+    expect(nodeCard('earth_available')?.classList).toContain('tech-node--completion-recent');
+
+    vi.advanceTimersByTime(2000);
+    fixture.detectChanges();
+
+    expect(nodeCard('earth_available')?.classList).not.toContain('tech-node--completion-recent');
+    vi.useRealTimers();
+  });
+
+  it('marks dependents when a completed prerequisite makes them available', () => {
+    vi.useFakeTimers();
+
+    gameState.setCompletedTechs(['earth_completed', 'earth_available']);
+    eventBus.techUnlocked$.next({ planetId: 'earth', nodeId: 'earth_available' });
+    fixture.detectChanges();
+
+    expect(nodeCard('earth_available')?.classList).toContain('tech-node--completion-recent');
+    expect(nodeCard('earth_newly_available')?.classList).toContain('tech-node--reveal-recent');
+
+    vi.advanceTimersByTime(2000);
+    fixture.detectChanges();
+
+    expect(nodeCard('earth_newly_available')?.classList).not.toContain('tech-node--reveal-recent');
+    vi.useRealTimers();
+  });
+
+  it('updates the selected in-progress inspector to completed without changing selection', () => {
+    clickNode('earth_progress');
+    expect(inspectorText()).toContain('In Flight Materials');
+    expect(fixture.nativeElement.querySelector('.tech-inspector__progress')).not.toBeNull();
+
+    gameState.setCompletedTechs(['earth_completed', 'earth_progress']);
+    gameState.setCompletedResearchYears({ earth_completed: 2039, earth_progress: 2041 });
+    gameState.setActiveResearch([]);
+    fixture.detectChanges();
+
+    expect(inspectorText()).toContain('In Flight Materials');
+    expect(inspectorText()).toContain('Year 2041');
+    expect(fixture.nativeElement.querySelector('.tech-inspector__start')).toBeNull();
+    expect(nodeCard('earth_progress')?.getAttribute('aria-current')).toBe('true');
   });
 });

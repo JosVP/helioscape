@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40" role="img" aria-label="Planetary Resource Grid placeholder icon">
+  <!-- PLACEHOLDER -->
+  <rect x="2" y="2" width="36" height="36" rx="6" fill="none" stroke="currentColor" stroke-opacity="0.28" stroke-dasharray="3 3"/>
+  <circle cx="20" cy="20" r="5" fill="#f0d56b"/>
+  <line x1="20" y1="5" x2="20" y2="11" stroke="#f0d56b" stroke-width="2" stroke-linecap="round"/>
+  <line x1="20" y1="29" x2="20" y2="35" stroke="#f0d56b" stroke-width="2" stroke-linecap="round"/>
+  <line x1="5" y1="20" x2="11" y2="20" stroke="#f0d56b" stroke-width="2" stroke-linecap="round"/>
+  <line x1="29" y1="20" x2="35" y2="20" stroke="#f0d56b" stroke-width="2" stroke-linecap="round"/>
+  <rect x="10" y="27" width="20" height="6" fill="#2f8f6b" transform="rotate(-8 20 30)"/>
+  <text x="20" y="37" fill="currentColor" fill-opacity="0.45" font-family="monospace" font-size="4" text-anchor="middle">placeholder</text>
+</svg>

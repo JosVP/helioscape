@@ -11,6 +11,7 @@ import {
   inject,
   output,
   signal,
+  type WritableSignal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import type { TechNode, PendingFork } from '@app/core/models';
@@ -40,6 +41,8 @@ export interface NodeEntry {
 
 /** Ordered map of nodeId → NodeEntry, insertion order = render order. */
 type ColumnStates = Map<string, NodeEntry>;
+type ResolvedNodeVisibility = Exclude<NodeVisibility, 'hint'>;
+type NodeVisibilitySnapshot = ReadonlyMap<string, NodeVisibility>;
 
 interface RectBounds {
   readonly left: number;
@@ -75,6 +78,7 @@ export class ResearchHubComponent implements AfterViewInit, OnDestroy {
   private readonly eventBus = inject(EventBusService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly clipLineGapBetweenTreeColumns = false;
+  private readonly transientFeedbackDurationMs = 2000;
 
   readonly closed = output<void>();
 
@@ -101,6 +105,12 @@ export class ResearchHubComponent implements AfterViewInit, OnDestroy {
       ...this.data.getTechNodesForPlanet('mercury')]
       .map((n) => [n.id, n]),
   );
+  private readonly researchHubNodes = [
+    ...this.marsNodes,
+    ...this.earthNodes,
+    ...this.moonNodes,
+    ...this.venusNodes,
+  ];
 
   // ---------------------------------------------------------------------------
   // Reactive column states
@@ -142,11 +152,14 @@ export class ResearchHubComponent implements AfterViewInit, OnDestroy {
   });
 
   // ---------------------------------------------------------------------------
-  // "New" badge tracking
+  // Transient completion/reveal tracking
   // ---------------------------------------------------------------------------
 
-  readonly newlyUnlockedIds = signal<ReadonlySet<string>>(new Set());
-  private readonly _newBadgeTimers: ReturnType<typeof setTimeout>[] = [];
+  readonly recentlyCompletedIds = signal<ReadonlySet<string>>(new Set());
+  readonly recentlyRevealedIds = signal<ReadonlySet<string>>(new Set());
+  private readonly _completionFeedbackTimers = new Map<string, ReturnType<typeof setTimeout>>();
+  private readonly _revealFeedbackTimers = new Map<string, ReturnType<typeof setTimeout>>();
+  private _lastVisibleSnapshot = new Map<string, NodeVisibility>();
 
   // ---------------------------------------------------------------------------
   // Fork modal
@@ -171,18 +184,27 @@ export class ResearchHubComponent implements AfterViewInit, OnDestroy {
   // ---------------------------------------------------------------------------
 
   constructor() {
+    this.eventBus.researchCompleted$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((trackId) => {
+        if (!this.allVisibleEntries().has(trackId)) return;
+        this._markTransient(
+          this.recentlyCompletedIds,
+          this._completionFeedbackTimers,
+          [trackId],
+        );
+        this._scheduleLineRedraw();
+      });
+
     this.eventBus.techUnlocked$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(({ nodeId }) => {
-        this.newlyUnlockedIds.update((s) => new Set([...s, nodeId]));
-        const handle = setTimeout(() => {
-          this.newlyUnlockedIds.update((s) => {
-            const next = new Set(s);
-            next.delete(nodeId);
-            return next;
-          });
-        }, 2000);
-        this._newBadgeTimers.push(handle);
+        this._markTransient(
+          this.recentlyCompletedIds,
+          this._completionFeedbackTimers,
+          [nodeId],
+        );
+        this._captureRevealFeedback(nodeId);
         this._scheduleLineRedraw();
       });
   }
@@ -194,12 +216,14 @@ export class ResearchHubComponent implements AfterViewInit, OnDestroy {
     this._resizeObserver = new ResizeObserver(() => this._scheduleLineRedraw());
     this._resizeObserver.observe(this.gridContainerRef.nativeElement);
     this._setInitialSelection();
+    this._lastVisibleSnapshot = this._visibleStateSnapshot();
     this._scheduleLineRedraw();
   }
 
   ngOnDestroy(): void {
     this._resizeObserver?.disconnect();
-    this._newBadgeTimers.forEach(clearTimeout);
+    this._clearTransientTimers(this._completionFeedbackTimers);
+    this._clearTransientTimers(this._revealFeedbackTimers);
   }
 
   // ---------------------------------------------------------------------------
@@ -243,6 +267,7 @@ export class ResearchHubComponent implements AfterViewInit, OnDestroy {
     const activeResearch = this.gameState.activeResearch();
     const currentYear = this.gameState.gameYear();
     const result = new Map<string, NodeEntry>();
+    const previewFrontierIds = this._previewFrontierIds(completed, activeResearch);
 
     // Sort by tier (ascending), then by prerequisite depth for consistent ordering
     const sorted = [...nodes].sort((a, b) => {
@@ -253,24 +278,21 @@ export class ResearchHubComponent implements AfterViewInit, OnDestroy {
 
     for (const node of sorted) {
       const activeTrack = activeResearch.find((t) => t.trackId === node.id);
-      const visibility = this._getVisibility(node, completed, interactive, activeTrack !== undefined);
+      const resolvedVisibility = this._getResolvedVisibility(
+        node,
+        completed,
+        interactive,
+        activeTrack !== undefined,
+      );
+      const visibility =
+        resolvedVisibility ??
+        (this._shouldShowAsHint(node, interactive, previewFrontierIds) ? 'hint' : null);
       if (visibility === null) continue;
 
-      let progressPercent: number | undefined;
-      let etaYear: number | undefined;
-      let isPaused: boolean | undefined;
-
-      if (visibility === 'in_progress' && activeTrack) {
-        isPaused = activeTrack.isPaused;
-        const elapsed = activeTrack.elapsedBeforeStart + (currentYear - activeTrack.startYear);
-        progressPercent = Math.min(100, Math.round((elapsed / node.durationYears) * 100));
-        if (!activeTrack.isPaused) {
-          const remaining = node.durationYears - elapsed;
-          etaYear = currentYear + Math.max(0, remaining);
-        }
-      }
-
-      result.set(node.id, { node, visibility, interactive, progressPercent, etaYear, isPaused });
+      result.set(
+        node.id,
+        this._buildNodeEntry(node, visibility, interactive, activeTrack, currentYear),
+      );
     }
 
     return result;
@@ -369,24 +391,19 @@ export class ResearchHubComponent implements AfterViewInit, OnDestroy {
   }
 
   /**
-   * Returns the visibility tier for a node, or null if it should be hidden.
+  * Returns a real, non-preview visibility tier for a node, or null if it should
+  * be hidden unless the second-pass preview frontier reveals it as a hint.
    *
    * Rules:
    * - completed: node id is in completedTechs[]
    * - available: TechTreeService.canUnlock() returns true
-   * - hint: not completed/available, but at least one direct prereq or spilloverPrereq
-   *         is in completedTechs[]
-   * - null (hidden): all other cases
-   *
-   * For non-interactive columns (Mars/Venus): completed and hint nodes are shown.
-   * Available nodes in those columns are shown as hint (they aren't clickable anyway).
    */
-  private _getVisibility(
+  private _getResolvedVisibility(
     node: TechNode,
     completed: string[],
     interactive: boolean,
     isActive: boolean,
-  ): NodeVisibility | null {
+  ): ResolvedNodeVisibility | null {
     if (completed.includes(node.id)) return 'completed';
 
     if (isActive) return 'in_progress';
@@ -400,13 +417,152 @@ export class ResearchHubComponent implements AfterViewInit, OnDestroy {
       }
     }
 
-    // Hint: at least one prereq (direct or spillover) is completed
-    const allPrereqs = [...node.prerequisites, ...node.spilloverPrerequisites];
-    if (allPrereqs.some((id) => completed.includes(id))) {
-      return 'hint';
+    return null; // hidden
+  }
+
+  private _buildNodeEntry(
+    node: TechNode,
+    visibility: NodeVisibility,
+    interactive: boolean,
+    activeTrack: ReturnType<typeof this.gameState.activeResearch>[number] | undefined,
+    currentYear: number,
+  ): NodeEntry {
+    let progressPercent: number | undefined;
+    let etaYear: number | undefined;
+    let isPaused: boolean | undefined;
+
+    if (visibility === 'in_progress' && activeTrack) {
+      isPaused = activeTrack.isPaused;
+      const elapsed = activeTrack.elapsedBeforeStart + (currentYear - activeTrack.startYear);
+      progressPercent = Math.min(100, Math.round((elapsed / node.durationYears) * 100));
+      if (!activeTrack.isPaused) {
+        const remaining = node.durationYears - elapsed;
+        etaYear = currentYear + Math.max(0, remaining);
+      }
     }
 
-    return null; // hidden
+    return { node, visibility, interactive, progressPercent, etaYear, isPaused };
+  }
+
+  private _previewFrontierIds(
+    completed: string[],
+    activeResearch: ReturnType<typeof this.gameState.activeResearch>,
+  ): ReadonlySet<string> {
+    const frontierIds = new Set(completed);
+    for (const track of activeResearch) {
+      frontierIds.add(track.trackId);
+    }
+
+    for (const node of this.researchHubNodes) {
+      if (!this._isInteractivePlanet(node.planet)) continue;
+      if (this.techTreeService.canUnlock(node.planet, node.id)) {
+        frontierIds.add(node.id);
+      }
+    }
+
+    return frontierIds;
+  }
+
+  private _shouldShowAsHint(
+    node: TechNode,
+    interactive: boolean,
+    previewFrontierIds: ReadonlySet<string>,
+  ): boolean {
+    const isNonInteractiveAvailable =
+      !interactive && this.techTreeService.canUnlock(node.planet, node.id);
+    return isNonInteractiveAvailable || this._hasPreviewPrerequisite(node, previewFrontierIds);
+  }
+
+  private _hasPreviewPrerequisite(node: TechNode, previewFrontierIds: ReadonlySet<string>): boolean {
+    return [...node.prerequisites, ...node.spilloverPrerequisites].some((id) =>
+      previewFrontierIds.has(id),
+    );
+  }
+
+  private _isInteractivePlanet(planetId: string): boolean {
+    return planetId === 'earth' || planetId === 'moon';
+  }
+
+  private _visibleStateSnapshot(): Map<string, NodeVisibility> {
+    return new Map(
+      [...this.allVisibleEntries()].map(([nodeId, entry]) => [nodeId, entry.visibility]),
+    );
+  }
+
+  private _captureRevealFeedback(completedNodeId: string): void {
+    const previous = this._lastVisibleSnapshot;
+    const currentEntries = this.allVisibleEntries();
+    const revealedIds = this._findNewlyRevealed(previous, currentEntries, completedNodeId);
+    this._markTransient(this.recentlyRevealedIds, this._revealFeedbackTimers, revealedIds);
+    this._lastVisibleSnapshot = this._visibleStateSnapshot();
+  }
+
+  private _findNewlyRevealed(
+    previous: NodeVisibilitySnapshot,
+    currentEntries: ReadonlyMap<string, NodeEntry>,
+    completedNodeId: string,
+  ): string[] {
+    const revealedIds: string[] = [];
+
+    for (const [nodeId, entry] of currentEntries) {
+      if (nodeId === completedNodeId) continue;
+      if (!this._hasPreviewPrerequisite(entry.node, new Set([completedNodeId]))) continue;
+
+      const previousVisibility = previous.get(nodeId) ?? null;
+      if (this._visibilityRank(entry.visibility) > this._visibilityRank(previousVisibility)) {
+        revealedIds.push(nodeId);
+      }
+    }
+
+    return revealedIds;
+  }
+
+  private _visibilityRank(visibility: NodeVisibility | null): number {
+    switch (visibility) {
+      case null:
+        return 0;
+      case 'hint':
+        return 1;
+      case 'needs_capacity':
+        return 2;
+      case 'available':
+      case 'in_progress':
+      case 'completed':
+        return 3;
+    }
+  }
+
+  private _markTransient(
+    state: WritableSignal<ReadonlySet<string>>,
+    timers: Map<string, ReturnType<typeof setTimeout>>,
+    nodeIds: readonly string[],
+  ): void {
+    if (nodeIds.length === 0) return;
+
+    state.update((current) => new Set([...current, ...nodeIds]));
+
+    for (const nodeId of nodeIds) {
+      const existingTimer = timers.get(nodeId);
+      if (existingTimer) clearTimeout(existingTimer);
+
+      const handle = setTimeout(() => {
+        state.update((current) => {
+          const next = new Set(current);
+          next.delete(nodeId);
+          return next;
+        });
+        timers.delete(nodeId);
+      }, this.transientFeedbackDurationMs);
+
+      timers.set(nodeId, handle);
+    }
+  }
+
+  private _clearTransientTimers(timers: Map<string, ReturnType<typeof setTimeout>>): void {
+    for (const handle of timers.values()) {
+      clearTimeout(handle);
+    }
+    timers.clear();
   }
 
   /**

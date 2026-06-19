@@ -1,7 +1,13 @@
 <aside class="tech-inspector" aria-label="Selected technology details">
   @if (viewModel(); as vm) {
     <div class="tech-inspector__header">
-      <app-tech-node-icon [planetId]="vm.node.planet" [visibility]="vm.visibility" size="large" />
+      <app-tech-node-icon
+        [planetId]="vm.node.planet"
+        [visibility]="vm.visibility"
+        [iconPath]="vm.node.iconPath"
+        [silhouetteIconPath]="vm.node.silhouetteIconPath"
+        size="large"
+      />
       <div class="tech-inspector__heading">
         <span class="tech-inspector__planet">{{ vm.planetLabel }}</span>
         <h3 class="tech-inspector__title">
@@ -33,7 +39,7 @@
         </div>
         @if (vm.completedYear) {
           <div class="tech-inspector__stat">
-            <dt>Completed</dt>
+            <dt>Completed in</dt>
             <dd>Year {{ vm.completedYear }}</dd>
           </div>
         }

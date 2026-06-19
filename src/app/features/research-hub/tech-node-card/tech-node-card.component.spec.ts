@@ -50,14 +50,14 @@ describe('TechNodeCardComponent', () => {
   function createComponent(
     visibility: 'completed' | 'available' | 'hint',
     interactive = true,
-    isNew = false,
+    isRevealRecent = false,
   ): void {
     fixture = TestBed.createComponent(TechNodeCardComponent);
     component = fixture.componentInstance;
     fixture.componentRef.setInput('node', MOCK_NODE);
     fixture.componentRef.setInput('visibility', visibility);
     fixture.componentRef.setInput('interactive', interactive);
-    fixture.componentRef.setInput('isNew', isNew);
+    fixture.componentRef.setInput('isRevealRecent', isRevealRecent);
     fixture.componentRef.setInput('planetId', 'earth');
     fixture.detectChanges();
   }
@@ -148,15 +148,27 @@ describe('TechNodeCardComponent', () => {
     expect(card.getAttribute('aria-current')).toBe('true');
   });
 
-  it('shows new badge when isNew is true', () => {
+  it('shows reveal badge when isRevealRecent is true', () => {
     createComponent('available', true, true);
-    const badge = fixture.nativeElement.querySelector('.tech-node__new-badge');
+    const badge = fixture.nativeElement.querySelector('.tech-node__feedback-badge--revealed');
     expect(badge).not.toBeNull();
+    expect(badge.textContent).toContain('New');
   });
 
-  it('does not show new badge when isNew is false', () => {
+  it('shows completion badge when isCompletionRecent is true', () => {
+    createComponent('completed');
+    fixture.componentRef.setInput('isCompletionRecent', true);
+    fixture.detectChanges();
+
+    const card = fixture.nativeElement.querySelector('.tech-node');
+    const badge = fixture.nativeElement.querySelector('.tech-node__feedback-badge--completed');
+    expect(card.classList).toContain('tech-node--completion-recent');
+    expect(badge.textContent).toContain('Completed');
+  });
+
+  it('does not show feedback badge when recent flags are false', () => {
     createComponent('available', true, false);
-    const badge = fixture.nativeElement.querySelector('.tech-node__new-badge');
+    const badge = fixture.nativeElement.querySelector('.tech-node__feedback-badge');
     expect(badge).toBeNull();
   });
 

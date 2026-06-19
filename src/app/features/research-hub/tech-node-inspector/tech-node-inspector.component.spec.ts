@@ -48,7 +48,9 @@ describe('TechNodeInspectorComponent', () => {
   it('renders completed year and no Start button for completed nodes', () => {
     setViewModel(makeViewModel({ visibility: 'completed', statusLabel: 'Completed', completedYear: 2044, canStart: false }));
 
+    expect(fixture.nativeElement.textContent).toContain('Completed in');
     expect(fixture.nativeElement.textContent).toContain('Year 2044');
+    expect(fixture.nativeElement.textContent).toContain('Enables later Earth research.');
     expect(fixture.nativeElement.querySelector('.tech-inspector__start')).toBeNull();
   });
 

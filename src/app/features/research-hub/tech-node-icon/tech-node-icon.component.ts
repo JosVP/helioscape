@@ -12,6 +12,9 @@ export class TechNodeIconComponent {
   readonly planetId = input.required<string>();
   readonly visibility = input.required<NodeVisibility>();
   readonly size = input<'compact' | 'large'>('compact');
+  readonly iconPath = input<string | undefined>(undefined);
+  readonly silhouetteIconPath = input<string | undefined>(undefined);
 
   readonly isHint = computed(() => this.visibility() === 'hint');
+  readonly imagePath = computed(() => (this.isHint() ? this.silhouetteIconPath() : this.iconPath()));
 }

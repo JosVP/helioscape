@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40" role="img" aria-label="Comet Water Delivery placeholder icon">
+  <!-- PLACEHOLDER -->
+  <rect x="2" y="2" width="36" height="36" rx="6" fill="none" stroke="currentColor" stroke-opacity="0.28" stroke-dasharray="3 3"/>
+  <path d="M7 24c4-5 8-5 13 0s9 5 13 0v8H7Z" fill="#dd7045"/>
+  <path d="M7 18c4-5 8-5 13 0s9 5 13 0" fill="none" stroke="#9b3e2f" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="14" cy="13" r="3" fill="#f4c27a"/>
+  <rect x="22" y="10" width="7" height="5" fill="#372523" transform="rotate(16 25.5 12.5)"/>
+  <text x="20" y="37" fill="currentColor" fill-opacity="0.45" font-family="monospace" font-size="4" text-anchor="middle">placeholder</text>
+</svg>
