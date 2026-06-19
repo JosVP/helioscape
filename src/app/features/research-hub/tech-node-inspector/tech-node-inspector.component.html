@@ -1,0 +1,111 @@
+<aside class="tech-inspector" aria-label="Selected technology details">
+  @if (viewModel(); as vm) {
+    <div class="tech-inspector__header">
+      <app-tech-node-icon [planetId]="vm.node.planet" [visibility]="vm.visibility" size="large" />
+      <div class="tech-inspector__heading">
+        <span class="tech-inspector__planet">{{ vm.planetLabel }}</span>
+        <h3 class="tech-inspector__title">
+          {{ vm.canRevealDetails ? vm.node.displayName : 'Locked technology' }}
+        </h3>
+        <span class="tech-inspector__status tech-inspector__status--{{ vm.visibility }}">
+          {{ vm.statusLabel }}
+        </span>
+      </div>
+    </div>
+
+    @if (vm.canRevealDetails) {
+      @if (vm.branchTag) {
+        <span class="tech-inspector__branch tech-inspector__branch--{{ vm.branchTag }}">
+          {{ vm.branchTag }} path
+        </span>
+      }
+
+      <p class="tech-inspector__description">{{ vm.node.description }}</p>
+
+      <dl class="tech-inspector__stats">
+        <div class="tech-inspector__stat">
+          <dt>Research capacity</dt>
+          <dd>{{ vm.node.rpCost }} RP</dd>
+        </div>
+        <div class="tech-inspector__stat">
+          <dt>Duration</dt>
+          <dd>{{ vm.node.durationYears }} years</dd>
+        </div>
+        @if (vm.completedYear) {
+          <div class="tech-inspector__stat">
+            <dt>Completed</dt>
+            <dd>Year {{ vm.completedYear }}</dd>
+          </div>
+        }
+      </dl>
+
+      @if (vm.progressPercent !== undefined) {
+        <div
+          class="tech-inspector__progress"
+          role="progressbar"
+          [attr.aria-valuenow]="vm.progressPercent"
+          aria-valuemin="0"
+          aria-valuemax="100"
+        >
+          <div class="tech-inspector__progress-fill" [style.--progress]="vm.progressPercent / 100"></div>
+        </div>
+        @if (vm.etaYear) {
+          <p class="tech-inspector__note">ETA: Year {{ vm.etaYear }}</p>
+        }
+      }
+
+      @if (vm.capacityShortfall !== undefined) {
+        <p class="tech-inspector__warning">
+          We need {{ vm.capacityShortfall }} more RP capacity before this can begin.
+        </p>
+      }
+
+      @if (hasOutcomes()) {
+        <section class="tech-inspector__section" aria-labelledby="tech-inspector-outcomes">
+          <h4 id="tech-inspector-outcomes">What this gains us</h4>
+          <ul class="tech-inspector__list">
+            @for (outcome of vm.node.outcomeSummary; track outcome) {
+              <li>{{ outcome }}</li>
+            }
+          </ul>
+        </section>
+      }
+    } @else {
+      <p class="tech-inspector__description tech-inspector__description--muted">
+        We can see the outline of this work, but not enough to commit to it yet.
+      </p>
+    }
+
+    @if (hasPrerequisites()) {
+      <section class="tech-inspector__section" aria-labelledby="tech-inspector-prereqs">
+        <h4 id="tech-inspector-prereqs">Prerequisites</h4>
+        <ul class="tech-inspector__prereqs">
+          @for (prereq of vm.prerequisites; track prereq.id) {
+            <li
+              class="tech-inspector__prereq"
+              [class.tech-inspector__prereq--met]="prereq.met"
+              [class.tech-inspector__prereq--unmet]="!prereq.met"
+            >
+              <span class="tech-inspector__prereq-dot" aria-hidden="true"></span>
+              <span>{{ prereq.label }}</span>
+              @if (prereq.isSpillover) {
+                <span class="tech-inspector__spillover">spillover</span>
+              }
+            </li>
+          }
+        </ul>
+      </section>
+    }
+
+    @if (vm.canStart) {
+      <button class="tech-inspector__start" type="button" (click)="onStart()">
+        Start Research
+      </button>
+    }
+  } @else {
+    <div class="tech-inspector__empty">
+      <h3 class="tech-inspector__title">Select a technology</h3>
+      <p>Choose a visible node to read what we know before committing research capacity.</p>
+    </div>
+  }
+</aside>

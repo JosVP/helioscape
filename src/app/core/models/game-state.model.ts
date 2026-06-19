@@ -166,6 +166,12 @@ export interface TechUnlockedEvent {
   nodeId: string;
 }
 
+/** Emitted when a research track starts or resumes on a planet. */
+export interface ResearchTrackStartedEvent {
+  trackId: string;
+  planetId: string;
+}
+
 /** Emitted when a terraforming choice is applied on a planet. */
 export interface TerraformChoiceEvent {
   planetId: string;

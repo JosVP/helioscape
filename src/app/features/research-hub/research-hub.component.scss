@@ -159,10 +159,10 @@
 
 .research-hub__grid {
   flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
+  min-height: 0;
+  overflow: hidden;
   display: grid;
-  grid-template-columns: 1fr 1.6fr 1fr;
+  grid-template-columns: minmax(190px, 0.85fr) minmax(360px, 1.7fr) minmax(280px, 0.95fr);
   gap: 0;
   padding: var(--space-lg);
   position: relative; // stacking context for SVG overlay
@@ -192,17 +192,17 @@
   }
 }
 
-// Bottom-fade mask to indicate more content below
-.research-hub__grid::after {
-  content: '';
-  position: sticky;
-  bottom: 0;
-  grid-column: 1 / -1;
-  height: 40px;
-  background: linear-gradient(to top, var(--color-bg-surface), transparent);
-  pointer-events: none;
-  z-index: 5;
-  margin-top: -40px; // collapse vertical space
+.research-hub__side-rail {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+  gap: var(--space-lg);
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: var(--space-xs);
+  position: relative;
+  z-index: 2;
 }
 
 // SVG overlay — pointer-events:none so cards remain clickable
@@ -224,6 +224,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
+  min-height: 0;
   position: relative;
   z-index: 2; // above SVG lines
   padding: var(--space-sm) var(--space-sm) var(--space-xl);
@@ -233,11 +234,18 @@
   &--earth { background: radial-gradient(ellipse 80% 40% at 50% 0%, color-mix(in srgb, var(--color-earth) 5%, transparent), transparent); }
   &--venus { background: radial-gradient(ellipse 80% 40% at 50% 0%, color-mix(in srgb, var(--color-venus) 5%, transparent), transparent); }
 
-  // Vertical separator line between columns
-  & + & {
+  &--earth {
+    overflow-y: auto;
+    overflow-x: hidden;
     border-left: 1px solid var(--color-bg-elevated);
     padding-left: var(--space-md);
   }
+}
+
+app-tech-node-inspector {
+  z-index: 2;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .research-hub__column-header {
@@ -338,4 +346,41 @@
   gap: var(--space-xl);
   align-content: flex-start;
   justify-content: center;
+}
+
+@media (max-width: 1100px) {
+  .research-hub__grid {
+    grid-template-columns: 1fr;
+    row-gap: var(--space-lg);
+  }
+
+  .research-hub__side-rail {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .research-hub__column--earth {
+    border-left: none;
+    padding-left: var(--space-sm);
+  }
+
+  app-tech-node-inspector {
+    position: static;
+    min-height: auto;
+  }
+}
+
+@media (max-width: 720px) {
+  .research-hub__header {
+    grid-template-columns: 1fr;
+    grid-template-areas: 'text';
+  }
+
+  .research-hub__vignette {
+    display: none;
+  }
+
+  .research-hub__side-rail {
+    grid-template-columns: 1fr;
+  }
 }

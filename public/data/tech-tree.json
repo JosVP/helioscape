@@ -3,6 +3,12 @@
     "id": "earth_launch_mercury_mission",
     "planet": "earth",
     "displayName": "Launch Mercury Mission",
+    "description": "We commit to Mercury: not as conquest, but as the first industrial foothold close enough to the Sun to change what civilisation can build.",
+    "outcomeSummary": [
+      "Opens the Mercury mission chain.",
+      "Unlocks early Moon research tracks.",
+      "Begins the path toward solar-scale industry."
+    ],
     "prerequisites": [],
     "spilloverPrerequisites": [],
     "rpCost": 0,
@@ -13,6 +19,12 @@
     "id": "earth_advanced_renewables",
     "planet": "earth",
     "displayName": "Advanced Renewables Integration",
+    "description": "We stitch solar, wind, storage, and grid forecasting into a calmer planetary metabolism, making clean power ordinary enough to build from.",
+    "outcomeSummary": [
+      "Enables Deuterium Extraction From Seawater.",
+      "Enables Automated Food Systems and Earth branch choices.",
+      "Provides a stable early research foundation."
+    ],
     "prerequisites": ["earth_launch_mercury_mission"],
     "spilloverPrerequisites": [],
     "rpCost": 30,
@@ -23,6 +35,12 @@
     "id": "earth_dome_habitat",
     "planet": "earth",
     "displayName": "Dome Habitat Technology",
+    "description": "We learn how to make sealed worlds feel less like capsules and more like places where ordinary life can take root.",
+    "outcomeSummary": [
+      "Supports future Mars dome and aerogel habitat options.",
+      "Improves early off-world living before open atmospheres are ready.",
+      "Creates a practical bridge between Earth cities and colony habitats."
+    ],
     "prerequisites": ["earth_launch_mercury_mission"],
     "spilloverPrerequisites": [],
     "rpCost": 30,
@@ -33,6 +51,12 @@
     "id": "earth_deuterium_extraction",
     "planet": "earth",
     "displayName": "Deuterium Extraction From Seawater",
+    "description": "We turn the oceans into a patient fuel source, separating rare hydrogen from abundance without treating abundance as permission to waste.",
+    "outcomeSummary": [
+      "Enables Fusion Ignition Theory.",
+      "Connects Earth's clean power base to future Type 1 energy systems.",
+      "Prepares civilisation for deuterium-scale industry."
+    ],
     "prerequisites": ["earth_advanced_renewables"],
     "spilloverPrerequisites": [],
     "rpCost": 40,
@@ -43,6 +67,12 @@
     "id": "earth_ocean_cleanup",
     "planet": "earth",
     "displayName": "Ocean Macro-Plastic Cleanup",
+    "description": "We stop treating the ocean as a place where mistakes disappear. Fleets, microbes, and law begin pulling a century of fragments home.",
+    "outcomeSummary": [
+      "Becomes available after Mercury Phase 1 spillover.",
+      "Strengthens Earth's Naturalist recovery arc.",
+      "Improves the baseline for later ocean restoration work."
+    ],
     "prerequisites": [],
     "spilloverPrerequisites": ["mercury_phase_1_complete"],
     "rpCost": 30,
@@ -53,6 +83,12 @@
     "id": "earth_fusion_ignition_theory",
     "planet": "earth",
     "displayName": "Fusion Ignition Theory",
+    "description": "We push controlled fusion from a promise into an engineering language, one careful confinement model at a time.",
+    "outcomeSummary": [
+      "Triggers a landmark culture event when completed.",
+      "Marks the theoretical step toward Type 1 civilisation.",
+      "Enables late Architect research paths that depend on fusion."
+    ],
     "prerequisites": ["earth_deuterium_extraction"],
     "spilloverPrerequisites": [],
     "rpCost": 50,
@@ -63,6 +99,12 @@
     "id": "earth_co2_drawdown",
     "planet": "earth",
     "displayName": "Atmospheric CO2 Drawdown",
+    "description": "Venus teaches us carbonate patience at planetary scale. We bring that lesson home and begin lowering the fever without pretending it was simple.",
+    "outcomeSummary": [
+      "Unlocked by Venus carbonate process spillover.",
+      "Enables Ocean Acidification Reversal.",
+      "Advances Earth's long Naturalist recovery path."
+    ],
     "prerequisites": [],
     "spilloverPrerequisites": ["venus_carbonate_process_started"],
     "rpCost": 40,
@@ -73,6 +115,12 @@
     "id": "earth_soil_restoration",
     "planet": "earth",
     "displayName": "Soil Restoration Network",
+    "description": "Mars makes us humble about dirt. We relearn soil as a living fabric and coordinate repair from farms to abandoned industrial ground.",
+    "outcomeSummary": [
+      "Unlocked by Mars soil-study spillover.",
+      "Enables Rewilding At Scale with Mars coastal stability.",
+      "Improves Earth's ecological recovery arc."
+    ],
     "prerequisites": [],
     "spilloverPrerequisites": ["mars_soil_study_complete"],
     "rpCost": 40,
@@ -83,6 +131,12 @@
     "id": "earth_ocean_acidification_reversal",
     "planet": "earth",
     "displayName": "Ocean Acidification Reversal",
+    "description": "We give the reefs, shell-builders, and plankton time to breathe again, correcting chemistry at a pace the living ocean can survive.",
+    "outcomeSummary": [
+      "Requires CO2 Drawdown and Venus carbonate spillover.",
+      "Deepens Earth's ocean restoration branch.",
+      "Supports the broader Naturalist recovery endpoint."
+    ],
     "prerequisites": ["earth_co2_drawdown"],
     "spilloverPrerequisites": ["venus_carbonate_process_started"],
     "rpCost": 50,
@@ -93,6 +147,12 @@
     "id": "earth_rewilding",
     "planet": "earth",
     "displayName": "Rewilding At Scale",
+    "description": "We return room to rivers, forests, pollinators, and migration. The work is not nostalgia; it is infrastructure made of living systems.",
+    "outcomeSummary": [
+      "Adds a Naturalist branch decision tag.",
+      "Requires Earth soil restoration and Mars coastal stability.",
+      "Represents a major Earth recovery milestone."
+    ],
     "prerequisites": ["earth_soil_restoration"],
     "spilloverPrerequisites": ["mars_coastal_stable"],
     "rpCost": 50,
@@ -103,6 +163,12 @@
     "id": "earth_automated_food_systems",
     "planet": "earth",
     "displayName": "Automated Food Systems",
+    "description": "We make food production precise enough to free land and labour, then face the harder question of what that freedom is for.",
+    "outcomeSummary": [
+      "Presents a fork between Naturalist rewilding and Architect development.",
+      "Can trigger a culture event through the chosen fork outcome.",
+      "The Architect choice adds RP capacity."
+    ],
     "prerequisites": ["earth_advanced_renewables"],
     "prerequisiteMode": "any",
     "spilloverPrerequisites": [],
@@ -140,6 +206,12 @@
     "id": "earth_vertical_megacity",
     "planet": "earth",
     "displayName": "Vertical Megacity Initiative",
+    "description": "We build upward with discipline, concentrating people, services, and transit so a city can grow without endlessly widening its wound.",
+    "outcomeSummary": [
+      "Adds an Architect branch decision tag.",
+      "Increases RP capacity by 15.",
+      "Triggers the first 50-million megacity culture event."
+    ],
     "prerequisites": ["earth_advanced_renewables"],
     "spilloverPrerequisites": [],
     "rpCost": 35,
@@ -154,6 +226,12 @@
     "id": "earth_arcology_framework",
     "planet": "earth",
     "displayName": "Arcology Framework",
+    "description": "We design cities as complete habitats: dense, efficient, and humane enough that scale no longer has to mean sprawl.",
+    "outcomeSummary": [
+      "Adds an Architect branch decision tag.",
+      "Applies the dense-living colonist bonus.",
+      "Enables deeper Architect city and resource-grid research."
+    ],
     "prerequisites": ["earth_vertical_megacity"],
     "spilloverPrerequisites": [],
     "rpCost": 45,
@@ -167,6 +245,12 @@
     "id": "earth_subsurface_city",
     "planet": "earth",
     "displayName": "Subsurface City Expansion",
+    "description": "We learn to live below the noise of weather and traffic, turning depth into shelter rather than exile.",
+    "outcomeSummary": [
+      "Adds an Architect branch decision tag.",
+      "Triggers an underground-communities culture event.",
+      "Transfers design confidence to protected off-world habitats."
+    ],
     "prerequisites": ["earth_arcology_framework"],
     "spilloverPrerequisites": [],
     "rpCost": 50,
@@ -180,6 +264,12 @@
     "id": "earth_planetary_resource_grid",
     "planet": "earth",
     "displayName": "Planetary Resource Grid",
+    "description": "We connect supply, need, weather, harvest, transit, and waste into one visible system, then use that visibility to prevent suffering early.",
+    "outcomeSummary": [
+      "Adds an Architect branch decision tag.",
+      "Increases RP capacity by 10.",
+      "Triggers a culture event about famine prevented before it starts."
+    ],
     "prerequisites": ["earth_arcology_framework"],
     "spilloverPrerequisites": [],
     "rpCost": 55,
@@ -194,6 +284,12 @@
     "id": "earth_geoengineering_bureau",
     "planet": "earth",
     "displayName": "Geoengineering Coordination Bureau",
+    "description": "We coordinate climate intervention with public memory and restraint, learning to manage an atmosphere without forgetting it is shared.",
+    "outcomeSummary": [
+      "Adds an Architect branch decision tag.",
+      "Improves the narrative bridge between Earth management and terraforming.",
+      "Enables more confident late planetary coordination."
+    ],
     "prerequisites": ["earth_planetary_resource_grid"],
     "spilloverPrerequisites": [],
     "rpCost": 55,
@@ -206,6 +302,12 @@
     "id": "earth_neural_digital_integration",
     "planet": "earth",
     "displayName": "Neural-Digital Integration Research",
+    "description": "We study the boundary between mind and system carefully, because a civilisation that thinks faster still has to decide wisely.",
+    "outcomeSummary": [
+      "Adds an Architect branch decision tag.",
+      "Increases RP capacity by 20.",
+      "Triggers a major culture event about human-system integration."
+    ],
     "prerequisites": ["earth_planetary_resource_grid", "earth_fusion_ignition_theory"],
     "spilloverPrerequisites": [],
     "rpCost": 70,
@@ -220,6 +322,12 @@
     "id": "earth_planetary_coordination_network",
     "planet": "earth",
     "displayName": "Planetary Coordination Network",
+    "description": "We let the planet's logistics run with a steadier intelligence, then ask what humans choose when survival is no longer the daily assignment.",
+    "outcomeSummary": [
+      "Adds an Architect branch decision tag.",
+      "Increases RP capacity by 30.",
+      "Triggers a culture event about life after planetary automation."
+    ],
     "prerequisites": ["earth_neural_digital_integration"],
     "spilloverPrerequisites": [],
     "rpCost": 80,
@@ -234,6 +342,12 @@
     "id": "moon_low_gravity_medicine",
     "planet": "moon",
     "displayName": "Low-Gravity Medicine",
+    "description": "We study bodies that grow, heal, and age under one-sixth gravity, learning what care means when even weight is different.",
+    "outcomeSummary": [
+      "Opens later Radiation Resilience research.",
+      "Improves the medical basis for off-world settlement.",
+      "Supports healthier future Mars colonists."
+    ],
     "prerequisites": [],
     "spilloverPrerequisites": ["earth_launch_mercury_mission"],
     "rpCost": 25,
@@ -244,6 +358,12 @@
     "id": "moon_closed_loop_life_support",
     "planet": "moon",
     "displayName": "Closed-Loop Life Support",
+    "description": "We make small habitats patient and forgiving, cycling air, water, food, and waste until survival becomes routine rather than heroic.",
+    "outcomeSummary": [
+      "Opens Isolation Psychology research.",
+      "Improves sealed habitat reliability.",
+      "Supports future dome and sky-city living."
+    ],
     "prerequisites": [],
     "spilloverPrerequisites": ["earth_launch_mercury_mission"],
     "rpCost": 30,
@@ -254,6 +374,12 @@
     "id": "moon_regolith_construction",
     "planet": "moon",
     "displayName": "Regolith Construction",
+    "description": "We turn dust into shelter, learning to print, sinter, shield, and repair with the ground already under our feet.",
+    "outcomeSummary": [
+      "Opens Early He-3 Extraction research.",
+      "Improves local construction knowledge for off-world bases.",
+      "Reduces dependence on Earth-shipped materials in future planning."
+    ],
     "prerequisites": [],
     "spilloverPrerequisites": ["earth_launch_mercury_mission"],
     "rpCost": 20,
@@ -264,6 +390,12 @@
     "id": "moon_organism_library_t1",
     "planet": "moon",
     "displayName": "Organism Library Tier 1",
+    "description": "We catalogue hardy pioneer life in controlled lunar systems, building a living library for worlds that are not ready yet.",
+    "outcomeSummary": [
+      "Provides early biological candidates for terraforming.",
+      "Supports Mars Biological Seeding prerequisites.",
+      "Opens Tier 2 once Mars confirms open water."
+    ],
     "prerequisites": [],
     "spilloverPrerequisites": ["earth_launch_mercury_mission"],
     "rpCost": 35,
@@ -274,6 +406,12 @@
     "id": "moon_radiation_resilience",
     "planet": "moon",
     "displayName": "Radiation Resilience",
+    "description": "We learn how cells, materials, and communities endure the invisible weather beyond Earth's magnetic shelter.",
+    "outcomeSummary": [
+      "Builds on Low-Gravity Medicine.",
+      "Improves long-duration crew safety in exposed habitats.",
+      "Transfers protective knowledge to Mars and Mercury planning."
+    ],
     "prerequisites": ["moon_low_gravity_medicine"],
     "spilloverPrerequisites": [],
     "rpCost": 30,
@@ -284,6 +422,12 @@
     "id": "moon_isolation_psychology",
     "planet": "moon",
     "displayName": "Isolation Psychology",
+    "description": "We study the rituals, spaces, and habits that keep small crews kind when every disagreement has nowhere to go.",
+    "outcomeSummary": [
+      "Builds on Closed-Loop Life Support.",
+      "Improves social resilience for future colonies.",
+      "Supports long missions where evacuation is not simple."
+    ],
     "prerequisites": ["moon_closed_loop_life_support"],
     "spilloverPrerequisites": [],
     "rpCost": 25,
@@ -294,6 +438,12 @@
     "id": "moon_he3_extraction",
     "planet": "moon",
     "displayName": "Early He-3 Extraction",
+    "description": "We test the slow chemistry of pulling rare isotopes from ordinary dust, bridging lunar industry to the fusion era ahead.",
+    "outcomeSummary": [
+      "Builds on Regolith Construction.",
+      "Adds a lunar bridge toward fusion-era resource handling.",
+      "Strengthens the Moon's role as research outpost and proving ground."
+    ],
     "prerequisites": ["moon_regolith_construction"],
     "spilloverPrerequisites": [],
     "rpCost": 40,
@@ -304,6 +454,12 @@
     "id": "moon_organism_library_t2",
     "planet": "moon",
     "displayName": "Organism Library Tier 2",
+    "description": "With Martian water no longer theoretical, we broaden the library from survival specialists into early ecosystems.",
+    "outcomeSummary": [
+      "Requires Tier 1 and Mars ocean spillover.",
+      "Improves biological options for later Mars and Venus seeding.",
+      "Turns Moon research into a living terraforming catalogue."
+    ],
     "prerequisites": ["moon_organism_library_t1"],
     "spilloverPrerequisites": ["mars_ocean_confirmed"],
     "rpCost": 50,
@@ -314,6 +470,12 @@
     "id": "mercury_landing_pad",
     "planet": "mercury",
     "displayName": "Landing Pad",
+    "description": "We mark the first safe place to arrive on Mercury, where sunlight is harsh enough to build a future and careless enough to kill one.",
+    "outcomeSummary": [
+      "One of three requirements for Mercury Phase 0.",
+      "Establishes crew and cargo arrival infrastructure.",
+      "Begins the Mercury industrial base."
+    ],
     "prerequisites": [],
     "spilloverPrerequisites": ["earth_launch_mercury_mission"],
     "rpCost": 20,
@@ -324,6 +486,12 @@
     "id": "mercury_power_cell",
     "planet": "mercury",
     "displayName": "Power Cell",
+    "description": "We give the first Mercury outpost a dependable heartbeat, compact enough to survive the crater rim and strong enough to start work.",
+    "outcomeSummary": [
+      "One of three requirements for Mercury Phase 0.",
+      "Provides early base power.",
+      "Prepares the outpost for sustained resource operations."
+    ],
     "prerequisites": [],
     "spilloverPrerequisites": ["earth_launch_mercury_mission"],
     "rpCost": 20,
@@ -334,6 +502,12 @@
     "id": "mercury_mining_facility",
     "planet": "mercury",
     "displayName": "Mining Facility",
+    "description": "We begin with a small bite into Mercury's crust, careful enough to survive and steady enough to feed everything that follows.",
+    "outcomeSummary": [
+      "One of three requirements for Mercury Phase 0.",
+      "Starts local ore access.",
+      "Enables the industrial chain that will later build Dyson panels."
+    ],
     "prerequisites": [],
     "spilloverPrerequisites": ["earth_launch_mercury_mission"],
     "rpCost": 20,
@@ -344,6 +518,12 @@
     "id": "mercury_phase_0_complete",
     "planet": "mercury",
     "displayName": "Mercury Phase 0 Complete",
+    "description": "The first Mercury base becomes more than a landing site. It can power itself, receive cargo, and pull material from the ground.",
+    "outcomeSummary": [
+      "Applies Mercury phase 0 state.",
+      "Unlocks Phase 1 Mercury infrastructure.",
+      "Confirms the first industrial foothold near the Sun."
+    ],
     "prerequisites": ["mercury_landing_pad", "mercury_power_cell", "mercury_mining_facility"],
     "spilloverPrerequisites": [],
     "rpCost": 0,
@@ -361,6 +541,12 @@
     "id": "mercury_refinery",
     "planet": "mercury",
     "displayName": "Refinery",
+    "description": "We stop shipping raw promise and start turning ore into usable streams, separating the useful from the merely heavy.",
+    "outcomeSummary": [
+      "One requirement for Mercury Phase 1.",
+      "Improves Mercury's local material chain.",
+      "Prepares resources for fabrication and expansion."
+    ],
     "prerequisites": ["mercury_phase_0_complete"],
     "spilloverPrerequisites": [],
     "rpCost": 30,
@@ -371,6 +557,12 @@
     "id": "mercury_fabricator",
     "planet": "mercury",
     "displayName": "Fabricator",
+    "description": "We teach the base to make parts for itself, shifting Mercury from an outpost supplied by Earth to an outpost that can answer back.",
+    "outcomeSummary": [
+      "One requirement for Mercury Phase 1.",
+      "Enables local construction capacity.",
+      "Supports later Dyson and component production chains."
+    ],
     "prerequisites": ["mercury_phase_0_complete"],
     "spilloverPrerequisites": [],
     "rpCost": 30,
@@ -381,6 +573,12 @@
     "id": "mercury_solar_array_expansion",
     "planet": "mercury",
     "displayName": "Solar Array Expansion",
+    "description": "We unfold collectors under a sun that never feels distant, converting Mercury's danger into the base's first abundance.",
+    "outcomeSummary": [
+      "One requirement for Mercury Phase 1.",
+      "Expands base power infrastructure.",
+      "Foreshadows the Dyson swarm production role."
+    ],
     "prerequisites": ["mercury_phase_0_complete"],
     "spilloverPrerequisites": [],
     "rpCost": 30,
@@ -391,6 +589,12 @@
     "id": "mercury_rare_metals_mining",
     "planet": "mercury",
     "displayName": "Rare Metals Mining",
+    "description": "We move beyond common ore and begin finding the stubborn elements that make advanced machines precise, durable, and worth the trouble.",
+    "outcomeSummary": [
+      "One requirement for Mercury Phase 1.",
+      "Opens access to advanced industrial materials.",
+      "Supports future component and panel upgrades."
+    ],
     "prerequisites": ["mercury_phase_0_complete"],
     "spilloverPrerequisites": [],
     "rpCost": 40,
@@ -401,6 +605,12 @@
     "id": "mercury_phase_1_complete",
     "planet": "mercury",
     "displayName": "Mercury Phase 1 Complete",
+    "description": "Mercury can now refine, fabricate, power, and mine beyond survival. The base becomes an industrial organism.",
+    "outcomeSummary": [
+      "Applies Mercury phase 1 state.",
+      "Unlocks Ocean Macro-Plastic Cleanup spillover on Earth.",
+      "Opens Phase 2 Mercury infrastructure."
+    ],
     "prerequisites": [
       "mercury_refinery",
       "mercury_fabricator",
@@ -423,6 +633,12 @@
     "id": "mercury_mass_driver",
     "planet": "mercury",
     "displayName": "Mass Driver",
+    "description": "We build a machine that throws finished work into orbit, turning Mercury's surface into the launch rail for a solar civilisation.",
+    "outcomeSummary": [
+      "One requirement for Mercury Phase 2.",
+      "Prepares orbital delivery for Dyson panels and planet components.",
+      "Enables the mass-driver backbone of Mercury industry."
+    ],
     "prerequisites": ["mercury_phase_1_complete"],
     "spilloverPrerequisites": [],
     "rpCost": 50,
@@ -433,6 +649,12 @@
     "id": "mercury_dyson_panel_production",
     "planet": "mercury",
     "displayName": "Dyson Panel Production",
+    "description": "We begin manufacturing the mirrored fields that will make sunlight a shared infrastructure rather than a weather condition.",
+    "outcomeSummary": [
+      "One requirement for Mercury Phase 2.",
+      "Starts the production base for Dyson swarm panels.",
+      "Connects Mercury industry to Kardashev progression."
+    ],
     "prerequisites": ["mercury_phase_1_complete"],
     "spilloverPrerequisites": [],
     "rpCost": 60,
@@ -443,6 +665,12 @@
     "id": "mercury_polar_volatiles_extraction",
     "planet": "mercury",
     "displayName": "Polar Volatiles Extraction",
+    "description": "We learn to work in the cold traps where Mercury hides water and carbon, treating each pocket as precious because it is.",
+    "outcomeSummary": [
+      "One requirement for Mercury Phase 2.",
+      "Opens local access to water and carbon compounds.",
+      "Supports life-support and advanced component chains."
+    ],
     "prerequisites": ["mercury_phase_1_complete"],
     "spilloverPrerequisites": [],
     "rpCost": 40,
@@ -453,6 +681,12 @@
     "id": "mercury_phase_2_complete",
     "planet": "mercury",
     "displayName": "Mercury Phase 2 Complete",
+    "description": "Mercury becomes the engine room of the inner system: launching, manufacturing, and supplying work too large for Earth alone.",
+    "outcomeSummary": [
+      "Applies Mercury phase 2 state.",
+      "Unlocks Mars and Venus terraforming options.",
+      "Completes the early Mercury industrial foundation."
+    ],
     "prerequisites": [
       "mercury_mass_driver",
       "mercury_dyson_panel_production",
@@ -474,6 +708,12 @@
     "id": "mars_polar_detonation",
     "planet": "mars",
     "displayName": "Polar Detonation",
+    "description": "We choose the bluntest warming path: fast, irreversible, and impossible to pretend is only engineering.",
+    "outcomeSummary": [
+      "Applies the Mars polar detonation terraforming choice.",
+      "Adds an Architect branch decision tag.",
+      "Triggers the Mars polar detonation culture event."
+    ],
     "prerequisites": [],
     "spilloverPrerequisites": ["mercury_phase_2_complete"],
     "rpCost": 60,
@@ -493,6 +733,12 @@
     "id": "mars_orbital_mirrors",
     "planet": "mars",
     "displayName": "Orbital Mirrors",
+    "description": "We place patient light above Mars, warming the planet by aim and persistence rather than shock.",
+    "outcomeSummary": [
+      "Applies the Mars orbital mirrors terraforming choice.",
+      "Adds an Architect branch decision tag.",
+      "Provides a reusable warming infrastructure path."
+    ],
     "prerequisites": [],
     "spilloverPrerequisites": ["mercury_phase_2_complete"],
     "rpCost": 50,
@@ -511,6 +757,12 @@
     "id": "mars_magnetic_umbrella",
     "planet": "mars",
     "displayName": "Magnetic Umbrella",
+    "description": "We shelter Mars from the solar wind, not by remaking its core, but by holding a protective field where the planet needs it most.",
+    "outcomeSummary": [
+      "Applies the Mars magnetic umbrella terraforming choice.",
+      "Adds a Naturalist branch decision tag.",
+      "Enables Comet Water Delivery."
+    ],
     "prerequisites": [],
     "spilloverPrerequisites": ["mercury_phase_2_complete"],
     "rpCost": 50,
@@ -529,6 +781,12 @@
     "id": "mars_aerogel_domes",
     "planet": "mars",
     "displayName": "Aerogel Domes",
+    "description": "We make small warm places under thin light, letting Mars host pockets of pressure and life before the whole sky is ready.",
+    "outcomeSummary": [
+      "Requires Mercury Phase 2 and Earth Dome Habitat Technology.",
+      "Applies the Mars aerogel domes terraforming choice.",
+      "Creates a gentler bridge toward open Martian habitats."
+    ],
     "prerequisites": [],
     "spilloverPrerequisites": ["mercury_phase_2_complete", "earth_dome_habitat"],
     "rpCost": 30,
@@ -546,6 +804,12 @@
     "id": "mars_comet_water_delivery",
     "planet": "mars",
     "displayName": "Comet Water Delivery",
+    "description": "We redirect distant ice toward a dry world, turning celestial bookkeeping into rain that will not arrive for decades.",
+    "outcomeSummary": [
+      "Applies the Mars comet water delivery choice.",
+      "Requires Magnetic Umbrella protection.",
+      "Enables Mars Ocean Confirmed."
+    ],
     "prerequisites": ["mars_magnetic_umbrella"],
     "spilloverPrerequisites": ["mercury_phase_2_complete"],
     "rpCost": 60,
@@ -563,6 +827,12 @@
     "id": "mars_ocean_confirmed",
     "planet": "mars",
     "displayName": "Mars Ocean Confirmed",
+    "description": "For the first time, Martian water is no longer a mineral memory or sealed tank. It gathers under open sky.",
+    "outcomeSummary": [
+      "Triggers the first liquid water culture event.",
+      "Spillover unlocks Moon Organism Library Tier 2.",
+      "Enables Biological Seeding."
+    ],
     "prerequisites": ["mars_comet_water_delivery"],
     "spilloverPrerequisites": [],
     "rpCost": 0,
@@ -580,6 +850,12 @@
     "id": "mars_biological_seeding",
     "planet": "mars",
     "displayName": "Biological Seeding",
+    "description": "We introduce life as a promise with safeguards, choosing organisms humble enough to begin and resilient enough to matter.",
+    "outcomeSummary": [
+      "Applies the Mars biological seeding choice.",
+      "Adds a Naturalist branch decision tag.",
+      "Enables Mars Soil Study Complete."
+    ],
     "prerequisites": ["mars_ocean_confirmed"],
     "spilloverPrerequisites": ["moon_organism_library_t1"],
     "rpCost": 50,
@@ -598,6 +874,12 @@
     "id": "mars_soil_study_complete",
     "planet": "mars",
     "displayName": "Mars Soil Study Complete",
+    "description": "The first Martian soils become readable: chemistry, microbes, failure, promise, and the slow grammar of a living ground.",
+    "outcomeSummary": [
+      "Spillover unlocks Earth's Soil Restoration Network.",
+      "Enables Mars Coastal Ecosystems Stable.",
+      "Turns Mars ecology into useful Earth restoration knowledge."
+    ],
     "prerequisites": ["mars_biological_seeding"],
     "spilloverPrerequisites": [],
     "rpCost": 0,
@@ -614,6 +896,12 @@
     "id": "mars_coastal_stable",
     "planet": "mars",
     "displayName": "Mars Coastal Ecosystems Stable",
+    "description": "The coasts hold through seasons. Not paradise, not yet, but stable enough that life can start making its own weather of habit.",
+    "outcomeSummary": [
+      "Spillover unlocks Earth's Rewilding At Scale.",
+      "Marks a major Mars biosphere stability step.",
+      "Closes the early Mars ecological research chain."
+    ],
     "prerequisites": ["mars_soil_study_complete"],
     "spilloverPrerequisites": [],
     "rpCost": 0,
@@ -626,6 +914,12 @@
     "id": "venus_orbital_shade_mirror",
     "planet": "venus",
     "displayName": "Orbital Shade Mirror",
+    "description": "We begin by giving Venus shade, placing a deliberate dusk between the planet and the furnace that made it unlivable.",
+    "outcomeSummary": [
+      "Applies the Venus orbital shade mirror choice.",
+      "Adds an Architect branch decision tag.",
+      "Triggers the Venus cooling culture event."
+    ],
     "prerequisites": [],
     "spilloverPrerequisites": ["mercury_phase_2_complete"],
     "rpCost": 60,
@@ -645,6 +939,12 @@
     "id": "venus_carbonate_sequestration",
     "planet": "venus",
     "displayName": "Carbonate Sequestration",
+    "description": "We turn atmosphere into stone carefully, lowering pressure through chemistry rather than pretending Venus can be hurried safely.",
+    "outcomeSummary": [
+      "Applies the Venus carbonate sequestration choice.",
+      "Adds a Naturalist branch decision tag.",
+      "Enables Venus Carbonate Process Started."
+    ],
     "prerequisites": ["venus_orbital_shade_mirror"],
     "spilloverPrerequisites": [],
     "rpCost": 50,
@@ -663,6 +963,12 @@
     "id": "venus_carbonate_process_started",
     "planet": "venus",
     "displayName": "Venus Carbonate Process Started",
+    "description": "Venus begins teaching Earth in return. The same chemistry that quiets one atmosphere can help repair another.",
+    "outcomeSummary": [
+      "Spillover unlocks Earth's Atmospheric CO2 Drawdown.",
+      "Spillover unlocks Earth's Ocean Acidification Reversal.",
+      "Marks the beginning of Venus-to-Earth climate knowledge transfer."
+    ],
     "prerequisites": ["venus_carbonate_sequestration"],
     "spilloverPrerequisites": [],
     "rpCost": 0,
@@ -680,6 +986,12 @@
     "id": "venus_europa_impact",
     "planet": "venus",
     "displayName": "Europa Impact",
+    "description": "We commit to a terrible precision: using a moon's ice and momentum to remake Venus, knowing the decision will echo for centuries.",
+    "outcomeSummary": [
+      "Applies the Venus Europa impact choice permanently.",
+      "Adds an Architect branch decision tag.",
+      "Represents the high-commitment ocean-and-spin Venus path."
+    ],
     "prerequisites": ["venus_orbital_shade_mirror"],
     "spilloverPrerequisites": [],
     "rpCost": 80,
@@ -698,6 +1010,12 @@
     "id": "venus_sky_cities",
     "planet": "venus",
     "displayName": "Sky Cities",
+    "description": "Before the surface can welcome us, the clouds can hold us. We design cities that float where pressure and temperature briefly become kind.",
+    "outcomeSummary": [
+      "Applies the Venus sky cities choice.",
+      "Adds a Naturalist branch decision tag.",
+      "Enables Sky City Descent."
+    ],
     "prerequisites": ["venus_orbital_shade_mirror"],
     "spilloverPrerequisites": [],
     "rpCost": 40,
@@ -716,6 +1034,12 @@
     "id": "venus_sky_city_descent",
     "planet": "venus",
     "displayName": "Sky City Descent",
+    "description": "As Venus changes beneath them, the cities must descend, adapt, or surrender buoyancy to a world becoming less hostile.",
+    "outcomeSummary": [
+      "Applies the Venus sky city descent choice.",
+      "Adds an Architect branch decision tag.",
+      "Moves the sky-city path toward long-term surface transition."
+    ],
     "prerequisites": ["venus_sky_cities"],
     "spilloverPrerequisites": [],
     "rpCost": 50,

@@ -13,6 +13,8 @@ const FORK_TECH_NODE: TechNode = {
   id: 'earth_automated_food_systems',
   planet: 'earth',
   displayName: 'Automated Food Systems',
+  description: 'We automate food systems and choose what freed land becomes.',
+  outcomeSummary: ['Presents a Naturalist or Architect fork.'],
   prerequisites: ['earth_advanced_renewables'],
   prerequisiteMode: 'any',
   spilloverPrerequisites: [],

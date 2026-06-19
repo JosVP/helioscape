@@ -9,6 +9,8 @@ const MOCK_NODE: TechNode = {
   id: 'earth_advanced_renewables',
   planet: 'earth',
   displayName: 'Advanced Renewables Integration',
+  description: 'We integrate advanced renewables.',
+  outcomeSummary: ['Enables later Earth research.'],
   prerequisites: ['earth_launch_mercury_mission'],
   spilloverPrerequisites: [],
   rpCost: 30,
@@ -94,7 +96,7 @@ describe('TechNodeCardComponent', () => {
   it('emits nodeClicked when interactive available node is clicked', () => {
     createComponent('available', true);
     let emitted: string | undefined;
-    component.nodeClicked.subscribe((id: string) => (emitted = id));
+    component.nodeSelected.subscribe((id: string) => (emitted = id));
     fixture.nativeElement.querySelector('.tech-node').click();
     expect(emitted).toBe('earth_advanced_renewables');
   });
@@ -102,17 +104,48 @@ describe('TechNodeCardComponent', () => {
   it('does not emit nodeClicked when interactive is false', () => {
     createComponent('available', false);
     let emitted: string | undefined;
-    component.nodeClicked.subscribe((id: string) => (emitted = id));
+    component.nodeSelected.subscribe((id: string) => (emitted = id));
     fixture.nativeElement.querySelector('.tech-node').click();
     expect(emitted).toBeUndefined();
   });
 
-  it('does not emit nodeClicked when visibility is completed', () => {
+  it('emits nodeSelected when visibility is completed', () => {
     createComponent('completed', true);
     let emitted: string | undefined;
-    component.nodeClicked.subscribe((id: string) => (emitted = id));
+    component.nodeSelected.subscribe((id: string) => (emitted = id));
     fixture.nativeElement.querySelector('.tech-node').click();
-    expect(emitted).toBeUndefined();
+    expect(emitted).toBe('earth_advanced_renewables');
+  });
+
+  it('emits nodeSelected for hint nodes without revealing details', () => {
+    createComponent('hint', true);
+    let emitted: string | undefined;
+    component.nodeSelected.subscribe((id: string) => (emitted = id));
+    fixture.nativeElement.querySelector('.tech-node').click();
+    expect(emitted).toBe('earth_advanced_renewables');
+    expect(fixture.nativeElement.querySelector('.tech-node__meta')).toBeNull();
+  });
+
+  it('emits nodeSelected on keyboard activation', () => {
+    createComponent('available', true);
+    let emitted: string | undefined;
+    component.nodeSelected.subscribe((id: string) => (emitted = id));
+
+    fixture.nativeElement
+      .querySelector('.tech-node')
+      .dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+
+    expect(emitted).toBe('earth_advanced_renewables');
+  });
+
+  it('applies selected state and aria-current', () => {
+    createComponent('available', true);
+    fixture.componentRef.setInput('selected', true);
+    fixture.detectChanges();
+
+    const card = fixture.nativeElement.querySelector('.tech-node');
+    expect(card.classList).toContain('tech-node--selected');
+    expect(card.getAttribute('aria-current')).toBe('true');
   });
 
   it('shows new badge when isNew is true', () => {

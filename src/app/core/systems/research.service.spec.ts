@@ -7,7 +7,7 @@ import { DataService } from '@app/core/services/data.service';
 import { GameStateService } from '@app/core/services/game-state.service';
 import { EventBusService } from '@app/core/services/event-bus.service';
 import { TechTreeService } from './tech-tree.service';
-import type { ResearchTrack, ActiveResearchTrack, TechEffect } from '@app/core/models';
+import type { ResearchTrack, ActiveResearchTrack, ResearchTrackStartedEvent, TechEffect, TechNode } from '@app/core/models';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -34,6 +34,22 @@ function makeActiveTrack(overrides: Partial<ActiveResearchTrack> = {}): ActiveRe
     isPaused: false,
     startYear: 2033,
     elapsedBeforeStart: 0,
+    ...overrides,
+  };
+}
+
+function makeTechNode(overrides: Partial<TechNode> = {}): TechNode {
+  return {
+    id: 'test_node',
+    planet: 'earth',
+    displayName: 'Test Node',
+    description: 'A test tech node.',
+    outcomeSummary: ['A test outcome.'],
+    prerequisites: [],
+    spilloverPrerequisites: [],
+    rpCost: 20,
+    durationYears: 5,
+    effects: [],
     ...overrides,
   };
 }
@@ -97,15 +113,18 @@ function makeGameStateFake(opts: {
   };
 }
 
-function makeDataFake(tracks: ResearchTrack[] = []) {
+function makeDataFake(tracks: ResearchTrack[] = [], techNodes: TechNode[] = []) {
   return {
     getResearchTrack: vi.fn((id: string) => tracks.find((t) => t.id === id) ?? null),
-    getTechNode:      vi.fn((_id: string) => null),
+    getTechNode:      vi.fn((id: string) => techNodes.find((node) => node.id === id) ?? null),
   };
 }
 
 function makeEventBusFake() {
-  return { researchCompleted$: new Subject<string>() };
+  return {
+    researchCompleted$: new Subject<string>(),
+    researchTrackStarted$: new Subject<ResearchTrackStartedEvent>(),
+  };
 }
 
 function makeTechTreeFake() {
@@ -130,9 +149,10 @@ describe('ResearchService', () => {
   function setup(
     tracks: ResearchTrack[] = [],
     gameStateOpts: Parameters<typeof makeGameStateFake>[0] = {},
+    techNodes: TechNode[] = [],
   ) {
     gameState = makeGameStateFake(gameStateOpts);
-    data      = makeDataFake(tracks);
+    data      = makeDataFake(tracks, techNodes);
     eventBus  = makeEventBusFake();
     techTree  = makeTechTreeFake();
 
@@ -336,13 +356,79 @@ describe('ResearchService', () => {
       expect(gameState.startResearch).toHaveBeenCalledWith('test_track', 'mars', 2040);
     });
 
+    it('emits researchTrackStarted$ for a valid new track', () => {
+      const trackDef = makeTrackDef({ rpCost: 20 });
+      setup([trackDef], {
+        completedTechs:  ['prereq_tech'],
+        usedRpCapacity:  0,
+        totalRpCapacity: 60,
+      });
+      const emitted: ResearchTrackStartedEvent[] = [];
+      eventBus.researchTrackStarted$.subscribe((event) => emitted.push(event));
+
+      service.startTrack('test_track', 'mars');
+
+      expect(emitted).toEqual([{ trackId: 'test_track', planetId: 'mars' }]);
+    });
+
+    it('emits researchTrackStarted$ when resuming a paused track', () => {
+      const trackDef = makeTrackDef({ rpCost: 20 });
+      setup([trackDef], {
+        completedTechs:  ['prereq_tech'],
+        activeResearch:  [makeActiveTrack({ isPaused: true, planetId: 'mars' })],
+        usedRpCapacity:  0,
+        totalRpCapacity: 60,
+      });
+      const emitted: ResearchTrackStartedEvent[] = [];
+      eventBus.researchTrackStarted$.subscribe((event) => emitted.push(event));
+
+      service.startTrack('test_track', 'mars');
+
+      expect(emitted).toEqual([{ trackId: 'test_track', planetId: 'mars' }]);
+    });
+
     it('is a no-op when canStartTrack returns false', () => {
       const trackDef = makeTrackDef();
       setup([trackDef], { completedTechs: [] });
+      const emitted: ResearchTrackStartedEvent[] = [];
+      eventBus.researchTrackStarted$.subscribe((event) => emitted.push(event));
 
       service.startTrack('test_track', 'mars');
 
       expect(gameState.startResearch).not.toHaveBeenCalled();
+      expect(emitted).toEqual([]);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // startTechTrack
+  // -------------------------------------------------------------------------
+
+  describe('startTechTrack()', () => {
+    it('emits researchTrackStarted$ for a valid tech node track', () => {
+      const node = makeTechNode({ id: 'test_node', planet: 'earth', rpCost: 20 });
+      setup([], { usedRpCapacity: 0, totalRpCapacity: 60 }, [node]);
+      techTree.canUnlock.mockReturnValue(true);
+      const emitted: ResearchTrackStartedEvent[] = [];
+      eventBus.researchTrackStarted$.subscribe((event) => emitted.push(event));
+
+      service.startTechTrack('test_node', 'earth');
+
+      expect(gameState.startResearch).toHaveBeenCalledWith('test_node', 'earth', 2033);
+      expect(emitted).toEqual([{ trackId: 'test_node', planetId: 'earth' }]);
+    });
+
+    it('does not emit researchTrackStarted$ when the tech node cannot start', () => {
+      const node = makeTechNode({ id: 'test_node', planet: 'earth', rpCost: 20 });
+      setup([], { usedRpCapacity: 50, totalRpCapacity: 60 }, [node]);
+      techTree.canUnlock.mockReturnValue(true);
+      const emitted: ResearchTrackStartedEvent[] = [];
+      eventBus.researchTrackStarted$.subscribe((event) => emitted.push(event));
+
+      service.startTechTrack('test_node', 'earth');
+
+      expect(gameState.startResearch).not.toHaveBeenCalled();
+      expect(emitted).toEqual([]);
     });
   });
 

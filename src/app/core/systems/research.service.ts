@@ -128,6 +128,7 @@ export class ResearchService {
     }
     if (!this.canStartTrack(trackId)) return;
     this.gameState.startResearch(trackId, planetId, this.gameState.gameYear());
+    this.eventBus.researchTrackStarted$.next({ trackId, planetId });
   }
 
   // ---------------------------------------------------------------------------
@@ -160,6 +161,7 @@ export class ResearchService {
     }
     if (!this.canStartTechTrack(nodeId, planetId)) return;
     this.gameState.startResearch(nodeId, planetId, this.gameState.gameYear());
+    this.eventBus.researchTrackStarted$.next({ trackId: nodeId, planetId });
   }
 
   // ---------------------------------------------------------------------------
@@ -181,6 +183,7 @@ export class ResearchService {
     if (!def) return;
     if (this.gameState.usedRpCapacity() + def.rpCost > this.gameState.totalRpCapacity()) return;
     this.gameState.resumeResearch(trackId);
+    this.eventBus.researchTrackStarted$.next({ trackId, planetId: track.planetId });
   }
 }
 

@@ -58,8 +58,8 @@
   // ---------------------------------------------------------------------------
 
   &--completed {
-    border-color: var(--color-accent-dim);
-    background: color-mix(in srgb, var(--color-accent-dim) 10%, var(--color-bg-elevated));
+    border-color: var(--color-success);
+    background: color-mix(in srgb, var(--color-success) 12%, var(--color-bg-elevated));
     opacity: 0.78;
 
     .tech-node__name { color: var(--color-text-primary); }
@@ -73,7 +73,7 @@
       left: 5px;
       font-family: system-ui, sans-serif; // avoid pixel font at this size
       font-size: 9px;
-      color: var(--color-accent-dim);
+      color: var(--color-success);
       pointer-events: none;
     }
   }
@@ -120,6 +120,12 @@
     }
   }
 
+  &--selected {
+    border-color: var(--color-accent-glow);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent) 25%, transparent),
+                inset 0 1px 0 color-mix(in srgb, var(--color-accent-glow) 18%, transparent);
+  }
+
   // ---------------------------------------------------------------------------
   // "New" animated border — spinning conic-gradient as a background-clip border.
   // Uses @property --tech-node-spin-angle so the gradient rotates without a
@@ -147,7 +153,7 @@
 
     // Override --card-bg for each visibility variant so the inner fill stays consistent
     &.tech-node--available { --card-bg: color-mix(in srgb, var(--color-accent) 8%, var(--color-bg-elevated)); }
-    &.tech-node--completed { --card-bg: color-mix(in srgb, var(--color-accent-dim) 10%, var(--color-bg-elevated)); }
+    &.tech-node--completed { --card-bg: color-mix(in srgb, var(--color-success) 12%, var(--color-bg-elevated)); }
     &.tech-node--hint      { --card-bg: var(--color-bg-surface); }
 
     // Remove the old pseudo-element approach (no longer needed)

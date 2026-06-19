@@ -31,48 +31,88 @@
     >✕</button>
   </div>
 
-  <!-- Three-column grid -->
+  <!-- Tech tree + inspector grid -->
   <div class="research-hub__grid" #gridContainer>
 
     <!-- SVG line overlay -->
     <svg class="research-hub__lines" #svgOverlay aria-hidden="true"></svg>
 
-    <!-- Mars column (read-only spillover display) -->
-    <div class="research-hub__column research-hub__column--mars">
-      <div class="research-hub__column-header">
-        <img
-          src="/assets/svg/planets/mars.svg"
-          class="research-hub__planet-icon"
-          alt=""
-          aria-hidden="true"
-          width="32"
-          height="32"
-        />
-        <span class="research-hub__column-name">Mars</span>
-        <span class="research-hub__column-subtitle">Terraforming milestones</span>
+    <div class="research-hub__side-rail" (scroll)="onTreeScroll()">
+      <!-- Mars column (read-only spillover display) -->
+      <div class="research-hub__column research-hub__column--mars">
+        <div class="research-hub__column-header">
+          <img
+            src="/assets/svg/planets/mars.svg"
+            class="research-hub__planet-icon"
+            alt=""
+            aria-hidden="true"
+            width="32"
+            height="32"
+          />
+          <span class="research-hub__column-name">Mars</span>
+          <span class="research-hub__column-subtitle">Terraforming milestones</span>
+        </div>
+
+        <div class="research-hub__nodes">
+          @for (row of marsTierRows(); track $index) {
+            <div class="research-hub__tier-row">
+              @for (entry of row; track entry.node.id) {
+                <app-tech-node-card
+                  [node]="entry.node"
+                  [visibility]="entry.visibility"
+                  [interactive]="true"
+                  [selected]="selectedEntry()?.node?.id === entry.node.id"
+                  [isNew]="newlyUnlockedIds().has(entry.node.id)"
+                  [progressPercent]="entry.progressPercent"
+                  [etaYear]="entry.etaYear"
+                  planetId="mars"
+                  (nodeSelected)="onNodeSelect($event)"
+                />
+              }
+            </div>
+          }
+        </div>
       </div>
 
-      <div class="research-hub__nodes">
-        @for (row of marsTierRows(); track $index) {
-          <div class="research-hub__tier-row">
-            @for (entry of row; track entry.node.id) {
-              <app-tech-node-card
-                [node]="entry.node"
-                [visibility]="entry.visibility"
-                [interactive]="false"
-                [isNew]="newlyUnlockedIds().has(entry.node.id)"
-                [progressPercent]="entry.progressPercent"
-                [etaYear]="entry.etaYear"
-                planetId="mars"
-              />
-            }
-          </div>
-        }
+      <!-- Venus column (read-only spillover display) -->
+      <div class="research-hub__column research-hub__column--venus">
+        <div class="research-hub__column-header">
+          <img
+            src="/assets/svg/planets/venus.svg"
+            class="research-hub__planet-icon"
+            alt=""
+            aria-hidden="true"
+            width="32"
+            height="32"
+          />
+          <span class="research-hub__column-name">Venus</span>
+          <span class="research-hub__column-subtitle">Terraforming milestones</span>
+        </div>
+
+        <div class="research-hub__nodes">
+          @for (row of venusTierRows(); track $index) {
+            <div class="research-hub__tier-row">
+              @for (entry of row; track entry.node.id) {
+                <app-tech-node-card
+                  [node]="entry.node"
+                  [visibility]="entry.visibility"
+                  [interactive]="true"
+                  [selected]="selectedEntry()?.node?.id === entry.node.id"
+                  [isNew]="newlyUnlockedIds().has(entry.node.id)"
+                  [progressPercent]="entry.progressPercent"
+                  [etaYear]="entry.etaYear"
+                  planetId="venus"
+                  (nodeSelected)="onNodeSelect($event)"
+                />
+              }
+            </div>
+          }
+        </div>
       </div>
     </div>
 
     <!-- Earth + Moon column (interactive) -->
-    <div class="research-hub__column research-hub__column--earth">
+    <div class="research-hub__column research-hub__column--earth" (scroll)="onTreeScroll()">
       <div class="research-hub__column-header">
         <img
           src="/assets/svg/planets/earth.svg"
@@ -94,11 +134,12 @@
                 [node]="entry.node"
                 [visibility]="entry.visibility"
                 [interactive]="entry.interactive"
+                [selected]="selectedEntry()?.node?.id === entry.node.id"
                 [isNew]="newlyUnlockedIds().has(entry.node.id)"
                 [progressPercent]="entry.progressPercent"
                 [etaYear]="entry.etaYear"
                 planetId="earth"
-                (nodeClicked)="onNodeClick($event, 'earth')"
+                (nodeSelected)="onNodeSelect($event)"
               />
             }
           </div>
@@ -127,11 +168,12 @@
                 [node]="entry.node"
                 [visibility]="entry.visibility"
                 [interactive]="entry.interactive"
+                [selected]="selectedEntry()?.node?.id === entry.node.id"
                 [isNew]="newlyUnlockedIds().has(entry.node.id)"
                 [progressPercent]="entry.progressPercent"
                 [etaYear]="entry.etaYear"
                 planetId="moon"
-                (nodeClicked)="onNodeClick($event, 'moon')"
+                (nodeSelected)="onNodeSelect($event)"
               />
             }
           </div>
@@ -139,39 +181,10 @@
       </div>
     </div>
 
-    <!-- Venus column (read-only spillover display) -->
-    <div class="research-hub__column research-hub__column--venus">
-      <div class="research-hub__column-header">
-        <img
-          src="/assets/svg/planets/venus.svg"
-          class="research-hub__planet-icon"
-          alt=""
-          aria-hidden="true"
-          width="32"
-          height="32"
-        />
-        <span class="research-hub__column-name">Venus</span>
-        <span class="research-hub__column-subtitle">Terraforming milestones</span>
-      </div>
-
-      <div class="research-hub__nodes">
-        @for (row of venusTierRows(); track $index) {
-          <div class="research-hub__tier-row">
-            @for (entry of row; track entry.node.id) {
-              <app-tech-node-card
-                [node]="entry.node"
-                [visibility]="entry.visibility"
-                [interactive]="false"
-                [isNew]="newlyUnlockedIds().has(entry.node.id)"
-                [progressPercent]="entry.progressPercent"
-                [etaYear]="entry.etaYear"
-                planetId="venus"
-              />
-            }
-          </div>
-        }
-      </div>
-    </div>
+    <app-tech-node-inspector
+      [viewModel]="selectedInspectorVm()"
+      (startRequested)="onStartSelectedNode($event)"
+    />
 
   </div><!-- /.research-hub__grid -->
 

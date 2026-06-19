@@ -29,15 +29,6 @@ No inline `// TODO:` comments in code - all tracking happens here to avoid dupli
 
 ## Active TODOs
 
-### Block 20-1 — EventBusService: researchTrackStarted$ subject
-
-- **File**: `src/app/core/services/event-bus.service.ts`
-- **Location**: Subject declarations section
-- **TODO**: Add `researchTrackStarted$: Subject<{ trackId: string; planetId: string }>` so UI/audio can react when a research track starts (distinct from `researchCompleted$`). Needed by future audio/toast integration.
-- **Depends on**: Block 20-1 ResearchService changes (the subject is emitted from `startTechTrack`)
-- **Prompt block**: Block 20-1
-- **Added**: 2026-06-19
-
 ### POST-PLAYTEST PROMPT SET (Blocks 18–25) — authored 2026 by analyst
 
 - **What**: A new batch of build prompts lives in `docs/agents/prompts/18-*` through `25-*`, addressing the post-09-8 playtest issues: orrery visual overhaul (18), planet unlock chain + panels (19), research-as-timed-RP-tracks (20), Kardashev + eager service injection (21), the full terraforming loop incl. bio composer (22), pause + interaction lock (23), state-gated culture events (24), and Mercury RTS fixes incl. upgrades/overdrive + multi-launchpad (25).
@@ -393,6 +384,11 @@ No inline `// TODO:` comments in code - all tracking happens here to avoid dupli
 ## Completed TODOs
 
 _(Moved here when implemented, kept for history)_
+
+### ✅ Block 20-1 — EventBusService: researchTrackStarted$ subject
+- **Completed**: 2026-06-19
+- **Implemented in**: `src/app/core/services/event-bus.service.ts`, `src/app/core/systems/research.service.ts`, `src/app/core/models/game-state.model.ts`
+- **Notes**: Added typed `ResearchTrackStartedEvent` and `researchTrackStarted$`. `ResearchService` emits after successful ResearchTrack starts, TechNode starts, and paused-track resumes. Focused `research.service.spec.ts` coverage added for start, resume, and no-op cases.
 
 ### ✅ Global resource/power HUD strip — ResourcePowerBarComponent
 - **Completed**: 2026-06-14

@@ -2,6 +2,8 @@ export interface TechNode {
   id: string;
   planet: string;
   displayName: string;
+  description: string;
+  outcomeSummary: string[];
   prerequisites: string[];
   prerequisiteMode?: 'all' | 'any';
   spilloverPrerequisites: string[];

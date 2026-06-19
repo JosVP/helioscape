@@ -18,6 +18,8 @@ function makeTechNode(overrides: Partial<TechNode> = {}): TechNode {
     id: 'test_node',
     planet: 'mars',
     displayName: 'Test Node',
+    description: 'We test a node.',
+    outcomeSummary: ['Applies test effects.'],
     prerequisites: [],
     spilloverPrerequisites: [],
     rpCost: 0,

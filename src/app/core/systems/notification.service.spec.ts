@@ -13,6 +13,8 @@ function makeTechNode(overrides: Partial<TechNode> = {}): TechNode {
     id: 'earth_advanced_renewables',
     planet: 'earth',
     displayName: 'Advanced Renewables Integration',
+    description: 'We integrate advanced renewables.',
+    outcomeSummary: ['Enables later Earth research.'],
     prerequisites: [],
     spilloverPrerequisites: [],
     rpCost: 20,

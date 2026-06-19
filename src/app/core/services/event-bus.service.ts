@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
 import type {
   TechUnlockedEvent,
+  ResearchTrackStartedEvent,
   TerraformChoiceEvent,
   TerraformPhaseEvent,
   BioPhaseEvent,
@@ -31,6 +32,9 @@ export class EventBusService {
 
   /** A research track has been completed. Payload: trackId. */
   readonly researchCompleted$ = new Subject<string>();
+
+  /** A research track has been started or resumed on a planet. */
+  readonly researchTrackStarted$ = new Subject<ResearchTrackStartedEvent>();
 
   /** A terraforming choice has been applied on a planet. */
   readonly terraformingChoiceApplied$ = new Subject<TerraformChoiceEvent>();

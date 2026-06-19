@@ -9,9 +9,8 @@ import {
 import type { TechNode } from '@app/core/models';
 import { DataService } from '@app/core/services/data.service';
 import { GameStateService } from '@app/core/services/game-state.service';
-
-/** UI-only visibility tier for a tech node card. */
-export type NodeVisibility = 'completed' | 'in_progress' | 'available' | 'needs_capacity' | 'hint';
+import { TechNodeIconComponent } from '../tech-node-icon/tech-node-icon.component';
+import type { NodeVisibility } from '../tech-node-view.model';
 
 /** A prerequisite entry shown in the tooltip. */
 export interface PrereqEntry {
@@ -25,6 +24,7 @@ export interface PrereqEntry {
   selector: 'app-tech-node-card',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [TechNodeIconComponent],
   templateUrl: './tech-node-card.component.html',
   styleUrl: './tech-node-card.component.scss',
 })
@@ -46,8 +46,10 @@ export class TechNodeCardComponent {
   readonly progressPercent = input<number | undefined>(undefined);
   /** ETA completion year. Only provided when visibility is 'in_progress'. */
   readonly etaYear = input<number | undefined>(undefined);
+  /** True when this card is selected in the inspector. */
+  readonly selected = input<boolean>(false);
 
-  readonly nodeClicked = output<string>();
+  readonly nodeSelected = output<string>();
 
   // ---------------------------------------------------------------------------
   // Derived display values
@@ -61,9 +63,14 @@ export class TechNodeCardComponent {
 
   readonly isInProgress    = computed(() => this.visibility() === 'in_progress');
   readonly isNeedsCapacity = computed(() => this.visibility() === 'needs_capacity');
-  readonly isClickable     = computed(() =>
-    this.interactive() && this.visibility() === 'available'
-  );
+  readonly isSelectable    = computed(() => this.interactive());
+
+  readonly ariaLabel = computed(() => {
+    if (!this.isSelectable()) return null;
+    return this.visibility() === 'hint'
+      ? 'Select locked technology clue'
+      : `Select technology: ${this.node().displayName}`;
+  });
 
   /** Branch tag derived from effects — naturalist, architect, or none. */
   readonly branchTag = computed<'naturalist' | 'architect' | null>(() => {
@@ -113,8 +120,14 @@ export class TechNodeCardComponent {
   // Interaction
   // ---------------------------------------------------------------------------
 
-  onClick(): void {
-    if (!this.isClickable()) return;
-    this.nodeClicked.emit(this.node().id);
+  onSelect(): void {
+    if (!this.isSelectable()) return;
+    this.nodeSelected.emit(this.node().id);
+  }
+
+  onKeydown(event: KeyboardEvent): void {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    this.onSelect();
   }
 }

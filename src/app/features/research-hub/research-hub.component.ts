@@ -19,11 +19,11 @@ import { EventBusService } from '@app/core/services/event-bus.service';
 import { GameStateService } from '@app/core/services/game-state.service';
 import { TechTreeService } from '@app/core/systems/tech-tree.service';
 import { ResearchService } from '@app/core/systems/research.service';
-import {
-  TechNodeCardComponent,
-  type NodeVisibility,
-} from './tech-node-card/tech-node-card.component';
+import { TechNodeCardComponent } from './tech-node-card/tech-node-card.component';
+import type { NodeVisibility } from './tech-node-view.model';
 import { ForkChoiceModalComponent } from './fork-choice-modal/fork-choice-modal.component';
+import { TechNodeInspectorComponent } from './tech-node-inspector/tech-node-inspector.component';
+import type { TechInspectorViewModel, InspectorPrerequisite } from './tech-node-inspector/tech-node-inspector.model';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -35,10 +35,25 @@ export interface NodeEntry {
   readonly interactive: boolean;
   readonly progressPercent?: number;
   readonly etaYear?: number;
+  readonly isPaused?: boolean;
 }
 
 /** Ordered map of nodeId → NodeEntry, insertion order = render order. */
 type ColumnStates = Map<string, NodeEntry>;
+
+interface RectBounds {
+  readonly left: number;
+  readonly top: number;
+  readonly right: number;
+  readonly bottom: number;
+}
+
+interface LinePoint {
+  readonly x: number;
+  readonly y: number;
+  readonly planet: string;
+  readonly isVisible: boolean;
+}
 
 // ---------------------------------------------------------------------------
 // Component
@@ -48,7 +63,7 @@ type ColumnStates = Map<string, NodeEntry>;
   selector: 'app-research-hub',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TechNodeCardComponent, ForkChoiceModalComponent],
+  imports: [TechNodeCardComponent, ForkChoiceModalComponent, TechNodeInspectorComponent],
   templateUrl: './research-hub.component.html',
   styleUrl: './research-hub.component.scss',
 })
@@ -59,6 +74,7 @@ export class ResearchHubComponent implements AfterViewInit, OnDestroy {
   private readonly researchService = inject(ResearchService);
   private readonly eventBus = inject(EventBusService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly clipLineGapBetweenTreeColumns = false;
 
   readonly closed = output<void>();
 
@@ -100,6 +116,30 @@ export class ResearchHubComponent implements AfterViewInit, OnDestroy {
   readonly earthTierRows = computed(() => this._buildTierRows(this.earthStates()));
   readonly moonTierRows = computed(() => this._buildTierRows(this.moonStates()));
   readonly venusTierRows = computed(() => this._buildTierRows(this.venusStates()));
+
+  readonly selectedNodeId = signal<string | null>(null);
+
+  readonly allVisibleEntries = computed(() => {
+    const entries = new Map<string, NodeEntry>();
+    for (const states of [this.marsStates(), this.earthStates(), this.moonStates(), this.venusStates()]) {
+      for (const [nodeId, entry] of states) {
+        entries.set(nodeId, entry);
+      }
+    }
+    return entries;
+  });
+
+  readonly selectedEntry = computed<NodeEntry | null>(() => {
+    const selectedId = this.selectedNodeId();
+    const entries = this.allVisibleEntries();
+    if (selectedId) return entries.get(selectedId) ?? null;
+    return this._defaultSelection(entries);
+  });
+
+  readonly selectedInspectorVm = computed<TechInspectorViewModel | null>(() => {
+    const entry = this.selectedEntry();
+    return entry ? this._buildInspectorViewModel(entry) : null;
+  });
 
   // ---------------------------------------------------------------------------
   // "New" badge tracking
@@ -153,6 +193,7 @@ export class ResearchHubComponent implements AfterViewInit, OnDestroy {
 
     this._resizeObserver = new ResizeObserver(() => this._scheduleLineRedraw());
     this._resizeObserver.observe(this.gridContainerRef.nativeElement);
+    this._setInitialSelection();
     this._scheduleLineRedraw();
   }
 
@@ -174,9 +215,23 @@ export class ResearchHubComponent implements AfterViewInit, OnDestroy {
     this.close();
   }
 
-  onNodeClick(nodeId: string, planetId: string): void {
-    this.researchService.startTechTrack(nodeId, planetId);
-    // researchCompleted$ → techUnlocked$ will fire when done → badge + redraw
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this._scheduleLineRedraw();
+  }
+
+  onTreeScroll(): void {
+    this._scheduleLineRedraw();
+  }
+
+  onNodeSelect(nodeId: string): void {
+    this.selectedNodeId.set(nodeId);
+  }
+
+  onStartSelectedNode(nodeId: string): void {
+    const viewModel = this.selectedInspectorVm();
+    if (!viewModel?.canStart || viewModel.node.id !== nodeId) return;
+    this.researchService.startTechTrack(viewModel.node.id, viewModel.node.planet);
   }
 
   // ---------------------------------------------------------------------------
@@ -203,18 +258,114 @@ export class ResearchHubComponent implements AfterViewInit, OnDestroy {
 
       let progressPercent: number | undefined;
       let etaYear: number | undefined;
+      let isPaused: boolean | undefined;
 
-      if (visibility === 'in_progress' && activeTrack && !activeTrack.isPaused) {
+      if (visibility === 'in_progress' && activeTrack) {
+        isPaused = activeTrack.isPaused;
         const elapsed = activeTrack.elapsedBeforeStart + (currentYear - activeTrack.startYear);
         progressPercent = Math.min(100, Math.round((elapsed / node.durationYears) * 100));
-        const remaining = node.durationYears - elapsed;
-        etaYear = currentYear + Math.max(0, remaining);
+        if (!activeTrack.isPaused) {
+          const remaining = node.durationYears - elapsed;
+          etaYear = currentYear + Math.max(0, remaining);
+        }
       }
 
-      result.set(node.id, { node, visibility, interactive, progressPercent, etaYear });
+      result.set(node.id, { node, visibility, interactive, progressPercent, etaYear, isPaused });
     }
 
     return result;
+  }
+
+  private _defaultSelection(entries: Map<string, NodeEntry>): NodeEntry | null {
+    const ordered = [...entries.values()];
+    return (
+      ordered.find((entry) => entry.node.planet === 'earth' && entry.visibility === 'available') ??
+      ordered.find((entry) => entry.node.planet === 'moon' && entry.visibility === 'available') ??
+      ordered.find((entry) => entry.visibility === 'in_progress') ??
+      ordered.find((entry) => entry.visibility === 'completed') ??
+      ordered.find((entry) => entry.node.planet === 'earth' || entry.node.planet === 'moon') ??
+      ordered[0] ??
+      null
+    );
+  }
+
+  private _setInitialSelection(): void {
+    if (this.selectedNodeId() !== null) return;
+    const entry = this._defaultSelection(this.allVisibleEntries());
+    if (entry) this.selectedNodeId.set(entry.node.id);
+  }
+
+  private _buildInspectorViewModel(entry: NodeEntry): TechInspectorViewModel {
+    const node = entry.node;
+    const currentYear = this.gameState.gameYear();
+    const usedCapacity = this.gameState.usedRpCapacity();
+    const totalCapacity = this.gameState.totalRpCapacity();
+    const capacityShortfall = Math.max(0, usedCapacity + node.rpCost - totalCapacity);
+    const canStart = entry.visibility === 'available' && capacityShortfall === 0;
+    const completedYear = this.gameState.completedResearchYears()[node.id];
+
+    return {
+      node,
+      visibility: entry.visibility,
+      planetLabel: this._planetLabel(node.planet),
+      statusLabel: this._statusLabel(entry),
+      branchTag: this._branchTag(node, entry.visibility),
+      canRevealDetails: entry.visibility !== 'hint',
+      prerequisites: this._prerequisitesFor(node),
+      progressPercent: entry.progressPercent,
+      etaYear: entry.etaYear,
+      completedYear,
+      capacityShortfall: entry.visibility === 'needs_capacity' ? capacityShortfall : undefined,
+      canStart,
+    };
+  }
+
+  private _planetLabel(planetId: string): string {
+    const labels: Record<string, string> = {
+      earth: 'Earth',
+      moon: 'Moon',
+      mercury: 'Mercury',
+      mars: 'Mars',
+      venus: 'Venus',
+    };
+    return labels[planetId] ?? planetId;
+  }
+
+  private _statusLabel(entry: NodeEntry): string {
+    switch (entry.visibility) {
+      case 'available':
+        return 'Available';
+      case 'completed':
+        return 'Completed';
+      case 'hint':
+        return 'Locked';
+      case 'in_progress':
+        return entry.isPaused ? 'Paused' : 'In progress';
+      case 'needs_capacity':
+        return 'Needs capacity';
+    }
+  }
+
+  private _branchTag(node: TechNode, visibility: NodeVisibility): 'naturalist' | 'architect' | null {
+    if (visibility === 'hint') return null;
+    const tagEffect = node.effects.find((effect) => effect.type === 'tag_decision');
+    if (!tagEffect || tagEffect.type !== 'tag_decision') return null;
+    return tagEffect.tag;
+  }
+
+  private _prerequisitesFor(node: TechNode): InspectorPrerequisite[] {
+    const completed = this.gameState.completedTechs();
+    const toEntry = (id: string, isSpillover: boolean): InspectorPrerequisite => ({
+      id,
+      label: this.data.getTechNode(id)?.displayName ?? id,
+      met: completed.includes(id),
+      isSpillover,
+    });
+
+    return [
+      ...node.prerequisites.map((id) => toEntry(id, false)),
+      ...node.spilloverPrerequisites.map((id) => toEntry(id, true)),
+    ];
   }
 
   /**
@@ -314,19 +465,41 @@ export class ResearchHubComponent implements AfterViewInit, OnDestroy {
     }
 
     const containerRect = container.getBoundingClientRect();
+    svg.setAttribute('viewBox', `0 0 ${containerRect.width} ${containerRect.height}`);
+
+    const sideRail = container.querySelector<HTMLElement>('.research-hub__side-rail');
+    const earthColumn = container.querySelector<HTMLElement>('.research-hub__column--earth');
+    const treeColumnRects = [sideRail, earthColumn]
+      .filter((el): el is HTMLElement => el !== null)
+      .map((el) => this._toContainerRect(el.getBoundingClientRect(), containerRect));
+    if (treeColumnRects.length === 0) return;
+
+    const clipRects = this.clipLineGapBetweenTreeColumns
+      ? treeColumnRects
+      : [this._unionRects(treeColumnRects)];
+
+    this._appendLineClip(svg, clipRects);
 
     // Build a map of nodeId → centre point relative to the grid container
-    const centres = new Map<string, { x: number; y: number; planet: string }>();
+    const centres = new Map<string, LinePoint>();
     const nodeEls = container.querySelectorAll<HTMLElement>('[data-node-id]');
     nodeEls.forEach((el) => {
       const id = el.getAttribute('data-node-id');
       if (!id) return;
       const rect = el.getBoundingClientRect();
+      const viewport = this._lineViewportFor(el, sideRail, earthColumn, containerRect);
+      if (!viewport) return;
+      const relativeRect = this._toContainerRect(rect, containerRect);
+      const rawPoint = {
+        x: relativeRect.left + (relativeRect.right - relativeRect.left) / 2,
+        y: relativeRect.top + (relativeRect.bottom - relativeRect.top) / 2,
+      };
       const node = this.allNodesById.get(id);
       centres.set(id, {
-        x: rect.left - containerRect.left + rect.width / 2 + container.scrollLeft,
-        y: rect.top - containerRect.top + rect.height / 2 + container.scrollTop,
+        x: rawPoint.x,
+        y: rawPoint.y,
         planet: node?.planet ?? 'earth',
+        isVisible: this._rectIntersects(relativeRect, viewport),
       });
     });
 
@@ -350,6 +523,7 @@ export class ResearchHubComponent implements AfterViewInit, OnDestroy {
       for (const { id: prereqId, spillover } of allPrereqs) {
         const source = centres.get(prereqId);
         if (!source) continue; // source node not visible — skip line
+        if (!source.isVisible && !target.isVisible) continue;
 
         const sourcePlanet = source.planet;
         const targetPlanet = entry.node.planet;
@@ -358,6 +532,7 @@ export class ResearchHubComponent implements AfterViewInit, OnDestroy {
         const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         const d = this._bezierPath(source, target, isCrossColumn);
         path.setAttribute('d', d);
+        path.setAttribute('clip-path', 'url(#research-hub-line-clip)');
         path.setAttribute('fill', 'none');
         path.setAttribute(
           'stroke',
@@ -371,6 +546,63 @@ export class ResearchHubComponent implements AfterViewInit, OnDestroy {
         svg.appendChild(path);
       }
     }
+  }
+
+  private _appendLineClip(svg: SVGElement, clipRects: RectBounds[]): void {
+    const namespace = 'http://www.w3.org/2000/svg';
+    const defs = document.createElementNS(namespace, 'defs');
+    const clipPath = document.createElementNS(namespace, 'clipPath');
+    clipPath.setAttribute('id', 'research-hub-line-clip');
+    clipPath.setAttribute('clipPathUnits', 'userSpaceOnUse');
+
+    for (const rect of clipRects) {
+      const clipRect = document.createElementNS(namespace, 'rect');
+      clipRect.setAttribute('x', `${rect.left}`);
+      clipRect.setAttribute('y', `${rect.top}`);
+      clipRect.setAttribute('width', `${Math.max(0, rect.right - rect.left)}`);
+      clipRect.setAttribute('height', `${Math.max(0, rect.bottom - rect.top)}`);
+      clipPath.appendChild(clipRect);
+    }
+
+    defs.appendChild(clipPath);
+    svg.appendChild(defs);
+  }
+
+  private _lineViewportFor(
+    element: HTMLElement,
+    sideRail: HTMLElement | null,
+    earthColumn: HTMLElement | null,
+    containerRect: DOMRect,
+  ): RectBounds | null {
+    const viewportElement = sideRail?.contains(element) ? sideRail : earthColumn?.contains(element) ? earthColumn : null;
+    return viewportElement ? this._toContainerRect(viewportElement.getBoundingClientRect(), containerRect) : null;
+  }
+
+  private _toContainerRect(rect: DOMRect, containerRect: DOMRect): RectBounds {
+    return {
+      left: rect.left - containerRect.left,
+      top: rect.top - containerRect.top,
+      right: rect.right - containerRect.left,
+      bottom: rect.bottom - containerRect.top,
+    };
+  }
+
+  private _unionRects(rects: RectBounds[]): RectBounds {
+    return rects.reduce((union, rect) => ({
+      left: Math.min(union.left, rect.left),
+      top: Math.min(union.top, rect.top),
+      right: Math.max(union.right, rect.right),
+      bottom: Math.max(union.bottom, rect.bottom),
+    }));
+  }
+
+  private _rectIntersects(rect: RectBounds, containerRect: RectBounds): boolean {
+    return (
+      rect.right >= containerRect.left &&
+      rect.left <= containerRect.right &&
+      rect.bottom >= containerRect.top &&
+      rect.top <= containerRect.bottom
+    );
   }
 
   private _bezierPath(
