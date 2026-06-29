@@ -1,0 +1,57 @@
+<div class="research-slot-strip" aria-label="Research slots">
+  <div class="research-slot-strip__side research-slot-strip__side--left">
+    @for (slot of slotViews(); track slot.slotId) {
+      @if (slot.position === 'venus-left' || slot.position === 'core-left') {
+        <button
+          class="research-slot-strip__slot"
+          [class.research-slot-strip__slot--occupied]="slot.activeNodeId !== null"
+          [class.research-slot-strip__slot--venus]="slot.position === 'venus-left'"
+          type="button"
+          [attr.aria-label]="slot.activeNodeName ? 'Focus ' + slot.activeNodeName : 'Open Research Hub'"
+          (click)="onSlotClick(slot)"
+        >
+          <span class="research-slot-strip__slot-label">{{ slot.displayName }}</span>
+          <span class="research-slot-strip__slot-name">{{ slot.activeNodeName ?? 'Empty' }}</span>
+          <span class="research-slot-strip__track" aria-hidden="true">
+            <span
+              class="research-slot-strip__fill research-slot-strip__fill--from-right"
+              [style.--slot-progress]="slot.progressPercent / 100"
+            ></span>
+          </span>
+        </button>
+      }
+    }
+  </div>
+
+  <button
+    class="research-slot-strip__hub-button"
+    type="button"
+    aria-label="Open Research Hub"
+    title="Research Hub"
+    (click)="onResearchClick()"
+  >&#9879;</button>
+
+  <div class="research-slot-strip__side research-slot-strip__side--right">
+    @for (slot of slotViews(); track slot.slotId) {
+      @if (slot.position === 'core-right' || slot.position === 'mars-right') {
+        <button
+          class="research-slot-strip__slot"
+          [class.research-slot-strip__slot--occupied]="slot.activeNodeId !== null"
+          [class.research-slot-strip__slot--mars]="slot.position === 'mars-right'"
+          type="button"
+          [attr.aria-label]="slot.activeNodeName ? 'Focus ' + slot.activeNodeName : 'Open Research Hub'"
+          (click)="onSlotClick(slot)"
+        >
+          <span class="research-slot-strip__slot-label">{{ slot.displayName }}</span>
+          <span class="research-slot-strip__slot-name">{{ slot.activeNodeName ?? 'Empty' }}</span>
+          <span class="research-slot-strip__track" aria-hidden="true">
+            <span
+              class="research-slot-strip__fill research-slot-strip__fill--from-left"
+              [style.--slot-progress]="slot.progressPercent / 100"
+            ></span>
+          </span>
+        </button>
+      }
+    }
+  </div>
+</div>

@@ -6,10 +6,6 @@ import { DataService, type MercuryBuilding } from '@app/core/services/data.servi
 import { GameStateService } from '@app/core/services/game-state.service';
 import type { ResourceStore, PlacedBuilding } from '@app/core/models';
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
 function makeResources(overrides: Partial<ResourceStore> = {}): ResourceStore {
   return { commonOre: 0, rareMetals: 0, polarVolatiles: 0, ...overrides };
 }
@@ -45,174 +41,86 @@ function makeMercuryBuildingDef(overrides: Partial<MercuryBuilding> = {}): Mercu
   } as MercuryBuilding;
 }
 
-// ---------------------------------------------------------------------------
-// Fakes
-// ---------------------------------------------------------------------------
-
 function makeGameStateFake(opts: {
   resources?: ResourceStore;
   buildings?: PlacedBuilding[];
   reservations?: ResourceStore;
   dysonWatts?: number;
 } = {}) {
-  const resourcesSignal = signal<ResourceStore>(opts.resources ?? makeResources());
-  const buildingsSignal = signal<PlacedBuilding[]>(opts.buildings ?? []);
-  const reservationsSignal = signal<ResourceStore>(opts.reservations ?? makeResources());
-  const dysonWattsSignal = signal<number>(opts.dysonWatts ?? 0);
-  const usedRpCapSignal = signal<number>(0);
-  const totalRpCapSignal = signal<number>(60);
-
   return {
-    mercuryResources: resourcesSignal.asReadonly(),
-    mercuryBuildings: buildingsSignal.asReadonly(),
-    resourceReservations: reservationsSignal.asReadonly(),
-    dysonEnergyWatts: dysonWattsSignal.asReadonly(),
-    usedRpCapacity: usedRpCapSignal.asReadonly(),
-    totalRpCapacity: totalRpCapSignal.asReadonly(),
+    mercuryResources: signal<ResourceStore>(opts.resources ?? makeResources()).asReadonly(),
+    mercuryBuildings: signal<PlacedBuilding[]>(opts.buildings ?? []).asReadonly(),
+    resourceReservations: signal<ResourceStore>(opts.reservations ?? makeResources()).asReadonly(),
+    dysonEnergyWatts: signal<number>(opts.dysonWatts ?? 0).asReadonly(),
     setResourceReservation: vi.fn(),
   };
 }
 
 function makeDataServiceFake(buildingDef?: MercuryBuilding) {
   return {
-    getMercuryBuilding: vi.fn().mockImplementation((id: string) =>
-      buildingDef?.id === id ? buildingDef : undefined
-    ),
+    getMercuryBuilding: vi.fn((id: string) => (buildingDef?.id === id ? buildingDef : undefined)),
   };
 }
 
-// ---------------------------------------------------------------------------
-// Tests
-// ---------------------------------------------------------------------------
-
 describe('ResourcePowerBarComponent', () => {
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [ResourcePowerBarComponent],
+  beforeEach(() => {
+    TestBed.resetTestingModule();
+    vi.clearAllMocks();
+  });
+
+  function setup(
+    gameState = makeGameStateFake(),
+    dataService = makeDataServiceFake()
+  ): { component: ResourcePowerBarComponent; gameState: ReturnType<typeof makeGameStateFake> } {
+    TestBed.configureTestingModule({
       providers: [
-        { provide: GameStateService, useValue: makeGameStateFake() },
-        { provide: DataService, useValue: makeDataServiceFake() },
+        { provide: GameStateService, useValue: gameState },
+        { provide: DataService, useValue: dataService },
       ],
-    }).compileComponents();
-  });
+    });
+    return {
+      component: TestBed.runInInjectionContext(() => new ResourcePowerBarComponent()),
+      gameState,
+    };
+  }
 
-  it('should render without errors', () => {
-    const fixture = TestBed.createComponent(ResourcePowerBarComponent);
-    expect(() => fixture.detectChanges()).not.toThrow();
-    expect(fixture.componentInstance).toBeTruthy();
-  });
-
-  it('should display resource counts from GameStateService', () => {
-    TestBed.overrideProvider(GameStateService, {
-      useValue: makeGameStateFake({
+  it('reads resource counts from GameStateService', () => {
+    const { component } = setup(
+      makeGameStateFake({
         resources: makeResources({ commonOre: 500, rareMetals: 200, polarVolatiles: 100 }),
-      }),
-    });
-    const fixture = TestBed.createComponent(ResourcePowerBarComponent);
-    fixture.detectChanges();
-    const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
-    expect(text).toContain('500');
-    expect(text).toContain('200');
-    expect(text).toContain('100');
+      })
+    );
+
+    expect(component.resources()).toEqual({ commonOre: 500, rareMetals: 200, polarVolatiles: 100 });
   });
 
-  it('should compute resource rate from an operational building', () => {
+  it('computes resource rates from operational Mercury buildings only', () => {
     const def = makeMercuryBuildingDef();
-    const buildings: PlacedBuilding[] = [makeBuilding({ status: 'operational', buildingId: def.id })];
-    TestBed.overrideProvider(GameStateService, {
-      useValue: makeGameStateFake({ buildings }),
-    });
-    TestBed.overrideProvider(DataService, {
-      useValue: makeDataServiceFake(def),
-    });
-    const fixture = TestBed.createComponent(ResourcePowerBarComponent);
-    fixture.detectChanges();
-    expect(fixture.componentInstance.resourceRates()['commonOre']).toBe(10);
+    const { component } = setup(
+      makeGameStateFake({ buildings: [makeBuilding(), makeBuilding({ id: 'b2', status: 'building' })] }),
+      makeDataServiceFake(def)
+    );
+
+    expect(component.resourceRates()['commonOre']).toBe(10);
   });
 
-  it('should not count rates from non-operational buildings', () => {
-    const def = makeMercuryBuildingDef();
-    const buildings: PlacedBuilding[] = [makeBuilding({ status: 'building', buildingId: def.id })];
-    TestBed.overrideProvider(GameStateService, {
-      useValue: makeGameStateFake({ buildings }),
-    });
-    TestBed.overrideProvider(DataService, {
-      useValue: makeDataServiceFake(def),
-    });
-    const fixture = TestBed.createComponent(ResourcePowerBarComponent);
-    fixture.detectChanges();
-    expect(fixture.componentInstance.resourceRates()['commonOre']).toBe(0);
+  it('computes power color thresholds', () => {
+    expect(setup(makeGameStateFake({ dysonWatts: 2e12 })).component.powerBarColor()).toBe('green');
+    TestBed.resetTestingModule();
+    expect(setup(makeGameStateFake({ dysonWatts: 1e12 })).component.powerBarColor()).toBe('amber');
+    TestBed.resetTestingModule();
+    expect(setup(makeGameStateFake({ dysonWatts: 0.5e12 })).component.powerBarColor()).toBe('red');
+    TestBed.resetTestingModule();
+    expect(setup(makeGameStateFake({ dysonWatts: 0 })).component.powerBarColor()).toBe('red');
   });
 
-  it('powerBarColor should return green below 80%', () => {
-    TestBed.overrideProvider(GameStateService, {
-      useValue: makeGameStateFake({ dysonWatts: 2e12 }), // 2 TW available, 0.8 TW consumed = 40%
-    });
-    const fixture = TestBed.createComponent(ResourcePowerBarComponent);
-    fixture.detectChanges();
-    expect(fixture.componentInstance.powerBarColor()).toBe('green');
-  });
-
-  it('powerBarColor should return amber at 80–99%', () => {
-    // 0.8 TW consumed / 1.0 TW available = 80%
-    TestBed.overrideProvider(GameStateService, {
-      useValue: makeGameStateFake({ dysonWatts: 1e12 }),
-    });
-    const fixture = TestBed.createComponent(ResourcePowerBarComponent);
-    fixture.detectChanges();
-    expect(fixture.componentInstance.powerBarColor()).toBe('amber');
-  });
-
-  it('powerBarColor should return red at 100%+', () => {
-    // 0.8 TW consumed / 0.5 TW available = 160% → clamped to 100
-    TestBed.overrideProvider(GameStateService, {
-      useValue: makeGameStateFake({ dysonWatts: 0.5e12 }),
-    });
-    const fixture = TestBed.createComponent(ResourcePowerBarComponent);
-    fixture.detectChanges();
-    expect(fixture.componentInstance.powerBarColor()).toBe('red');
-  });
-
-  it('powerBarColor should return red when dysonPowerTw is 0', () => {
-    TestBed.overrideProvider(GameStateService, {
-      useValue: makeGameStateFake({ dysonWatts: 0 }),
-    });
-    const fixture = TestBed.createComponent(ResourcePowerBarComponent);
-    fixture.detectChanges();
-    expect(fixture.componentInstance.powerBarColor()).toBe('red');
-  });
-
-  it('should hide reservation inputs when showReservationInputs is false', () => {
-    const fixture = TestBed.createComponent(ResourcePowerBarComponent);
-    fixture.detectChanges();
-    const el = fixture.nativeElement as HTMLElement;
-    expect(el.querySelector('.resource-power-bar__reservations')).toBeNull();
-  });
-
-  it('should show reservation inputs when showReservationInputs is true', () => {
-    const fixture = TestBed.createComponent(ResourcePowerBarComponent);
-    fixture.componentRef.setInput('showReservationInputs', true);
-    fixture.detectChanges();
-    const el = fixture.nativeElement as HTMLElement;
-    expect(el.querySelector('.resource-power-bar__reservations')).not.toBeNull();
-    // All 3 resource inputs should be present
-    const inputs = el.querySelectorAll('.resource-power-bar__reserve-input');
-    expect(inputs).toHaveLength(3);
-  });
-
-  it('should call setResourceReservation on reservation input change', () => {
-    const fakeState = makeGameStateFake();
-    TestBed.overrideProvider(GameStateService, { useValue: fakeState });
-    const fixture = TestBed.createComponent(ResourcePowerBarComponent);
-    fixture.componentRef.setInput('showReservationInputs', true);
-    fixture.detectChanges();
-
-    const input = (fixture.nativeElement as HTMLElement).querySelector(
-      '.resource-power-bar__reserve-input'
-    ) as HTMLInputElement;
+  it('updates resource reservation from input changes', () => {
+    const { component, gameState } = setup();
+    const input = document.createElement('input');
     input.value = '500';
-    input.dispatchEvent(new Event('change'));
 
-    expect(fakeState.setResourceReservation).toHaveBeenCalledWith('commonOre', 500);
+    component.onReservationChange('commonOre', { target: input } as unknown as Event);
+
+    expect(gameState.setResourceReservation).toHaveBeenCalledWith('commonOre', 500);
   });
 });

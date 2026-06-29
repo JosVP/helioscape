@@ -10,6 +10,7 @@ import type {
   LockedPlanetSelectedEvent,
   PlanetTransitEvent,
   PlanetUnlockEvent,
+  ResearchHubFocusRequestEvent,
 } from '@app/core/models';
 
 /**
@@ -99,4 +100,7 @@ export class EventBusService {
 
   /** The player has requested to open the Research Hub overlay. */
   readonly researchHubRequested$ = new Subject<void>();
+
+  /** The player has requested to open the Research Hub and optionally focus a node. */
+  readonly researchHubFocusRequested$ = new Subject<ResearchHubFocusRequestEvent>();
 }

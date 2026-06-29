@@ -1,418 +1,127 @@
-// ---------------------------------------------------------------------------
-// Research Hub Overlay — full-screen panel with three-column tech tree
-// ---------------------------------------------------------------------------
-
-// ---------------------------------------------------------------------------
-// Entrance animations
-// ---------------------------------------------------------------------------
-
 @keyframes rh-fade-in {
   from { opacity: 0; }
-  to   { opacity: 1; }
+  to { opacity: 1; }
 }
 
 @keyframes rh-slide-up {
   from { transform: translateY(48px); opacity: 0; }
-  to   { transform: translateY(0);    opacity: 1; }
+  to { transform: translateY(0); opacity: 1; }
 }
-
-// ---------------------------------------------------------------------------
-// Backdrop
-// ---------------------------------------------------------------------------
 
 .research-hub__backdrop {
   position: fixed;
   inset: 0;
+  z-index: 100;
   background: rgba(0, 0, 0, 0.72);
   backdrop-filter: blur(3px);
-  z-index: 100;
   animation: rh-fade-in 0.2s ease-out both;
 }
-
-// ---------------------------------------------------------------------------
-// Panel
-// ---------------------------------------------------------------------------
 
 .research-hub__panel {
   position: fixed;
   inset: var(--space-lg) var(--space-md) 0;
-  max-height: calc(100dvh - var(--space-lg));
-  display: flex;
-  flex-direction: column;
-  background: var(--color-bg-surface);
-  border: 1px solid color-mix(in srgb, var(--color-accent-dim) 40%, var(--color-bg-elevated));
-  border-bottom: none;
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  box-shadow: var(--shadow-panel), inset 0 1px 0 color-mix(in srgb, var(--color-accent) 18%, transparent);
   z-index: 101;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  max-height: calc(100dvh - var(--space-lg));
   overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--color-accent-dim) 40%, var(--color-bg-elevated));
+  border-bottom: 0;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--color-bg-surface) 94%, var(--color-bg-base)), var(--color-bg-surface));
+  box-shadow: var(--shadow-panel), inset 0 1px 0 color-mix(in srgb, var(--color-accent) 18%, transparent);
   animation: rh-slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
-
-  // Focus ring when panel itself is focused (programmatic focus on open)
-  &:focus-visible {
-    outline: none; // panel focus is visual — managed by inner close button
-  }
 }
 
-// ---------------------------------------------------------------------------
-// Header
-// ---------------------------------------------------------------------------
-
 .research-hub__header {
+  position: relative;
   display: grid;
-  grid-template-columns: 1fr auto;
-  grid-template-rows: auto auto;
-  grid-template-areas:
-    'text  slots'
-    'text  slots';
-  gap: 0 var(--space-lg);
-  padding: var(--space-md) var(--space-xl) var(--space-md) var(--space-lg);
+  grid-template-columns: minmax(240px, 1fr) auto 32px;
+  align-items: center;
+  gap: var(--space-lg);
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-accent-dim) 25%, var(--color-bg-elevated));
   background: linear-gradient(
     to bottom,
     color-mix(in srgb, var(--color-bg-base) 60%, transparent),
     transparent
   );
-  border-bottom: 1px solid color-mix(in srgb, var(--color-accent-dim) 25%, var(--color-bg-elevated));
-  flex-shrink: 0;
-  position: relative;
 }
 
 .research-hub__header-text {
-  grid-area: text;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+  display: grid;
   gap: var(--space-xs);
   min-width: 0;
 }
 
 .research-hub__title {
+  margin: 0;
+  color: var(--color-accent-glow);
   font-family: var(--font-display);
   font-size: var(--text-lg);
-  color: var(--color-accent-glow);
-  margin: 0;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  // Subtle text glow
   text-shadow: 0 0 16px color-mix(in srgb, var(--color-accent-glow) 40%, transparent);
 }
 
 .research-hub__subtitle {
-  font-family: var(--font-body);
-  font-size: var(--text-sm);
-  color: var(--color-text-secondary);
   margin: 0;
-  max-width: 52ch;
-  line-height: 1.6;
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
   font-style: italic;
 }
 
-.research-hub__slots {
-  grid-area: slots;
-  align-self: center;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(128px, 1fr));
-  gap: var(--space-xs);
-  margin-right: calc(32px + var(--space-md));
-  min-width: 280px;
-}
-
-.research-hub__slot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-sm);
-  min-height: 36px;
-  padding: var(--space-xs) var(--space-sm);
-  border: 1px solid color-mix(in srgb, var(--color-accent-dim) 24%, var(--color-bg-elevated));
-  border-radius: var(--radius-sm);
-  background: color-mix(in srgb, var(--color-bg-elevated) 42%, transparent);
-}
-
-.research-hub__slot-name {
-  min-width: 0;
-  color: var(--color-text-secondary);
-  font-family: var(--font-body);
-  font-size: var(--text-xs);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.research-hub__slot-state {
-  flex-shrink: 0;
-  color: var(--color-accent-glow);
-  font-family: var(--font-display);
-  font-size: var(--text-xs);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
 .research-hub__close {
-  position: absolute;
-  top: var(--space-md);
-  right: var(--space-md);
-  background: transparent;
-  border: 1px solid var(--color-bg-elevated);
-  border-radius: var(--radius-sm);
-  color: var(--color-text-secondary);
-  font-size: var(--text-sm);
-  line-height: 1;
   width: 32px;
   height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  border: 1px solid var(--color-bg-elevated);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-secondary);
   cursor: pointer;
   transition: var(--transition-ui);
 
-  &:hover {
-    border-color: var(--color-text-secondary);
-    color: var(--color-text-primary);
-    background: var(--color-bg-elevated);
-  }
-
+  &:hover,
   &:focus-visible {
-    outline: 2px solid var(--color-accent);
-    outline-offset: 2px;
     border-color: var(--color-accent);
     color: var(--color-text-primary);
+    outline: none;
   }
 }
 
-// ---------------------------------------------------------------------------
-// Scroll area + grid
-// ---------------------------------------------------------------------------
-
-.research-hub__grid {
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
+.research-hub__body {
   display: grid;
-  grid-template-columns: minmax(190px, 0.85fr) minmax(360px, 1.7fr) minmax(280px, 0.95fr);
-  gap: 0;
-  padding: var(--space-lg);
-  position: relative; // stacking context for SVG overlay
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 440px);
+  min-height: 0;
+}
 
-  // Subtle column dividers via gap-free layout + box-shadow on columns
-  column-gap: var(--space-lg);
+.research-hub__right-panel {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  min-height: 0;
+  border-left: 1px solid color-mix(in srgb, var(--color-accent-dim) 18%, transparent);
+  background:
+    radial-gradient(circle at 50% 0, color-mix(in srgb, var(--color-accent) 8%, transparent), transparent 38%),
+    color-mix(in srgb, var(--color-bg-base) 18%, transparent);
+}
 
-  // Custom scrollbar
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-bg-elevated) transparent;
+@media (max-width: 920px) {
+  .research-hub__header {
+    grid-template-columns: minmax(0, 1fr) 32px;
 
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: var(--color-bg-elevated);
-    border-radius: 3px;
-
-    &:hover {
-      background: var(--color-text-disabled);
+    app-research-slot-strip {
+      display: none;
     }
   }
-}
 
-.research-hub__side-rail {
-  display: flex;
-  min-width: 0;
-  min-height: 0;
-  flex-direction: column;
-  gap: var(--space-lg);
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding-right: var(--space-xs);
-  position: relative;
-  z-index: 2;
-}
-
-// SVG overlay — pointer-events:none so cards remain clickable
-.research-hub__lines {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 1;
-  overflow: visible;
-}
-
-// ---------------------------------------------------------------------------
-// Columns
-// ---------------------------------------------------------------------------
-
-.research-hub__column {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-md);
-  min-height: 0;
-  position: relative;
-  z-index: 2; // above SVG lines
-  padding: var(--space-sm) var(--space-sm) var(--space-xl);
-
-  // Very subtle column background tint
-  &--mars  { background: radial-gradient(ellipse 80% 40% at 50% 0%, color-mix(in srgb, var(--color-mars) 5%, transparent), transparent); }
-  &--earth { background: radial-gradient(ellipse 80% 40% at 50% 0%, color-mix(in srgb, var(--color-earth) 5%, transparent), transparent); }
-  &--venus { background: radial-gradient(ellipse 80% 40% at 50% 0%, color-mix(in srgb, var(--color-venus) 5%, transparent), transparent); }
-
-  &--earth {
-    overflow-y: auto;
-    overflow-x: hidden;
-    border-left: 1px solid var(--color-bg-elevated);
-    padding-left: var(--space-md);
-  }
-}
-
-app-tech-node-inspector {
-  z-index: 2;
-  min-height: 0;
-  overflow-y: auto;
-}
-
-.research-hub__column-header {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  padding-bottom: var(--space-sm);
-  flex-shrink: 0;
-  position: relative;
-
-  // Accent border line with glow
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-  }
-
-  .research-hub__column--mars &::after  {
-    background: var(--color-mars);
-    box-shadow: 0 0 6px var(--color-mars);
-  }
-
-  .research-hub__column--earth &::after {
-    background: var(--color-earth);
-    box-shadow: 0 0 6px var(--color-earth);
-  }
-
-  .research-hub__column--venus &::after {
-    background: var(--color-venus);
-    box-shadow: 0 0 6px var(--color-venus);
-  }
-}
-
-.research-hub__moon-header {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  padding: var(--space-sm) 0 var(--space-sm) var(--space-sm);
-  margin-top: var(--space-md);
-  flex-shrink: 0;
-  // Left accent bar instead of full-width borders — subtler separation
-  border-left: 2px solid var(--color-moon);
-  background: color-mix(in srgb, var(--color-moon) 6%, transparent);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-}
-
-.research-hub__planet-icon {
-  flex-shrink: 0;
-
-  &--small {
-    opacity: 0.7;
-  }
-}
-
-.research-hub__column-name {
-  font-family: var(--font-display);
-  font-size: var(--text-md);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-
-  .research-hub__column--mars &  { color: var(--color-mars); }
-  .research-hub__column--earth & { color: var(--color-earth); }
-  .research-hub__column--venus & { color: var(--color-venus); }
-
-  &--small {
-    font-size: var(--text-sm);
-    color: var(--color-moon);
-  }
-}
-
-.research-hub__column-subtitle {
-  font-family: var(--font-body);
-  font-size: var(--text-xs);
-  color: var(--color-text-disabled);
-  margin-left: auto;
-  text-align: right;
-}
-
-// ---------------------------------------------------------------------------
-// Node grid within a column — rows stacked bottom-to-top by tier
-// ---------------------------------------------------------------------------
-
-// Outer container: column-reverse so tier-0 (oldest) appears at the bottom visually.
-// Each .research-hub__tier-row is a horizontal wrapping flex of same-tier nodes.
-.research-hub__nodes {
-  display: flex;
-  flex-direction: column-reverse;
-  gap: var(--space-xl);
-}
-
-// One row per tech tier — nodes of the same tier sit side by side
-.research-hub__tier-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-xl);
-  align-content: flex-start;
-  justify-content: center;
-}
-
-@media (max-width: 1100px) {
-  .research-hub__grid {
+  .research-hub__body {
     grid-template-columns: 1fr;
-    row-gap: var(--space-lg);
+    grid-template-rows: minmax(45dvh, 1fr) minmax(260px, 45dvh);
   }
 
-  .research-hub__side-rail {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .research-hub__column--earth {
-    border-left: none;
-    padding-left: var(--space-sm);
-  }
-
-  app-tech-node-inspector {
-    position: static;
-    min-height: auto;
-  }
-}
-
-@media (max-width: 720px) {
-  .research-hub__header {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      'text'
-      'slots';
-    gap: var(--space-sm);
-  }
-
-  .research-hub__slots {
-    grid-template-columns: 1fr;
-    margin-right: 0;
-    min-width: 0;
-  }
-
-  .research-hub__side-rail {
-    grid-template-columns: 1fr;
+  .research-hub__right-panel {
+    border-left: 0;
+    border-top: 1px solid color-mix(in srgb, var(--color-accent-dim) 18%, transparent);
   }
 }

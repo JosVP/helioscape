@@ -4,6 +4,8 @@ import type {
   PlanetData,
   ResearchArcDefinition,
   ResearchEffect,
+  ResearchLayoutData,
+  ResearchLayoutNode,
   ResearchNode,
   TechNode,
   ResearchTrack,
@@ -37,7 +39,7 @@ export interface ResourceData {
 }
 
 export interface MercuryBuildingEffect {
-  type: 'resource_rate' | 'dyson_panels_per_year' | 'rp_capacity_boost';
+  type: 'resource_rate' | 'dyson_panels_per_year';
   resourceId?: string;
   rate?: number;
   amount?: number;
@@ -180,6 +182,7 @@ export interface BioPhaseDef {
 export class DataService {
   private planets: Record<string, PlanetData> = {};
   private researchNodes: ResearchNode[] = [];
+  private researchLayout: ResearchLayoutData | null = null;
   private researchArcs: ResearchArcDefinition[] = [];
   private cultureEvents: CultureEvent[] = [];
   private milestones: KardashevMilestone[] = [];
@@ -199,6 +202,7 @@ export class DataService {
       const [
         planetsArray,
         researchNodes,
+        researchLayout,
         researchArcs,
         cultureEvents,
         milestones,
@@ -211,6 +215,7 @@ export class DataService {
       ] = await Promise.all([
         this.fetchJson<PlanetData[]>('/data/planets.json'),
         this.fetchJson<ResearchNode[]>('/data/research-tracks.json'),
+        this.fetchJson<ResearchLayoutData>('/data/research-layout.json'),
         this.fetchOptionalJson<ResearchArcDefinition[]>('/data/research-arcs.json', []),
         this.fetchJson<CultureEvent[]>('/data/culture-events.json'),
         this.fetchJson<KardashevMilestone[]>('/data/kardashev-milestones.json'),
@@ -230,6 +235,7 @@ export class DataService {
         {} as Record<string, PlanetData>,
       );
       this.researchNodes = researchNodes;
+      this.researchLayout = researchLayout;
       this.researchArcs = researchArcs;
       this.cultureEvents = cultureEvents;
       this.milestones = milestones;
@@ -281,6 +287,17 @@ export class DataService {
 
   getAllResearchNodes(): ResearchNode[] {
     return this.researchNodes;
+  }
+
+  getResearchLayout(): ResearchLayoutData {
+    if (!this.researchLayout) {
+      throw new Error('DataService: research layout not loaded — loadAll() must complete first');
+    }
+    return this.researchLayout;
+  }
+
+  getResearchLayoutNode(nodeId: string): ResearchLayoutNode | undefined {
+    return this.researchLayout?.nodes.find((node) => node.nodeId === nodeId);
   }
 
   getTechNode(id: string): TechNode | undefined {

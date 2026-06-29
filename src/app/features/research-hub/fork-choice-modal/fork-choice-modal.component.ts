@@ -77,14 +77,18 @@ export class ForkChoiceModalComponent {
     const summary: string[] = [];
     for (const effect of effects) {
       switch (effect.type) {
-        case 'rp_capacity_boost':
-          summary.push(`+${effect.amount} RP capacity`);
-          break;
         case 'unlock_tech': {
           const node = this.data.getTechNode(effect.target);
           summary.push(`Unlocks: ${node?.displayName ?? effect.target}`);
           break;
         }
+        case 'research_time_reduction':
+          summary.push(
+            effect.target
+              ? `Reduces future research time for ${effect.target}`
+              : `Reduces future research time by ${effect.amountYears} years`,
+          );
+          break;
         case 'apply_terraforming_choice':
           summary.push('Applies a terraforming path choice');
           break;

@@ -1,0 +1,33 @@
+@if (arcs().length > 0) {
+  <section class="research-arc-panel" aria-label="Research arcs">
+    <h3 class="research-arc-panel__title">Research Arcs</h3>
+    <div class="research-arc-panel__list">
+      @for (arc of arcs(); track arc.definition.id) {
+        <article class="research-arc-panel__arc" [attr.data-mode]="arc.definition.progressMode ?? arc.definition.type">
+          <header>
+            <span>{{ arc.definition.displayName }}</span>
+            <small>{{ arc.progressText }}</small>
+          </header>
+          <p>{{ arc.definition.description }}</p>
+          <div
+            class="research-arc-panel__track"
+            role="progressbar"
+            [attr.aria-valuenow]="arc.progressPercent"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            [attr.aria-valuetext]="arc.progressText"
+          >
+            <span class="research-arc-panel__fill" [style.--progress]="arc.progressPercent / 100"></span>
+          </div>
+          @if (arc.findings.length > 0) {
+            <ul>
+              @for (finding of arc.findings; track finding.findingId) {
+                <li>{{ finding.title }} · Year {{ finding.year }}</li>
+              }
+            </ul>
+          }
+        </article>
+      }
+    </div>
+  </section>
+}

@@ -5,7 +5,7 @@
 
 .resource-power-bar {
   display: grid;
-  grid-template-columns: minmax(220px, 1fr) minmax(320px, 2fr);
+  grid-template-columns: minmax(220px, 1fr) minmax(340px, 1.4fr) minmax(320px, 2fr);
   align-items: center;
   width: 100%;
   height: 40px;
@@ -31,6 +31,12 @@
   &__minerals-col {
     justify-content: flex-end;
     flex-wrap: wrap;
+    border-left: var(--border-subtle);
+  }
+
+  app-research-slot-strip {
+    min-width: 0;
+    padding: 0 var(--space-sm);
     border-left: var(--border-subtle);
   }
 

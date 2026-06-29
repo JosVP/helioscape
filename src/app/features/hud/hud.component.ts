@@ -7,7 +7,6 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { EventBusService } from '@app/core/services/event-bus.service';
 import { GameLoopService } from '@app/core/services/game-loop.service';
 import { GameStateService } from '@app/core/services/game-state.service';
 import { SaveService } from '@app/core/services/save.service';
@@ -28,8 +27,6 @@ const AUTOSAVE_VISIBLE_MS = 2500;
  * NOTE: The setTimeout here is a UI-only dismiss timer, not game logic — this is the only
  * acceptable use of setTimeout in a component (same pattern as initial-load in ARCHITECTURE.md).
  *
- * NOTE: EventBusService is injected but currently unused. Reserved for future milestone toast
- * triggers (e.g. milestoneReached$) without requiring a re-inject.
  */
 @Component({
   selector: 'app-hud',
@@ -40,19 +37,12 @@ const AUTOSAVE_VISIBLE_MS = 2500;
   styleUrl: './hud.component.scss',
 })
 export class HudComponent {
-  // Unused at present — see NOTE above.
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  private readonly eventBus = inject(EventBusService);
   private readonly gameLoop = inject(GameLoopService);
   private readonly gameState = inject(GameStateService);
   private readonly saveService = inject(SaveService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly showAutosave = signal(false);
-
-  openResearchHub(): void {
-    this.eventBus.researchHubRequested$.next();
-  }
 
   private autosaveTimer: ReturnType<typeof setTimeout> | null = null;
   /**

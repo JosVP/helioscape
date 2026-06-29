@@ -1,0 +1,54 @@
+<section
+	#viewport
+	class="research-hex-map"
+	[class.research-hex-map--dragging]="isDragging()"
+	aria-label="Research map"
+	(pointerdown)="onPointerDown($event)"
+	(pointermove)="onPointerMove($event)"
+	(pointerup)="onPointerUp($event)"
+	(pointercancel)="onPointerUp($event)"
+>
+	<div class="research-hex-map__content" [style.transform]="mapTransform()">
+		<svg
+			class="research-hex-map__lines"
+			[attr.viewBox]="viewBox()"
+			[style.left.px]="bounds().minX"
+			[style.top.px]="bounds().minY"
+			[style.width.px]="bounds().width"
+			[style.height.px]="bounds().height"
+			aria-hidden="true"
+		>
+			@for (line of lines(); track trackLine($index, line)) {
+				<path
+					[attr.class]="lineClass(line)"
+					[attr.d]="linePath(line)"
+					[attr.data-planet]="line.planetId"
+				/>
+			}
+		</svg>
+
+		@for (marker of regionMarkers(); track trackRegion($index, marker)) {
+			<div
+				class="research-hex-map__region-label"
+				[style.left.px]="marker.x"
+				[style.top.px]="marker.y"
+				aria-hidden="true"
+			>
+				{{ marker.displayName }}
+			</div>
+		}
+
+		@for (node of nodes(); track trackNode($index, node)) {
+			<app-research-hex-tile
+				class="research-hex-map__tile"
+				[style.left.px]="node.x"
+				[style.top.px]="node.y"
+				[entry]="node.entry"
+				[selected]="selectedNodeId() === node.entry.node.id"
+				[isCompletionRecent]="recentlyCompletedIds().has(node.entry.node.id)"
+				[isRevealRecent]="newlyAvailableIds().has(node.entry.node.id)"
+				(nodeSelected)="onTileSelected($event)"
+			/>
+		}
+	</div>
+</section>

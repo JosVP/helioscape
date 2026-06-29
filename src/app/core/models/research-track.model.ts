@@ -53,7 +53,6 @@ export type ResearchEffect =
   | { readonly type: 'tag_decision'; readonly tag: 'naturalist' | 'architect' }
   | { readonly type: 'apply_colonist_bonus'; readonly bonus: 'dense_living' | 'open_environment' }
   | { readonly type: 'research_time_reduction'; readonly amountYears: number; readonly target?: string }
-  | { readonly type: 'rp_capacity_boost'; readonly amount: number }
   | { readonly type: 'set_flag'; readonly flag: string }
   | { readonly type: 'present_fork'; readonly forkId: string; readonly choices: ForkChoice[] };
 
@@ -87,6 +86,9 @@ export interface ResearchArcDefinition {
   readonly id: string;
   readonly displayName: string;
   readonly type: 'open' | 'closed';
+  readonly progressMode?: 'finite' | 'ongoing';
+  readonly totalFindings?: number;
+  readonly unlockNodeIds?: string[];
   readonly description: string;
   readonly nodeIds: string[];
   readonly knownFindings: ResearchArcKnownFinding[];

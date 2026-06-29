@@ -1,0 +1,109 @@
+<aside class="research-node-details" aria-label="Research details">
+  @if (viewModel(); as vm) {
+    <header class="research-node-details__header" [attr.data-planet]="vm.entry.node.planet">
+      <span class="research-node-details__eyebrow">{{ vm.planetLabel }} · {{ vm.statusLabel }}</span>
+      <h3 class="research-node-details__title">{{ vm.entry.node.displayName }}</h3>
+      @if (vm.branchTag) {
+        <span class="research-node-details__tag">{{ vm.branchTag }}</span>
+      }
+    </header>
+
+    @if (vm.entry.progressPercent !== undefined) {
+      <div
+        class="research-node-details__progress"
+        role="progressbar"
+        [attr.aria-valuenow]="vm.entry.progressPercent"
+        aria-valuemin="0"
+        aria-valuemax="100"
+      >
+        <span class="research-node-details__progress-fill" [style.--progress]="vm.entry.progressPercent / 100"></span>
+      </div>
+    }
+
+    <dl class="research-node-details__meta">
+      <div>
+        <dt>Duration</dt>
+        <dd>{{ vm.entry.node.durationYears }} years</dd>
+      </div>
+      @if (vm.entry.etaYear !== undefined) {
+        <div>
+          <dt>ETA</dt>
+          <dd>Year {{ vm.entry.etaYear }}</dd>
+        </div>
+      }
+      @if (vm.completedYear !== undefined) {
+        <div>
+          <dt>Completed</dt>
+          <dd>Year {{ vm.completedYear }}</dd>
+        </div>
+      }
+    </dl>
+
+    <p class="research-node-details__description">{{ vm.entry.node.description }}</p>
+
+    <section class="research-node-details__section">
+      <h4>Unlock condition</h4>
+      <p>{{ vm.entry.node.unlockCondition }}</p>
+    </section>
+
+    @if (vm.prerequisites.length > 0) {
+      <section class="research-node-details__section">
+        <h4>Prerequisites</h4>
+        <div class="research-node-details__prerequisites">
+          @for (prereq of vm.prerequisites; track prereq.id) {
+            <button
+              class="research-node-details__prerequisite"
+              type="button"
+              [attr.data-met]="prereq.met"
+              (click)="prerequisiteFocused.emit(prereq.id)"
+            >
+              <span>{{ prereq.label }}</span>
+              @if (prereq.isSpillover) {
+                <small>spillover</small>
+              }
+            </button>
+          }
+        </div>
+      </section>
+    }
+
+    @if (vm.entry.node.outcomeSummary.length > 0) {
+      <section class="research-node-details__section">
+        <h4>Outcomes</h4>
+        <ul>
+          @for (outcome of vm.entry.node.outcomeSummary; track outcome) {
+            <li>{{ outcome }}</li>
+          }
+        </ul>
+      </section>
+    }
+
+    @if (vm.activeTransfers.length > 0) {
+      <section class="research-node-details__section">
+        <h4>Active transfers</h4>
+        <ul>
+          @for (transfer of vm.activeTransfers; track transfer.fromNodeId + transfer.effect) {
+            <li>{{ transfer.description }}</li>
+          }
+        </ul>
+      </section>
+    }
+
+    <footer class="research-node-details__actions">
+      @if (vm.canStart) {
+        <button type="button" (click)="startRequested.emit(vm.entry.node.id)">Start research</button>
+      } @else if (vm.canPause) {
+        <button type="button" (click)="pauseRequested.emit(vm.entry.node.id)">Pause</button>
+      } @else if (vm.canResume) {
+        <button type="button" (click)="resumeRequested.emit(vm.entry.node.id)">Resume</button>
+      } @else if (vm.startBlockedReason) {
+        <p>{{ vm.startBlockedReason }}</p>
+      }
+    </footer>
+  } @else {
+    <div class="research-node-details__empty">
+      <h3>Select a research node</h3>
+      <p>Choose a hex to read what we know before assigning a research slot.</p>
+    </div>
+  }
+</aside>

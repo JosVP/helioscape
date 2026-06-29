@@ -103,6 +103,10 @@ describe('TechTreeService', () => {
   let eventBus: ReturnType<typeof makeEventBusFake>;
   let terraformingService: ReturnType<typeof makeTerraformingServiceFake>;
 
+  beforeEach(() => {
+    TestBed.resetTestingModule();
+  });
+
   function setup(
     nodes: TechNode[] = [],
     gameStateOpts: Parameters<typeof makeGameStateFake>[0] = {}
@@ -461,14 +465,6 @@ describe('TechTreeService', () => {
       setupSingleEffectNode({ type: 'apply_colonist_bonus', bonus: 'open_environment' });
       service.unlockTech('mars', 'n1');
       expect(gameState.setColonistBonus).toHaveBeenCalledWith('openEnvironment', true);
-    });
-
-    it('rp_capacity_boost: is a no-op (no direct mutation)', () => {
-      setupSingleEffectNode({ type: 'rp_capacity_boost', amount: 20 });
-      service.unlockTech('mars', 'n1');
-      // Nothing should be called — the computed in GameStateService handles this.
-      expect(gameState.addToEventQueue).not.toHaveBeenCalled();
-      expect(gameState.setEarthFlag).not.toHaveBeenCalled();
     });
 
     it('set_flag: calls setEarthFlag with true', () => {

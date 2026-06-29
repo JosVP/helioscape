@@ -18,12 +18,12 @@
           class="track-item__action track-item__action--resume"
           type="button"
           [disabled]="!vm().canResume"
-          [attr.title]="vm().canResume ? null : 'Not enough RP capacity'"
+          [attr.title]="vm().canResume ? null : 'No research slot available'"
           (click)="resume.emit(vm().def.id)"
         >Resume</button>
       }
       @case ('available') {
-        <span class="track-item__meta">{{ vm().def.rpCost }} RP · {{ vm().def.durationYears }} yrs</span>
+        <span class="track-item__meta">{{ vm().def.durationYears }} yrs</span>
         <button
           class="track-item__action track-item__action--start"
           type="button"

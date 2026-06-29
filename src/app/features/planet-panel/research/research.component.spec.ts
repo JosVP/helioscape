@@ -1,4 +1,4 @@
-import { TestBed, ComponentFixture } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { Subject } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
@@ -47,6 +47,7 @@ const completedTechsSig   = signal<string[]>(['prereq_tech']);
 const gameYearSig         = signal<number>(2050);
 const usedRpCapacitySig   = signal<number>(0);
 const totalRpCapacitySig  = signal<number>(60);
+const availableResearchSlotsSig = signal([{ id: 'earth_core_1', displayName: 'Earth Research I', planetId: 'earth', kind: 'default' as const }]);
 const researchTracksSig   = signal<ResearchTrack[]>([makeTrackDef()]);
 
 const mockGameState = {
@@ -55,6 +56,7 @@ const mockGameState = {
   gameYear:         gameYearSig.asReadonly(),
   usedRpCapacity:   usedRpCapacitySig.asReadonly(),
   totalRpCapacity:  totalRpCapacitySig.asReadonly(),
+  availableResearchSlots: availableResearchSlotsSig.asReadonly(),
 };
 
 const mockData = {
@@ -74,9 +76,8 @@ const mockResearchService = {
 // Setup
 // ---------------------------------------------------------------------------
 
-function setup(planetId = 'mars'): ComponentFixture<ResearchComponent> {
+function setup(planetId = 'mars'): ResearchComponent {
   TestBed.configureTestingModule({
-    imports: [ResearchComponent],
     providers: [
       { provide: GameStateService,  useValue: mockGameState },
       { provide: DataService,       useValue: mockData },
@@ -84,10 +85,12 @@ function setup(planetId = 'mars'): ComponentFixture<ResearchComponent> {
       { provide: ResearchService,   useValue: mockResearchService },
     ],
   });
-  const fixture = TestBed.createComponent(ResearchComponent);
-  fixture.componentRef.setInput('planetId', planetId);
-  fixture.detectChanges();
-  return fixture;
+  const component = TestBed.runInInjectionContext(() => new ResearchComponent());
+  Object.defineProperty(component, 'planetId', {
+    configurable: true,
+    value: () => planetId,
+  });
+  return component;
 }
 
 beforeEach(() => {
@@ -96,6 +99,7 @@ beforeEach(() => {
   gameYearSig.set(2050);
   usedRpCapacitySig.set(0);
   totalRpCapacitySig.set(60);
+  availableResearchSlotsSig.set([{ id: 'earth_core_1', displayName: 'Earth Research I', planetId: 'earth', kind: 'default' as const }]);
   researchTracksSig.set([makeTrackDef()]);
   mockResearchService.startTrack.mockReset();
   mockResearchService.pauseTrack.mockReset();
@@ -111,8 +115,8 @@ describe('ResearchComponent', () => {
   // ── Track bucketing ──────────────────────────────────────────────────────
 
   it('available track appears in availableTracks when prerequisite is met', () => {
-    const fixture = setup();
-    const avail = fixture.componentInstance.availableTracks();
+    const component = setup();
+    const avail = component.availableTracks();
     expect(avail).toHaveLength(1);
     expect(avail[0].def.id).toBe('track_a');
     expect(avail[0].status).toBe('available');
@@ -120,15 +124,15 @@ describe('ResearchComponent', () => {
 
   it('track with unmet prerequisite does NOT appear in availableTracks', () => {
     completedTechsSig.set([]); // prerequisite not met
-    const fixture = setup();
-    expect(fixture.componentInstance.availableTracks()).toHaveLength(0);
+    const component = setup();
+    expect(component.availableTracks()).toHaveLength(0);
   });
 
   it('running track appears in runningTracks', () => {
     // elapsed = elapsedBeforeStart(0) + (2050 - 2047) = 3 years
     activeResearchSig.set([makeActiveTrack({ isPaused: false, startYear: 2047, elapsedBeforeStart: 0 })]);
-    const fixture = setup();
-    const running = fixture.componentInstance.runningTracks();
+    const component = setup();
+    const running = component.runningTracks();
     expect(running).toHaveLength(1);
     expect(running[0].status).toBe('running');
     expect(running[0].progressPercent).toBeCloseTo(30);
@@ -139,8 +143,8 @@ describe('ResearchComponent', () => {
   it('paused track appears in pausedTracks', () => {
     // elapsed = elapsedBeforeStart(5) + 0 (paused) = 5 years
     activeResearchSig.set([makeActiveTrack({ isPaused: true, startYear: 2050, elapsedBeforeStart: 5 })]);
-    const fixture = setup();
-    const paused = fixture.componentInstance.pausedTracks();
+    const component = setup();
+    const paused = component.pausedTracks();
     expect(paused).toHaveLength(1);
     expect(paused[0].status).toBe('paused');
     expect(paused[0].progressPercent).toBe(50);
@@ -149,39 +153,36 @@ describe('ResearchComponent', () => {
 
   // ── canResume ─────────────────────────────────────────────────────────────
 
-  it('canResume is true when paused and sufficient capacity available', () => {
+  it('canResume is true when paused and a research slot is available', () => {
     activeResearchSig.set([makeActiveTrack({ isPaused: true })]);
-    usedRpCapacitySig.set(0);
-    totalRpCapacitySig.set(60); // free = 60, cost = 20 → ok
-    const fixture = setup();
-    expect(fixture.componentInstance.pausedTracks()[0].canResume).toBe(true);
+    const component = setup();
+    expect(component.pausedTracks()[0].canResume).toBe(true);
   });
 
-  it('canResume is false when paused and insufficient capacity', () => {
+  it('canResume is false when paused and no research slot is available', () => {
     activeResearchSig.set([makeActiveTrack({ isPaused: true })]);
-    usedRpCapacitySig.set(50);
-    totalRpCapacitySig.set(60); // free = 10, cost = 20 → blocked
-    const fixture = setup();
-    expect(fixture.componentInstance.pausedTracks()[0].canResume).toBe(false);
+    availableResearchSlotsSig.set([]);
+    const component = setup();
+    expect(component.pausedTracks()[0].canResume).toBe(false);
   });
 
   // ── Action delegation ─────────────────────────────────────────────────────
 
   it('start() calls ResearchService.startTrack with trackId and planetId', () => {
-    const fixture = setup('mars');
-    fixture.componentInstance.start('track_a');
+    const component = setup('mars');
+    component.start('track_a');
     expect(mockResearchService.startTrack).toHaveBeenCalledWith('track_a', 'mars');
   });
 
   it('pause() calls ResearchService.pauseTrack with trackId', () => {
-    const fixture = setup();
-    fixture.componentInstance.pause('track_a');
+    const component = setup();
+    component.pause('track_a');
     expect(mockResearchService.pauseTrack).toHaveBeenCalledWith('track_a');
   });
 
   it('resume() calls ResearchService.resumeTrack with trackId', () => {
-    const fixture = setup();
-    fixture.componentInstance.resume('track_a');
+    const component = setup();
+    component.resume('track_a');
     expect(mockResearchService.resumeTrack).toHaveBeenCalledWith('track_a');
   });
 
@@ -190,16 +191,14 @@ describe('ResearchComponent', () => {
   it('emitting researchCompleted$ removes track from runningTracks', () => {
     // 10 years elapsed = complete, but we simulate service completing it externally
     activeResearchSig.set([makeActiveTrack({ isPaused: false, startYear: 2040, elapsedBeforeStart: 0 })]);
-    const fixture = setup();
-    fixture.detectChanges();
-    expect(fixture.componentInstance.runningTracks()).toHaveLength(1);
+    const component = setup();
+    expect(component.runningTracks()).toHaveLength(1);
 
     // Simulate service completing the track: remove from active, add to completed.
     activeResearchSig.set([]);
     completedTechsSig.set(['prereq_tech', 'track_a']);
     researchCompleted$.next('track_a');
-    fixture.detectChanges();
 
-    expect(fixture.componentInstance.runningTracks()).toHaveLength(0);
+    expect(component.runningTracks()).toHaveLength(0);
   });
 });

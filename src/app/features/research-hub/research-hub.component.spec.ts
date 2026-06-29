@@ -1,379 +1,163 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { computed, signal } from '@angular/core';
 import { Subject } from 'rxjs';
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import type { ActiveResearchTrack, PendingFork, ResearchSlot, TechNode, TechUnlockedEvent } from '@app/core/models';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { ActiveResearchTrack, ResearchArcDefinition, ResearchLayoutData, ResearchNode, ResearchSlot } from '@app/core/models';
 import { DataService } from '@app/core/services/data.service';
 import { EventBusService } from '@app/core/services/event-bus.service';
 import { GameStateService } from '@app/core/services/game-state.service';
+import { ResearchArcService } from '@app/core/systems/research-arc.service';
 import { ResearchService } from '@app/core/systems/research.service';
 import { TechTreeService } from '@app/core/systems/tech-tree.service';
 import { ResearchHubComponent } from './research-hub.component';
 
-class ResizeObserverStub {
-  observe(): void {}
-  unobserve(): void {}
-  disconnect(): void {}
-}
-
-const TECH_NODES: TechNode[] = [
+const NODES: ResearchNode[] = [
+  makeNode({ id: 'earth_launch_mercury_mission', displayName: 'Launch Mercury Mission' }),
+  makeNode({ id: 'earth_parent', displayName: 'Parent Research' }),
+  makeNode({ id: 'earth_child', displayName: 'Child Research', prerequisites: ['earth_parent'] }),
+  makeNode({ id: 'moon_spillover', planet: 'moon', displayName: 'Moon Spillover', spilloverPrerequisites: ['earth_parent'] }),
   makeNode({
-    id: 'earth_launch_mercury_mission',
-    displayName: 'Launch Mercury Mission',
-    description: 'We open the first path outward.',
-    outcomeSummary: ['Unlocks early Moon research tracks.'],
-    tier: 0,
-    rpCost: 0,
-    durationYears: 0,
-  }),
-  makeNode({
-    id: 'earth_completed',
-    displayName: 'Completed Foundations',
-    description: 'The first foundation is already finished.',
-    outcomeSummary: ['This work is already part of our toolkit.'],
-    tier: 0,
-  }),
-  makeNode({
-    id: 'earth_available',
-    displayName: 'Available Energy Grid',
-    description: 'We can start this grid integration when we choose.',
-    outcomeSummary: ['Adds a path toward cleaner infrastructure.'],
-    tier: 1,
-    rpCost: 20,
-    durationYears: 8,
-  }),
-  makeNode({
-    id: 'earth_blocked_capacity',
-    displayName: 'Capacity Heavy Network',
-    description: 'This asks for more capacity than we can spare.',
-    outcomeSummary: ['Unlocks a wider infrastructure programme.'],
-    tier: 1,
-    rpCost: 80,
-  }),
-  makeNode({
-    id: 'earth_progress',
-    displayName: 'In Flight Materials',
-    description: 'This project is already moving through the labs.',
-    outcomeSummary: ['Improves orbital construction planning.'],
-    tier: 1,
-    durationYears: 10,
-  }),
-  makeNode({
-    id: 'earth_hint',
-    displayName: 'Hidden Follow-Up',
-    description: 'This description should stay hidden for hint nodes.',
-    outcomeSummary: ['This outcome should stay hidden.'],
-    prerequisites: ['earth_completed'],
-    tier: 2,
-  }),
-  makeNode({
-    id: 'earth_newly_available',
-    displayName: 'Newly Available Follow-Up',
-    description: 'This should not steal the inspector selection.',
-    outcomeSummary: ['Keeps the current selection stable.'],
-    prerequisites: ['earth_available'],
-    tier: 2,
-  }),
-  makeNode({
-    id: 'earth_preview_child',
-    displayName: 'Second-Layer Hidden Child',
-    description: 'This should not appear from another preview card.',
-    outcomeSummary: ['This outcome should remain hidden.'],
-    prerequisites: ['earth_newly_available'],
-    tier: 3,
-  }),
-  makeNode({
-    id: 'moon_low_gravity_medicine',
-    planet: 'moon',
-    displayName: 'Low Gravity Medicine',
-    description: 'This Moon track should begin as a shrouded preview.',
-    outcomeSummary: ['Supports life in low gravity.'],
-    spilloverPrerequisites: ['earth_launch_mercury_mission'],
-    tier: 1,
+    id: 'mars_transfer_target',
+    planet: 'mars',
+    displayName: 'Mars Transfer Target',
+    transfersFrom: [
+      { fromNodeId: 'earth_parent', effect: 'time_reduction', reason: 'shared tools', description: 'Earth tools shorten the work.' },
+    ],
   }),
 ];
 
-function makeNode(overrides: Partial<TechNode>): TechNode {
+const LAYOUT: ResearchLayoutData = {
+  hexSize: 38,
+  hexGap: 12,
+  regions: [{ id: 'earth-center', displayName: 'Earth', anchor: { q: 0, r: 0 } }],
+  nodes: NODES.map((node, index) => ({ nodeId: node.id, q: index * 2, r: 0, region: 'earth-center' })),
+};
+
+const ARCS: ResearchArcDefinition[] = [
+  {
+    id: 'deep_ocean_exploration',
+    displayName: 'Deep Ocean Exploration',
+    type: 'open',
+    progressMode: 'ongoing',
+    unlockNodeIds: ['earth_parent'],
+    description: 'We learn from oceans.',
+    nodeIds: ['earth_parent'],
+    knownFindings: [],
+  },
+];
+
+function makeNode(overrides: Partial<ResearchNode>): ResearchNode {
   return {
-    id: 'earth_node',
+    id: 'node',
     planet: 'earth',
-    displayName: 'Earth Node',
-    description: 'A test technology.',
-    outcomeSummary: ['A test outcome.'],
+    displayName: 'Node',
+    category: 'capability',
+    tier: 1,
+    durationYears: 10,
+    description: 'We study a thing.',
+    outcomeSummary: ['A useful outcome.'],
+    unlockCondition: 'Available for tests.',
     prerequisites: [],
     spilloverPrerequisites: [],
-    rpCost: 10,
-    durationYears: 5,
     effects: [],
-    ...overrides,
-  };
-}
-
-function makeActiveTrack(overrides: Partial<ActiveResearchTrack> = {}): ActiveResearchTrack {
-  return {
-    trackId: 'earth_progress',
-    planetId: 'earth',
-    isPaused: false,
-    startYear: 2038,
-    elapsedBeforeStart: 2,
     ...overrides,
   };
 }
 
 function makeGameStateFake() {
   const gameYear = signal(2040);
-  const completedTechs = signal<string[]>(['earth_completed']);
-  const completedResearchYears = signal<Record<string, number>>({ earth_completed: 2039 });
-  const activeResearch = signal<ActiveResearchTrack[]>([makeActiveTrack()]);
-  const usedRpCapacity = signal(0);
-  const totalRpCapacity = signal(60);
-  const pendingFork = signal<PendingFork | null>(null);
-  const visibleResearchSlots = signal<ResearchSlot[]>([
+  const completedTechs = signal<string[]>(['earth_parent']);
+  const completedResearchYears = signal<Record<string, number>>({ earth_parent: 2039 });
+  const activeResearch = signal<ActiveResearchTrack[]>([]);
+  const availableResearchSlots = signal<ResearchSlot[]>([
     { id: 'earth_core_1', displayName: 'Earth Research I', planetId: 'earth', kind: 'default' },
-    { id: 'earth_core_2', displayName: 'Earth Research II', planetId: 'earth', kind: 'default' },
   ]);
-  const occupiedResearchSlotIds = computed(() => {
-    const occupied = new Set<string>();
-    for (const track of activeResearch()) {
-      if (!track.isPaused && track.slotId) occupied.add(track.slotId);
-    }
-    return occupied;
-  });
-  const availableResearchSlots = computed(() => {
-    const occupied = occupiedResearchSlotIds();
-    return visibleResearchSlots().filter((slot) => !occupied.has(slot.id));
-  });
-
+  const pendingFork = signal(null);
+  const arcLog = signal({});
   return {
     gameYear: gameYear.asReadonly(),
     completedTechs: completedTechs.asReadonly(),
     completedResearchYears: completedResearchYears.asReadonly(),
     activeResearch: activeResearch.asReadonly(),
-    visibleResearchSlots: visibleResearchSlots.asReadonly(),
-    occupiedResearchSlotIds,
-    availableResearchSlots,
-    usedRpCapacity: usedRpCapacity.asReadonly(),
-    totalRpCapacity: totalRpCapacity.asReadonly(),
+    availableResearchSlots: availableResearchSlots.asReadonly(),
     pendingFork: pendingFork.asReadonly(),
-    setCompletedTechs: (techIds: string[]) => completedTechs.set(techIds),
-    setCompletedResearchYears: (years: Record<string, number>) => completedResearchYears.set(years),
-    setActiveResearch: (tracks: ActiveResearchTrack[]) => activeResearch.set(tracks),
-  };
-}
-
-function makeDataFake(): Pick<DataService, 'getTechNode' | 'getTechNodesForPlanet'> {
-  return {
-    getTechNode: (id: string) => TECH_NODES.find((node) => node.id === id),
-    getTechNodesForPlanet: (planetId: string) =>
-      TECH_NODES.filter((node) => node.planet === planetId),
-  };
-}
-
-function makeTechTreeFake(gameState: ReturnType<typeof makeGameStateFake>): Pick<TechTreeService, 'canUnlock'> {
-  return {
-    canUnlock: (_planetId: string, nodeId: string) => {
-      const node = TECH_NODES.find((candidate) => candidate.id === nodeId);
-      if (!node) return false;
-
-      const completed = gameState.completedTechs();
-      if (completed.includes(nodeId)) return false;
-
-      const directPrereqsMet =
-        node.prerequisites.length === 0 ||
-        (node.prerequisiteMode === 'any'
-          ? node.prerequisites.some((id) => completed.includes(id))
-          : node.prerequisites.every((id) => completed.includes(id)));
-      const spilloverMet = node.spilloverPrerequisites.every((id) => completed.includes(id));
-      return directPrereqsMet && spilloverMet;
-    },
-  };
-}
-
-function makeEventBusFake(): Pick<EventBusService, 'techUnlocked$' | 'researchCompleted$'> {
-  return {
-    techUnlocked$: new Subject<TechUnlockedEvent>(),
-    researchCompleted$: new Subject<string>(),
+    arcLog: arcLog.asReadonly(),
+    visibleResearchSlots: availableResearchSlots.asReadonly(),
+    occupiedResearchSlotIds: computed(() => new Set<string>()),
+    setCompletedTechs: (value: string[]) => completedTechs.set(value),
+    setActiveResearch: (value: ActiveResearchTrack[]) => activeResearch.set(value),
   };
 }
 
 describe('ResearchHubComponent', () => {
-  let fixture: ComponentFixture<ResearchHubComponent>;
   let gameState: ReturnType<typeof makeGameStateFake>;
-  let researchService: Pick<ResearchService, 'startTechTrack' | 'canStartTechTrack'>;
-  let eventBus: ReturnType<typeof makeEventBusFake>;
+  let researchService: Pick<ResearchService, 'canStartTechTrack' | 'startTechTrack' | 'pauseTrack' | 'resumeTrack'>;
 
-  beforeEach(async () => {
-    vi.stubGlobal('ResizeObserver', ResizeObserverStub);
-    vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback): number => {
-      callback(0);
-      return 1;
-    });
-
-    researchService = {
-      canStartTechTrack: vi.fn((nodeId: string) => nodeId !== 'earth_blocked_capacity'),
-      startTechTrack: vi.fn(),
-    };
+  beforeEach(() => {
+    TestBed.resetTestingModule();
+    vi.clearAllMocks();
     gameState = makeGameStateFake();
-    eventBus = makeEventBusFake();
-
-    await TestBed.configureTestingModule({
-      imports: [ResearchHubComponent],
+    researchService = {
+      canStartTechTrack: vi.fn(() => true),
+      startTechTrack: vi.fn(),
+      pauseTrack: vi.fn(),
+      resumeTrack: vi.fn(),
+    };
+    TestBed.configureTestingModule({
       providers: [
-        { provide: DataService, useValue: makeDataFake() },
+        {
+          provide: DataService,
+          useValue: {
+            getResearchLayout: () => LAYOUT,
+            getAllResearchNodes: () => NODES,
+            getAllResearchArcs: () => ARCS,
+          },
+        },
         { provide: GameStateService, useValue: gameState },
-        { provide: TechTreeService, useValue: makeTechTreeFake(gameState) },
-        { provide: EventBusService, useValue: eventBus },
+        { provide: TechTreeService, useValue: { canUnlock: (_planetId: string, nodeId: string) => nodeId !== 'earth_parent' } },
         { provide: ResearchService, useValue: researchService },
+        { provide: ResearchArcService, useValue: { getActiveTransfersForNode: () => [] } },
+        {
+          provide: EventBusService,
+          useValue: { researchCompleted$: new Subject<string>(), techUnlocked$: new Subject<{ planetId: string; nodeId: string }>() },
+        },
       ],
-    }).compileComponents();
-
-    fixture = TestBed.createComponent(ResearchHubComponent);
-    fixture.detectChanges();
+    });
   });
 
-  afterEach(() => {
-    vi.unstubAllGlobals();
-  });
-
-  function clickNode(nodeId: string): void {
-    const card = fixture.nativeElement.querySelector(`[data-node-id="${nodeId}"]`) as HTMLElement | null;
-    expect(card).not.toBeNull();
-    card?.click();
-    fixture.detectChanges();
+  function createComponent(): ResearchHubComponent {
+    return TestBed.runInInjectionContext(() => new ResearchHubComponent());
   }
 
-  function nodeCard(nodeId: string): HTMLElement | null {
-    return fixture.nativeElement.querySelector(`[data-node-id="${nodeId}"]`) as HTMLElement | null;
-  }
+  it('defaults to Mercury launch and builds one map tile per layout node', () => {
+    const component = createComponent();
 
-  function inspectorText(): string {
-    return fixture.nativeElement.querySelector('app-tech-node-inspector')?.textContent ?? '';
-  }
-
-  it('selects a node without starting research', () => {
-    clickNode('earth_available');
-
-    expect(inspectorText()).toContain('Available Energy Grid');
-    expect(researchService.startTechTrack).not.toHaveBeenCalled();
+    expect(component.selectedEntry()?.node.id).toBe('earth_launch_mercury_mission');
+    expect(component.mapNodes()).toHaveLength(NODES.length);
   });
 
-  it('starts research only from the inspector action', () => {
-    clickNode('earth_available');
+  it('derives prerequisite, spillover, and transfer lines from node data', () => {
+    const component = createComponent();
 
-    const startButton = fixture.nativeElement.querySelector('.tech-inspector__start') as HTMLButtonElement | null;
-    expect(startButton).not.toBeNull();
-    startButton?.click();
-
-    expect(researchService.startTechTrack).toHaveBeenCalledWith('earth_available', 'earth');
+    expect(component.mapLines().map((line) => line.kind).sort()).toEqual(['prerequisite', 'spillover', 'transfer']);
   });
 
-  it('shows completed nodes with completion year and no start action', () => {
-    clickNode('earth_completed');
+  it('starts, pauses, and resumes through ResearchService only', () => {
+    const component = createComponent();
 
-    expect(inspectorText()).toContain('Completed Foundations');
-    expect(inspectorText()).toContain('Year 2039');
-    expect(fixture.nativeElement.querySelector('.tech-inspector__start')).toBeNull();
+    component.onStartSelectedNode('earth_child');
+    component.onPauseSelectedNode('earth_child');
+    component.onResumeSelectedNode('earth_child');
+
+    expect(researchService.startTechTrack).toHaveBeenCalledWith('earth_child', 'earth');
+    expect(researchService.pauseTrack).toHaveBeenCalledWith('earth_child');
+    expect(researchService.resumeTrack).toHaveBeenCalledWith('earth_child');
   });
 
-  it('shows progress for in-progress nodes', () => {
-    clickNode('earth_progress');
+  it('shows standalone arc progress when an unlock node is complete', () => {
+    const component = createComponent();
 
-    expect(inspectorText()).toContain('In Flight Materials');
-    expect(fixture.nativeElement.querySelector('.tech-inspector__progress')).not.toBeNull();
-    expect(fixture.nativeElement.querySelector('.tech-inspector__start')).toBeNull();
-  });
-
-  it('shows capacity warning instead of start action when RP capacity is short', () => {
-    clickNode('earth_blocked_capacity');
-
-    expect(inspectorText()).toContain('All visible research slots are currently occupied.');
-    expect(fixture.nativeElement.querySelector('.tech-inspector__start')).toBeNull();
-  });
-
-  it('shows locked node details with known prerequisites', () => {
-    clickNode('earth_newly_available');
-
-    expect(inspectorText()).toContain('Newly Available Follow-Up');
-    expect(inspectorText()).toContain('Available Energy Grid');
-    expect(inspectorText()).toContain('This should not steal the inspector selection');
-    expect(inspectorText()).toContain('Keeps the current selection stable');
-  });
-
-  it('does not auto-select a newly available node after the current selection completes', () => {
-    clickNode('earth_available');
-    expect(inspectorText()).toContain('Available Energy Grid');
-
-    gameState.setCompletedTechs(['earth_completed', 'earth_available']);
-    gameState.setActiveResearch([]);
-    fixture.detectChanges();
-
-    expect(inspectorText()).toContain('Available Energy Grid');
-    expect(inspectorText()).not.toContain('Newly Available Follow-Up');
-  });
-
-  it('shows Moon spillover tracks as locked cards until unlocked', () => {
-    const moonPreview = nodeCard('moon_low_gravity_medicine');
-
-    expect(moonPreview).not.toBeNull();
-    expect(moonPreview?.classList).toContain('tech-node--locked');
-    expect(moonPreview?.textContent).toContain('Low Gravity Medicine');
-  });
-
-  it('shows locked follow-up nodes without hiding second-layer children', () => {
-    const directPreview = nodeCard('earth_newly_available');
-    const secondLayerPreview = nodeCard('earth_preview_child');
-
-    expect(directPreview).not.toBeNull();
-    expect(directPreview?.classList).toContain('tech-node--locked');
-    expect(secondLayerPreview).not.toBeNull();
-    expect(secondLayerPreview?.classList).toContain('tech-node--locked');
-  });
-
-  it('marks completed cards briefly after researchCompleted emits', () => {
-    vi.useFakeTimers();
-
-    eventBus.researchCompleted$.next('earth_available');
-    fixture.detectChanges();
-
-    expect(nodeCard('earth_available')?.classList).toContain('tech-node--completion-recent');
-
-    vi.advanceTimersByTime(2000);
-    fixture.detectChanges();
-
-    expect(nodeCard('earth_available')?.classList).not.toContain('tech-node--completion-recent');
-    vi.useRealTimers();
-  });
-
-  it('marks dependents when a completed prerequisite makes them available', () => {
-    vi.useFakeTimers();
-
-    gameState.setCompletedTechs(['earth_completed', 'earth_available']);
-    eventBus.techUnlocked$.next({ planetId: 'earth', nodeId: 'earth_available' });
-    fixture.detectChanges();
-
-    expect(nodeCard('earth_available')?.classList).toContain('tech-node--completion-recent');
-    expect(nodeCard('earth_newly_available')?.classList).toContain('tech-node--reveal-recent');
-
-    vi.advanceTimersByTime(2000);
-    fixture.detectChanges();
-
-    expect(nodeCard('earth_newly_available')?.classList).not.toContain('tech-node--reveal-recent');
-    vi.useRealTimers();
-  });
-
-  it('updates the selected in-progress inspector to completed without changing selection', () => {
-    clickNode('earth_progress');
-    expect(inspectorText()).toContain('In Flight Materials');
-    expect(fixture.nativeElement.querySelector('.tech-inspector__progress')).not.toBeNull();
-
-    gameState.setCompletedTechs(['earth_completed', 'earth_progress']);
-    gameState.setCompletedResearchYears({ earth_completed: 2039, earth_progress: 2041 });
-    gameState.setActiveResearch([]);
-    fixture.detectChanges();
-
-    expect(inspectorText()).toContain('In Flight Materials');
-    expect(inspectorText()).toContain('Year 2041');
-    expect(fixture.nativeElement.querySelector('.tech-inspector__start')).toBeNull();
-    expect(nodeCard('earth_progress')?.getAttribute('aria-current')).toBe('true');
+    expect(component.arcPanelViews()).toHaveLength(1);
+    expect(component.arcPanelViews()[0].progressText).toBe('Ongoing, 0 findings');
   });
 });

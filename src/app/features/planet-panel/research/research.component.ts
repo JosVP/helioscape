@@ -37,7 +37,7 @@ function buildVM(
   active: readonly ActiveResearchTrack[],
   completed: readonly string[],
   currentYear: number,
-  freeCapacity: number,
+  hasFreeSlot: boolean,
 ): ResearchTrackVM {
   const entry = active.find((t) => t.trackId === def.id) ?? null;
 
@@ -71,9 +71,7 @@ function buildVM(
       ? currentYear + yearsRemaining
       : null;
 
-  // A paused track's rpCost is NOT counted in usedRpCapacity (GameStateService
-  // excludes paused tracks from the sum), so freeCapacity is the true budget.
-  const canResume = status === 'paused' && def.rpCost <= freeCapacity;
+  const canResume = status === 'paused' && hasFreeSlot;
 
   return { def, active: entry, status, progressPercent, yearsRemaining, completionYear, canResume };
 }
@@ -118,8 +116,8 @@ export class ResearchComponent {
     const active       = this.gameState.activeResearch();
     const completed    = this.gameState.completedTechs();
     const year         = this.gameState.gameYear();
-    const freeCapacity = this.gameState.totalRpCapacity() - this.gameState.usedRpCapacity();
-    return defs.map((def) => buildVM(def, active, completed, year, freeCapacity));
+    const hasFreeSlot  = this.gameState.availableResearchSlots().length > 0;
+    return defs.map((def) => buildVM(def, active, completed, year, hasFreeSlot));
   });
 
   readonly runningTracks   = computed(() => this.allTracks().filter((t) => t.status === 'running'));

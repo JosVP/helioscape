@@ -1,0 +1,29 @@
+<button
+  class="research-hex-tile"
+  type="button"
+  [attr.data-node-id]="entry().node.id"
+  [attr.data-planet]="entry().node.planet"
+  [attr.data-status]="entry().visibility"
+  [class.research-hex-tile--selected]="selected()"
+  [class.research-hex-tile--new]="isRevealRecent()"
+  [class.research-hex-tile--recent]="isCompletionRecent()"
+  [attr.aria-label]="ariaLabel()"
+  (click)="onSelect()"
+>
+  <span class="research-hex-tile__frame" aria-hidden="true"></span>
+  <span class="research-hex-tile__content">
+    <span class="research-hex-tile__planet">{{ entry().node.planet }}</span>
+    <span class="research-hex-tile__name">{{ entry().node.displayName }}</span>
+    <span class="research-hex-tile__status">{{ statusLabel() }}</span>
+  </span>
+
+  @if (entry().progressPercent !== undefined) {
+    <span class="research-hex-tile__progress" aria-hidden="true">
+      <span class="research-hex-tile__progress-fill" [style.--progress]="entry().progressPercent! / 100"></span>
+    </span>
+  }
+
+  @if (isRevealRecent()) {
+    <span class="research-hex-tile__badge">New</span>
+  }
+</button>

@@ -62,6 +62,7 @@ export class GameShellComponent implements OnInit, OnDestroy {
   readonly selectedPlanetId = signal<string | null>(null);
   readonly isPauseMenuOpen = signal(false);
   readonly isResearchHubOpen = signal(false);
+  readonly pendingResearchHubFocusNodeId = signal<string | null>(null);
   /** Controls which full-screen view is shown. Orrery is hidden (not destroyed) when Mercury is active. */
   readonly activeView = signal<'orrery' | 'mercury'>('orrery');
 
@@ -83,7 +84,11 @@ export class GameShellComponent implements OnInit, OnDestroy {
 
     this.eventBus.researchHubRequested$
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => this.isResearchHubOpen.set(true));
+      .subscribe(() => this.openResearchHub(null));
+
+    this.eventBus.researchHubFocusRequested$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(({ nodeId }) => this.openResearchHub(nodeId ?? null));
   }
 
   ngOnDestroy(): void {
@@ -125,6 +130,16 @@ export class GameShellComponent implements OnInit, OnDestroy {
 
   closeResearchHub(): void {
     this.isResearchHubOpen.set(false);
+    this.pendingResearchHubFocusNodeId.set(null);
+  }
+
+  onResearchHubFocusHandled(): void {
+    this.pendingResearchHubFocusNodeId.set(null);
+  }
+
+  private openResearchHub(nodeId: string | null): void {
+    this.pendingResearchHubFocusNodeId.set(nodeId);
+    this.isResearchHubOpen.set(true);
   }
 
   private handlePlanetSelection(id: string): void {

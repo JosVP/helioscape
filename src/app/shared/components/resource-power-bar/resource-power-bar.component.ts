@@ -3,12 +3,13 @@ import { DecimalPipe } from '@angular/common';
 import { DataService } from '@app/core/services/data.service';
 import { GameStateService } from '@app/core/services/game-state.service';
 import type { ResourceStore } from '@app/core/models';
+import { ResearchSlotStripComponent } from '@app/shared/components/research-slot-strip/research-slot-strip.component';
 
 @Component({
   selector: 'app-resource-power-bar',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DecimalPipe],
+  imports: [DecimalPipe, ResearchSlotStripComponent],
   templateUrl: './resource-power-bar.component.html',
   styleUrl: './resource-power-bar.component.scss',
 })

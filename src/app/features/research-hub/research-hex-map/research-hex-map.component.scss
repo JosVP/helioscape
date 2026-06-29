@@ -1,0 +1,100 @@
+:host {
+  display: block;
+  min-width: 0;
+  min-height: 0;
+}
+
+.research-hex-map {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  border-right: var(--border-subtle);
+  background:
+    radial-gradient(circle at 48% 52%, color-mix(in srgb, var(--color-accent) 10%, transparent), transparent 35%),
+    radial-gradient(circle at 18% 24%, color-mix(in srgb, var(--color-mars) 8%, transparent), transparent 28%),
+    radial-gradient(circle at 78% 20%, color-mix(in srgb, var(--color-venus) 7%, transparent), transparent 26%),
+    linear-gradient(135deg, color-mix(in srgb, var(--color-bg-base) 56%, transparent), transparent);
+  cursor: grab;
+  touch-action: none;
+
+  &--dragging {
+    cursor: grabbing;
+  }
+
+  &__content {
+    position: absolute;
+    inset: 0;
+    transform-origin: 0 0;
+    will-change: transform;
+  }
+
+  &__lines {
+    position: absolute;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  &__line {
+    fill: none;
+    stroke: var(--color-accent-dim);
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    opacity: 0.42;
+    transition: var(--transition-ui);
+
+    &--spillover {
+      stroke-dasharray: 8 7;
+      opacity: 0.55;
+    }
+
+    &--transfer {
+      stroke-dasharray: 2 8;
+      opacity: 0.62;
+    }
+
+    &--contextual {
+      opacity: 0.16;
+      stroke-width: 1.2;
+    }
+
+    &--long {
+      opacity: 0.1;
+      stroke-width: 1;
+    }
+
+    &--focused {
+      opacity: 0.82;
+      stroke-width: 2.4;
+      filter: drop-shadow(0 0 5px color-mix(in srgb, var(--color-accent-glow) 55%, transparent));
+    }
+
+    &[data-planet='earth'] { stroke: var(--color-earth); }
+    &[data-planet='moon'] { stroke: var(--color-moon); }
+    &[data-planet='mars'] { stroke: var(--color-mars); }
+    &[data-planet='venus'] { stroke: var(--color-venus); }
+    &[data-planet='mercury'] { stroke: var(--color-mercury); }
+  }
+
+  &__tile {
+    position: absolute;
+  }
+
+  &__region-label {
+    position: absolute;
+    z-index: 0;
+    transform: translate(-50%, -50%);
+    padding: var(--space-xs) var(--space-sm);
+    border: 1px solid color-mix(in srgb, var(--color-accent-dim) 24%, transparent);
+    border-radius: var(--radius-sm);
+    background: color-mix(in srgb, var(--color-bg-base) 42%, transparent);
+    color: color-mix(in srgb, var(--color-text-muted) 82%, transparent);
+    font-family: var(--font-display);
+    font-size: var(--text-xs);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    pointer-events: none;
+    user-select: none;
+  }
+}

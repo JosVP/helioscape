@@ -1,202 +1,50 @@
-<!-- Backdrop -->
 <div class="research-hub__backdrop" (click)="close()" aria-hidden="true"></div>
 
-<!-- Panel -->
 <div class="research-hub__panel" role="dialog" aria-modal="true" aria-labelledby="research-hub-title">
-
-  <!-- Header -->
-  <div class="research-hub__header">
+  <header class="research-hub__header">
     <div class="research-hub__header-text">
       <h2 class="research-hub__title" id="research-hub-title">Research Hub</h2>
       <p class="research-hub__subtitle">
-        Every idea that has carried us further began here.
-        Expand what we know, and open new paths for the worlds we are building.
+        Every idea that carries us further begins here.
       </p>
     </div>
 
-    <div class="research-hub__slots" aria-label="Research slots">
-      @for (slot of gameState.visibleResearchSlots(); track slot.id) {
-        <div class="research-hub__slot">
-          <span class="research-hub__slot-name">{{ slot.displayName }}</span>
-          <span class="research-hub__slot-state">
-            {{ gameState.occupiedResearchSlotIds().has(slot.id) ? 'Active' : 'Empty' }}
-          </span>
-        </div>
-      }
-    </div>
+    <app-research-slot-strip />
 
     <button
       #closeBtn
       class="research-hub__close"
+      type="button"
       aria-label="Close Research Hub"
       (click)="close()"
     >✕</button>
-  </div>
+  </header>
 
-  <!-- Tech tree + inspector grid -->
-  <div class="research-hub__grid" #gridContainer>
-
-    <!-- SVG line overlay -->
-    <svg class="research-hub__lines" #svgOverlay aria-hidden="true"></svg>
-
-    <div class="research-hub__side-rail" (scroll)="onTreeScroll()">
-      <!-- Mars column (read-only spillover display) -->
-      <div class="research-hub__column research-hub__column--mars">
-        <div class="research-hub__column-header">
-          <img
-            src="/assets/svg/planets/mars.svg"
-            class="research-hub__planet-icon"
-            alt=""
-            aria-hidden="true"
-            width="32"
-            height="32"
-          />
-          <span class="research-hub__column-name">Mars</span>
-          <span class="research-hub__column-subtitle">Terraforming milestones</span>
-        </div>
-
-        <div class="research-hub__nodes">
-          @for (row of marsTierRows(); track $index) {
-            <div class="research-hub__tier-row">
-              @for (entry of row; track entry.node.id) {
-                <app-tech-node-card
-                  [node]="entry.node"
-                  [visibility]="entry.visibility"
-                  [interactive]="true"
-                  [selected]="selectedEntry()?.node?.id === entry.node.id"
-                  [isCompletionRecent]="recentlyCompletedIds().has(entry.node.id)"
-                  [isRevealRecent]="newlyAvailableIds().has(entry.node.id)"
-                  [progressPercent]="entry.progressPercent"
-                  [etaYear]="entry.etaYear"
-                  planetId="mars"
-                  (nodeSelected)="onNodeSelect($event)"
-                />
-              }
-            </div>
-          }
-        </div>
-      </div>
-
-      <!-- Venus column (read-only spillover display) -->
-      <div class="research-hub__column research-hub__column--venus">
-        <div class="research-hub__column-header">
-          <img
-            src="/assets/svg/planets/venus.svg"
-            class="research-hub__planet-icon"
-            alt=""
-            aria-hidden="true"
-            width="32"
-            height="32"
-          />
-          <span class="research-hub__column-name">Venus</span>
-          <span class="research-hub__column-subtitle">Terraforming milestones</span>
-        </div>
-
-        <div class="research-hub__nodes">
-          @for (row of venusTierRows(); track $index) {
-            <div class="research-hub__tier-row">
-              @for (entry of row; track entry.node.id) {
-                <app-tech-node-card
-                  [node]="entry.node"
-                  [visibility]="entry.visibility"
-                  [interactive]="true"
-                  [selected]="selectedEntry()?.node?.id === entry.node.id"
-                  [isCompletionRecent]="recentlyCompletedIds().has(entry.node.id)"
-                  [isRevealRecent]="newlyAvailableIds().has(entry.node.id)"
-                  [progressPercent]="entry.progressPercent"
-                  [etaYear]="entry.etaYear"
-                  planetId="venus"
-                  (nodeSelected)="onNodeSelect($event)"
-                />
-              }
-            </div>
-          }
-        </div>
-      </div>
-    </div>
-
-    <!-- Earth + Moon column (interactive) -->
-    <div class="research-hub__column research-hub__column--earth" (scroll)="onTreeScroll()">
-      <div class="research-hub__column-header">
-        <img
-          src="/assets/svg/planets/earth.svg"
-          class="research-hub__planet-icon"
-          alt=""
-          aria-hidden="true"
-          width="32"
-          height="32"
-        />
-        <span class="research-hub__column-name">Earth</span>
-        <span class="research-hub__column-subtitle">Research &amp; technology</span>
-      </div>
-
-      <div class="research-hub__nodes">
-        @for (row of earthTierRows(); track $index) {
-          <div class="research-hub__tier-row">
-            @for (entry of row; track entry.node.id) {
-              <app-tech-node-card
-                [node]="entry.node"
-                [visibility]="entry.visibility"
-                [interactive]="entry.interactive"
-                [selected]="selectedEntry()?.node?.id === entry.node.id"
-                [isCompletionRecent]="recentlyCompletedIds().has(entry.node.id)"
-                [isRevealRecent]="newlyAvailableIds().has(entry.node.id)"
-                [progressPercent]="entry.progressPercent"
-                [etaYear]="entry.etaYear"
-                planetId="earth"
-                (nodeSelected)="onNodeSelect($event)"
-              />
-            }
-          </div>
-        }
-      </div>
-
-      <!-- Moon sub-section -->
-      <div class="research-hub__moon-header">
-        <img
-          src="/assets/svg/planets/moon.svg"
-          class="research-hub__planet-icon research-hub__planet-icon--small"
-          alt=""
-          aria-hidden="true"
-          width="24"
-          height="24"
-        />
-        <span class="research-hub__column-name research-hub__column-name--small">Moon</span>
-        <span class="research-hub__column-subtitle">Research outpost</span>
-      </div>
-
-      <div class="research-hub__nodes">
-        @for (row of moonTierRows(); track $index) {
-          <div class="research-hub__tier-row">
-            @for (entry of row; track entry.node.id) {
-              <app-tech-node-card
-                [node]="entry.node"
-                [visibility]="entry.visibility"
-                [interactive]="entry.interactive"
-                [selected]="selectedEntry()?.node?.id === entry.node.id"
-                [isCompletionRecent]="recentlyCompletedIds().has(entry.node.id)"
-                [isRevealRecent]="newlyAvailableIds().has(entry.node.id)"
-                [progressPercent]="entry.progressPercent"
-                [etaYear]="entry.etaYear"
-                planetId="moon"
-                (nodeSelected)="onNodeSelect($event)"
-              />
-            }
-          </div>
-        }
-      </div>
-    </div>
-
-    <app-tech-node-inspector
-      [viewModel]="selectedInspectorVm()"
-      (startRequested)="onStartSelectedNode($event)"
+  <div class="research-hub__body">
+    <app-research-hex-map
+      [nodes]="mapNodes()"
+      [lines]="mapLines()"
+      [layout]="layout"
+      [selectedNodeId]="selectedEntry()?.node?.id ?? null"
+      [recentlyCompletedIds]="recentlyCompletedIds()"
+      [newlyAvailableIds]="newlyAvailableIds()"
+      (nodeSelected)="onNodeSelect($event)"
     />
 
-  </div><!-- /.research-hub__grid -->
+    <aside class="research-hub__right-panel">
+      <app-research-node-details
+        [viewModel]="selectedDetailsVm()"
+        (startRequested)="onStartSelectedNode($event)"
+        (pauseRequested)="onPauseSelectedNode($event)"
+        (resumeRequested)="onResumeSelectedNode($event)"
+        (prerequisiteFocused)="focusNode($event)"
+      />
 
-  <!-- Fork choice modal (Block 7.3 stub) -->
+      <app-research-arc-progress-panel [arcs]="arcPanelViews()" />
+    </aside>
+  </div>
+
   @if (showForkModal() && pendingFork() !== null) {
     <app-fork-choice-modal [fork]="pendingFork()!" />
   }
-
-</div><!-- /.research-hub__panel -->
+</div>

@@ -141,6 +141,17 @@ function mockFetchFor(service: DataService, overrides: Record<string, unknown> =
   const defaults: Record<string, unknown> = {
     '/data/planets.json': fakePlanets,
     '/data/research-tracks.json': fakeResearchNodes,
+    '/data/research-layout.json': {
+      hexSize: 38,
+      hexGap: 12,
+      regions: [{ id: 'earth-center', displayName: 'Earth', anchor: { q: 0, r: 0 } }],
+      nodes: fakeResearchNodes.map((node, index) => ({
+        nodeId: node.id,
+        q: index * 2,
+        r: 0,
+        region: 'earth-center',
+      })),
+    },
     '/data/research-arcs.json': [],
     '/data/culture-events.json': fakeCultureEvents,
     '/data/kardashev-milestones.json': fakeMilestones,
@@ -210,10 +221,11 @@ describe('DataService', () => {
 
       await service.loadAll();
 
-      expect(fetchMock).toHaveBeenCalledTimes(11);
+      expect(fetchMock).toHaveBeenCalledTimes(12);
       expect(fetchMock).not.toHaveBeenCalledWith('/data/tech-tree.json');
       expect(fetchMock).toHaveBeenCalledWith('/data/planets.json');
       expect(fetchMock).toHaveBeenCalledWith('/data/research-tracks.json');
+      expect(fetchMock).toHaveBeenCalledWith('/data/research-layout.json');
       expect(fetchMock).toHaveBeenCalledWith('/data/research-arcs.json');
       expect(fetchMock).toHaveBeenCalledWith('/data/mercury-buildings.json');
       expect(fetchMock).toHaveBeenCalledWith('/data/mercury-components.json');
@@ -302,6 +314,22 @@ describe('DataService', () => {
 
     it('getAllResearchNodes() returns all canonical research nodes', () => {
       expect(service.getAllResearchNodes()).toHaveLength(3);
+    });
+
+    it('getResearchLayout() returns authored layout metadata', () => {
+      const layout = service.getResearchLayout();
+      expect(layout.hexSize).toBe(38);
+      expect(layout.nodes).toHaveLength(fakeResearchNodes.length);
+    });
+
+    it('getResearchLayoutNode() returns a layout entry by node id', () => {
+      const layoutNode = service.getResearchLayoutNode('earth_launch_mercury_mission');
+      expect(layoutNode).toEqual({
+        nodeId: 'earth_launch_mercury_mission',
+        q: 0,
+        r: 0,
+        region: 'earth-center',
+      });
     });
 
     it('getTechNode() temporarily returns a node by id', () => {

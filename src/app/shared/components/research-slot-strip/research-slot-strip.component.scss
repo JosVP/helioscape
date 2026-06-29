@@ -1,0 +1,118 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.research-slot-strip {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 32px minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-xs);
+  min-width: 340px;
+
+  &__side {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    min-width: 0;
+
+    &--left {
+      justify-content: flex-end;
+    }
+
+    &--right {
+      justify-content: flex-start;
+    }
+  }
+
+  &__slot,
+  &__hub-button {
+    border: 1px solid var(--color-border-subtle);
+    background: var(--color-bg-elevated);
+    color: var(--color-text-secondary);
+    transition: var(--transition-ui);
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+      border-color: var(--color-accent);
+      color: var(--color-text-primary);
+      outline: none;
+      box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent) 24%, transparent);
+    }
+  }
+
+  &__slot {
+    display: grid;
+    grid-template-rows: auto auto 3px;
+    gap: 2px;
+    width: 112px;
+    min-height: 30px;
+    padding: 3px var(--space-xs);
+    border-radius: var(--radius-sm);
+    text-align: left;
+
+    &--occupied {
+      color: var(--color-text-primary);
+      border-color: color-mix(in srgb, var(--color-accent) 45%, var(--color-border-subtle));
+    }
+
+    &--venus,
+    &--mars {
+      width: 98px;
+      opacity: 0.9;
+    }
+  }
+
+  &__slot-label,
+  &__slot-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__slot-label {
+    color: var(--color-text-muted);
+    font-size: 8px;
+    text-transform: uppercase;
+  }
+
+  &__slot-name {
+    font-size: var(--text-xs);
+  }
+
+  &__track {
+    display: block;
+    height: 3px;
+    background: color-mix(in srgb, var(--color-bg-surface) 75%, black);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  &__fill {
+    display: block;
+    width: calc(var(--slot-progress, 0) * 100%);
+    height: 100%;
+    background: var(--color-accent);
+    transition: width 1s linear;
+
+    &--from-right {
+      margin-left: auto;
+    }
+
+    &--from-left {
+      margin-right: auto;
+    }
+  }
+
+  &__hub-button {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--text-md);
+    line-height: 1;
+  }
+}

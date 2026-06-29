@@ -160,6 +160,10 @@ describe('MercuryBuildService', () => {
   let data: ReturnType<typeof makeDataFake>;
   let eventBus: ReturnType<typeof makeEventBusFake>;
 
+  beforeEach(() => {
+    TestBed.resetTestingModule();
+  });
+
   function setup(components: MercuryComponent[] = [], gameStateOpts: Parameters<typeof makeGameStateFake>[0] = {}) {
     gameState = makeGameStateFake(gameStateOpts);
     data = makeDataFake(components);
@@ -197,7 +201,7 @@ describe('MercuryBuildService', () => {
 
     it('returns false when unlockCondition is not in earthFlags', () => {
       setup(
-        [makeComponent({ id: 'odn', unlockCondition: 'mercury_phase_2_complete' })],
+        [makeComponent({ id: 'odn', unlockCondition: 'mercury_ready' })],
         { earthFlags: {} },
       );
       expect(service.queueComponent('odn', 'mars')).toBe(false);

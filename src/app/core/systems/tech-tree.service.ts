@@ -15,9 +15,6 @@ import { TerraformingService } from './terraforming.service';
  * GameStateService, calls mutation methods on GameStateService, and emits
  * notifications on EventBusService.
  *
- * Signals that depend on completedTechs (e.g. GameStateService.rpCapacityBoosts)
- * are updated automatically when unlockTech() is called — no explicit handling
- * is needed for rp_capacity_boost effects.
  */
 @Injectable({ providedIn: 'root' })
 export class TechTreeService {
@@ -242,10 +239,6 @@ export class TechTreeService {
    * Applies a single TechEffect to game state.
    *
    * Each case maps to the corresponding GameStateService mutation.
-   * rp_capacity_boost is intentionally a no-op here: GameStateService derives
-   * the total RP capacity via a computed signal from completedTechs, so the boost
-   * is reflected automatically once the associated tech is in completedTechs.
-   *
    * apply_terraforming_choice delegates to TerraformingService.applyChoice() which
    * handles validation, state writes, special-case side effects, and event emission.
    */
@@ -285,11 +278,6 @@ export class TechTreeService {
           effect.bonus === 'dense_living' ? 'denseLiving' : 'openEnvironment',
           true
         );
-        break;
-
-      case 'rp_capacity_boost':
-        // No direct mutation needed. GameStateService.rpCapacityBoosts is a computed
-        // signal that sums rp_capacity_boost effects across all completedTechs.
         break;
 
       case 'set_flag':

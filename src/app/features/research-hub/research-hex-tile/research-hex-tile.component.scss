@@ -1,0 +1,150 @@
+:host {
+	display: block;
+}
+
+.research-hex-tile {
+	position: relative;
+	width: 108px;
+	height: 94px;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	color: var(--color-text-secondary);
+	cursor: pointer;
+	transform: translate(-50%, -50%);
+
+	&__frame {
+		position: absolute;
+		inset: 0;
+		clip-path: polygon(25% 3%, 75% 3%, 100% 50%, 75% 97%, 25% 97%, 0 50%);
+		border: 1px solid transparent;
+		background: linear-gradient(
+			180deg,
+			color-mix(in srgb, var(--color-bg-elevated) 92%, transparent),
+			color-mix(in srgb, var(--color-bg-surface) 88%, var(--color-bg-base))
+		);
+		box-shadow:
+			inset 0 0 0 1px color-mix(in srgb, var(--color-border-strong) 62%, transparent),
+			0 8px 20px color-mix(in srgb, var(--color-bg-base) 34%, transparent);
+		transition: var(--transition-ui);
+	}
+
+	&__content {
+		position: relative;
+		z-index: 1;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		gap: var(--space-xs);
+		height: 100%;
+		padding: var(--space-md) var(--space-sm);
+		box-sizing: border-box;
+		text-align: center;
+		pointer-events: none;
+	}
+
+	&__planet,
+	&__status {
+		font-family: var(--font-display);
+		font-size: 8px;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+	}
+
+	&__planet {
+		color: var(--color-text-muted);
+	}
+
+	&__name {
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+		color: var(--color-text-primary);
+		font-size: var(--text-xs);
+		line-height: 1.25;
+	}
+
+	&__status {
+		color: var(--color-text-secondary);
+	}
+
+	&__progress {
+		position: absolute;
+		z-index: 2;
+		left: var(--space-lg);
+		right: var(--space-lg);
+		bottom: var(--space-md);
+		height: 4px;
+		overflow: hidden;
+		border-radius: 999px;
+		background: color-mix(in srgb, var(--color-bg-base) 70%, transparent);
+	}
+
+	&__progress-fill {
+		display: block;
+		height: 100%;
+		width: calc(var(--progress, 0) * 100%);
+		background: var(--color-accent);
+		transition: width 1s linear;
+	}
+
+	&__badge {
+		position: absolute;
+		z-index: 3;
+		top: var(--space-xs);
+		right: var(--space-sm);
+		padding: 1px var(--space-xs);
+		border-radius: var(--radius-sm);
+		background: var(--color-accent);
+		color: var(--color-bg-base);
+		font-family: var(--font-display);
+		font-size: 7px;
+		text-transform: uppercase;
+	}
+
+	&[data-status='available'] &__frame,
+	&[data-status='running'] &__frame,
+	&[data-status='paused'] &__frame {
+		box-shadow:
+			inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 65%, transparent),
+			0 0 18px color-mix(in srgb, var(--color-accent) 14%, transparent);
+	}
+
+	&[data-status='completed'] &__frame {
+		box-shadow:
+			inset 0 0 0 1px color-mix(in srgb, var(--color-good) 55%, transparent),
+			0 0 14px color-mix(in srgb, var(--color-good) 12%, transparent);
+	}
+
+	&[data-status='locked'],
+	&[data-status='post_v1'] {
+		opacity: 0.38;
+		filter: saturate(0.45);
+	}
+
+	&[data-planet='earth'] &__planet { color: var(--color-earth); }
+	&[data-planet='moon'] &__planet { color: var(--color-moon); }
+	&[data-planet='mars'] &__planet { color: var(--color-mars); }
+	&[data-planet='venus'] &__planet { color: var(--color-venus); }
+	&[data-planet='mercury'] &__planet { color: var(--color-mercury); }
+
+	&--selected &__frame,
+	&:hover &__frame,
+	&:focus-visible &__frame {
+		box-shadow:
+			inset 0 0 0 2px var(--color-accent-glow),
+			0 0 22px color-mix(in srgb, var(--color-accent-glow) 24%, transparent);
+	}
+
+	&:focus-visible {
+		outline: none;
+	}
+}
+
+:host-context(.reduced-motion) .research-hex-tile {
+	&__frame,
+	&__progress-fill {
+		transition: none;
+	}
+}

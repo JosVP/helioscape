@@ -1,0 +1,286 @@
+{
+  "hexSize": 38,
+  "hexGap": 12,
+  "regions": [
+    {
+      "id": "earth-center",
+      "displayName": "Earth",
+      "anchor": {
+        "q": 0,
+        "r": -1
+      }
+    },
+    {
+      "id": "moon-lower",
+      "displayName": "Moon",
+      "anchor": {
+        "q": -2,
+        "r": 5
+      }
+    },
+    {
+      "id": "mars-upper-left",
+      "displayName": "Mars",
+      "anchor": {
+        "q": -6,
+        "r": -6
+      }
+    },
+    {
+      "id": "venus-upper-right",
+      "displayName": "Venus",
+      "anchor": {
+        "q": 6,
+        "r": -6
+      }
+    }
+  ],
+  "nodes": [
+    {
+      "nodeId": "earth_launch_mercury_mission",
+      "q": 0,
+      "r": 0,
+      "region": "earth-center"
+    },
+    {
+      "nodeId": "earth_advanced_renewables",
+      "q": 0,
+      "r": -2,
+      "region": "earth-center"
+    },
+    {
+      "nodeId": "earth_dome_habitat",
+      "q": 2,
+      "r": -2,
+      "region": "earth-center"
+    },
+    {
+      "nodeId": "earth_deuterium_extraction",
+      "q": 0,
+      "r": -4,
+      "region": "earth-center"
+    },
+    {
+      "nodeId": "earth_ocean_cleanup",
+      "q": -2,
+      "r": 0,
+      "region": "earth-center"
+    },
+    {
+      "nodeId": "earth_fusion_ignition_theory",
+      "q": 0,
+      "r": -6,
+      "region": "earth-center"
+    },
+    {
+      "nodeId": "earth_co2_drawdown",
+      "q": -2,
+      "r": -2,
+      "region": "earth-center"
+    },
+    {
+      "nodeId": "earth_soil_restoration",
+      "q": -3,
+      "r": 1,
+      "region": "earth-center"
+    },
+    {
+      "nodeId": "earth_ocean_acidification_reversal",
+      "q": -4,
+      "r": -3,
+      "region": "earth-center"
+    },
+    {
+      "nodeId": "earth_rewilding",
+      "q": -5,
+      "r": 1,
+      "region": "earth-center"
+    },
+    {
+      "nodeId": "earth_automated_food_systems",
+      "q": 2,
+      "r": -4,
+      "region": "earth-center"
+    },
+    {
+      "nodeId": "earth_vertical_megacity",
+      "q": 4,
+      "r": -4,
+      "region": "earth-center"
+    },
+    {
+      "nodeId": "earth_arcology_framework",
+      "q": 5,
+      "r": -6,
+      "region": "earth-center"
+    },
+    {
+      "nodeId": "earth_subsurface_city",
+      "q": 3,
+      "r": -7,
+      "region": "earth-center"
+    },
+    {
+      "nodeId": "earth_planetary_resource_grid",
+      "q": 6,
+      "r": -4,
+      "region": "earth-center"
+    },
+    {
+      "nodeId": "earth_geoengineering_bureau",
+      "q": 8,
+      "r": -4,
+      "region": "earth-center"
+    },
+    {
+      "nodeId": "earth_neural_digital_integration",
+      "q": 5,
+      "r": -8,
+      "region": "earth-center"
+    },
+    {
+      "nodeId": "earth_planetary_coordination_network",
+      "q": 7,
+      "r": -8,
+      "region": "earth-center"
+    },
+    {
+      "nodeId": "moon_low_gravity_medicine",
+      "q": -4,
+      "r": 4,
+      "region": "moon-lower"
+    },
+    {
+      "nodeId": "moon_closed_loop_life_support",
+      "q": -2,
+      "r": 4,
+      "region": "moon-lower"
+    },
+    {
+      "nodeId": "moon_regolith_construction",
+      "q": 0,
+      "r": 4,
+      "region": "moon-lower"
+    },
+    {
+      "nodeId": "moon_organism_library_t1",
+      "q": 2,
+      "r": 4,
+      "region": "moon-lower"
+    },
+    {
+      "nodeId": "moon_radiation_resilience",
+      "q": -5,
+      "r": 6,
+      "region": "moon-lower"
+    },
+    {
+      "nodeId": "moon_isolation_psychology",
+      "q": -3,
+      "r": 7,
+      "region": "moon-lower"
+    },
+    {
+      "nodeId": "moon_he3_extraction",
+      "q": -1,
+      "r": 7,
+      "region": "moon-lower"
+    },
+    {
+      "nodeId": "moon_organism_library_t2",
+      "q": 1,
+      "r": 6,
+      "region": "moon-lower"
+    },
+    {
+      "nodeId": "mars_polar_detonation",
+      "q": -8,
+      "r": -6,
+      "region": "mars-upper-left"
+    },
+    {
+      "nodeId": "mars_orbital_mirrors",
+      "q": -6,
+      "r": -7,
+      "region": "mars-upper-left"
+    },
+    {
+      "nodeId": "mars_magnetic_umbrella",
+      "q": -4,
+      "r": -7,
+      "region": "mars-upper-left"
+    },
+    {
+      "nodeId": "mars_aerogel_domes",
+      "q": -2,
+      "r": -6,
+      "region": "mars-upper-left"
+    },
+    {
+      "nodeId": "mars_comet_water_delivery",
+      "q": -6,
+      "r": -9,
+      "region": "mars-upper-left"
+    },
+    {
+      "nodeId": "mars_ocean_confirmed",
+      "q": -8,
+      "r": -8,
+      "region": "mars-upper-left"
+    },
+    {
+      "nodeId": "mars_biological_seeding",
+      "q": -9,
+      "r": -6,
+      "region": "mars-upper-left"
+    },
+    {
+      "nodeId": "mars_soil_study_complete",
+      "q": -8,
+      "r": -4,
+      "region": "mars-upper-left"
+    },
+    {
+      "nodeId": "mars_coastal_stable",
+      "q": -6,
+      "r": -3,
+      "region": "mars-upper-left"
+    },
+    {
+      "nodeId": "venus_orbital_shade_mirror",
+      "q": 6,
+      "r": -7,
+      "region": "venus-upper-right"
+    },
+    {
+      "nodeId": "venus_carbonate_sequestration",
+      "q": 4,
+      "r": -8,
+      "region": "venus-upper-right"
+    },
+    {
+      "nodeId": "venus_carbonate_process_started",
+      "q": 3,
+      "r": -6,
+      "region": "venus-upper-right"
+    },
+    {
+      "nodeId": "venus_europa_impact",
+      "q": 8,
+      "r": -8,
+      "region": "venus-upper-right"
+    },
+    {
+      "nodeId": "venus_sky_cities",
+      "q": 9,
+      "r": -6,
+      "region": "venus-upper-right"
+    },
+    {
+      "nodeId": "venus_sky_city_descent",
+      "q": 10,
+      "r": -5,
+      "region": "venus-upper-right"
+    }
+  ]
+}

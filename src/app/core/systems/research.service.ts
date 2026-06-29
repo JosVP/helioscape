@@ -156,7 +156,7 @@ export class ResearchService {
     this.gameState.pauseResearch(trackId);
   }
 
-  /** Resumes a paused track, checking RP capacity first. */
+  /** Resumes a paused track after checking that a compatible research slot is free. */
   resumeTrack(trackId: string): void {
     const track = this.gameState.activeResearch().find((t) => t.trackId === trackId);
     if (!track?.isPaused) return;

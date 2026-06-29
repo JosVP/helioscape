@@ -3,6 +3,8 @@
     "id": "hunt_for_life",
     "displayName": "Hunt for Life",
     "type": "open",
+    "progressMode": "ongoing",
+    "unlockNodeIds": ["mars_ocean_confirmed", "mars_biological_seeding"],
     "description": "We connect every clue about water, chemistry, and biology into one patient search for living worlds.",
     "nodeIds": ["mars_ocean_confirmed", "mars_biological_seeding"],
     "knownFindings": [
@@ -22,6 +24,8 @@
     "id": "deep_ocean_exploration",
     "displayName": "Deep Ocean Exploration",
     "type": "open",
+    "progressMode": "ongoing",
+    "unlockNodeIds": ["earth_ocean_cleanup", "earth_ocean_acidification_reversal"],
     "description": "We learn how pressure, darkness, chemistry, and patience shape oceans we cannot easily touch.",
     "nodeIds": ["earth_ocean_cleanup", "earth_ocean_acidification_reversal"],
     "knownFindings": [
@@ -36,6 +40,9 @@
     "id": "solar_gravitational_lens",
     "displayName": "Solar Gravitational Lens",
     "type": "closed",
+    "progressMode": "finite",
+    "totalFindings": 1,
+    "unlockNodeIds": ["earth_fusion_ignition_theory"],
     "description": "We turn stellar gravity into an instrument and use the Sun itself as part of the telescope.",
     "nodeIds": ["earth_fusion_ignition_theory"],
     "knownFindings": [
@@ -50,6 +57,8 @@
     "id": "understanding_the_universe",
     "displayName": "Understanding the Universe",
     "type": "open",
+    "progressMode": "ongoing",
+    "unlockNodeIds": ["earth_fusion_ignition_theory", "moon_closed_loop_life_support"],
     "description": "Every practical breakthrough also changes the questions we are capable of asking.",
     "nodeIds": ["earth_fusion_ignition_theory", "moon_closed_loop_life_support"],
     "knownFindings": [

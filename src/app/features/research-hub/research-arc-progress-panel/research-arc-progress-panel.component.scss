@@ -1,0 +1,106 @@
+@keyframes research-arc-sweep {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
+}
+
+:host {
+  display: block;
+  min-height: 0;
+}
+
+.research-arc-panel {
+  min-height: 0;
+  padding: var(--space-md) var(--space-lg) var(--space-lg);
+  border-top: 1px solid color-mix(in srgb, var(--color-accent-dim) 22%, transparent);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--color-bg-elevated) 18%, transparent), transparent),
+    color-mix(in srgb, var(--color-bg-base) 34%, transparent);
+
+  &__title {
+    margin: 0 0 var(--space-sm);
+    color: var(--color-accent-glow);
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    text-transform: uppercase;
+  }
+
+  &__list {
+    display: grid;
+    gap: var(--space-sm);
+    max-height: 28dvh;
+    overflow-y: auto;
+  }
+
+  &__arc {
+    padding: var(--space-sm);
+    border: 1px solid color-mix(in srgb, var(--color-border-strong) 68%, transparent);
+    border-radius: var(--radius-md);
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--color-bg-elevated) 66%, transparent), transparent),
+      color-mix(in srgb, var(--color-bg-base) 26%, transparent);
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      gap: var(--space-sm);
+      color: var(--color-text-primary);
+      font-family: var(--font-display);
+      font-size: var(--text-xs);
+    }
+
+    small {
+      color: var(--color-text-secondary);
+    }
+
+    p,
+    li {
+      color: var(--color-text-secondary);
+      font-size: var(--text-xs);
+      line-height: 1.45;
+    }
+
+    ul {
+      margin: var(--space-xs) 0 0;
+      padding-left: var(--space-md);
+    }
+
+    &[data-mode='ongoing'] .research-arc-panel__fill {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+
+      &::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, transparent, var(--color-accent-glow), transparent);
+        animation: research-arc-sweep 2.4s linear infinite;
+      }
+    }
+  }
+
+  &__track {
+    height: 5px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--color-bg-base);
+  }
+
+  &__fill {
+    display: block;
+    width: calc(var(--progress, 0) * 100%);
+    height: 100%;
+    background: var(--color-accent);
+    transition: width 1s linear;
+  }
+}
+
+:host-context(.reduced-motion) .research-arc-panel {
+  &__arc[data-mode='ongoing'] .research-arc-panel__fill::after {
+    animation: none;
+  }
+
+  &__fill {
+    transition: none;
+  }
+}

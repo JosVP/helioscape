@@ -198,6 +198,10 @@ export interface ForkPresentedEvent {
   techId: string;
 }
 
+export interface ResearchHubFocusRequestEvent {
+  nodeId?: string;
+}
+
 export interface PlanetTransitEvent {
   planetId: string;
   missionId: string;

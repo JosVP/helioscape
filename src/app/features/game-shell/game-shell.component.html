@@ -28,7 +28,11 @@
 />
 
 @if (isResearchHubOpen()) {
-  <app-research-hub (closed)="closeResearchHub()" />
+  <app-research-hub
+    [focusedNodeId]="pendingResearchHubFocusNodeId()"
+    (focusHandled)="onResearchHubFocusHandled()"
+    (closed)="closeResearchHub()"
+  />
 }
 
 <app-resource-power-bar [showReservationInputs]="activeView() === 'mercury'" />

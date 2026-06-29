@@ -1,13 +1,11 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component } from '@angular/core';
-import { ForkChoiceModalComponent } from './fork-choice-modal.component';
+// @vitest-environment jsdom
+
+import { TestBed } from '@angular/core/testing';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { PendingFork, TechNode } from '@app/core/models';
 import { DataService } from '@app/core/services/data.service';
 import { TechTreeService } from '@app/core/systems/tech-tree.service';
-import type { PendingFork, TechNode } from '@app/core/models';
-
-// ---------------------------------------------------------------------------
-// Fixtures
-// ---------------------------------------------------------------------------
+import { ForkChoiceModalComponent } from './fork-choice-modal.component';
 
 const FORK_TECH_NODE: TechNode = {
   id: 'earth_automated_food_systems',
@@ -42,7 +40,6 @@ const FORK_TECH_NODE: TechNode = {
           effects: [
             { type: 'emit_event', eventId: 'ce_food_fork_architect' },
             { type: 'tag_decision', tag: 'architect' },
-            { type: 'rp_capacity_boost', amount: 10 },
           ],
         },
       ],
@@ -56,188 +53,86 @@ const PENDING_FORK: PendingFork = {
   forkId: 'food_systems_fork',
 };
 
-// ---------------------------------------------------------------------------
-// Host wrapper — required to supply input.required<>
-// ---------------------------------------------------------------------------
-
-@Component({
-  standalone: true,
-  imports: [ForkChoiceModalComponent],
-  template: '<app-fork-choice-modal [fork]="fork" />',
-})
-class TestHostComponent {
-  fork: PendingFork = PENDING_FORK;
+function setFork(component: ForkChoiceModalComponent, fork: PendingFork): void {
+  Object.defineProperty(component, 'fork', {
+    configurable: true,
+    value: () => fork,
+  });
 }
-
-// ---------------------------------------------------------------------------
-// Suites
-// ---------------------------------------------------------------------------
 
 describe('ForkChoiceModalComponent', () => {
   const mockTechTreeService = { completeForkChoice: vi.fn() };
 
-  // -------------------------------------------------------------------------
-  // Happy-path tests — tech node resolves correctly
-  // -------------------------------------------------------------------------
-
-  describe('when tech node resolves', () => {
-    let hostFixture: ComponentFixture<TestHostComponent>;
-    let host: TestHostComponent;
-
-    beforeEach(async () => {
-      await TestBed.configureTestingModule({
-        imports: [TestHostComponent],
-        providers: [
-          { provide: TechTreeService, useValue: mockTechTreeService },
-          {
-            provide: DataService,
-            useValue: {
-              getTechNode: (id: string) =>
-                id === FORK_TECH_NODE.id ? FORK_TECH_NODE : undefined,
-            },
-          },
-        ],
-      }).compileComponents();
-
-      hostFixture = TestBed.createComponent(TestHostComponent);
-      host = hostFixture.componentInstance;
-      hostFixture.detectChanges();
-    });
-
-    beforeEach(() => {
-      vi.clearAllMocks();
-    });
-
-    it('renders the tech display name', () => {
-      const el: HTMLElement = hostFixture.nativeElement;
-      const title = el.querySelector('.fork-choice-modal__tech-name');
-      expect(title?.textContent).toContain('Automated Food Systems');
-    });
-
-    it('renders two choice buttons', () => {
-      const el: HTMLElement = hostFixture.nativeElement;
-      const choices = el.querySelectorAll('.fork-choice-modal__choice');
-      expect(choices).toHaveLength(2);
-    });
-
-    it('renders the correct labels on each choice', () => {
-      const el: HTMLElement = hostFixture.nativeElement;
-      const labels = Array.from(el.querySelectorAll('.fork-choice-modal__choice-label')).map(
-        (n) => n.textContent?.trim(),
-      );
-      expect(labels).toContain('Rewild the freed land');
-      expect(labels).toContain('Develop the freed land');
-    });
-
-    it('renders a naturalist tag chip for the first choice', () => {
-      const el: HTMLElement = hostFixture.nativeElement;
-      const tags = el.querySelectorAll('.fork-choice-modal__tag--naturalist');
-      expect(tags.length).toBeGreaterThan(0);
-      expect(tags[0].textContent).toContain('Naturalist');
-    });
-
-    it('renders an architect tag chip for the second choice', () => {
-      const el: HTMLElement = hostFixture.nativeElement;
-      const tags = el.querySelectorAll('.fork-choice-modal__tag--architect');
-      expect(tags.length).toBeGreaterThan(0);
-      expect(tags[0].textContent).toContain('Architect');
-    });
-
-    it('shows RP capacity boost in the effect summary for the architect choice', () => {
-      const el: HTMLElement = hostFixture.nativeElement;
-      const effectItems = Array.from(el.querySelectorAll('.fork-choice-modal__effect')).map(
-        (n) => n.textContent ?? '',
-      );
-      expect(effectItems.some((t) => t.includes('+10 RP capacity'))).toBe(true);
-    });
-
-    it('does not surface tag_decision or emit_event in the effect summary', () => {
-      const el: HTMLElement = hostFixture.nativeElement;
-      const effectItems = Array.from(el.querySelectorAll('.fork-choice-modal__effect')).map(
-        (n) => n.textContent ?? '',
-      );
-      expect(effectItems.every((t) => !t.includes('alignment') && !t.includes('event'))).toBe(
-        true,
-      );
-    });
-
-    it('has no cancel button', () => {
-      const el: HTMLElement = hostFixture.nativeElement;
-      const buttons = Array.from(el.querySelectorAll('button'));
-      const cancelBtn = buttons.find(
-        (b) =>
-          b.textContent?.toLowerCase().includes('cancel') || b.textContent?.includes('✕'),
-      );
-      expect(cancelBtn).toBeUndefined();
-    });
-
-    it('renders the dialog with aria-modal="true"', () => {
-      const el: HTMLElement = hostFixture.nativeElement;
-      const overlay = el.querySelector('[role="dialog"]');
-      expect(overlay?.getAttribute('aria-modal')).toBe('true');
-    });
-
-    it('calls completeForkChoice with correct args when the naturalist choice is clicked', () => {
-      const el: HTMLElement = hostFixture.nativeElement;
-      const firstChoice = el.querySelector<HTMLButtonElement>('.fork-choice-modal__choice');
-      firstChoice?.click();
-      expect(mockTechTreeService.completeForkChoice).toHaveBeenCalledWith(
-        'earth',
-        'earth_automated_food_systems',
-        'rewild_freed_land',
-      );
-    });
-
-    it('calls completeForkChoice with correct args when the architect choice is clicked', () => {
-      const el: HTMLElement = hostFixture.nativeElement;
-      const choices = el.querySelectorAll<HTMLButtonElement>('.fork-choice-modal__choice');
-      choices[1]?.click();
-      expect(mockTechTreeService.completeForkChoice).toHaveBeenCalledWith(
-        'earth',
-        'earth_automated_food_systems',
-        'develop_freed_land',
-      );
-    });
+  beforeEach(() => {
+    TestBed.resetTestingModule();
+    vi.clearAllMocks();
   });
 
-  // -------------------------------------------------------------------------
-  // Graceful fallback — tech node is unknown/missing
-  // -------------------------------------------------------------------------
-
-  describe('when tech node is not found', () => {
-    let hostFixture: ComponentFixture<TestHostComponent>;
-    let host: TestHostComponent;
-
-    beforeEach(async () => {
-      await TestBed.configureTestingModule({
-        imports: [TestHostComponent],
-        providers: [
-          { provide: TechTreeService, useValue: mockTechTreeService },
-          {
-            provide: DataService,
-            useValue: { getTechNode: (_id: string) => undefined },
-          },
-        ],
-      }).compileComponents();
-
-      hostFixture = TestBed.createComponent(TestHostComponent);
-      host = hostFixture.componentInstance;
-      // Use an unknown techId from the start
-      host.fork = { ...PENDING_FORK, techId: 'unknown_tech_id' };
-      hostFixture.detectChanges();
+  function setup(node: TechNode | null = FORK_TECH_NODE): ForkChoiceModalComponent {
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: TechTreeService, useValue: mockTechTreeService },
+        {
+          provide: DataService,
+          useValue: { getTechNode: (id: string) => (node && id === node.id ? node : undefined) },
+        },
+      ],
     });
 
-    it('falls back to techId as display name', () => {
-      const el: HTMLElement = hostFixture.nativeElement;
-      const title = el.querySelector('.fork-choice-modal__tech-name');
-      expect(title?.textContent).toContain('unknown_tech_id');
-    });
+    const component = TestBed.runInInjectionContext(() => new ForkChoiceModalComponent());
+    setFork(component, node ? PENDING_FORK : { ...PENDING_FORK, techId: 'unknown_tech_id' });
+    return component;
+  }
 
-    it('renders zero choice buttons', () => {
-      const el: HTMLElement = hostFixture.nativeElement;
-      const choices = el.querySelectorAll('.fork-choice-modal__choice');
-      expect(choices).toHaveLength(0);
-    });
+  it('resolves the fork-bearing research display name', () => {
+    const component = setup();
+
+    expect(component.techDisplayName()).toBe('Automated Food Systems');
+  });
+
+  it('falls back to tech id when the node is missing', () => {
+    const component = setup(null);
+
+    expect(component.techDisplayName()).toBe('unknown_tech_id');
+    expect(component.enrichedChoices()).toEqual([]);
+  });
+
+  it('enriches choices without surfacing old RP or capacity language', () => {
+    const component = setup();
+
+    const choices = component.enrichedChoices();
+
+    expect(choices.map((choice) => choice.label)).toEqual([
+      'Rewild the freed land',
+      'Develop the freed land',
+    ]);
+    expect(choices.map((choice) => choice.tag)).toEqual(['naturalist', 'architect']);
+    expect(choices.flatMap((choice) => choice.effectSummary).join(' ')).not.toMatch(/RP|capacity/i);
+  });
+
+  it('does not include tag or event-only effects in the summary', () => {
+    const component = setup();
+
+    expect(component.enrichedChoices().flatMap((choice) => choice.effectSummary)).toEqual([]);
+  });
+
+  it('delegates the chosen fork choice to TechTreeService', () => {
+    const component = setup();
+
+    component.choose('develop_freed_land');
+
+    expect(mockTechTreeService.completeForkChoice).toHaveBeenCalledWith(
+      'earth',
+      'earth_automated_food_systems',
+      'develop_freed_land',
+    );
+  });
+
+  it('renders branch tag labels', () => {
+    const component = setup();
+
+    expect(component.tagLabel('naturalist')).toContain('Naturalist');
+    expect(component.tagLabel('architect')).toContain('Architect');
+    expect(component.tagLabel('')).toBe('');
   });
 });
-

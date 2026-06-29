@@ -94,14 +94,14 @@
     "durationYears": 25,
     "description": "We stop treating the ocean as a place where mistakes disappear. Fleets, microbes, and law begin pulling a century of fragments home.",
     "outcomeSummary": [
-      "Becomes available after Mercury Phase 1 spillover.",
+      "Becomes available after the Mercury mission begins.",
       "Strengthens Earth's Naturalist recovery arc.",
       "Improves the baseline for later ocean restoration work."
     ],
-    "unlockCondition": "Requires mercury phase 1 complete.",
+    "unlockCondition": "Requires Launch Mercury Mission.",
     "prerequisites": [],
     "spilloverPrerequisites": [
-      "mercury_phase_1_complete"
+      "earth_launch_mercury_mission"
     ],
     "effects": [],
     "visualOrder": 5,
@@ -252,7 +252,7 @@
     "outcomeSummary": [
       "Presents a fork between Naturalist rewilding and Architect development.",
       "Can trigger a culture event through the chosen fork outcome.",
-      "The Architect choice adds RP capacity."
+      "The chosen branch sets the tone for later Earth identity research."
     ],
     "unlockCondition": "Complete Advanced Renewables Integration.",
     "prerequisites": [
@@ -291,10 +291,6 @@
               {
                 "type": "tag_decision",
                 "tag": "architect"
-              },
-              {
-                "type": "rp_capacity_boost",
-                "amount": 10
               }
             ]
           }
@@ -315,7 +311,7 @@
     "description": "We build upward with discipline, concentrating people, services, and transit so a city can grow without endlessly widening its wound.",
     "outcomeSummary": [
       "Adds an Architect branch decision tag.",
-      "Increases RP capacity by 15.",
+      "Concentrates housing and services without widening the city footprint.",
       "Triggers the first 50-million megacity culture event."
     ],
     "unlockCondition": "Complete Advanced Renewables Integration.",
@@ -327,10 +323,6 @@
       {
         "type": "tag_decision",
         "tag": "architect"
-      },
-      {
-        "type": "rp_capacity_boost",
-        "amount": 15
       },
       {
         "type": "emit_event",
@@ -412,7 +404,7 @@
     "description": "We connect supply, need, weather, harvest, transit, and waste into one visible system, then use that visibility to prevent suffering early.",
     "outcomeSummary": [
       "Adds an Architect branch decision tag.",
-      "Increases RP capacity by 10.",
+      "Makes supply risks visible early enough for coordinated response.",
       "Triggers a culture event about famine prevented before it starts."
     ],
     "unlockCondition": "Complete Arcology Framework.",
@@ -424,10 +416,6 @@
       {
         "type": "tag_decision",
         "tag": "architect"
-      },
-      {
-        "type": "rp_capacity_boost",
-        "amount": 10
       },
       {
         "type": "emit_event",
@@ -474,7 +462,7 @@
     "description": "We study the boundary between mind and system carefully, because a civilisation that thinks faster still has to decide wisely.",
     "outcomeSummary": [
       "Adds an Architect branch decision tag.",
-      "Increases RP capacity by 20.",
+      "Frames the debate over human judgment inside planetary systems.",
       "Triggers a major culture event about human-system integration."
     ],
     "unlockCondition": "Complete Planetary Resource Grid and Fusion Ignition Theory.",
@@ -487,10 +475,6 @@
       {
         "type": "tag_decision",
         "tag": "architect"
-      },
-      {
-        "type": "rp_capacity_boost",
-        "amount": 20
       },
       {
         "type": "emit_event",
@@ -510,7 +494,7 @@
     "description": "We let the planet's logistics run with a steadier intelligence, then ask what humans choose when survival is no longer the daily assignment.",
     "outcomeSummary": [
       "Adds an Architect branch decision tag.",
-      "Increases RP capacity by 30.",
+      "Coordinates planetary logistics as a mature civic system.",
       "Triggers a culture event about life after planetary automation."
     ],
     "unlockCondition": "Complete Neural-Digital Integration Research.",
@@ -522,10 +506,6 @@
       {
         "type": "tag_decision",
         "tag": "architect"
-      },
-      {
-        "type": "rp_capacity_boost",
-        "amount": 30
       },
       {
         "type": "emit_event",
@@ -717,320 +697,6 @@
     "iconPath": "/assets/svg/tech-tree/moon_organism_library_t2.svg"
   },
   {
-    "id": "mercury_landing_pad",
-    "planet": "mercury",
-    "displayName": "Landing Pad",
-    "category": "reactive",
-    "tier": 1,
-    "durationYears": 5,
-    "description": "We mark the first safe place to arrive on Mercury, where sunlight is harsh enough to build a future and careless enough to kill one.",
-    "outcomeSummary": [
-      "One of three requirements for Mercury Phase 0.",
-      "Establishes crew and cargo arrival infrastructure.",
-      "Begins the Mercury industrial base."
-    ],
-    "unlockCondition": "Requires earth launch mercury mission.",
-    "prerequisites": [],
-    "spilloverPrerequisites": [
-      "earth_launch_mercury_mission"
-    ],
-    "effects": [],
-    "visualOrder": 27,
-    "iconPath": "/assets/svg/tech-tree/mercury_landing_pad.svg"
-  },
-  {
-    "id": "mercury_power_cell",
-    "planet": "mercury",
-    "displayName": "Power Cell",
-    "category": "reactive",
-    "tier": 1,
-    "durationYears": 5,
-    "description": "We give the first Mercury outpost a dependable heartbeat, compact enough to survive the crater rim and strong enough to start work.",
-    "outcomeSummary": [
-      "One of three requirements for Mercury Phase 0.",
-      "Provides early base power.",
-      "Prepares the outpost for sustained resource operations."
-    ],
-    "unlockCondition": "Requires earth launch mercury mission.",
-    "prerequisites": [],
-    "spilloverPrerequisites": [
-      "earth_launch_mercury_mission"
-    ],
-    "effects": [],
-    "visualOrder": 28,
-    "iconPath": "/assets/svg/tech-tree/mercury_power_cell.svg"
-  },
-  {
-    "id": "mercury_mining_facility",
-    "planet": "mercury",
-    "displayName": "Mining Facility",
-    "category": "reactive",
-    "tier": 1,
-    "durationYears": 5,
-    "description": "We begin with a small bite into Mercury's crust, careful enough to survive and steady enough to feed everything that follows.",
-    "outcomeSummary": [
-      "One of three requirements for Mercury Phase 0.",
-      "Starts local ore access.",
-      "Enables the industrial chain that will later build Dyson panels."
-    ],
-    "unlockCondition": "Requires earth launch mercury mission.",
-    "prerequisites": [],
-    "spilloverPrerequisites": [
-      "earth_launch_mercury_mission"
-    ],
-    "effects": [],
-    "visualOrder": 29,
-    "iconPath": "/assets/svg/tech-tree/mercury_mining_facility.svg"
-  },
-  {
-    "id": "mercury_phase_0_complete",
-    "planet": "mercury",
-    "displayName": "Mercury Phase 0 Complete",
-    "category": "reactive",
-    "tier": 2,
-    "durationYears": 0,
-    "description": "The first Mercury base becomes more than a landing site. It can power itself, receive cargo, and pull material from the ground.",
-    "outcomeSummary": [
-      "Applies Mercury phase 0 state.",
-      "Unlocks Phase 1 Mercury infrastructure.",
-      "Confirms the first industrial foothold near the Sun."
-    ],
-    "unlockCondition": "Complete Landing Pad and Power Cell and Mining Facility.",
-    "prerequisites": [
-      "mercury_landing_pad",
-      "mercury_power_cell",
-      "mercury_mining_facility"
-    ],
-    "spilloverPrerequisites": [],
-    "effects": [
-      {
-        "type": "apply_terraforming_choice",
-        "planet": "mercury",
-        "choiceId": "phase_0",
-        "permanent": true
-      }
-    ],
-    "visualOrder": 30,
-    "iconPath": "/assets/svg/tech-tree/mercury_phase_0_complete.svg"
-  },
-  {
-    "id": "mercury_refinery",
-    "planet": "mercury",
-    "displayName": "Refinery",
-    "category": "capability",
-    "tier": 3,
-    "durationYears": 10,
-    "description": "We stop shipping raw promise and start turning ore into usable streams, separating the useful from the merely heavy.",
-    "outcomeSummary": [
-      "One requirement for Mercury Phase 1.",
-      "Improves Mercury's local material chain.",
-      "Prepares resources for fabrication and expansion."
-    ],
-    "unlockCondition": "Complete Mercury Phase 0 Complete.",
-    "prerequisites": [
-      "mercury_phase_0_complete"
-    ],
-    "spilloverPrerequisites": [],
-    "effects": [],
-    "visualOrder": 31,
-    "iconPath": "/assets/svg/tech-tree/mercury_refinery.svg"
-  },
-  {
-    "id": "mercury_fabricator",
-    "planet": "mercury",
-    "displayName": "Fabricator",
-    "category": "capability",
-    "tier": 3,
-    "durationYears": 10,
-    "description": "We teach the base to make parts for itself, shifting Mercury from an outpost supplied by Earth to an outpost that can answer back.",
-    "outcomeSummary": [
-      "One requirement for Mercury Phase 1.",
-      "Enables local construction capacity.",
-      "Supports later Dyson and component production chains."
-    ],
-    "unlockCondition": "Complete Mercury Phase 0 Complete.",
-    "prerequisites": [
-      "mercury_phase_0_complete"
-    ],
-    "spilloverPrerequisites": [],
-    "effects": [],
-    "visualOrder": 32,
-    "iconPath": "/assets/svg/tech-tree/mercury_fabricator.svg"
-  },
-  {
-    "id": "mercury_solar_array_expansion",
-    "planet": "mercury",
-    "displayName": "Solar Array Expansion",
-    "category": "capability",
-    "tier": 3,
-    "durationYears": 10,
-    "description": "We unfold collectors under a sun that never feels distant, converting Mercury's danger into the base's first abundance.",
-    "outcomeSummary": [
-      "One requirement for Mercury Phase 1.",
-      "Expands base power infrastructure.",
-      "Foreshadows the Dyson swarm production role."
-    ],
-    "unlockCondition": "Complete Mercury Phase 0 Complete.",
-    "prerequisites": [
-      "mercury_phase_0_complete"
-    ],
-    "spilloverPrerequisites": [],
-    "effects": [],
-    "visualOrder": 33,
-    "iconPath": "/assets/svg/tech-tree/mercury_solar_array_expansion.svg"
-  },
-  {
-    "id": "mercury_rare_metals_mining",
-    "planet": "mercury",
-    "displayName": "Rare Metals Mining",
-    "category": "capability",
-    "tier": 3,
-    "durationYears": 12,
-    "description": "We move beyond common ore and begin finding the stubborn elements that make advanced machines precise, durable, and worth the trouble.",
-    "outcomeSummary": [
-      "One requirement for Mercury Phase 1.",
-      "Opens access to advanced industrial materials.",
-      "Supports future component and panel upgrades."
-    ],
-    "unlockCondition": "Complete Mercury Phase 0 Complete.",
-    "prerequisites": [
-      "mercury_phase_0_complete"
-    ],
-    "spilloverPrerequisites": [],
-    "effects": [],
-    "visualOrder": 34,
-    "iconPath": "/assets/svg/tech-tree/mercury_rare_metals_mining.svg"
-  },
-  {
-    "id": "mercury_phase_1_complete",
-    "planet": "mercury",
-    "displayName": "Mercury Phase 1 Complete",
-    "category": "reactive",
-    "tier": 3,
-    "durationYears": 0,
-    "description": "Mercury can now refine, fabricate, power, and mine beyond survival. The base becomes an industrial organism.",
-    "outcomeSummary": [
-      "Applies Mercury phase 1 state.",
-      "Unlocks Ocean Macro-Plastic Cleanup spillover on Earth.",
-      "Opens Phase 2 Mercury infrastructure."
-    ],
-    "unlockCondition": "Complete Refinery and Fabricator and Solar Array Expansion and Rare Metals Mining.",
-    "prerequisites": [
-      "mercury_refinery",
-      "mercury_fabricator",
-      "mercury_solar_array_expansion",
-      "mercury_rare_metals_mining"
-    ],
-    "spilloverPrerequisites": [],
-    "effects": [
-      {
-        "type": "apply_terraforming_choice",
-        "planet": "mercury",
-        "choiceId": "phase_1",
-        "permanent": true
-      }
-    ],
-    "visualOrder": 35,
-    "iconPath": "/assets/svg/tech-tree/mercury_phase_1_complete.svg"
-  },
-  {
-    "id": "mercury_mass_driver",
-    "planet": "mercury",
-    "displayName": "Mass Driver",
-    "category": "capability",
-    "tier": 3,
-    "durationYears": 15,
-    "description": "We build a machine that throws finished work into orbit, turning Mercury's surface into the launch rail for a solar civilisation.",
-    "outcomeSummary": [
-      "One requirement for Mercury Phase 2.",
-      "Prepares orbital delivery for Dyson panels and planet components.",
-      "Enables the mass-driver backbone of Mercury industry."
-    ],
-    "unlockCondition": "Complete Mercury Phase 1 Complete.",
-    "prerequisites": [
-      "mercury_phase_1_complete"
-    ],
-    "spilloverPrerequisites": [],
-    "effects": [],
-    "visualOrder": 36,
-    "iconPath": "/assets/svg/tech-tree/mercury_mass_driver.svg"
-  },
-  {
-    "id": "mercury_dyson_panel_production",
-    "planet": "mercury",
-    "displayName": "Dyson Panel Production",
-    "category": "capability",
-    "tier": 3,
-    "durationYears": 18,
-    "description": "We begin manufacturing the mirrored fields that will make sunlight a shared infrastructure rather than a weather condition.",
-    "outcomeSummary": [
-      "One requirement for Mercury Phase 2.",
-      "Starts the production base for Dyson swarm panels.",
-      "Connects Mercury industry to Kardashev progression."
-    ],
-    "unlockCondition": "Complete Mercury Phase 1 Complete.",
-    "prerequisites": [
-      "mercury_phase_1_complete"
-    ],
-    "spilloverPrerequisites": [],
-    "effects": [],
-    "visualOrder": 37,
-    "iconPath": "/assets/svg/tech-tree/mercury_dyson_panel_production.svg"
-  },
-  {
-    "id": "mercury_polar_volatiles_extraction",
-    "planet": "mercury",
-    "displayName": "Polar Volatiles Extraction",
-    "category": "capability",
-    "tier": 3,
-    "durationYears": 12,
-    "description": "We learn to work in the cold traps where Mercury hides water and carbon, treating each pocket as precious because it is.",
-    "outcomeSummary": [
-      "One requirement for Mercury Phase 2.",
-      "Opens local access to water and carbon compounds.",
-      "Supports life-support and advanced component chains."
-    ],
-    "unlockCondition": "Complete Mercury Phase 1 Complete.",
-    "prerequisites": [
-      "mercury_phase_1_complete"
-    ],
-    "spilloverPrerequisites": [],
-    "effects": [],
-    "visualOrder": 38,
-    "iconPath": "/assets/svg/tech-tree/mercury_polar_volatiles_extraction.svg"
-  },
-  {
-    "id": "mercury_phase_2_complete",
-    "planet": "mercury",
-    "displayName": "Mercury Phase 2 Complete",
-    "category": "reactive",
-    "tier": 3,
-    "durationYears": 0,
-    "description": "Mercury becomes the engine room of the inner system: launching, manufacturing, and supplying work too large for Earth alone.",
-    "outcomeSummary": [
-      "Applies Mercury phase 2 state.",
-      "Unlocks Mars and Venus terraforming options.",
-      "Completes the early Mercury industrial foundation."
-    ],
-    "unlockCondition": "Complete Mass Driver and Dyson Panel Production and Polar Volatiles Extraction.",
-    "prerequisites": [
-      "mercury_mass_driver",
-      "mercury_dyson_panel_production",
-      "mercury_polar_volatiles_extraction"
-    ],
-    "spilloverPrerequisites": [],
-    "effects": [
-      {
-        "type": "apply_terraforming_choice",
-        "planet": "mercury",
-        "choiceId": "phase_2",
-        "permanent": true
-      }
-    ],
-    "visualOrder": 39,
-    "iconPath": "/assets/svg/tech-tree/mercury_phase_2_complete.svg"
-  },
-  {
     "id": "mars_polar_detonation",
     "planet": "mars",
     "displayName": "Polar Detonation",
@@ -1043,10 +709,10 @@
       "Adds an Architect branch decision tag.",
       "Triggers the Mars polar detonation culture event."
     ],
-    "unlockCondition": "Requires mercury phase 2 complete.",
+    "unlockCondition": "Requires Launch Mercury Mission.",
     "prerequisites": [],
     "spilloverPrerequisites": [
-      "mercury_phase_2_complete"
+      "earth_launch_mercury_mission"
     ],
     "effects": [
       {
@@ -1080,10 +746,10 @@
       "Adds an Architect branch decision tag.",
       "Provides a reusable warming infrastructure path."
     ],
-    "unlockCondition": "Requires mercury phase 2 complete.",
+    "unlockCondition": "Requires Launch Mercury Mission.",
     "prerequisites": [],
     "spilloverPrerequisites": [
-      "mercury_phase_2_complete"
+      "earth_launch_mercury_mission"
     ],
     "effects": [
       {
@@ -1113,10 +779,10 @@
       "Adds a Naturalist branch decision tag.",
       "Enables Comet Water Delivery."
     ],
-    "unlockCondition": "Requires mercury phase 2 complete.",
+    "unlockCondition": "Requires Launch Mercury Mission.",
     "prerequisites": [],
     "spilloverPrerequisites": [
-      "mercury_phase_2_complete"
+      "earth_launch_mercury_mission"
     ],
     "effects": [
       {
@@ -1142,14 +808,14 @@
     "durationYears": 20,
     "description": "We make small warm places under thin light, letting Mars host pockets of pressure and life before the whole sky is ready.",
     "outcomeSummary": [
-      "Requires Mercury Phase 2 and Earth Dome Habitat Technology.",
+      "Requires Launch Mercury Mission and Earth Dome Habitat Technology.",
       "Applies the Mars aerogel domes terraforming choice.",
       "Creates a gentler bridge toward open Martian habitats."
     ],
-    "unlockCondition": "Requires mercury phase 2 complete and earth dome habitat.",
+    "unlockCondition": "Requires Launch Mercury Mission and earth dome habitat.",
     "prerequisites": [],
     "spilloverPrerequisites": [
-      "mercury_phase_2_complete",
+      "earth_launch_mercury_mission",
       "earth_dome_habitat"
     ],
     "effects": [
@@ -1176,12 +842,12 @@
       "Requires Magnetic Umbrella protection.",
       "Enables Mars Ocean Confirmed."
     ],
-    "unlockCondition": "Complete Magnetic Umbrella. Requires mercury phase 2 complete.",
+    "unlockCondition": "Complete Magnetic Umbrella. Requires Launch Mercury Mission.",
     "prerequisites": [
       "mars_magnetic_umbrella"
     ],
     "spilloverPrerequisites": [
-      "mercury_phase_2_complete"
+      "earth_launch_mercury_mission"
     ],
     "effects": [
       {
@@ -1352,10 +1018,10 @@
       "Adds an Architect branch decision tag.",
       "Triggers the Venus cooling culture event."
     ],
-    "unlockCondition": "Requires mercury phase 2 complete.",
+    "unlockCondition": "Requires Launch Mercury Mission.",
     "prerequisites": [],
     "spilloverPrerequisites": [
-      "mercury_phase_2_complete"
+      "earth_launch_mercury_mission"
     ],
     "effects": [
       {
