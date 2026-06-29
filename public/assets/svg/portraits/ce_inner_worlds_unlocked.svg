@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 420" role="img" aria-labelledby="title desc">
+  <!-- PLACEHOLDER -->
+  <title id="title">Placeholder portrait for inner worlds unlocked</title>
+  <desc id="desc">A simple placeholder showing Mars and Venus becoming available.</desc>
+  <rect width="600" height="420" fill="#10151f"/>
+  <rect x="12" y="12" width="576" height="396" rx="12" fill="none" stroke="#9fb4d1" stroke-width="4" stroke-dasharray="14 10" opacity="0.75"/>
+  <circle cx="215" cy="210" r="86" fill="#b95738"/>
+  <circle cx="385" cy="210" r="86" fill="#d7b36a"/>
+  <path d="M160 174c32 18 74 22 110 6" fill="none" stroke="#6f2f22" stroke-width="12" opacity="0.45"/>
+  <path d="M330 190c40-24 82-18 112 10" fill="none" stroke="#fff3b0" stroke-width="14" opacity="0.42"/>
+  <path d="M215 330C278 292 322 292 385 330" fill="none" stroke="#8db9ff" stroke-width="5" opacity="0.8"/>
+  <text x="300" y="62" text-anchor="middle" font-family="serif" font-size="28" fill="#e7eefb">PLACEHOLDER</text>
+  <text x="300" y="376" text-anchor="middle" font-family="serif" font-size="24" fill="#e7eefb">Mars and Venus unlocked</text>
+</svg>

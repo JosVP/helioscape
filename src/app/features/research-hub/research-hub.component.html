@@ -14,13 +14,15 @@
       </p>
     </div>
 
-    <div class="research-hub__vignette" aria-hidden="true">
-      <img
-        src="/assets/svg/vignettes/research-hub.svg"
-        alt=""
-        width="200"
-        height="150"
-      />
+    <div class="research-hub__slots" aria-label="Research slots">
+      @for (slot of gameState.visibleResearchSlots(); track slot.id) {
+        <div class="research-hub__slot">
+          <span class="research-hub__slot-name">{{ slot.displayName }}</span>
+          <span class="research-hub__slot-state">
+            {{ gameState.occupiedResearchSlotIds().has(slot.id) ? 'Active' : 'Empty' }}
+          </span>
+        </div>
+      }
     </div>
 
     <button
@@ -63,7 +65,7 @@
                   [interactive]="true"
                   [selected]="selectedEntry()?.node?.id === entry.node.id"
                   [isCompletionRecent]="recentlyCompletedIds().has(entry.node.id)"
-                  [isRevealRecent]="recentlyRevealedIds().has(entry.node.id)"
+                  [isRevealRecent]="newlyAvailableIds().has(entry.node.id)"
                   [progressPercent]="entry.progressPercent"
                   [etaYear]="entry.etaYear"
                   planetId="mars"
@@ -100,7 +102,7 @@
                   [interactive]="true"
                   [selected]="selectedEntry()?.node?.id === entry.node.id"
                   [isCompletionRecent]="recentlyCompletedIds().has(entry.node.id)"
-                  [isRevealRecent]="recentlyRevealedIds().has(entry.node.id)"
+                  [isRevealRecent]="newlyAvailableIds().has(entry.node.id)"
                   [progressPercent]="entry.progressPercent"
                   [etaYear]="entry.etaYear"
                   planetId="venus"
@@ -138,7 +140,7 @@
                 [interactive]="entry.interactive"
                 [selected]="selectedEntry()?.node?.id === entry.node.id"
                 [isCompletionRecent]="recentlyCompletedIds().has(entry.node.id)"
-                [isRevealRecent]="recentlyRevealedIds().has(entry.node.id)"
+                [isRevealRecent]="newlyAvailableIds().has(entry.node.id)"
                 [progressPercent]="entry.progressPercent"
                 [etaYear]="entry.etaYear"
                 planetId="earth"
@@ -173,7 +175,7 @@
                 [interactive]="entry.interactive"
                 [selected]="selectedEntry()?.node?.id === entry.node.id"
                 [isCompletionRecent]="recentlyCompletedIds().has(entry.node.id)"
-                [isRevealRecent]="recentlyRevealedIds().has(entry.node.id)"
+                [isRevealRecent]="newlyAvailableIds().has(entry.node.id)"
                 [progressPercent]="entry.progressPercent"
                 [etaYear]="entry.etaYear"
                 planetId="moon"

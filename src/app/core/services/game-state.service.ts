@@ -14,6 +14,8 @@ import type {
   EuropaState,
   ActiveResearchTrack,
   TechEffect,
+  ResearchArcLogEntry,
+  ResearchSlot,
   CultureEventEntry,
   CultureEventHistoryEntry,
   MercuryMinerState,
@@ -28,8 +30,8 @@ import { DataService } from './data.service';
 /** The game year when a new campaign begins. */
 const INITIAL_YEAR = 2033;
 
-/** Base research-point capacity before any boosts. */
-const BASE_RP_CAPACITY = 60;
+/** Default colony population threshold when a planet has no data override. */
+const DEFAULT_COLONY_RESEARCH_SLOT_POPULATION_THRESHOLD = 50_000;
 
 /** Initial Mercury resource store. */
 const INITIAL_RESOURCES: Readonly<ResourceStore> = {
@@ -85,6 +87,7 @@ export class GameStateService {
   private readonly _completedTechs = signal<string[]>([]);
   private readonly _completedResearchYears = signal<Record<string, number>>({});
   private readonly _activeResearch = signal<ActiveResearchTrack[]>([]);
+  private readonly _arcLog = signal<Record<string, ResearchArcLogEntry[]>>({});
   private readonly _pendingFork = signal<PendingFork | null>(null);
   private readonly _planetUnlocks = signal<Record<string, PlanetUnlockState>>({});
 
@@ -137,6 +140,7 @@ export class GameStateService {
   readonly completedResearchYears: Signal<Record<string, number>> =
     this._completedResearchYears.asReadonly();
   readonly activeResearch: Signal<ActiveResearchTrack[]> = this._activeResearch.asReadonly();
+  readonly arcLog: Signal<Record<string, ResearchArcLogEntry[]>> = this._arcLog.asReadonly();
   readonly pendingFork: Signal<PendingFork | null> = this._pendingFork.asReadonly();
   readonly planetUnlocks: Signal<Record<string, PlanetUnlockState>> = this._planetUnlocks.asReadonly();
 
@@ -175,44 +179,58 @@ export class GameStateService {
   // Computed signals
   // -------------------------------------------------------------------------
 
-  /**
-   * Sum of rp_capacity_boost effects from completed tech nodes and operational Mercury buildings.
-   * Private — consumed only by totalRpCapacity.
-   */
-  private readonly rpCapacityBoosts = computed<number>(() => {
-    const fromTechs = this._completedTechs()
-      .flatMap((id) => this.data.getTechNode(id)?.effects ?? [])
-      .filter(
-        (e): e is Extract<TechEffect, { type: 'rp_capacity_boost' }> =>
-          e.type === 'rp_capacity_boost'
-      )
-      .reduce((sum, e) => sum + e.amount, 0);
+  readonly visibleResearchSlots = computed<ResearchSlot[]>(() => {
+    const planets = this._planets();
+    const slots: ResearchSlot[] = [
+      { id: 'earth_core_1', displayName: 'Earth Research I', planetId: 'earth', kind: 'default' },
+      { id: 'earth_core_2', displayName: 'Earth Research II', planetId: 'earth', kind: 'default' },
+    ];
 
-    // MercuryBuildingEffect is a flat interface (not a discriminated union), so no Extract needed.
-    const fromBuildings = this._mercuryBuildings()
-      .filter((b) => b.status === 'operational')
-      .flatMap((b) => this.data.getMercuryBuilding(b.buildingId)?.effects ?? [])
-      .filter((e) => e.type === 'rp_capacity_boost')
-      .reduce((sum, e) => sum + (e.amount ?? 0), 0);
+    for (const planetId of ['mars', 'venus']) {
+      const planet = planets[planetId];
+      const threshold =
+        this.data.getPlanet(planetId).researchSlotPopulationThreshold ??
+        DEFAULT_COLONY_RESEARCH_SLOT_POPULATION_THRESHOLD;
+      if (planet && planet.population >= threshold) {
+        slots.push({
+          id: `${planetId}_colony`,
+          displayName: `${this.data.getPlanet(planetId).displayName} Research`,
+          planetId,
+          kind: 'colony',
+          populationThreshold: threshold,
+        });
+      }
+    }
 
-    return fromTechs + fromBuildings;
+    return slots;
   });
 
-  /** Maximum research-point slots available across all active tracks. */
-  readonly totalRpCapacity = computed<number>(() => BASE_RP_CAPACITY + this.rpCapacityBoosts());
+  readonly occupiedResearchSlotIds = computed<Set<string>>(() => {
+    const occupied = new Set<string>();
+    const active = this._activeResearch().filter((track) => !track.isPaused);
+    const hasCollaborative = active.some((track) => track.slotId === 'collaborative');
+    if (hasCollaborative) {
+      for (const slot of this.visibleResearchSlots()) {
+        occupied.add(slot.id);
+      }
+      return occupied;
+    }
+    for (const track of active) {
+      if (track.slotId) occupied.add(track.slotId);
+    }
+    return occupied;
+  });
 
-  /** Research points currently allocated to running (non-paused) tracks. */
-  readonly usedRpCapacity = computed<number>(() =>
-    this._activeResearch()
-      .filter((t) => !t.isPaused)
-      .reduce((sum, t) => {
-        const rpCost =
-          this.data.getResearchTrack(t.trackId)?.rpCost ??
-          this.data.getTechNode(t.trackId)?.rpCost ??
-          0;
-        return sum + rpCost;
-      }, 0)
-  );
+  readonly availableResearchSlots = computed<ResearchSlot[]>(() => {
+    const occupied = this.occupiedResearchSlotIds();
+    return this.visibleResearchSlots().filter((slot) => !occupied.has(slot.id));
+  });
+
+  /** @deprecated Research V2 uses visibleResearchSlots/availableResearchSlots. */
+  readonly totalRpCapacity = computed<number>(() => this.visibleResearchSlots().length);
+
+  /** @deprecated Research V2 uses occupiedResearchSlotIds. */
+  readonly usedRpCapacity = computed<number>(() => this.occupiedResearchSlotIds().size);
 
   /**
    * Power balance for all operational Mercury grid buildings.
@@ -247,11 +265,11 @@ export class GameStateService {
     this._completedTechs.update((techs) => (techs.includes(techId) ? techs : [...techs, techId]));
   }
 
-  /** Starts a new research track. `startYear` is the current game year. */
-  startResearch(trackId: string, planetId: string, startYear: number): void {
+  /** Starts a new research node. `startYear` is the current game year. */
+  startResearch(trackId: string, planetId: string, startYear: number, slotId: string | null = null): void {
     this._activeResearch.update((tracks) => [
       ...tracks,
-      { trackId, planetId, isPaused: false, startYear, elapsedBeforeStart: 0 },
+      { trackId, planetId, slotId, isPaused: false, startYear, elapsedBeforeStart: 0 },
     ]);
   }
 
@@ -265,18 +283,24 @@ export class GameStateService {
       tracks.map((t) => {
         if (t.trackId !== trackId || t.isPaused) return t;
         const elapsed = t.elapsedBeforeStart + (currentYear - t.startYear);
-        return { ...t, isPaused: true, elapsedBeforeStart: elapsed, startYear: currentYear };
+        return {
+          ...t,
+          slotId: null,
+          isPaused: true,
+          elapsedBeforeStart: elapsed,
+          startYear: currentYear,
+        };
       })
     );
   }
 
   /** Resumes a paused research track from the current year. */
-  resumeResearch(trackId: string): void {
+  resumeResearch(trackId: string, slotId: string | null = null): void {
     const currentYear = this._gameYear();
     this._activeResearch.update((tracks) =>
       tracks.map((t) =>
         t.trackId === trackId && t.isPaused
-          ? { ...t, isPaused: false, startYear: currentYear }
+          ? { ...t, slotId, isPaused: false, startYear: currentYear }
           : t
       )
     );
@@ -289,6 +313,14 @@ export class GameStateService {
     this._completedResearchYears.update((years) =>
       years[trackId] === completedYear ? years : { ...years, [trackId]: completedYear }
     );
+  }
+
+  addArcFinding(entry: ResearchArcLogEntry): void {
+    this._arcLog.update((log) => {
+      const entries = log[entry.arcId] ?? [];
+      if (entries.some((existing) => existing.findingId === entry.findingId)) return log;
+      return { ...log, [entry.arcId]: [...entries, entry] };
+    });
   }
 
   // -------------------------------------------------------------------------
@@ -878,6 +910,7 @@ export class GameStateService {
     this._completedTechs.set([]);
     this._completedResearchYears.set({});
     this._activeResearch.set([]);
+    this._arcLog.set({});
     this._pendingFork.set(null);
     this._planetUnlocks.set(this.buildInitialPlanetUnlocksRecord());
     this._mercuryResources.set({ ...INITIAL_RESOURCES });
@@ -920,6 +953,7 @@ export class GameStateService {
     this._completedTechs.set(state.completedTechs);
     this._completedResearchYears.set(state.completedResearchYears ?? {});
     this._activeResearch.set(state.activeResearch);
+    this._arcLog.set(state.arcLog ?? {});
     this._pendingFork.set(state.pendingFork);
     this._planetUnlocks.set(state.planetUnlocks ?? this.buildInitialPlanetUnlocksRecord());
     this._mercuryResources.set(state.mercuryResources);
@@ -959,6 +993,7 @@ export class GameStateService {
       completedTechs: this._completedTechs(),
       completedResearchYears: this._completedResearchYears(),
       activeResearch: this._activeResearch(),
+      arcLog: this._arcLog(),
       pendingFork: this._pendingFork(),
       planetUnlocks: this._planetUnlocks(),
       mercuryResources: this._mercuryResources(),

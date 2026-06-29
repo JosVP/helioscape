@@ -41,7 +41,6 @@ export interface NodeEntry {
 
 /** Ordered map of nodeId → NodeEntry, insertion order = render order. */
 type ColumnStates = Map<string, NodeEntry>;
-type ResolvedNodeVisibility = Exclude<NodeVisibility, 'hint'>;
 type NodeVisibilitySnapshot = ReadonlyMap<string, NodeVisibility>;
 
 interface RectBounds {
@@ -71,14 +70,13 @@ interface LinePoint {
   styleUrl: './research-hub.component.scss',
 })
 export class ResearchHubComponent implements AfterViewInit, OnDestroy {
-  private readonly gameState = inject(GameStateService);
+  readonly gameState = inject(GameStateService);
   private readonly data = inject(DataService);
   private readonly techTreeService = inject(TechTreeService);
   private readonly researchService = inject(ResearchService);
   private readonly eventBus = inject(EventBusService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly clipLineGapBetweenTreeColumns = false;
-  private readonly transientFeedbackDurationMs = 2000;
 
   readonly closed = output<void>();
 
@@ -156,7 +154,8 @@ export class ResearchHubComponent implements AfterViewInit, OnDestroy {
   // ---------------------------------------------------------------------------
 
   readonly recentlyCompletedIds = signal<ReadonlySet<string>>(new Set());
-  readonly recentlyRevealedIds = signal<ReadonlySet<string>>(new Set());
+  readonly newlyAvailableIds = signal<ReadonlySet<string>>(new Set());
+  private readonly transientFeedbackDurationMs = 2000;
   private readonly _completionFeedbackTimers = new Map<string, ReturnType<typeof setTimeout>>();
   private readonly _revealFeedbackTimers = new Map<string, ReturnType<typeof setTimeout>>();
   private _lastVisibleSnapshot = new Map<string, NodeVisibility>();
@@ -249,12 +248,17 @@ export class ResearchHubComponent implements AfterViewInit, OnDestroy {
   }
 
   onNodeSelect(nodeId: string): void {
+    const previousId = this.selectedNodeId();
+    if (previousId && previousId !== nodeId) {
+      this._acknowledgeNewNode(previousId);
+    }
     this.selectedNodeId.set(nodeId);
   }
 
   onStartSelectedNode(nodeId: string): void {
     const viewModel = this.selectedInspectorVm();
     if (!viewModel?.canStart || viewModel.node.id !== nodeId) return;
+    this._acknowledgeNewNode(nodeId);
     this.researchService.startTechTrack(viewModel.node.id, viewModel.node.planet);
   }
 
@@ -278,16 +282,12 @@ export class ResearchHubComponent implements AfterViewInit, OnDestroy {
 
     for (const node of sorted) {
       const activeTrack = activeResearch.find((t) => t.trackId === node.id);
-      const resolvedVisibility = this._getResolvedVisibility(
+      const visibility = this._getVisibility(
         node,
         completed,
-        interactive,
         activeTrack !== undefined,
+        activeTrack?.isPaused ?? false,
       );
-      const visibility =
-        resolvedVisibility ??
-        (this._shouldShowAsHint(node, interactive, previewFrontierIds) ? 'hint' : null);
-      if (visibility === null) continue;
 
       result.set(
         node.id,
@@ -303,7 +303,7 @@ export class ResearchHubComponent implements AfterViewInit, OnDestroy {
     return (
       ordered.find((entry) => entry.node.planet === 'earth' && entry.visibility === 'available') ??
       ordered.find((entry) => entry.node.planet === 'moon' && entry.visibility === 'available') ??
-      ordered.find((entry) => entry.visibility === 'in_progress') ??
+      ordered.find((entry) => entry.visibility === 'running') ??
       ordered.find((entry) => entry.visibility === 'completed') ??
       ordered.find((entry) => entry.node.planet === 'earth' || entry.node.planet === 'moon') ??
       ordered[0] ??
@@ -320,10 +320,7 @@ export class ResearchHubComponent implements AfterViewInit, OnDestroy {
   private _buildInspectorViewModel(entry: NodeEntry): TechInspectorViewModel {
     const node = entry.node;
     const currentYear = this.gameState.gameYear();
-    const usedCapacity = this.gameState.usedRpCapacity();
-    const totalCapacity = this.gameState.totalRpCapacity();
-    const capacityShortfall = Math.max(0, usedCapacity + node.rpCost - totalCapacity);
-    const canStart = entry.visibility === 'available' && capacityShortfall === 0;
+    const canStart = entry.visibility === 'available' && this.researchService.canStartTechTrack(node.id, node.planet);
     const completedYear = this.gameState.completedResearchYears()[node.id];
 
     return {
@@ -332,12 +329,14 @@ export class ResearchHubComponent implements AfterViewInit, OnDestroy {
       planetLabel: this._planetLabel(node.planet),
       statusLabel: this._statusLabel(entry),
       branchTag: this._branchTag(node, entry.visibility),
-      canRevealDetails: entry.visibility !== 'hint',
       prerequisites: this._prerequisitesFor(node),
       progressPercent: entry.progressPercent,
       etaYear: entry.etaYear,
       completedYear,
-      capacityShortfall: entry.visibility === 'needs_capacity' ? capacityShortfall : undefined,
+      startBlockedReason:
+        entry.visibility === 'available' && !canStart
+          ? 'All visible research slots are currently occupied.'
+          : undefined,
       canStart,
     };
   }
@@ -359,17 +358,19 @@ export class ResearchHubComponent implements AfterViewInit, OnDestroy {
         return 'Available';
       case 'completed':
         return 'Completed';
-      case 'hint':
+      case 'locked':
         return 'Locked';
-      case 'in_progress':
-        return entry.isPaused ? 'Paused' : 'In progress';
-      case 'needs_capacity':
-        return 'Needs capacity';
+      case 'running':
+        return 'In progress';
+      case 'paused':
+        return 'Paused';
+      case 'post_v1':
+        return 'Future research';
     }
   }
 
   private _branchTag(node: TechNode, visibility: NodeVisibility): 'naturalist' | 'architect' | null {
-    if (visibility === 'hint') return null;
+    if (visibility === 'locked') return null;
     const tagEffect = node.effects.find((effect) => effect.type === 'tag_decision');
     if (!tagEffect || tagEffect.type !== 'tag_decision') return null;
     return tagEffect.tag;
@@ -392,32 +393,26 @@ export class ResearchHubComponent implements AfterViewInit, OnDestroy {
 
   /**
   * Returns a real, non-preview visibility tier for a node, or null if it should
-  * be hidden unless the second-pass preview frontier reveals it as a hint.
+  * be locked while still remaining visible in the full graph.
    *
    * Rules:
    * - completed: node id is in completedTechs[]
    * - available: TechTreeService.canUnlock() returns true
    */
-  private _getResolvedVisibility(
+  private _getVisibility(
     node: TechNode,
     completed: string[],
-    interactive: boolean,
     isActive: boolean,
-  ): ResolvedNodeVisibility | null {
+    isPaused: boolean,
+  ): NodeVisibility {
+    if (node.postV1) return 'post_v1';
     if (completed.includes(node.id)) return 'completed';
 
-    if (isActive) return 'in_progress';
+    if (isActive) return isPaused ? 'paused' : 'running';
 
-    if (interactive) {
-      if (this.techTreeService.canUnlock(node.planet, node.id)) {
-        // Check RP capacity
-        const hasCapacity =
-          this.gameState.usedRpCapacity() + node.rpCost <= this.gameState.totalRpCapacity();
-        return hasCapacity ? 'available' : 'needs_capacity';
-      }
-    }
+    if (this.techTreeService.canUnlock(node.planet, node.id)) return 'available';
 
-    return null; // hidden
+    return 'locked';
   }
 
   private _buildNodeEntry(
@@ -431,9 +426,9 @@ export class ResearchHubComponent implements AfterViewInit, OnDestroy {
     let etaYear: number | undefined;
     let isPaused: boolean | undefined;
 
-    if (visibility === 'in_progress' && activeTrack) {
+    if ((visibility === 'running' || visibility === 'paused') && activeTrack) {
       isPaused = activeTrack.isPaused;
-      const elapsed = activeTrack.elapsedBeforeStart + (currentYear - activeTrack.startYear);
+      const elapsed = activeTrack.elapsedBeforeStart + (activeTrack.isPaused ? 0 : currentYear - activeTrack.startYear);
       progressPercent = Math.min(100, Math.round((elapsed / node.durationYears) * 100));
       if (!activeTrack.isPaused) {
         const remaining = node.durationYears - elapsed;
@@ -463,16 +458,6 @@ export class ResearchHubComponent implements AfterViewInit, OnDestroy {
     return frontierIds;
   }
 
-  private _shouldShowAsHint(
-    node: TechNode,
-    interactive: boolean,
-    previewFrontierIds: ReadonlySet<string>,
-  ): boolean {
-    const isNonInteractiveAvailable =
-      !interactive && this.techTreeService.canUnlock(node.planet, node.id);
-    return isNonInteractiveAvailable || this._hasPreviewPrerequisite(node, previewFrontierIds);
-  }
-
   private _hasPreviewPrerequisite(node: TechNode, previewFrontierIds: ReadonlySet<string>): boolean {
     return [...node.prerequisites, ...node.spilloverPrerequisites].some((id) =>
       previewFrontierIds.has(id),
@@ -493,8 +478,17 @@ export class ResearchHubComponent implements AfterViewInit, OnDestroy {
     const previous = this._lastVisibleSnapshot;
     const currentEntries = this.allVisibleEntries();
     const revealedIds = this._findNewlyRevealed(previous, currentEntries, completedNodeId);
-    this._markTransient(this.recentlyRevealedIds, this._revealFeedbackTimers, revealedIds);
+    this._markTransient(this.newlyAvailableIds, this._revealFeedbackTimers, revealedIds);
     this._lastVisibleSnapshot = this._visibleStateSnapshot();
+  }
+
+  private _acknowledgeNewNode(nodeId: string): void {
+    this.newlyAvailableIds.update((current) => {
+      if (!current.has(nodeId)) return current;
+      const next = new Set(current);
+      next.delete(nodeId);
+      return next;
+    });
   }
 
   private _findNewlyRevealed(
@@ -521,12 +515,12 @@ export class ResearchHubComponent implements AfterViewInit, OnDestroy {
     switch (visibility) {
       case null:
         return 0;
-      case 'hint':
+      case 'locked':
+      case 'post_v1':
         return 1;
-      case 'needs_capacity':
-        return 2;
       case 'available':
-      case 'in_progress':
+      case 'running':
+      case 'paused':
       case 'completed':
         return 3;
     }

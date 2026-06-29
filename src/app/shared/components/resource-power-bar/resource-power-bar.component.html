@@ -15,20 +15,6 @@
     </span>
   </div>
 
-  <!-- Centre: Research Points -->
-  <div class="resource-power-bar__rp-col">
-    <span class="resource-power-bar__col-label">Research Points</span>
-    <div class="resource-power-bar__track"
-         role="progressbar"
-         [attr.aria-valuenow]="rpUsed()"
-         [attr.aria-valuemax]="rpTotal()"
-         aria-label="Research point capacity">
-      <div class="resource-power-bar__fill resource-power-bar__fill--rp"
-           [style.--bar-pct]="rpBarPercent() / 100"></div>
-    </div>
-    <span class="resource-power-bar__value">{{ rpUsed() }} / {{ rpTotal() }} RP</span>
-  </div>
-
   <!-- Right: Minerals -->
   <div class="resource-power-bar__minerals-col">
     <span class="resource-power-bar__col-label">Minerals</span>

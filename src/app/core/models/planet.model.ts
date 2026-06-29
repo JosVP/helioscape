@@ -25,6 +25,8 @@ export interface PlanetData {
   displayName: string;
   /** Data-driven progression gate for normal selection/base access. */
   unlock: PlanetUnlockDefinition;
+  /** Optional colony population required before this planet contributes a research slot. */
+  researchSlotPopulationThreshold?: number;
   initialState: PlanetInitialState;
   visual: PlanetVisualData;
   /** Ordered phase display names, indexed by terraformingPhase. */
@@ -72,6 +74,7 @@ export interface PlanetYearUnlockDefinition {
 export interface PlanetMercuryZoneUnlockDefinition {
   type: 'mercury_zone_selected';
   eventId?: string;
+  setFlag?: string;
 }
 
 /**

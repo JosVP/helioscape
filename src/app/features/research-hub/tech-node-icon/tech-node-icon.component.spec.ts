@@ -1,11 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TechNodeIconComponent } from './tech-node-icon.component';
+import type { NodeVisibility } from '../tech-node-view.model';
 
 describe('TechNodeIconComponent', () => {
   let fixture: ComponentFixture<TechNodeIconComponent>;
 
   function createComponent(
-    visibility: 'completed' | 'hint',
+    visibility: NodeVisibility,
     size: 'compact' | 'large' = 'compact',
     paths: { readonly iconPath?: string; readonly silhouetteIconPath?: string } = {},
   ): void {
@@ -22,9 +23,9 @@ describe('TechNodeIconComponent', () => {
     await TestBed.configureTestingModule({ imports: [TechNodeIconComponent] }).compileComponents();
   });
 
-  it('renders a silhouette marker for hint nodes', () => {
-    createComponent('hint');
-    expect(fixture.nativeElement.textContent).toContain('?');
+  it('renders a fallback icon for locked nodes', () => {
+    createComponent('locked');
+    expect(fixture.nativeElement.querySelector('svg')).not.toBeNull();
   });
 
   it('uses the success colour for completed nodes', () => {
@@ -33,14 +34,13 @@ describe('TechNodeIconComponent', () => {
     expect(circle.getAttribute('fill')).toContain('--color-success');
   });
 
-  it('uses the silhouette asset for hint nodes when provided', () => {
-    createComponent('hint', 'compact', { silhouetteIconPath: '/assets/svg/tech-tree/node--silhouette.svg' });
+  it('uses the silhouette asset for locked nodes when provided', () => {
+    createComponent('locked', 'compact', { silhouetteIconPath: '/assets/svg/tech-tree/node--silhouette.svg' });
     const image = fixture.nativeElement.querySelector('img') as HTMLImageElement | null;
     expect(image?.getAttribute('src')).toBe('/assets/svg/tech-tree/node--silhouette.svg');
-    expect(fixture.nativeElement.textContent).not.toContain('?');
   });
 
-  it('uses the normal asset for non-hint nodes when provided', () => {
+  it('uses the normal asset for nodes when provided', () => {
     createComponent('completed', 'compact', { iconPath: '/assets/svg/tech-tree/node.svg' });
     const image = fixture.nativeElement.querySelector('img') as HTMLImageElement | null;
     expect(image?.getAttribute('src')).toBe('/assets/svg/tech-tree/node.svg');

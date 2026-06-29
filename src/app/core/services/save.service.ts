@@ -6,7 +6,7 @@ import { GameStateService } from './game-state.service';
 // Constants
 // ---------------------------------------------------------------------------
 
-const SAVE_VERSION = 4;
+const SAVE_VERSION = 5;
 const MAX_SLOTS = 3;
 const AUTOSAVE_SLOT = 0;
 
@@ -20,6 +20,17 @@ export interface SlotInfo {
   kardashevLevel?: number;
   saveTimestamp?: number;
   isAutosave: boolean;
+}
+
+interface LegacyActiveResearchSave {
+  readonly trackId?: string;
+  readonly nodeId?: string;
+  readonly planetId: string;
+  readonly slotId?: string | null;
+  readonly progressYears?: number;
+  readonly isPaused?: boolean;
+  readonly startYear?: number;
+  readonly elapsedBeforeStart?: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -287,7 +298,40 @@ export class SaveService {
       };
     }
 
+    if (fromVersion < 5) {
+      const visibleSlots = this.getMigratedVisibleSlotIds(migrated);
+      let nextSlotIndex = 0;
+      if (Array.isArray(migrated.activeResearch)) {
+        migrated.activeResearch = (migrated.activeResearch as LegacyActiveResearchSave[]).map((track) => {
+          const trackId = track.nodeId ?? track.trackId ?? '';
+          const shouldPause = track.isPaused === true || nextSlotIndex >= visibleSlots.length;
+          const slotId = shouldPause ? null : track.slotId ?? visibleSlots[nextSlotIndex++];
+          return {
+            trackId,
+            planetId: track.planetId,
+            slotId,
+            isPaused: shouldPause,
+            startYear: track.startYear ?? ((migrated.gameYear as number | undefined) ?? 2033),
+            elapsedBeforeStart: track.elapsedBeforeStart ?? 0,
+          };
+        });
+      }
+      migrated = {
+        ...migrated,
+        arcLog: migrated.arcLog ?? {},
+        version: 5,
+      };
+    }
+
     console.warn(`[SaveService] Migrating save from version ${fromVersion} → ${SAVE_VERSION}`);
     return migrated as SerializedGameState;
+  }
+
+  private getMigratedVisibleSlotIds(data: Partial<SerializedGameState>): string[] {
+    const slots = ['earth_core_1', 'earth_core_2'];
+    const planets = data.planets ?? {};
+    if ((planets['mars']?.population ?? 0) >= 50_000) slots.push('mars_colony');
+    if ((planets['venus']?.population ?? 0) >= 50_000) slots.push('venus_colony');
+    return slots;
   }
 }

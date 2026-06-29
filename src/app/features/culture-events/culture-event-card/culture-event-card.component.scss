@@ -7,7 +7,7 @@
 //
 // z-index ladder:
 //   orrery      0  |  hud    10  |  panels 20
-//   pause-menu 50  |  toasts 90  |  this  100
+//   pause-menu 50  |  toasts 90  |  research hub 101  |  this  120
 // ---------------------------------------------------------------------------
 
 // ─── Screen-reader-only utility ──────────────────────────────────────────────
@@ -39,7 +39,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 100;
+  z-index: 120;
   opacity: 0;
   pointer-events: none;
   // Overlay fade uses the spring easing so backdrop blur blends in together

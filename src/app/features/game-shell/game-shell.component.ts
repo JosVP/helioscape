@@ -14,6 +14,7 @@ import { EventBusService } from '@app/core/services/event-bus.service';
 import { GameLoopService } from '@app/core/services/game-loop.service';
 import { GameStateService } from '@app/core/services/game-state.service';
 import { PlanetUnlockService } from '@app/core/systems/planet-unlock.service';
+import { ResearchArcService } from '@app/core/systems/research-arc.service';
 import { CultureEventCardComponent } from '@app/features/culture-events/culture-event-card/culture-event-card.component';
 import { CultureEventToastComponent } from '@app/features/culture-events/culture-event-toast/culture-event-toast.component';
 import { HudComponent } from '@app/features/hud/hud.component';
@@ -51,6 +52,7 @@ export class GameShellComponent implements OnInit, OnDestroy {
   private readonly eventBus = inject(EventBusService);
   private readonly audioService = inject(AudioService);
   private readonly planetUnlockService = inject(PlanetUnlockService);
+  private readonly researchArcService = inject(ResearchArcService);
   private readonly destroyRef = inject(DestroyRef);
 
   // ---------------------------------------------------------------------------
@@ -71,6 +73,8 @@ export class GameShellComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.gameState.ensureInitialised();
+    void this.planetUnlockService;
+    void this.researchArcService;
     this.gameLoop.start();
 
     this.eventBus.planetSelected$

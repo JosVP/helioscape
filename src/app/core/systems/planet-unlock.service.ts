@@ -37,6 +37,8 @@ export class PlanetUnlockService {
     unlocks: Readonly<Record<string, PlanetUnlockState>>,
     selectedZone: string | null = null
   ): void {
+    const innerWorldsHandled = this.processInnerWorldZoneUnlocks(unlocks, selectedZone, year);
+
     for (const planet of this.data.getAllPlanets()) {
       const state = unlocks[planet.id];
       if (!state || state.status === 'unlocked') continue;
@@ -52,6 +54,7 @@ export class PlanetUnlockService {
           this.processYearUnlock(planet, state, planet.unlock, year);
           break;
         case 'mercury_zone_selected':
+          if (innerWorldsHandled && (planet.id === 'mars' || planet.id === 'venus')) break;
           this.processZoneUnlock(planet, state, planet.unlock, selectedZone, year);
           break;
         case 'start_unlocked':
@@ -169,5 +172,59 @@ export class PlanetUnlockService {
   ): void {
     if (state.status !== 'locked' || selectedZone === null) return;
     this.unlockPlanetFromDefinition(planet.id, unlock, year, unlock.eventId);
+  }
+
+  private processInnerWorldZoneUnlocks(
+    unlocks: Readonly<Record<string, PlanetUnlockState>>,
+    selectedZone: string | null,
+    year: number,
+  ): boolean {
+    if (selectedZone === null) return false;
+
+    const mars = this.data.getPlanet('mars');
+    const venus = this.data.getPlanet('venus');
+    if (mars.unlock.type !== 'mercury_zone_selected' || venus.unlock.type !== 'mercury_zone_selected') {
+      return false;
+    }
+
+    const marsState = unlocks['mars'];
+    const venusState = unlocks['venus'];
+    const planetsToUnlock = [marsState, venusState].filter(
+      (state): state is PlanetUnlockState => state?.status === 'locked',
+    );
+    if (planetsToUnlock.length === 0) return true;
+    const unlockedPlanetIds = new Set(planetsToUnlock.map((state) => state.planetId));
+
+    for (const state of planetsToUnlock) {
+      this.gameState.unlockPlanet(state.planetId, year);
+      this.eventBus.planetUnlocked$.next({ planetId: state.planetId, unlockedYear: year });
+    }
+
+    if (unlockedPlanetIds.has('venus') && venus.unlock.setFlag) {
+      this.setUnlockFlag('venus', venus.unlock.setFlag);
+    }
+
+    if (planetsToUnlock.length === 2) {
+      this.queueCombinedInnerWorldsEvent(year);
+    }
+
+    return true;
+  }
+
+  private queueCombinedInnerWorldsEvent(year: number): void {
+    const eventId = 'ce_inner_worlds_unlocked';
+    const marsState = this.gameState.getPlanetUnlockState('mars');
+    const venusState = this.gameState.getPlanetUnlockState('venus');
+    if (!marsState || !venusState || !this.data.getCultureEvent(eventId)) return;
+    if (marsState.firedFlags.includes(eventId) || venusState.firedFlags.includes(eventId)) return;
+
+    this.gameState.addToEventQueue({
+      eventId,
+      queuedAtYear: year,
+      priority: false,
+      wasInterrupted: false,
+    });
+    this.gameState.markPlanetUnlockFlagFired('mars', eventId);
+    this.gameState.markPlanetUnlockFlagFired('venus', eventId);
   }
 }

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { DataService } from './data.service';
-import type { PlanetData, TechNode, ResearchTrack } from '@app/core/models';
+import type { PlanetData, ResearchNode } from '@app/core/models';
 
 // ---------------------------------------------------------------------------
 // Minimal fixture data matching the real JSON shapes
@@ -53,16 +53,18 @@ const fakePlanets: PlanetData[] = [
   },
 ];
 
-const fakeTechTree: TechNode[] = [
+const fakeResearchNodes: ResearchNode[] = [
   {
     id: 'earth_launch_mercury_mission',
     planet: 'earth',
     displayName: 'Launch Mercury Mission',
+    category: 'capability',
+    tier: 1,
     description: 'We launch the Mercury mission.',
     outcomeSummary: ['Unlocks Mercury.'],
+    unlockCondition: 'Available from the beginning.',
     prerequisites: [],
     spilloverPrerequisites: [],
-    rpCost: 0,
     durationYears: 0,
     effects: [],
   },
@@ -70,26 +72,29 @@ const fakeTechTree: TechNode[] = [
     id: 'mars_polar_detonation',
     planet: 'mars',
     displayName: 'Polar Detonation',
+    category: 'reactive',
+    tier: 1,
     description: 'We choose a fast warming path for Mars.',
     outcomeSummary: ['Applies a Mars terraforming choice.'],
+    unlockCondition: 'Reach Mars terraforming planning.',
     prerequisites: [],
     spilloverPrerequisites: [],
-    rpCost: 60,
     durationYears: 20,
     effects: [{ type: 'tag_decision', tag: 'architect' }],
   },
-];
-
-const fakeResearchTracks: ResearchTrack[] = [
   {
     id: 'moon_low_grav_medicine_track',
-    displayName: 'Low-Gravity Medicine Program',
     planet: 'moon',
-    rpCost: 25,
-    durationYears: 30,
+    displayName: 'Low-Gravity Medicine Program',
+    category: 'capability',
+    tier: 1,
     description: 'We study how bones adapt.',
-    prerequisiteTech: 'earth_launch_mercury_mission',
-    onCompleteEffects: [],
+    outcomeSummary: ['Improves lunar medicine.'],
+    unlockCondition: 'Complete Launch Mercury Mission.',
+    prerequisites: ['earth_launch_mercury_mission'],
+    spilloverPrerequisites: [],
+    durationYears: 30,
+    effects: [],
   },
 ];
 
@@ -135,8 +140,8 @@ const fakeResources = [
 function mockFetchFor(service: DataService, overrides: Record<string, unknown> = {}): void {
   const defaults: Record<string, unknown> = {
     '/data/planets.json': fakePlanets,
-    '/data/tech-tree.json': fakeTechTree,
-    '/data/research-tracks.json': fakeResearchTracks,
+    '/data/research-tracks.json': fakeResearchNodes,
+    '/data/research-arcs.json': [],
     '/data/culture-events.json': fakeCultureEvents,
     '/data/kardashev-milestones.json': fakeMilestones,
     '/data/resources.json': fakeResources,
@@ -206,8 +211,10 @@ describe('DataService', () => {
       await service.loadAll();
 
       expect(fetchMock).toHaveBeenCalledTimes(11);
+      expect(fetchMock).not.toHaveBeenCalledWith('/data/tech-tree.json');
       expect(fetchMock).toHaveBeenCalledWith('/data/planets.json');
-      expect(fetchMock).toHaveBeenCalledWith('/data/tech-tree.json');
+      expect(fetchMock).toHaveBeenCalledWith('/data/research-tracks.json');
+      expect(fetchMock).toHaveBeenCalledWith('/data/research-arcs.json');
       expect(fetchMock).toHaveBeenCalledWith('/data/mercury-buildings.json');
       expect(fetchMock).toHaveBeenCalledWith('/data/mercury-components.json');
       expect(fetchMock).toHaveBeenCalledWith('/data/bio-phases.json');
@@ -271,13 +278,33 @@ describe('DataService', () => {
     });
   });
 
-  describe('tech-tree accessors', () => {
+  describe('research-node accessors', () => {
     beforeEach(async () => {
       mockFetchFor(service);
       await service.loadAll();
     });
 
-    it('getTechNode() returns a node by id', () => {
+    it('getResearchNode() returns a node by id', () => {
+      const node = service.getResearchNode('earth_launch_mercury_mission');
+      expect(node).toBeDefined();
+      expect(node?.displayName).toBe('Launch Mercury Mission');
+    });
+
+    it('getResearchNode() returns undefined for an unknown id', () => {
+      expect(service.getResearchNode('nonexistent')).toBeUndefined();
+    });
+
+    it('getResearchNodesForPlanet() filters correctly', () => {
+      const earthNodes = service.getResearchNodesForPlanet('earth');
+      expect(earthNodes).toHaveLength(1);
+      expect(earthNodes[0].id).toBe('earth_launch_mercury_mission');
+    });
+
+    it('getAllResearchNodes() returns all canonical research nodes', () => {
+      expect(service.getAllResearchNodes()).toHaveLength(3);
+    });
+
+    it('getTechNode() temporarily returns a node by id', () => {
       const node = service.getTechNode('earth_launch_mercury_mission');
       expect(node).toBeDefined();
       expect(node?.displayName).toBe('Launch Mercury Mission');
@@ -287,7 +314,7 @@ describe('DataService', () => {
       expect(service.getTechNode('nonexistent')).toBeUndefined();
     });
 
-    it('getTechNodesForPlanet() filters correctly', () => {
+    it('getTechNodesForPlanet() temporarily filters correctly', () => {
       const earthNodes = service.getTechNodesForPlanet('earth');
       expect(earthNodes).toHaveLength(1);
       expect(earthNodes[0].id).toBe('earth_launch_mercury_mission');
@@ -314,8 +341,14 @@ describe('DataService', () => {
       expect(service.getResearchTrack('nonexistent')).toBeUndefined();
     });
 
-    it('getResearchTracksForPlanet() returns empty array for planet with no tracks', () => {
-      expect(service.getResearchTracksForPlanet('mars')).toEqual([]);
+    it('getResearchTracksForPlanet() temporarily returns node-backed tracks for a planet', () => {
+      const tracks = service.getResearchTracksForPlanet('moon');
+      expect(tracks).toHaveLength(1);
+      expect(tracks[0].id).toBe('moon_low_grav_medicine_track');
+    });
+
+    it('getAllResearchArcs() returns loaded arc definitions', () => {
+      expect(service.getAllResearchArcs()).toEqual([]);
     });
   });
 

@@ -2,13 +2,13 @@ import { Injectable, effect, inject, untracked } from '@angular/core';
 import { DataService } from '@app/core/services/data.service';
 import { EventBusService } from '@app/core/services/event-bus.service';
 import { GameStateService } from '@app/core/services/game-state.service';
+import type { ResearchNode, ResearchSlot } from '@app/core/models';
 import { TechTreeService } from './tech-tree.service';
 
 /**
  * ResearchService — pure system service.
  *
- * Drives progress on all active research tracks (both ResearchTrack and TechNode
- * tracks share a single queue and a single RP capacity pool).
+ * Drives progress on all active research nodes using visible research slots.
  *
  * Progress is derived from (startYear, elapsedBeforeStart, currentYear) — pure
  * integer arithmetic, save/load safe, no stored progress floats.
@@ -34,15 +34,12 @@ export class ResearchService {
   // ---------------------------------------------------------------------------
 
   /**
-   * Returns duration and rpCost for either a ResearchTrack or TechNode entry.
-   * Returns null when the id is unknown in both data sources.
+   * Returns duration for a canonical ResearchNode entry.
+   * Returns null when the id is unknown.
    */
-  private getTrackDef(trackId: string): { durationYears: number; rpCost: number } | null {
-    const rt = this.data.getResearchTrack(trackId);
-    if (rt) return { durationYears: rt.durationYears, rpCost: rt.rpCost };
-    const tn = this.data.getTechNode(trackId);
-    if (tn) return { durationYears: tn.durationYears, rpCost: tn.rpCost };
-    return null;
+  private getTrackDef(trackId: string): { durationYears: number } | null {
+    const node = this.data.getResearchNode(trackId);
+    return node ? { durationYears: node.durationYears } : null;
   }
 
   /** Elapsed years for a track at the given current year. */
@@ -82,16 +79,8 @@ export class ResearchService {
   private _completeTrack(trackId: string, planetId: string): void {
     this.gameState.completeResearch(trackId, this.gameState.gameYear());
 
-    const rt = this.data.getResearchTrack(trackId);
-    if (rt) {
-      // ResearchTrack path: apply onCompleteEffects directly.
-      this.techTree.applyEffects(rt.onCompleteEffects, planetId);
-      this.eventBus.researchCompleted$.next(trackId);
-      return;
-    }
-
     if (this.data.getTechNode(trackId)) {
-      // TechNode path: delegate to TechTreeService (handles fork logic etc.).
+      // Delegate to TechTreeService (handles fork logic etc.).
       this.techTree.completeNodeResearch(planetId, trackId);
       this.eventBus.researchCompleted$.next(trackId);
     }
@@ -105,18 +94,8 @@ export class ResearchService {
    * Returns true if a ResearchTrack can be started.
    */
   canStartTrack(trackId: string): boolean {
-    const def = this.data.getResearchTrack(trackId);
-    if (!def) return false;
-
-    const completed = this.gameState.completedTechs();
-    if (completed.includes(trackId)) return false;
-    if (!completed.includes(def.prerequisiteTech)) return false;
-
-    const existing = this.gameState.activeResearch().find((t) => t.trackId === trackId);
-    if (existing && !existing.isPaused) return false;
-    if (existing?.isPaused) return true; // capacity validated at resume
-
-    return this.gameState.usedRpCapacity() + def.rpCost <= this.gameState.totalRpCapacity();
+    const node = this.data.getResearchNode(trackId);
+    return node ? this.canStartResearchNode(node, node.planet) : false;
   }
 
   /** Starts or resumes a ResearchTrack. */
@@ -126,8 +105,11 @@ export class ResearchService {
       this.resumeTrack(trackId);
       return;
     }
-    if (!this.canStartTrack(trackId)) return;
-    this.gameState.startResearch(trackId, planetId, this.gameState.gameYear());
+    const node = this.data.getResearchNode(trackId);
+    if (!node) return;
+    const slotId = this.getAssignableSlotId(node);
+    if (!slotId || !this.canStartResearchNode(node, planetId)) return;
+    this.gameState.startResearch(trackId, planetId, this.gameState.gameYear(), slotId);
     this.eventBus.researchTrackStarted$.next({ trackId, planetId });
   }
 
@@ -140,13 +122,9 @@ export class ResearchService {
    * Prereqs are verified by TechTreeService.canUnlock(); capacity is checked here.
    */
   canStartTechTrack(nodeId: string, planetId: string): boolean {
-    const node = this.data.getTechNode(nodeId);
+    const node = this.data.getResearchNode(nodeId);
     if (!node) return false;
-    if (this.gameState.completedTechs().includes(nodeId)) return false;
-    const alreadyActive = this.gameState.activeResearch().find((t) => t.trackId === nodeId);
-    if (alreadyActive && !alreadyActive.isPaused) return false;
-    if (!this.techTree.canUnlock(planetId, nodeId)) return false;
-    return this.gameState.usedRpCapacity() + node.rpCost <= this.gameState.totalRpCapacity();
+    return this.canStartResearchNode(node, planetId);
   }
 
   /**
@@ -159,8 +137,11 @@ export class ResearchService {
       this.resumeTrack(nodeId);
       return;
     }
-    if (!this.canStartTechTrack(nodeId, planetId)) return;
-    this.gameState.startResearch(nodeId, planetId, this.gameState.gameYear());
+    const node = this.data.getResearchNode(nodeId);
+    if (!node) return;
+    const slotId = this.getAssignableSlotId(node);
+    if (!slotId || !this.canStartTechTrack(nodeId, planetId)) return;
+    this.gameState.startResearch(nodeId, planetId, this.gameState.gameYear(), slotId);
     this.eventBus.researchTrackStarted$.next({ trackId: nodeId, planetId });
   }
 
@@ -179,11 +160,45 @@ export class ResearchService {
   resumeTrack(trackId: string): void {
     const track = this.gameState.activeResearch().find((t) => t.trackId === trackId);
     if (!track?.isPaused) return;
-    const def = this.getTrackDef(trackId);
-    if (!def) return;
-    if (this.gameState.usedRpCapacity() + def.rpCost > this.gameState.totalRpCapacity()) return;
-    this.gameState.resumeResearch(trackId);
+    const node = this.data.getResearchNode(trackId);
+    if (!node) return;
+    const slotId = this.getAssignableSlotId(node);
+    if (!slotId) return;
+    this.gameState.resumeResearch(trackId, slotId);
     this.eventBus.researchTrackStarted$.next({ trackId, planetId: track.planetId });
+  }
+
+  private canStartResearchNode(node: ResearchNode, planetId: string): boolean {
+    if (this.gameState.completedTechs().includes(node.id)) return false;
+    const existing = this.gameState.activeResearch().find((track) => track.trackId === node.id);
+    if (existing && !existing.isPaused) return false;
+    if (existing?.isPaused) return this.getAssignableSlotId(node) !== null;
+    if (!this.techTree.canUnlock(planetId, node.id)) return false;
+    return this.getAssignableSlotId(node) !== null;
+  }
+
+  private getAssignableSlotId(node: ResearchNode): string | null {
+    const freeSlots = this.getFreeSlotsForNode(node);
+    if (node.collaborative) {
+      return freeSlots.length === this.gameState.visibleResearchSlots().length ? 'collaborative' : null;
+    }
+    return freeSlots[0]?.id ?? null;
+  }
+
+  private getFreeSlotsForNode(node: ResearchNode): ResearchSlot[] {
+    if (this.hasRunningCollaborativeResearch()) return [];
+    return this.gameState.availableResearchSlots().filter((slot) => this.canSlotRunNode(slot, node));
+  }
+
+  private canSlotRunNode(slot: ResearchSlot, node: ResearchNode): boolean {
+    if (slot.kind === 'default') {
+      return node.colonySlotPlanet === undefined;
+    }
+    return node.colonySlotPlanet === slot.planetId || node.planet === slot.planetId;
+  }
+
+  private hasRunningCollaborativeResearch(): boolean {
+    return this.gameState.activeResearch().some((track) => !track.isPaused && track.slotId === 'collaborative');
   }
 }
 

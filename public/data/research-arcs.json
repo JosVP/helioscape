@@ -1,0 +1,63 @@
+[
+  {
+    "id": "hunt_for_life",
+    "displayName": "Hunt for Life",
+    "type": "open",
+    "description": "We connect every clue about water, chemistry, and biology into one patient search for living worlds.",
+    "nodeIds": ["mars_ocean_confirmed", "mars_biological_seeding"],
+    "knownFindings": [
+      {
+        "id": "mars_ocean_context",
+        "title": "Mars Gives Us A Water Baseline",
+        "requirement": "node:mars_ocean_confirmed"
+      },
+      {
+        "id": "mars_bio_context",
+        "title": "Pioneer Ecologies Become A Reference",
+        "requirement": "node:mars_biological_seeding"
+      }
+    ]
+  },
+  {
+    "id": "deep_ocean_exploration",
+    "displayName": "Deep Ocean Exploration",
+    "type": "open",
+    "description": "We learn how pressure, darkness, chemistry, and patience shape oceans we cannot easily touch.",
+    "nodeIds": ["earth_ocean_cleanup", "earth_ocean_acidification_reversal"],
+    "knownFindings": [
+      {
+        "id": "earth_ocean_repair",
+        "title": "Earth's Oceans Become A Living Laboratory",
+        "requirement": "node:earth_ocean_acidification_reversal"
+      }
+    ]
+  },
+  {
+    "id": "solar_gravitational_lens",
+    "displayName": "Solar Gravitational Lens",
+    "type": "closed",
+    "description": "We turn stellar gravity into an instrument and use the Sun itself as part of the telescope.",
+    "nodeIds": ["earth_fusion_ignition_theory"],
+    "knownFindings": [
+      {
+        "id": "fusion_enables_deep_instruments",
+        "title": "Fusion Makes Deep-Space Instrumentation Plausible",
+        "requirement": "node:earth_fusion_ignition_theory"
+      }
+    ]
+  },
+  {
+    "id": "understanding_the_universe",
+    "displayName": "Understanding the Universe",
+    "type": "open",
+    "description": "Every practical breakthrough also changes the questions we are capable of asking.",
+    "nodeIds": ["earth_fusion_ignition_theory", "moon_closed_loop_life_support"],
+    "knownFindings": [
+      {
+        "id": "closed_worlds_and_big_questions",
+        "title": "Closed Worlds Teach Us How To Ask Larger Questions",
+        "requirement": "node:moon_closed_loop_life_support"
+      }
+    ]
+  }
+]

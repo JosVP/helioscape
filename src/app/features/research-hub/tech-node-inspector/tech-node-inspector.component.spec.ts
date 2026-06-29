@@ -23,7 +23,6 @@ function makeViewModel(overrides: Partial<TechInspectorViewModel> = {}): TechIns
     planetLabel: 'Earth',
     statusLabel: 'Available',
     branchTag: null,
-    canRevealDetails: true,
     prerequisites: [],
     canStart: true,
     ...overrides,
@@ -57,7 +56,7 @@ describe('TechNodeInspectorComponent', () => {
   it('renders progress and ETA for in-progress nodes', () => {
     setViewModel(
       makeViewModel({
-        visibility: 'in_progress',
+        visibility: 'running',
         statusLabel: 'In progress',
         progressPercent: 50,
         etaYear: 2043,
@@ -73,14 +72,13 @@ describe('TechNodeInspectorComponent', () => {
   it('renders capacity warning and no Start button for needs-capacity nodes', () => {
     setViewModel(
       makeViewModel({
-        visibility: 'needs_capacity',
-        statusLabel: 'Needs capacity',
-        capacityShortfall: 10,
+        visibility: 'available',
+        startBlockedReason: 'All visible research slots are currently occupied.',
         canStart: false,
       }),
     );
 
-    expect(fixture.nativeElement.textContent).toContain('10 more RP capacity');
+    expect(fixture.nativeElement.textContent).toContain('All visible research slots are currently occupied.');
     expect(fixture.nativeElement.querySelector('.tech-inspector__start')).toBeNull();
   });
 
@@ -94,20 +92,20 @@ describe('TechNodeInspectorComponent', () => {
     expect(emitted).toBe('earth_advanced_renewables');
   });
 
-  it('does not reveal hidden details for hint nodes', () => {
+  it('renders locked nodes with prerequisite context', () => {
     setViewModel(
       makeViewModel({
-        visibility: 'hint',
+        node: { ...NODE, unlockCondition: 'Complete a visible prerequisite first.' },
+        visibility: 'locked',
         statusLabel: 'Locked',
-        canRevealDetails: false,
         canStart: false,
         prerequisites: [{ id: 'x', label: 'A visible clue', met: false, isSpillover: false }],
       }),
     );
 
-    expect(fixture.nativeElement.textContent).toContain('Locked technology');
+    expect(fixture.nativeElement.textContent).toContain('Complete a visible prerequisite first.');
     expect(fixture.nativeElement.textContent).toContain('A visible clue');
-    expect(fixture.nativeElement.textContent).not.toContain(NODE.description);
-    expect(fixture.nativeElement.textContent).not.toContain(NODE.outcomeSummary[0]);
+    expect(fixture.nativeElement.textContent).toContain(NODE.description);
+    expect(fixture.nativeElement.textContent).toContain(NODE.outcomeSummary[0]);
   });
 });

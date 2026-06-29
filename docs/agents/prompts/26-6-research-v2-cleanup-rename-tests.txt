@@ -57,7 +57,7 @@ CLEANUP REQUIREMENTS
 
 5. Tests to add or update
    Service-level:
-   - slot visibility: 2 start, 3 after Mars or Venus, 4 after both
+   - slot visibility: 2 at start, Mars colony slot after Mars population threshold, Venus colony slot after Venus population threshold
    - start/pause/resume/complete slot behavior
    - collaborative node behavior
    - deterministic transfer helper

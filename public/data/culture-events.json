@@ -10,23 +10,14 @@
     "priority": false
   },
   {
-    "id": "ce_mars_unlocked",
-    "title": "Mars Comes Within Reach",
-    "narratorText": "Mercury's industry has matured enough to carry our ambitions outward. Mars is no longer a distant red question; it is a destination we can begin to answer.",
-    "portrait": "/assets/svg/portraits/ce_mars_phase_1.svg",
+    "id": "ce_inner_worlds_unlocked",
+    "title": "The Inner Worlds Open",
+    "narratorText": "Mercury's industry has matured enough to carry our ambitions outward. Mars and Venus are no longer distant questions; they are neighbouring futures we can begin to answer.",
+    "portrait": "/assets/svg/portraits/ce_inner_worlds_unlocked.svg",
     "choices": [],
     "tags": [],
-    "trigger": { "type": "planet_unlocked", "planet": "mars" },
-    "priority": false
-  },
-  {
-    "id": "ce_venus_unlocked",
-    "title": "The Morning Star Awaits",
-    "narratorText": "Venus is no longer beyond our planning horizon. We can now study the twin world closely enough to choose what kind of future we mean to give it.",
-    "portrait": "/assets/svg/portraits/ce_venus_phase_1.svg",
-    "choices": [],
-    "tags": [],
-    "trigger": { "type": "planet_unlocked", "planet": "venus" },
+    "trigger": { "type": "planet_unlocked", "planet": "inner_worlds" },
+    "presentation": "modal",
     "priority": false
   },
   {

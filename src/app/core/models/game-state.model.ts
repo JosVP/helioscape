@@ -1,5 +1,6 @@
 import type { PlanetId, PlanetState } from './planet.model';
 import type { ActiveResearchTrack } from './tech-tree.model';
+import type { ResearchArcLogEntry } from './research-track.model';
 import type { CultureEventEntry, CultureEventHistoryEntry } from './culture-event.model';
 
 // ---------------------------------------------------------------------------
@@ -36,6 +37,7 @@ export interface SerializedGameState {
   completedTechs: string[];
   completedResearchYears: Record<string, number>;
   activeResearch: ActiveResearchTrack[];
+  arcLog: Record<string, ResearchArcLogEntry[]>;
   pendingFork: PendingFork | null;
   planetUnlocks: Record<string, PlanetUnlockState>;
   mercuryResources: ResourceStore;

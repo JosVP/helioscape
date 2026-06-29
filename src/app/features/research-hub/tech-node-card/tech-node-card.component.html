@@ -35,57 +35,33 @@
   <div class="tech-node__body">
     <div class="tech-node__name">{{ displayName() }}</div>
 
-    @if (showDetails()) {
-      <div class="tech-node__meta">
-        <span class="tech-node__cost">{{ node().rpCost }} RP</span>
-        @if (node().durationYears > 0) {
-          <span class="tech-node__duration">· {{ node().durationYears }}yr</span>
-        }
+    <div class="tech-node__meta">
+      <span class="tech-node__tier">Tier {{ node().tier ?? 1 }}</span>
+      @if (node().durationYears > 0) {
+        <span class="tech-node__duration">· {{ node().durationYears }}yr</span>
+      }
+      <span class="tech-node__status">· {{ visibility() }}</span>
+    </div>
+
+    @if (branchTag()) {
+      <span class="tech-node__branch-tag tech-node__branch-tag--{{ branchTag() }}">
+        {{ branchTag() }}
+      </span>
+    }
+
+    @if (isInProgress()) {
+      <div class="tech-node__progress"
+           role="progressbar"
+           [attr.aria-valuenow]="progressPercent() ?? 0"
+           aria-valuemin="0"
+           aria-valuemax="100">
+        <div class="tech-node__progress-fill"
+             [style.--progress]="(progressPercent() ?? 0) / 100"></div>
       </div>
-
-      @if (branchTag()) {
-        <span class="tech-node__branch-tag tech-node__branch-tag--{{ branchTag() }}">
-          {{ branchTag() }}
-        </span>
-      }
-
-      @if (isInProgress()) {
-        <div class="tech-node__progress"
-             role="progressbar"
-             [attr.aria-valuenow]="progressPercent() ?? 0"
-             aria-valuemin="0"
-             aria-valuemax="100">
-          <div class="tech-node__progress-fill"
-               [style.--progress]="(progressPercent() ?? 0) / 100"></div>
-        </div>
-        @if (etaYear()) {
-          <span class="tech-node__eta">Est. {{ etaYear() }}</span>
-        }
-      }
-
-      @if (isNeedsCapacity()) {
-        <span class="tech-node__capacity-badge">⏳ Needs capacity</span>
+      @if (etaYear()) {
+        <span class="tech-node__eta">Est. {{ etaYear() }}</span>
       }
     }
   </div>
-
-  <!-- Tooltip (only for nodes with prereqs) -->
-  @if (showTooltip()) {
-    <div class="tech-node__tooltip" role="tooltip">
-      <div class="tech-node__tooltip-title">Prerequisites</div>
-      @for (prereq of prereqSummary(); track prereq.id) {
-        <div class="tech-node__tooltip-prereq"
-          [class.tech-node__tooltip-prereq--met]="prereq.met"
-          [class.tech-node__tooltip-prereq--unmet]="!prereq.met"
-        >
-          <span class="tech-node__tooltip-prereq-dot"></span>
-          <span>{{ prereq.label }}</span>
-          @if (prereq.isSpillover) {
-            <span class="tech-node__tooltip-spillover">↗ spillover</span>
-          }
-        </div>
-      }
-    </div>
-  }
 </div>
 

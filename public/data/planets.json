@@ -68,9 +68,10 @@
   {
     "id": "mars",
     "displayName": "Mars",
+    "researchSlotPopulationThreshold": 50000,
     "unlock": {
       "type": "mercury_zone_selected",
-      "eventId": "ce_mars_unlocked"
+      "eventId": "ce_inner_worlds_unlocked"
     },
     "initialState": {
       "atmospherePressure": 0.006,
@@ -124,9 +125,10 @@
   {
     "id": "venus",
     "displayName": "Venus",
+    "researchSlotPopulationThreshold": 50000,
     "unlock": {
       "type": "mercury_zone_selected",
-      "eventId": "ce_venus_unlocked",
+      "eventId": "ce_inner_worlds_unlocked",
       "setFlag": "venus_opening_decision_available"
     },
     "initialState": {

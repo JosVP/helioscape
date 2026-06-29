@@ -1,64 +1,17 @@
-export interface TechNode {
-  id: string;
-  planet: string;
-  displayName: string;
-  description: string;
-  outcomeSummary: string[];
-  prerequisites: string[];
-  prerequisiteMode?: 'all' | 'any';
-  spilloverPrerequisites: string[];
-  spilloverGate?: {
-    mode: 'min_naturalist_nodes';
-    count: number;
-  };
-  rpCost: number;
-  durationYears: number;
-  effects: TechEffect[];
-  tier?: number;
-  iconPath?: string;
-  silhouetteIconPath?: string;
-}
+import type {
+  ActiveResearch,
+  ForkChoice,
+  LegacyResearchTrack,
+  LegacyTechNode,
+  ResearchEffect,
+} from './research-track.model';
 
-export type TechEffect =
-  | { type: 'unlock_tech'; target: string }
-  | { type: 'emit_event'; eventId: string }
-  | { type: 'spillover_unlock'; targetPlanet: string; targetTech: string }
-  | {
-      type: 'apply_terraforming_choice';
-      planet: string;
-      choiceId: string;
-      permanent: boolean;
-    }
-  | { type: 'tag_decision'; tag: 'naturalist' | 'architect' }
-  | { type: 'apply_colonist_bonus'; bonus: 'dense_living' | 'open_environment' }
-  | { type: 'rp_capacity_boost'; amount: number }
-  | { type: 'set_flag'; flag: string }
-  | { type: 'present_fork'; forkId: string; choices: ForkChoice[] };
+export type TechNode = LegacyTechNode;
+export type TechEffect = ResearchEffect;
+export type { ForkChoice };
+export type ResearchTrack = LegacyResearchTrack;
 
-export interface ForkChoice {
-  id: string;
-  label: string;
-  tag: 'naturalist' | 'architect' | '';
-  effects: TechEffect[];
-}
-
-export interface ResearchTrack {
-  id: string;
-  displayName: string;
-  planet: string;
-  rpCost: number;
-  durationYears: number;
-  description: string;
-  prerequisiteTech: string;
-  onCompleteEffects: TechEffect[];
-}
-
-export interface ActiveResearchTrack {
+export interface ActiveResearchTrack extends Omit<ActiveResearch, 'nodeId' | 'slotId'> {
   readonly trackId: string;
-  readonly planetId: string;
-  readonly isPaused: boolean;
-  /** The game year when this run (or most recent resume) began. */
-  readonly startYear: number;
-  /** Years accumulated from all paused/resumed runs before the current startYear. */
-  readonly elapsedBeforeStart: number;
+  readonly slotId?: string | null;
 }

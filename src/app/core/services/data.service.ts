@@ -2,10 +2,12 @@ import { Injectable } from '@angular/core';
 import type {
   MoonData,
   PlanetData,
+  ResearchArcDefinition,
+  ResearchEffect,
+  ResearchNode,
   TechNode,
   ResearchTrack,
   CultureEvent,
-  TechEffect,
   ResourceStore,
 } from '@app/core/models';
 
@@ -21,7 +23,7 @@ export interface KardashevMilestone {
   /** Human-readable condition strings (e.g. 'dyson_15_percent'). */
   conditions: string[];
   approximateYearRange: string;
-  effects: TechEffect[];
+  effects: ResearchEffect[];
 }
 
 export interface ResourceData {
@@ -177,8 +179,8 @@ export interface BioPhaseDef {
 @Injectable({ providedIn: 'root' })
 export class DataService {
   private planets: Record<string, PlanetData> = {};
-  private techTree: TechNode[] = [];
-  private researchTracks: ResearchTrack[] = [];
+  private researchNodes: ResearchNode[] = [];
+  private researchArcs: ResearchArcDefinition[] = [];
   private cultureEvents: CultureEvent[] = [];
   private milestones: KardashevMilestone[] = [];
   private resources: ResourceData[] = [];
@@ -196,8 +198,8 @@ export class DataService {
     try {
       const [
         planetsArray,
-        techTree,
-        researchTracks,
+        researchNodes,
+        researchArcs,
         cultureEvents,
         milestones,
         resources,
@@ -208,8 +210,8 @@ export class DataService {
         moonData,
       ] = await Promise.all([
         this.fetchJson<PlanetData[]>('/data/planets.json'),
-        this.fetchJson<TechNode[]>('/data/tech-tree.json'),
-        this.fetchJson<ResearchTrack[]>('/data/research-tracks.json'),
+        this.fetchJson<ResearchNode[]>('/data/research-tracks.json'),
+        this.fetchOptionalJson<ResearchArcDefinition[]>('/data/research-arcs.json', []),
         this.fetchJson<CultureEvent[]>('/data/culture-events.json'),
         this.fetchJson<KardashevMilestone[]>('/data/kardashev-milestones.json'),
         this.fetchJson<ResourceData[]>('/data/resources.json'),
@@ -227,8 +229,8 @@ export class DataService {
         },
         {} as Record<string, PlanetData>,
       );
-      this.techTree = techTree;
-      this.researchTracks = researchTracks;
+      this.researchNodes = researchNodes;
+      this.researchArcs = researchArcs;
       this.cultureEvents = cultureEvents;
       this.milestones = milestones;
       this.resources = resources;
@@ -266,15 +268,28 @@ export class DataService {
   }
 
   // -------------------------------------------------------------------------
-  // Tech-tree accessors
+  // Research-node accessors
   // -------------------------------------------------------------------------
 
+  getResearchNode(id: string): ResearchNode | undefined {
+    return this.researchNodes.find((node) => node.id === id);
+  }
+
+  getResearchNodesForPlanet(planetId: string): ResearchNode[] {
+    return this.researchNodes.filter((node) => node.planet === planetId);
+  }
+
+  getAllResearchNodes(): ResearchNode[] {
+    return this.researchNodes;
+  }
+
   getTechNode(id: string): TechNode | undefined {
-    return this.techTree.find((t) => t.id === id);
+    const node = this.getResearchNode(id);
+    return node ? this.toLegacyTechNode(node) : undefined;
   }
 
   getTechNodesForPlanet(planetId: string): TechNode[] {
-    return this.techTree.filter((t) => t.planet === planetId);
+    return this.getResearchNodesForPlanet(planetId).map((node) => this.toLegacyTechNode(node));
   }
 
   // -------------------------------------------------------------------------
@@ -282,11 +297,20 @@ export class DataService {
   // -------------------------------------------------------------------------
 
   getResearchTrack(id: string): ResearchTrack | undefined {
-    return this.researchTracks.find((t) => t.id === id);
+    const node = this.getResearchNode(id);
+    return node ? this.toLegacyResearchTrack(node) : undefined;
   }
 
   getResearchTracksForPlanet(planetId: string): ResearchTrack[] {
-    return this.researchTracks.filter((t) => t.planet === planetId);
+    return this.getResearchNodesForPlanet(planetId).map((node) => this.toLegacyResearchTrack(node));
+  }
+
+  getResearchArc(id: string): ResearchArcDefinition | undefined {
+    return this.researchArcs.find((arc) => arc.id === id);
+  }
+
+  getAllResearchArcs(): ResearchArcDefinition[] {
+    return this.researchArcs;
   }
 
   // -------------------------------------------------------------------------
@@ -406,5 +430,37 @@ export class DataService {
       throw new Error(`DataService: HTTP ${response.status} fetching "${path}"`);
     }
     return response.json() as Promise<T>;
+  }
+
+  private async fetchOptionalJson<T>(path: string, fallback: T): Promise<T> {
+    const response = await fetch(path);
+    if (response.status === 404) {
+      return fallback;
+    }
+    if (!response.ok) {
+      throw new Error(`DataService: HTTP ${response.status} fetching "${path}"`);
+    }
+    return response.json() as Promise<T>;
+  }
+
+  private toLegacyTechNode(node: ResearchNode): TechNode {
+    return {
+      ...node,
+      rpCost: 0,
+      tier: node.tier,
+    };
+  }
+
+  private toLegacyResearchTrack(node: ResearchNode): ResearchTrack {
+    return {
+      id: node.id,
+      displayName: node.displayName,
+      planet: node.planet,
+      rpCost: 0,
+      durationYears: node.durationYears,
+      description: node.description,
+      prerequisiteTech: node.prerequisites[0] ?? '',
+      onCompleteEffects: node.effects,
+    };
   }
 }

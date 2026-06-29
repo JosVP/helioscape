@@ -1,102 +1,1560 @@
 [
   {
-    "id": "moon_low_grav_medicine_track",
-    "displayName": "Low-Gravity Medicine Program",
-    "planet": "moon",
-    "rpCost": 25,
-    "durationYears": 30,
-    "description": "We study how bones, circulation, and development adapt to long-lived human life in one-sixth gravity.",
-    "prerequisiteTech": "earth_launch_mercury_mission",
-    "onCompleteEffects": [{ "type": "unlock_tech", "target": "moon_low_gravity_medicine" }]
-  },
-  {
-    "id": "moon_closed_loop_track",
-    "displayName": "Closed-Loop Habitat Systems",
-    "planet": "moon",
-    "rpCost": 30,
-    "durationYears": 35,
-    "description": "We turn the Moon into a laboratory for sealed life-support cycles that waste almost nothing and fail slowly enough to survive.",
-    "prerequisiteTech": "earth_launch_mercury_mission",
-    "onCompleteEffects": [{ "type": "unlock_tech", "target": "moon_closed_loop_life_support" }]
-  },
-  {
-    "id": "moon_regolith_construction_track",
-    "displayName": "Regolith Construction Methods",
-    "planet": "moon",
-    "rpCost": 20,
-    "durationYears": 25,
-    "description": "We learn how to sinter, print, and shield with lunar soil until local building becomes safer than shipping walls from Earth.",
-    "prerequisiteTech": "earth_launch_mercury_mission",
-    "onCompleteEffects": [{ "type": "unlock_tech", "target": "moon_regolith_construction" }]
-  },
-  {
-    "id": "moon_organism_library_t1_track",
-    "displayName": "Organism Library Tier I",
-    "planet": "moon",
-    "rpCost": 35,
-    "durationYears": 35,
-    "description": "We catalog hardy microbes, lichens, and engineered pioneer ecologies that might someday survive beyond Earth.",
-    "prerequisiteTech": "earth_launch_mercury_mission",
-    "onCompleteEffects": [{ "type": "unlock_tech", "target": "moon_organism_library_t1" }]
-  },
-  {
-    "id": "moon_radiation_resilience_track",
-    "displayName": "Radiation Resilience",
-    "planet": "moon",
-    "rpCost": 30,
-    "durationYears": 30,
-    "description": "We map the slow damage of cosmic exposure and design biological and material countermeasures for lives spent under a thin roof of dust.",
-    "prerequisiteTech": "moon_low_grav_medicine_track",
-    "onCompleteEffects": [{ "type": "unlock_tech", "target": "moon_radiation_resilience" }]
-  },
-  {
-    "id": "moon_isolation_psychology_track",
-    "displayName": "Isolation Psychology",
-    "planet": "moon",
-    "rpCost": 25,
-    "durationYears": 25,
-    "description": "We study what keeps small crews humane, stable, and creatively alive when the horizon never changes and home is a radio delay away.",
-    "prerequisiteTech": "moon_closed_loop_track",
-    "onCompleteEffects": [{ "type": "unlock_tech", "target": "moon_isolation_psychology" }]
-  },
-  {
-    "id": "moon_he3_extraction_track",
-    "displayName": "Helium-3 Extraction",
-    "planet": "moon",
-    "rpCost": 40,
-    "durationYears": 30,
-    "description": "We develop the patient industrial chemistry needed to pull fusion-relevant isotopes out of vast fields of ordinary lunar dust.",
-    "prerequisiteTech": "moon_regolith_construction_track",
-    "onCompleteEffects": [{ "type": "unlock_tech", "target": "moon_he3_extraction" }]
-  },
-  {
-    "id": "moon_organism_library_t2_track",
-    "displayName": "Organism Library Tier II",
-    "planet": "moon",
-    "rpCost": 50,
-    "durationYears": 45,
-    "description": "We expand the library with wet-world ecologies and adaptive biomes informed by the first confirmed signs that open Martian water can hold.",
-    "prerequisiteTech": "moon_organism_library_t1_track",
-    "onCompleteEffects": [{ "type": "unlock_tech", "target": "moon_organism_library_t2" }]
-  },
-  {
-    "id": "earth_deuterium_extraction_track",
-    "displayName": "Deuterium Extraction Theory",
+    "id": "earth_launch_mercury_mission",
     "planet": "earth",
-    "rpCost": 40,
-    "durationYears": 30,
-    "description": "We refine the membranes, energy budgets, and industrial flows needed to pull fusion fuel from the oceans at planetary scale.",
-    "prerequisiteTech": "earth_advanced_renewables",
-    "onCompleteEffects": [{ "type": "unlock_tech", "target": "earth_deuterium_extraction" }]
+    "displayName": "Launch Mercury Mission",
+    "category": "capability",
+    "tier": 1,
+    "durationYears": 0,
+    "description": "We commit to Mercury: not as conquest, but as the first industrial foothold close enough to the Sun to change what civilisation can build.",
+    "outcomeSummary": [
+      "Opens the Mercury mission chain.",
+      "Unlocks early Moon research tracks.",
+      "Begins the path toward solar-scale industry."
+    ],
+    "unlockCondition": "Available from the beginning.",
+    "prerequisites": [],
+    "spilloverPrerequisites": [],
+    "effects": [],
+    "visualOrder": 1,
+    "iconPath": "/assets/svg/tech-tree/earth_launch_mercury_mission.svg"
   },
   {
-    "id": "earth_fusion_ignition_theory_track",
-    "displayName": "Fusion Ignition Theory Program",
+    "id": "earth_advanced_renewables",
     "planet": "earth",
-    "rpCost": 50,
+    "displayName": "Advanced Renewables Integration",
+    "category": "capability",
+    "tier": 2,
+    "durationYears": 20,
+    "description": "We stitch solar, wind, storage, and grid forecasting into a calmer planetary metabolism, making clean power ordinary enough to build from.",
+    "outcomeSummary": [
+      "Enables Deuterium Extraction From Seawater.",
+      "Enables Automated Food Systems and Earth branch choices.",
+      "Provides a stable early research foundation."
+    ],
+    "unlockCondition": "Complete Launch Mercury Mission.",
+    "prerequisites": [
+      "earth_launch_mercury_mission"
+    ],
+    "spilloverPrerequisites": [],
+    "effects": [],
+    "visualOrder": 2,
+    "iconPath": "/assets/svg/tech-tree/earth_advanced_renewables.svg"
+  },
+  {
+    "id": "earth_dome_habitat",
+    "planet": "earth",
+    "displayName": "Dome Habitat Technology",
+    "category": "capability",
+    "tier": 2,
+    "durationYears": 20,
+    "description": "We learn how to make sealed worlds feel less like capsules and more like places where ordinary life can take root.",
+    "outcomeSummary": [
+      "Supports future Mars dome and aerogel habitat options.",
+      "Improves early off-world living before open atmospheres are ready.",
+      "Creates a practical bridge between Earth cities and colony habitats."
+    ],
+    "unlockCondition": "Complete Launch Mercury Mission.",
+    "prerequisites": [
+      "earth_launch_mercury_mission"
+    ],
+    "spilloverPrerequisites": [],
+    "effects": [],
+    "visualOrder": 3,
+    "iconPath": "/assets/svg/tech-tree/earth_dome_habitat.svg"
+  },
+  {
+    "id": "earth_deuterium_extraction",
+    "planet": "earth",
+    "displayName": "Deuterium Extraction From Seawater",
+    "category": "capability",
+    "tier": 3,
+    "durationYears": 30,
+    "description": "We turn the oceans into a patient fuel source, separating rare hydrogen from abundance without treating abundance as permission to waste.",
+    "outcomeSummary": [
+      "Enables Fusion Ignition Theory.",
+      "Connects Earth's clean power base to future Type 1 energy systems.",
+      "Prepares civilisation for deuterium-scale industry."
+    ],
+    "unlockCondition": "Complete Advanced Renewables Integration.",
+    "prerequisites": [
+      "earth_advanced_renewables"
+    ],
+    "spilloverPrerequisites": [],
+    "effects": [],
+    "visualOrder": 4,
+    "iconPath": "/assets/svg/tech-tree/earth_deuterium_extraction.svg"
+  },
+  {
+    "id": "earth_ocean_cleanup",
+    "planet": "earth",
+    "displayName": "Ocean Macro-Plastic Cleanup",
+    "category": "reactive",
+    "tier": 1,
+    "durationYears": 25,
+    "description": "We stop treating the ocean as a place where mistakes disappear. Fleets, microbes, and law begin pulling a century of fragments home.",
+    "outcomeSummary": [
+      "Becomes available after Mercury Phase 1 spillover.",
+      "Strengthens Earth's Naturalist recovery arc.",
+      "Improves the baseline for later ocean restoration work."
+    ],
+    "unlockCondition": "Requires mercury phase 1 complete.",
+    "prerequisites": [],
+    "spilloverPrerequisites": [
+      "mercury_phase_1_complete"
+    ],
+    "effects": [],
+    "visualOrder": 5,
+    "iconPath": "/assets/svg/tech-tree/earth_ocean_cleanup.svg",
+    "arcIds": [
+      "deep_ocean_exploration"
+    ]
+  },
+  {
+    "id": "earth_fusion_ignition_theory",
+    "planet": "earth",
+    "displayName": "Fusion Ignition Theory",
+    "category": "capability",
+    "tier": 3,
     "durationYears": 40,
-    "description": "We push through the last theoretical barriers between controlled deuterium fuel cycles and a power source robust enough to change civilisation.",
-    "prerequisiteTech": "earth_deuterium_extraction_track",
-    "onCompleteEffects": [{ "type": "unlock_tech", "target": "earth_fusion_ignition_theory" }]
+    "description": "We push controlled fusion from a promise into an engineering language, one careful confinement model at a time.",
+    "outcomeSummary": [
+      "Triggers a landmark culture event when completed.",
+      "Marks the theoretical step toward Type 1 civilisation.",
+      "Enables late Architect research paths that depend on fusion."
+    ],
+    "unlockCondition": "Complete Deuterium Extraction From Seawater.",
+    "prerequisites": [
+      "earth_deuterium_extraction"
+    ],
+    "spilloverPrerequisites": [],
+    "effects": [
+      {
+        "type": "emit_event",
+        "eventId": "ce_fusion_theory_complete"
+      }
+    ],
+    "visualOrder": 6,
+    "iconPath": "/assets/svg/tech-tree/earth_fusion_ignition_theory.svg",
+    "arcIds": [
+      "solar_gravitational_lens",
+      "understanding_the_universe"
+    ]
+  },
+  {
+    "id": "earth_co2_drawdown",
+    "planet": "earth",
+    "displayName": "Atmospheric CO2 Drawdown",
+    "category": "reactive",
+    "tier": 1,
+    "durationYears": 30,
+    "description": "Venus teaches us carbonate patience at planetary scale. We bring that lesson home and begin lowering the fever without pretending it was simple.",
+    "outcomeSummary": [
+      "Unlocked by Venus carbonate process spillover.",
+      "Enables Ocean Acidification Reversal.",
+      "Advances Earth's long Naturalist recovery path."
+    ],
+    "unlockCondition": "Requires venus carbonate process started.",
+    "prerequisites": [],
+    "spilloverPrerequisites": [
+      "venus_carbonate_process_started"
+    ],
+    "effects": [],
+    "visualOrder": 7,
+    "iconPath": "/assets/svg/tech-tree/earth_co2_drawdown.svg"
+  },
+  {
+    "id": "earth_soil_restoration",
+    "planet": "earth",
+    "displayName": "Soil Restoration Network",
+    "category": "reactive",
+    "tier": 1,
+    "durationYears": 30,
+    "description": "Mars makes us humble about dirt. We relearn soil as a living fabric and coordinate repair from farms to abandoned industrial ground.",
+    "outcomeSummary": [
+      "Unlocked by Mars soil-study spillover.",
+      "Enables Rewilding At Scale with Mars coastal stability.",
+      "Improves Earth's ecological recovery arc."
+    ],
+    "unlockCondition": "Requires mars soil study complete.",
+    "prerequisites": [],
+    "spilloverPrerequisites": [
+      "mars_soil_study_complete"
+    ],
+    "effects": [],
+    "visualOrder": 8,
+    "iconPath": "/assets/svg/tech-tree/earth_soil_restoration.svg"
+  },
+  {
+    "id": "earth_ocean_acidification_reversal",
+    "planet": "earth",
+    "displayName": "Ocean Acidification Reversal",
+    "category": "reactive",
+    "tier": 2,
+    "durationYears": 35,
+    "description": "We give the reefs, shell-builders, and plankton time to breathe again, correcting chemistry at a pace the living ocean can survive.",
+    "outcomeSummary": [
+      "Requires CO2 Drawdown and Venus carbonate spillover.",
+      "Deepens Earth's ocean restoration branch.",
+      "Supports the broader Naturalist recovery endpoint."
+    ],
+    "unlockCondition": "Complete Atmospheric CO2 Drawdown. Requires venus carbonate process started.",
+    "prerequisites": [
+      "earth_co2_drawdown"
+    ],
+    "spilloverPrerequisites": [
+      "venus_carbonate_process_started"
+    ],
+    "effects": [],
+    "visualOrder": 9,
+    "iconPath": "/assets/svg/tech-tree/earth_ocean_acidification_reversal.svg",
+    "arcIds": [
+      "deep_ocean_exploration"
+    ]
+  },
+  {
+    "id": "earth_rewilding",
+    "planet": "earth",
+    "displayName": "Rewilding At Scale",
+    "category": "identity",
+    "tier": 2,
+    "durationYears": 40,
+    "description": "We return room to rivers, forests, pollinators, and migration. The work is not nostalgia; it is infrastructure made of living systems.",
+    "outcomeSummary": [
+      "Adds a Naturalist branch decision tag.",
+      "Requires Earth soil restoration and Mars coastal stability.",
+      "Represents a major Earth recovery milestone."
+    ],
+    "unlockCondition": "Complete Soil Restoration Network. Requires mars coastal stable.",
+    "prerequisites": [
+      "earth_soil_restoration"
+    ],
+    "spilloverPrerequisites": [
+      "mars_coastal_stable"
+    ],
+    "effects": [
+      {
+        "type": "tag_decision",
+        "tag": "naturalist"
+      }
+    ],
+    "visualOrder": 10,
+    "iconPath": "/assets/svg/tech-tree/earth_rewilding.svg"
+  },
+  {
+    "id": "earth_automated_food_systems",
+    "planet": "earth",
+    "displayName": "Automated Food Systems",
+    "category": "identity",
+    "tier": 3,
+    "durationYears": 25,
+    "description": "We make food production precise enough to free land and labour, then face the harder question of what that freedom is for.",
+    "outcomeSummary": [
+      "Presents a fork between Naturalist rewilding and Architect development.",
+      "Can trigger a culture event through the chosen fork outcome.",
+      "The Architect choice adds RP capacity."
+    ],
+    "unlockCondition": "Complete Advanced Renewables Integration.",
+    "prerequisites": [
+      "earth_advanced_renewables"
+    ],
+    "spilloverPrerequisites": [],
+    "effects": [
+      {
+        "type": "present_fork",
+        "forkId": "food_systems_fork",
+        "choices": [
+          {
+            "id": "rewild_freed_land",
+            "label": "Rewild the freed land",
+            "tag": "naturalist",
+            "effects": [
+              {
+                "type": "emit_event",
+                "eventId": "ce_food_fork_naturalist"
+              },
+              {
+                "type": "tag_decision",
+                "tag": "naturalist"
+              }
+            ]
+          },
+          {
+            "id": "develop_freed_land",
+            "label": "Develop the freed land",
+            "tag": "architect",
+            "effects": [
+              {
+                "type": "emit_event",
+                "eventId": "ce_food_fork_architect"
+              },
+              {
+                "type": "tag_decision",
+                "tag": "architect"
+              },
+              {
+                "type": "rp_capacity_boost",
+                "amount": 10
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "visualOrder": 11,
+    "prerequisiteMode": "any",
+    "iconPath": "/assets/svg/tech-tree/earth_automated_food_systems.svg"
+  },
+  {
+    "id": "earth_vertical_megacity",
+    "planet": "earth",
+    "displayName": "Vertical Megacity Initiative",
+    "category": "identity",
+    "tier": 3,
+    "durationYears": 30,
+    "description": "We build upward with discipline, concentrating people, services, and transit so a city can grow without endlessly widening its wound.",
+    "outcomeSummary": [
+      "Adds an Architect branch decision tag.",
+      "Increases RP capacity by 15.",
+      "Triggers the first 50-million megacity culture event."
+    ],
+    "unlockCondition": "Complete Advanced Renewables Integration.",
+    "prerequisites": [
+      "earth_advanced_renewables"
+    ],
+    "spilloverPrerequisites": [],
+    "effects": [
+      {
+        "type": "tag_decision",
+        "tag": "architect"
+      },
+      {
+        "type": "rp_capacity_boost",
+        "amount": 15
+      },
+      {
+        "type": "emit_event",
+        "eventId": "ce_megacity_50m"
+      }
+    ],
+    "visualOrder": 12,
+    "iconPath": "/assets/svg/tech-tree/earth_vertical_megacity.svg"
+  },
+  {
+    "id": "earth_arcology_framework",
+    "planet": "earth",
+    "displayName": "Arcology Framework",
+    "category": "identity",
+    "tier": 3,
+    "durationYears": 35,
+    "description": "We design cities as complete habitats: dense, efficient, and humane enough that scale no longer has to mean sprawl.",
+    "outcomeSummary": [
+      "Adds an Architect branch decision tag.",
+      "Applies the dense-living colonist bonus.",
+      "Enables deeper Architect city and resource-grid research."
+    ],
+    "unlockCondition": "Complete Vertical Megacity Initiative.",
+    "prerequisites": [
+      "earth_vertical_megacity"
+    ],
+    "spilloverPrerequisites": [],
+    "effects": [
+      {
+        "type": "tag_decision",
+        "tag": "architect"
+      },
+      {
+        "type": "apply_colonist_bonus",
+        "bonus": "dense_living"
+      }
+    ],
+    "visualOrder": 13,
+    "iconPath": "/assets/svg/tech-tree/earth_arcology_framework.svg"
+  },
+  {
+    "id": "earth_subsurface_city",
+    "planet": "earth",
+    "displayName": "Subsurface City Expansion",
+    "category": "identity",
+    "tier": 3,
+    "durationYears": 40,
+    "description": "We learn to live below the noise of weather and traffic, turning depth into shelter rather than exile.",
+    "outcomeSummary": [
+      "Adds an Architect branch decision tag.",
+      "Triggers an underground-communities culture event.",
+      "Transfers design confidence to protected off-world habitats."
+    ],
+    "unlockCondition": "Complete Arcology Framework.",
+    "prerequisites": [
+      "earth_arcology_framework"
+    ],
+    "spilloverPrerequisites": [],
+    "effects": [
+      {
+        "type": "tag_decision",
+        "tag": "architect"
+      },
+      {
+        "type": "emit_event",
+        "eventId": "ce_underground_people"
+      }
+    ],
+    "visualOrder": 14,
+    "iconPath": "/assets/svg/tech-tree/earth_subsurface_city.svg"
+  },
+  {
+    "id": "earth_planetary_resource_grid",
+    "planet": "earth",
+    "displayName": "Planetary Resource Grid",
+    "category": "identity",
+    "tier": 3,
+    "durationYears": 40,
+    "description": "We connect supply, need, weather, harvest, transit, and waste into one visible system, then use that visibility to prevent suffering early.",
+    "outcomeSummary": [
+      "Adds an Architect branch decision tag.",
+      "Increases RP capacity by 10.",
+      "Triggers a culture event about famine prevented before it starts."
+    ],
+    "unlockCondition": "Complete Arcology Framework.",
+    "prerequisites": [
+      "earth_arcology_framework"
+    ],
+    "spilloverPrerequisites": [],
+    "effects": [
+      {
+        "type": "tag_decision",
+        "tag": "architect"
+      },
+      {
+        "type": "rp_capacity_boost",
+        "amount": 10
+      },
+      {
+        "type": "emit_event",
+        "eventId": "ce_grid_prevents_famine"
+      }
+    ],
+    "visualOrder": 15,
+    "iconPath": "/assets/svg/tech-tree/earth_planetary_resource_grid.svg"
+  },
+  {
+    "id": "earth_geoengineering_bureau",
+    "planet": "earth",
+    "displayName": "Geoengineering Coordination Bureau",
+    "category": "identity",
+    "tier": 3,
+    "durationYears": 45,
+    "description": "We coordinate climate intervention with public memory and restraint, learning to manage an atmosphere without forgetting it is shared.",
+    "outcomeSummary": [
+      "Adds an Architect branch decision tag.",
+      "Improves the narrative bridge between Earth management and terraforming.",
+      "Enables more confident late planetary coordination."
+    ],
+    "unlockCondition": "Complete Planetary Resource Grid.",
+    "prerequisites": [
+      "earth_planetary_resource_grid"
+    ],
+    "spilloverPrerequisites": [],
+    "effects": [
+      {
+        "type": "tag_decision",
+        "tag": "architect"
+      }
+    ],
+    "visualOrder": 16,
+    "iconPath": "/assets/svg/tech-tree/earth_geoengineering_bureau.svg"
+  },
+  {
+    "id": "earth_neural_digital_integration",
+    "planet": "earth",
+    "displayName": "Neural-Digital Integration Research",
+    "category": "identity",
+    "tier": 3,
+    "durationYears": 60,
+    "description": "We study the boundary between mind and system carefully, because a civilisation that thinks faster still has to decide wisely.",
+    "outcomeSummary": [
+      "Adds an Architect branch decision tag.",
+      "Increases RP capacity by 20.",
+      "Triggers a major culture event about human-system integration."
+    ],
+    "unlockCondition": "Complete Planetary Resource Grid and Fusion Ignition Theory.",
+    "prerequisites": [
+      "earth_planetary_resource_grid",
+      "earth_fusion_ignition_theory"
+    ],
+    "spilloverPrerequisites": [],
+    "effects": [
+      {
+        "type": "tag_decision",
+        "tag": "architect"
+      },
+      {
+        "type": "rp_capacity_boost",
+        "amount": 20
+      },
+      {
+        "type": "emit_event",
+        "eventId": "ce_neural_digital_debate"
+      }
+    ],
+    "visualOrder": 17,
+    "iconPath": "/assets/svg/tech-tree/earth_neural_digital_integration.svg"
+  },
+  {
+    "id": "earth_planetary_coordination_network",
+    "planet": "earth",
+    "displayName": "Planetary Coordination Network",
+    "category": "identity",
+    "tier": 3,
+    "durationYears": 70,
+    "description": "We let the planet's logistics run with a steadier intelligence, then ask what humans choose when survival is no longer the daily assignment.",
+    "outcomeSummary": [
+      "Adds an Architect branch decision tag.",
+      "Increases RP capacity by 30.",
+      "Triggers a culture event about life after planetary automation."
+    ],
+    "unlockCondition": "Complete Neural-Digital Integration Research.",
+    "prerequisites": [
+      "earth_neural_digital_integration"
+    ],
+    "spilloverPrerequisites": [],
+    "effects": [
+      {
+        "type": "tag_decision",
+        "tag": "architect"
+      },
+      {
+        "type": "rp_capacity_boost",
+        "amount": 30
+      },
+      {
+        "type": "emit_event",
+        "eventId": "ce_automation_what_do_humans_do"
+      }
+    ],
+    "visualOrder": 18,
+    "iconPath": "/assets/svg/tech-tree/earth_planetary_coordination_network.svg"
+  },
+  {
+    "id": "moon_low_gravity_medicine",
+    "planet": "moon",
+    "displayName": "Low-Gravity Medicine",
+    "category": "reactive",
+    "tier": 1,
+    "durationYears": 30,
+    "description": "We study bodies that grow, heal, and age under one-sixth gravity, learning what care means when even weight is different.",
+    "outcomeSummary": [
+      "Opens later Radiation Resilience research.",
+      "Improves the medical basis for off-world settlement.",
+      "Supports healthier future Mars colonists."
+    ],
+    "unlockCondition": "Requires earth launch mercury mission.",
+    "prerequisites": [],
+    "spilloverPrerequisites": [
+      "earth_launch_mercury_mission"
+    ],
+    "effects": [],
+    "visualOrder": 19,
+    "iconPath": "/assets/svg/tech-tree/moon_low_gravity_medicine.svg"
+  },
+  {
+    "id": "moon_closed_loop_life_support",
+    "planet": "moon",
+    "displayName": "Closed-Loop Life Support",
+    "category": "efficiency",
+    "tier": 1,
+    "durationYears": 35,
+    "description": "We make small habitats patient and forgiving, cycling air, water, food, and waste until survival becomes routine rather than heroic.",
+    "outcomeSummary": [
+      "Opens Isolation Psychology research.",
+      "Improves sealed habitat reliability.",
+      "Supports future dome and sky-city living."
+    ],
+    "unlockCondition": "Requires earth launch mercury mission.",
+    "prerequisites": [],
+    "spilloverPrerequisites": [
+      "earth_launch_mercury_mission"
+    ],
+    "effects": [],
+    "visualOrder": 20,
+    "iconPath": "/assets/svg/tech-tree/moon_closed_loop_life_support.svg",
+    "arcIds": [
+      "understanding_the_universe"
+    ]
+  },
+  {
+    "id": "moon_regolith_construction",
+    "planet": "moon",
+    "displayName": "Regolith Construction",
+    "category": "efficiency",
+    "tier": 1,
+    "durationYears": 25,
+    "description": "We turn dust into shelter, learning to print, sinter, shield, and repair with the ground already under our feet.",
+    "outcomeSummary": [
+      "Opens Early He-3 Extraction research.",
+      "Improves local construction knowledge for off-world bases.",
+      "Reduces dependence on Earth-shipped materials in future planning."
+    ],
+    "unlockCondition": "Requires earth launch mercury mission.",
+    "prerequisites": [],
+    "spilloverPrerequisites": [
+      "earth_launch_mercury_mission"
+    ],
+    "effects": [],
+    "visualOrder": 21,
+    "iconPath": "/assets/svg/tech-tree/moon_regolith_construction.svg"
+  },
+  {
+    "id": "moon_organism_library_t1",
+    "planet": "moon",
+    "displayName": "Organism Library Tier 1",
+    "category": "reactive",
+    "tier": 1,
+    "durationYears": 35,
+    "description": "We catalogue hardy pioneer life in controlled lunar systems, building a living library for worlds that are not ready yet.",
+    "outcomeSummary": [
+      "Provides early biological candidates for terraforming.",
+      "Supports Mars Biological Seeding prerequisites.",
+      "Opens Tier 2 once Mars confirms open water."
+    ],
+    "unlockCondition": "Requires earth launch mercury mission.",
+    "prerequisites": [],
+    "spilloverPrerequisites": [
+      "earth_launch_mercury_mission"
+    ],
+    "effects": [],
+    "visualOrder": 22,
+    "iconPath": "/assets/svg/tech-tree/moon_organism_library_t1.svg"
+  },
+  {
+    "id": "moon_radiation_resilience",
+    "planet": "moon",
+    "displayName": "Radiation Resilience",
+    "category": "capability",
+    "tier": 2,
+    "durationYears": 30,
+    "description": "We learn how cells, materials, and communities endure the invisible weather beyond Earth's magnetic shelter.",
+    "outcomeSummary": [
+      "Builds on Low-Gravity Medicine.",
+      "Improves long-duration crew safety in exposed habitats.",
+      "Transfers protective knowledge to Mars and Mercury planning."
+    ],
+    "unlockCondition": "Complete Low-Gravity Medicine.",
+    "prerequisites": [
+      "moon_low_gravity_medicine"
+    ],
+    "spilloverPrerequisites": [],
+    "effects": [],
+    "visualOrder": 23,
+    "iconPath": "/assets/svg/tech-tree/moon_radiation_resilience.svg"
+  },
+  {
+    "id": "moon_isolation_psychology",
+    "planet": "moon",
+    "displayName": "Isolation Psychology",
+    "category": "capability",
+    "tier": 2,
+    "durationYears": 25,
+    "description": "We study the rituals, spaces, and habits that keep small crews kind when every disagreement has nowhere to go.",
+    "outcomeSummary": [
+      "Builds on Closed-Loop Life Support.",
+      "Improves social resilience for future colonies.",
+      "Supports long missions where evacuation is not simple."
+    ],
+    "unlockCondition": "Complete Closed-Loop Life Support.",
+    "prerequisites": [
+      "moon_closed_loop_life_support"
+    ],
+    "spilloverPrerequisites": [],
+    "effects": [],
+    "visualOrder": 24,
+    "iconPath": "/assets/svg/tech-tree/moon_isolation_psychology.svg"
+  },
+  {
+    "id": "moon_he3_extraction",
+    "planet": "moon",
+    "displayName": "Early He-3 Extraction",
+    "category": "capability",
+    "tier": 2,
+    "durationYears": 30,
+    "description": "We test the slow chemistry of pulling rare isotopes from ordinary dust, bridging lunar industry to the fusion era ahead.",
+    "outcomeSummary": [
+      "Builds on Regolith Construction.",
+      "Adds a lunar bridge toward fusion-era resource handling.",
+      "Strengthens the Moon's role as research outpost and proving ground."
+    ],
+    "unlockCondition": "Complete Regolith Construction.",
+    "prerequisites": [
+      "moon_regolith_construction"
+    ],
+    "spilloverPrerequisites": [],
+    "effects": [],
+    "visualOrder": 25,
+    "iconPath": "/assets/svg/tech-tree/moon_he3_extraction.svg"
+  },
+  {
+    "id": "moon_organism_library_t2",
+    "planet": "moon",
+    "displayName": "Organism Library Tier 2",
+    "category": "reactive",
+    "tier": 2,
+    "durationYears": 45,
+    "description": "With Martian water no longer theoretical, we broaden the library from survival specialists into early ecosystems.",
+    "outcomeSummary": [
+      "Requires Tier 1 and Mars ocean spillover.",
+      "Improves biological options for later Mars and Venus seeding.",
+      "Turns Moon research into a living terraforming catalogue."
+    ],
+    "unlockCondition": "Complete Organism Library Tier 1. Requires mars ocean confirmed.",
+    "prerequisites": [
+      "moon_organism_library_t1"
+    ],
+    "spilloverPrerequisites": [
+      "mars_ocean_confirmed"
+    ],
+    "effects": [],
+    "visualOrder": 26,
+    "iconPath": "/assets/svg/tech-tree/moon_organism_library_t2.svg"
+  },
+  {
+    "id": "mercury_landing_pad",
+    "planet": "mercury",
+    "displayName": "Landing Pad",
+    "category": "reactive",
+    "tier": 1,
+    "durationYears": 5,
+    "description": "We mark the first safe place to arrive on Mercury, where sunlight is harsh enough to build a future and careless enough to kill one.",
+    "outcomeSummary": [
+      "One of three requirements for Mercury Phase 0.",
+      "Establishes crew and cargo arrival infrastructure.",
+      "Begins the Mercury industrial base."
+    ],
+    "unlockCondition": "Requires earth launch mercury mission.",
+    "prerequisites": [],
+    "spilloverPrerequisites": [
+      "earth_launch_mercury_mission"
+    ],
+    "effects": [],
+    "visualOrder": 27,
+    "iconPath": "/assets/svg/tech-tree/mercury_landing_pad.svg"
+  },
+  {
+    "id": "mercury_power_cell",
+    "planet": "mercury",
+    "displayName": "Power Cell",
+    "category": "reactive",
+    "tier": 1,
+    "durationYears": 5,
+    "description": "We give the first Mercury outpost a dependable heartbeat, compact enough to survive the crater rim and strong enough to start work.",
+    "outcomeSummary": [
+      "One of three requirements for Mercury Phase 0.",
+      "Provides early base power.",
+      "Prepares the outpost for sustained resource operations."
+    ],
+    "unlockCondition": "Requires earth launch mercury mission.",
+    "prerequisites": [],
+    "spilloverPrerequisites": [
+      "earth_launch_mercury_mission"
+    ],
+    "effects": [],
+    "visualOrder": 28,
+    "iconPath": "/assets/svg/tech-tree/mercury_power_cell.svg"
+  },
+  {
+    "id": "mercury_mining_facility",
+    "planet": "mercury",
+    "displayName": "Mining Facility",
+    "category": "reactive",
+    "tier": 1,
+    "durationYears": 5,
+    "description": "We begin with a small bite into Mercury's crust, careful enough to survive and steady enough to feed everything that follows.",
+    "outcomeSummary": [
+      "One of three requirements for Mercury Phase 0.",
+      "Starts local ore access.",
+      "Enables the industrial chain that will later build Dyson panels."
+    ],
+    "unlockCondition": "Requires earth launch mercury mission.",
+    "prerequisites": [],
+    "spilloverPrerequisites": [
+      "earth_launch_mercury_mission"
+    ],
+    "effects": [],
+    "visualOrder": 29,
+    "iconPath": "/assets/svg/tech-tree/mercury_mining_facility.svg"
+  },
+  {
+    "id": "mercury_phase_0_complete",
+    "planet": "mercury",
+    "displayName": "Mercury Phase 0 Complete",
+    "category": "reactive",
+    "tier": 2,
+    "durationYears": 0,
+    "description": "The first Mercury base becomes more than a landing site. It can power itself, receive cargo, and pull material from the ground.",
+    "outcomeSummary": [
+      "Applies Mercury phase 0 state.",
+      "Unlocks Phase 1 Mercury infrastructure.",
+      "Confirms the first industrial foothold near the Sun."
+    ],
+    "unlockCondition": "Complete Landing Pad and Power Cell and Mining Facility.",
+    "prerequisites": [
+      "mercury_landing_pad",
+      "mercury_power_cell",
+      "mercury_mining_facility"
+    ],
+    "spilloverPrerequisites": [],
+    "effects": [
+      {
+        "type": "apply_terraforming_choice",
+        "planet": "mercury",
+        "choiceId": "phase_0",
+        "permanent": true
+      }
+    ],
+    "visualOrder": 30,
+    "iconPath": "/assets/svg/tech-tree/mercury_phase_0_complete.svg"
+  },
+  {
+    "id": "mercury_refinery",
+    "planet": "mercury",
+    "displayName": "Refinery",
+    "category": "capability",
+    "tier": 3,
+    "durationYears": 10,
+    "description": "We stop shipping raw promise and start turning ore into usable streams, separating the useful from the merely heavy.",
+    "outcomeSummary": [
+      "One requirement for Mercury Phase 1.",
+      "Improves Mercury's local material chain.",
+      "Prepares resources for fabrication and expansion."
+    ],
+    "unlockCondition": "Complete Mercury Phase 0 Complete.",
+    "prerequisites": [
+      "mercury_phase_0_complete"
+    ],
+    "spilloverPrerequisites": [],
+    "effects": [],
+    "visualOrder": 31,
+    "iconPath": "/assets/svg/tech-tree/mercury_refinery.svg"
+  },
+  {
+    "id": "mercury_fabricator",
+    "planet": "mercury",
+    "displayName": "Fabricator",
+    "category": "capability",
+    "tier": 3,
+    "durationYears": 10,
+    "description": "We teach the base to make parts for itself, shifting Mercury from an outpost supplied by Earth to an outpost that can answer back.",
+    "outcomeSummary": [
+      "One requirement for Mercury Phase 1.",
+      "Enables local construction capacity.",
+      "Supports later Dyson and component production chains."
+    ],
+    "unlockCondition": "Complete Mercury Phase 0 Complete.",
+    "prerequisites": [
+      "mercury_phase_0_complete"
+    ],
+    "spilloverPrerequisites": [],
+    "effects": [],
+    "visualOrder": 32,
+    "iconPath": "/assets/svg/tech-tree/mercury_fabricator.svg"
+  },
+  {
+    "id": "mercury_solar_array_expansion",
+    "planet": "mercury",
+    "displayName": "Solar Array Expansion",
+    "category": "capability",
+    "tier": 3,
+    "durationYears": 10,
+    "description": "We unfold collectors under a sun that never feels distant, converting Mercury's danger into the base's first abundance.",
+    "outcomeSummary": [
+      "One requirement for Mercury Phase 1.",
+      "Expands base power infrastructure.",
+      "Foreshadows the Dyson swarm production role."
+    ],
+    "unlockCondition": "Complete Mercury Phase 0 Complete.",
+    "prerequisites": [
+      "mercury_phase_0_complete"
+    ],
+    "spilloverPrerequisites": [],
+    "effects": [],
+    "visualOrder": 33,
+    "iconPath": "/assets/svg/tech-tree/mercury_solar_array_expansion.svg"
+  },
+  {
+    "id": "mercury_rare_metals_mining",
+    "planet": "mercury",
+    "displayName": "Rare Metals Mining",
+    "category": "capability",
+    "tier": 3,
+    "durationYears": 12,
+    "description": "We move beyond common ore and begin finding the stubborn elements that make advanced machines precise, durable, and worth the trouble.",
+    "outcomeSummary": [
+      "One requirement for Mercury Phase 1.",
+      "Opens access to advanced industrial materials.",
+      "Supports future component and panel upgrades."
+    ],
+    "unlockCondition": "Complete Mercury Phase 0 Complete.",
+    "prerequisites": [
+      "mercury_phase_0_complete"
+    ],
+    "spilloverPrerequisites": [],
+    "effects": [],
+    "visualOrder": 34,
+    "iconPath": "/assets/svg/tech-tree/mercury_rare_metals_mining.svg"
+  },
+  {
+    "id": "mercury_phase_1_complete",
+    "planet": "mercury",
+    "displayName": "Mercury Phase 1 Complete",
+    "category": "reactive",
+    "tier": 3,
+    "durationYears": 0,
+    "description": "Mercury can now refine, fabricate, power, and mine beyond survival. The base becomes an industrial organism.",
+    "outcomeSummary": [
+      "Applies Mercury phase 1 state.",
+      "Unlocks Ocean Macro-Plastic Cleanup spillover on Earth.",
+      "Opens Phase 2 Mercury infrastructure."
+    ],
+    "unlockCondition": "Complete Refinery and Fabricator and Solar Array Expansion and Rare Metals Mining.",
+    "prerequisites": [
+      "mercury_refinery",
+      "mercury_fabricator",
+      "mercury_solar_array_expansion",
+      "mercury_rare_metals_mining"
+    ],
+    "spilloverPrerequisites": [],
+    "effects": [
+      {
+        "type": "apply_terraforming_choice",
+        "planet": "mercury",
+        "choiceId": "phase_1",
+        "permanent": true
+      }
+    ],
+    "visualOrder": 35,
+    "iconPath": "/assets/svg/tech-tree/mercury_phase_1_complete.svg"
+  },
+  {
+    "id": "mercury_mass_driver",
+    "planet": "mercury",
+    "displayName": "Mass Driver",
+    "category": "capability",
+    "tier": 3,
+    "durationYears": 15,
+    "description": "We build a machine that throws finished work into orbit, turning Mercury's surface into the launch rail for a solar civilisation.",
+    "outcomeSummary": [
+      "One requirement for Mercury Phase 2.",
+      "Prepares orbital delivery for Dyson panels and planet components.",
+      "Enables the mass-driver backbone of Mercury industry."
+    ],
+    "unlockCondition": "Complete Mercury Phase 1 Complete.",
+    "prerequisites": [
+      "mercury_phase_1_complete"
+    ],
+    "spilloverPrerequisites": [],
+    "effects": [],
+    "visualOrder": 36,
+    "iconPath": "/assets/svg/tech-tree/mercury_mass_driver.svg"
+  },
+  {
+    "id": "mercury_dyson_panel_production",
+    "planet": "mercury",
+    "displayName": "Dyson Panel Production",
+    "category": "capability",
+    "tier": 3,
+    "durationYears": 18,
+    "description": "We begin manufacturing the mirrored fields that will make sunlight a shared infrastructure rather than a weather condition.",
+    "outcomeSummary": [
+      "One requirement for Mercury Phase 2.",
+      "Starts the production base for Dyson swarm panels.",
+      "Connects Mercury industry to Kardashev progression."
+    ],
+    "unlockCondition": "Complete Mercury Phase 1 Complete.",
+    "prerequisites": [
+      "mercury_phase_1_complete"
+    ],
+    "spilloverPrerequisites": [],
+    "effects": [],
+    "visualOrder": 37,
+    "iconPath": "/assets/svg/tech-tree/mercury_dyson_panel_production.svg"
+  },
+  {
+    "id": "mercury_polar_volatiles_extraction",
+    "planet": "mercury",
+    "displayName": "Polar Volatiles Extraction",
+    "category": "capability",
+    "tier": 3,
+    "durationYears": 12,
+    "description": "We learn to work in the cold traps where Mercury hides water and carbon, treating each pocket as precious because it is.",
+    "outcomeSummary": [
+      "One requirement for Mercury Phase 2.",
+      "Opens local access to water and carbon compounds.",
+      "Supports life-support and advanced component chains."
+    ],
+    "unlockCondition": "Complete Mercury Phase 1 Complete.",
+    "prerequisites": [
+      "mercury_phase_1_complete"
+    ],
+    "spilloverPrerequisites": [],
+    "effects": [],
+    "visualOrder": 38,
+    "iconPath": "/assets/svg/tech-tree/mercury_polar_volatiles_extraction.svg"
+  },
+  {
+    "id": "mercury_phase_2_complete",
+    "planet": "mercury",
+    "displayName": "Mercury Phase 2 Complete",
+    "category": "reactive",
+    "tier": 3,
+    "durationYears": 0,
+    "description": "Mercury becomes the engine room of the inner system: launching, manufacturing, and supplying work too large for Earth alone.",
+    "outcomeSummary": [
+      "Applies Mercury phase 2 state.",
+      "Unlocks Mars and Venus terraforming options.",
+      "Completes the early Mercury industrial foundation."
+    ],
+    "unlockCondition": "Complete Mass Driver and Dyson Panel Production and Polar Volatiles Extraction.",
+    "prerequisites": [
+      "mercury_mass_driver",
+      "mercury_dyson_panel_production",
+      "mercury_polar_volatiles_extraction"
+    ],
+    "spilloverPrerequisites": [],
+    "effects": [
+      {
+        "type": "apply_terraforming_choice",
+        "planet": "mercury",
+        "choiceId": "phase_2",
+        "permanent": true
+      }
+    ],
+    "visualOrder": 39,
+    "iconPath": "/assets/svg/tech-tree/mercury_phase_2_complete.svg"
+  },
+  {
+    "id": "mars_polar_detonation",
+    "planet": "mars",
+    "displayName": "Polar Detonation",
+    "category": "identity",
+    "tier": 1,
+    "durationYears": 20,
+    "description": "We choose the bluntest warming path: fast, irreversible, and impossible to pretend is only engineering.",
+    "outcomeSummary": [
+      "Applies the Mars polar detonation terraforming choice.",
+      "Adds an Architect branch decision tag.",
+      "Triggers the Mars polar detonation culture event."
+    ],
+    "unlockCondition": "Requires mercury phase 2 complete.",
+    "prerequisites": [],
+    "spilloverPrerequisites": [
+      "mercury_phase_2_complete"
+    ],
+    "effects": [
+      {
+        "type": "apply_terraforming_choice",
+        "planet": "mars",
+        "choiceId": "mars_polar_detonation",
+        "permanent": true
+      },
+      {
+        "type": "tag_decision",
+        "tag": "architect"
+      },
+      {
+        "type": "emit_event",
+        "eventId": "ce_mars_polar_detonation"
+      }
+    ],
+    "visualOrder": 40,
+    "iconPath": "/assets/svg/tech-tree/mars_polar_detonation.svg"
+  },
+  {
+    "id": "mars_orbital_mirrors",
+    "planet": "mars",
+    "displayName": "Orbital Mirrors",
+    "category": "identity",
+    "tier": 1,
+    "durationYears": 35,
+    "description": "We place patient light above Mars, warming the planet by aim and persistence rather than shock.",
+    "outcomeSummary": [
+      "Applies the Mars orbital mirrors terraforming choice.",
+      "Adds an Architect branch decision tag.",
+      "Provides a reusable warming infrastructure path."
+    ],
+    "unlockCondition": "Requires mercury phase 2 complete.",
+    "prerequisites": [],
+    "spilloverPrerequisites": [
+      "mercury_phase_2_complete"
+    ],
+    "effects": [
+      {
+        "type": "apply_terraforming_choice",
+        "planet": "mars",
+        "choiceId": "mars_orbital_mirrors",
+        "permanent": false
+      },
+      {
+        "type": "tag_decision",
+        "tag": "architect"
+      }
+    ],
+    "visualOrder": 41,
+    "iconPath": "/assets/svg/tech-tree/mars_orbital_mirrors.svg"
+  },
+  {
+    "id": "mars_magnetic_umbrella",
+    "planet": "mars",
+    "displayName": "Magnetic Umbrella",
+    "category": "identity",
+    "tier": 1,
+    "durationYears": 40,
+    "description": "We shelter Mars from the solar wind, not by remaking its core, but by holding a protective field where the planet needs it most.",
+    "outcomeSummary": [
+      "Applies the Mars magnetic umbrella terraforming choice.",
+      "Adds a Naturalist branch decision tag.",
+      "Enables Comet Water Delivery."
+    ],
+    "unlockCondition": "Requires mercury phase 2 complete.",
+    "prerequisites": [],
+    "spilloverPrerequisites": [
+      "mercury_phase_2_complete"
+    ],
+    "effects": [
+      {
+        "type": "apply_terraforming_choice",
+        "planet": "mars",
+        "choiceId": "mars_magnetic_umbrella",
+        "permanent": false
+      },
+      {
+        "type": "tag_decision",
+        "tag": "naturalist"
+      }
+    ],
+    "visualOrder": 42,
+    "iconPath": "/assets/svg/tech-tree/mars_magnetic_umbrella.svg"
+  },
+  {
+    "id": "mars_aerogel_domes",
+    "planet": "mars",
+    "displayName": "Aerogel Domes",
+    "category": "reactive",
+    "tier": 1,
+    "durationYears": 20,
+    "description": "We make small warm places under thin light, letting Mars host pockets of pressure and life before the whole sky is ready.",
+    "outcomeSummary": [
+      "Requires Mercury Phase 2 and Earth Dome Habitat Technology.",
+      "Applies the Mars aerogel domes terraforming choice.",
+      "Creates a gentler bridge toward open Martian habitats."
+    ],
+    "unlockCondition": "Requires mercury phase 2 complete and earth dome habitat.",
+    "prerequisites": [],
+    "spilloverPrerequisites": [
+      "mercury_phase_2_complete",
+      "earth_dome_habitat"
+    ],
+    "effects": [
+      {
+        "type": "apply_terraforming_choice",
+        "planet": "mars",
+        "choiceId": "mars_aerogel_domes",
+        "permanent": false
+      }
+    ],
+    "visualOrder": 43,
+    "iconPath": "/assets/svg/tech-tree/mars_aerogel_domes.svg"
+  },
+  {
+    "id": "mars_comet_water_delivery",
+    "planet": "mars",
+    "displayName": "Comet Water Delivery",
+    "category": "reactive",
+    "tier": 2,
+    "durationYears": 35,
+    "description": "We redirect distant ice toward a dry world, turning celestial bookkeeping into rain that will not arrive for decades.",
+    "outcomeSummary": [
+      "Applies the Mars comet water delivery choice.",
+      "Requires Magnetic Umbrella protection.",
+      "Enables Mars Ocean Confirmed."
+    ],
+    "unlockCondition": "Complete Magnetic Umbrella. Requires mercury phase 2 complete.",
+    "prerequisites": [
+      "mars_magnetic_umbrella"
+    ],
+    "spilloverPrerequisites": [
+      "mercury_phase_2_complete"
+    ],
+    "effects": [
+      {
+        "type": "apply_terraforming_choice",
+        "planet": "mars",
+        "choiceId": "mars_comet_water_delivery",
+        "permanent": false
+      }
+    ],
+    "visualOrder": 44,
+    "iconPath": "/assets/svg/tech-tree/mars_comet_water_delivery.svg"
+  },
+  {
+    "id": "mars_ocean_confirmed",
+    "planet": "mars",
+    "displayName": "Mars Ocean Confirmed",
+    "category": "capability",
+    "tier": 3,
+    "durationYears": 0,
+    "description": "For the first time, Martian water is no longer a mineral memory or sealed tank. It gathers under open sky.",
+    "outcomeSummary": [
+      "Triggers the first liquid water culture event.",
+      "Spillover unlocks Moon Organism Library Tier 2.",
+      "Enables Biological Seeding."
+    ],
+    "unlockCondition": "Complete Comet Water Delivery.",
+    "prerequisites": [
+      "mars_comet_water_delivery"
+    ],
+    "spilloverPrerequisites": [],
+    "effects": [
+      {
+        "type": "emit_event",
+        "eventId": "ce_mars_first_liquid_water"
+      },
+      {
+        "type": "spillover_unlock",
+        "targetPlanet": "moon",
+        "targetTech": "moon_organism_library_t2"
+      }
+    ],
+    "visualOrder": 45,
+    "iconPath": "/assets/svg/tech-tree/mars_ocean_confirmed.svg",
+    "arcIds": [
+      "hunt_for_life"
+    ],
+    "transfersFrom": [
+      {
+        "fromNodeId": "earth_ocean_acidification_reversal",
+        "effect": "capability_gate",
+        "reason": "Earth ocean repair gives us a baseline for interpreting water chemistry elsewhere.",
+        "description": "Future life-search outcomes can resolve more strongly when Earth ocean repair is complete."
+      }
+    ]
+  },
+  {
+    "id": "mars_biological_seeding",
+    "planet": "mars",
+    "displayName": "Biological Seeding",
+    "category": "identity",
+    "tier": 3,
+    "durationYears": 30,
+    "description": "We introduce life as a promise with safeguards, choosing organisms humble enough to begin and resilient enough to matter.",
+    "outcomeSummary": [
+      "Applies the Mars biological seeding choice.",
+      "Adds a Naturalist branch decision tag.",
+      "Enables Mars Soil Study Complete."
+    ],
+    "unlockCondition": "Complete Mars Ocean Confirmed. Requires moon organism library t1.",
+    "prerequisites": [
+      "mars_ocean_confirmed"
+    ],
+    "spilloverPrerequisites": [
+      "moon_organism_library_t1"
+    ],
+    "effects": [
+      {
+        "type": "apply_terraforming_choice",
+        "planet": "mars",
+        "choiceId": "mars_biological_seeding",
+        "permanent": false
+      },
+      {
+        "type": "tag_decision",
+        "tag": "naturalist"
+      }
+    ],
+    "visualOrder": 46,
+    "iconPath": "/assets/svg/tech-tree/mars_biological_seeding.svg",
+    "arcIds": [
+      "hunt_for_life"
+    ],
+    "transfersFrom": [
+      {
+        "fromNodeId": "moon_closed_loop_life_support",
+        "effect": "variance_reduction",
+        "reason": "Closed habitats teach us how ecologies fail slowly enough to recover.",
+        "description": "Mars biological seeding has steadier outcomes after closed-loop life support."
+      }
+    ]
+  },
+  {
+    "id": "mars_soil_study_complete",
+    "planet": "mars",
+    "displayName": "Mars Soil Study Complete",
+    "category": "capability",
+    "tier": 3,
+    "durationYears": 0,
+    "description": "The first Martian soils become readable: chemistry, microbes, failure, promise, and the slow grammar of a living ground.",
+    "outcomeSummary": [
+      "Spillover unlocks Earth's Soil Restoration Network.",
+      "Enables Mars Coastal Ecosystems Stable.",
+      "Turns Mars ecology into useful Earth restoration knowledge."
+    ],
+    "unlockCondition": "Complete Biological Seeding.",
+    "prerequisites": [
+      "mars_biological_seeding"
+    ],
+    "spilloverPrerequisites": [],
+    "effects": [
+      {
+        "type": "spillover_unlock",
+        "targetPlanet": "earth",
+        "targetTech": "earth_soil_restoration"
+      }
+    ],
+    "visualOrder": 47,
+    "iconPath": "/assets/svg/tech-tree/mars_soil_study_complete.svg"
+  },
+  {
+    "id": "mars_coastal_stable",
+    "planet": "mars",
+    "displayName": "Mars Coastal Ecosystems Stable",
+    "category": "capability",
+    "tier": 3,
+    "durationYears": 0,
+    "description": "The coasts hold through seasons. Not paradise, not yet, but stable enough that life can start making its own weather of habit.",
+    "outcomeSummary": [
+      "Spillover unlocks Earth's Rewilding At Scale.",
+      "Marks a major Mars biosphere stability step.",
+      "Closes the early Mars ecological research chain."
+    ],
+    "unlockCondition": "Complete Mars Soil Study Complete.",
+    "prerequisites": [
+      "mars_soil_study_complete"
+    ],
+    "spilloverPrerequisites": [],
+    "effects": [
+      {
+        "type": "spillover_unlock",
+        "targetPlanet": "earth",
+        "targetTech": "earth_rewilding"
+      }
+    ],
+    "visualOrder": 48,
+    "iconPath": "/assets/svg/tech-tree/mars_coastal_stable.svg"
+  },
+  {
+    "id": "venus_orbital_shade_mirror",
+    "planet": "venus",
+    "displayName": "Orbital Shade Mirror",
+    "category": "identity",
+    "tier": 1,
+    "durationYears": 40,
+    "description": "We begin by giving Venus shade, placing a deliberate dusk between the planet and the furnace that made it unlivable.",
+    "outcomeSummary": [
+      "Applies the Venus orbital shade mirror choice.",
+      "Adds an Architect branch decision tag.",
+      "Triggers the Venus cooling culture event."
+    ],
+    "unlockCondition": "Requires mercury phase 2 complete.",
+    "prerequisites": [],
+    "spilloverPrerequisites": [
+      "mercury_phase_2_complete"
+    ],
+    "effects": [
+      {
+        "type": "apply_terraforming_choice",
+        "planet": "venus",
+        "choiceId": "venus_orbital_shade_mirror",
+        "permanent": false
+      },
+      {
+        "type": "tag_decision",
+        "tag": "architect"
+      },
+      {
+        "type": "emit_event",
+        "eventId": "ce_venus_cooling_begins"
+      }
+    ],
+    "visualOrder": 49,
+    "iconPath": "/assets/svg/tech-tree/venus_orbital_shade_mirror.svg"
+  },
+  {
+    "id": "venus_carbonate_sequestration",
+    "planet": "venus",
+    "displayName": "Carbonate Sequestration",
+    "category": "identity",
+    "tier": 2,
+    "durationYears": 35,
+    "description": "We turn atmosphere into stone carefully, lowering pressure through chemistry rather than pretending Venus can be hurried safely.",
+    "outcomeSummary": [
+      "Applies the Venus carbonate sequestration choice.",
+      "Adds a Naturalist branch decision tag.",
+      "Enables Venus Carbonate Process Started."
+    ],
+    "unlockCondition": "Complete Orbital Shade Mirror.",
+    "prerequisites": [
+      "venus_orbital_shade_mirror"
+    ],
+    "spilloverPrerequisites": [],
+    "effects": [
+      {
+        "type": "apply_terraforming_choice",
+        "planet": "venus",
+        "choiceId": "venus_carbonate_sequestration",
+        "permanent": false
+      },
+      {
+        "type": "tag_decision",
+        "tag": "naturalist"
+      }
+    ],
+    "visualOrder": 50,
+    "iconPath": "/assets/svg/tech-tree/venus_carbonate_sequestration.svg",
+    "transfersFrom": [
+      {
+        "fromNodeId": "earth_co2_drawdown",
+        "effect": "queue_reduction",
+        "reason": "Earth-scale drawdown teaches us how to move carbon without pretending atmosphere is simple.",
+        "description": "Venus CO2 removal planning can reuse Earth drawdown logistics."
+      }
+    ]
+  },
+  {
+    "id": "venus_carbonate_process_started",
+    "planet": "venus",
+    "displayName": "Venus Carbonate Process Started",
+    "category": "capability",
+    "tier": 3,
+    "durationYears": 0,
+    "description": "Venus begins teaching Earth in return. The same chemistry that quiets one atmosphere can help repair another.",
+    "outcomeSummary": [
+      "Spillover unlocks Earth's Atmospheric CO2 Drawdown.",
+      "Spillover unlocks Earth's Ocean Acidification Reversal.",
+      "Marks the beginning of Venus-to-Earth climate knowledge transfer."
+    ],
+    "unlockCondition": "Complete Carbonate Sequestration.",
+    "prerequisites": [
+      "venus_carbonate_sequestration"
+    ],
+    "spilloverPrerequisites": [],
+    "effects": [
+      {
+        "type": "spillover_unlock",
+        "targetPlanet": "earth",
+        "targetTech": "earth_co2_drawdown"
+      },
+      {
+        "type": "spillover_unlock",
+        "targetPlanet": "earth",
+        "targetTech": "earth_ocean_acidification_reversal"
+      }
+    ],
+    "visualOrder": 51,
+    "iconPath": "/assets/svg/tech-tree/venus_carbonate_process_started.svg",
+    "transfersFrom": [
+      {
+        "fromNodeId": "earth_co2_drawdown",
+        "effect": "queue_reduction",
+        "reason": "Earth carbon capture gives Venus an operational vocabulary for carbonate sequestration.",
+        "description": "Venus carbonate work is informed by completed Earth CO2 Drawdown."
+      }
+    ]
+  },
+  {
+    "id": "venus_europa_impact",
+    "planet": "venus",
+    "displayName": "Europa Impact",
+    "category": "identity",
+    "tier": 2,
+    "durationYears": 50,
+    "description": "We commit to a terrible precision: using a moon's ice and momentum to remake Venus, knowing the decision will echo for centuries.",
+    "outcomeSummary": [
+      "Applies the Venus Europa impact choice permanently.",
+      "Adds an Architect branch decision tag.",
+      "Represents the high-commitment ocean-and-spin Venus path."
+    ],
+    "unlockCondition": "Complete Orbital Shade Mirror.",
+    "prerequisites": [
+      "venus_orbital_shade_mirror"
+    ],
+    "spilloverPrerequisites": [],
+    "effects": [
+      {
+        "type": "apply_terraforming_choice",
+        "planet": "venus",
+        "choiceId": "venus_europa_impact",
+        "permanent": true
+      },
+      {
+        "type": "tag_decision",
+        "tag": "architect"
+      }
+    ],
+    "visualOrder": 52,
+    "iconPath": "/assets/svg/tech-tree/venus_europa_impact.svg"
+  },
+  {
+    "id": "venus_sky_cities",
+    "planet": "venus",
+    "displayName": "Sky Cities",
+    "category": "identity",
+    "tier": 2,
+    "durationYears": 25,
+    "description": "Before the surface can welcome us, the clouds can hold us. We design cities that float where pressure and temperature briefly become kind.",
+    "outcomeSummary": [
+      "Applies the Venus sky cities choice.",
+      "Adds a Naturalist branch decision tag.",
+      "Enables Sky City Descent."
+    ],
+    "unlockCondition": "Complete Orbital Shade Mirror.",
+    "prerequisites": [
+      "venus_orbital_shade_mirror"
+    ],
+    "spilloverPrerequisites": [],
+    "effects": [
+      {
+        "type": "apply_terraforming_choice",
+        "planet": "venus",
+        "choiceId": "venus_sky_cities",
+        "permanent": false
+      },
+      {
+        "type": "tag_decision",
+        "tag": "naturalist"
+      }
+    ],
+    "visualOrder": 53,
+    "iconPath": "/assets/svg/tech-tree/venus_sky_cities.svg"
+  },
+  {
+    "id": "venus_sky_city_descent",
+    "planet": "venus",
+    "displayName": "Sky City Descent",
+    "category": "identity",
+    "tier": 3,
+    "durationYears": 30,
+    "description": "As Venus changes beneath them, the cities must descend, adapt, or surrender buoyancy to a world becoming less hostile.",
+    "outcomeSummary": [
+      "Applies the Venus sky city descent choice.",
+      "Adds an Architect branch decision tag.",
+      "Moves the sky-city path toward long-term surface transition."
+    ],
+    "unlockCondition": "Complete Sky Cities.",
+    "prerequisites": [
+      "venus_sky_cities"
+    ],
+    "spilloverPrerequisites": [],
+    "effects": [
+      {
+        "type": "apply_terraforming_choice",
+        "planet": "venus",
+        "choiceId": "venus_sky_city_descent",
+        "permanent": false
+      },
+      {
+        "type": "tag_decision",
+        "tag": "architect"
+      }
+    ],
+    "visualOrder": 54,
+    "iconPath": "/assets/svg/tech-tree/venus_sky_city_descent.svg"
   }
 ]

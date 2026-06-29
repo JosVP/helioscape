@@ -14,11 +14,10 @@ export interface TechInspectorViewModel {
   readonly planetLabel: string;
   readonly statusLabel: string;
   readonly branchTag: 'naturalist' | 'architect' | null;
-  readonly canRevealDetails: boolean;
   readonly prerequisites: InspectorPrerequisite[];
   readonly progressPercent?: number;
   readonly etaYear?: number;
   readonly completedYear?: number;
-  readonly capacityShortfall?: number;
+  readonly startBlockedReason?: string;
   readonly canStart: boolean;
 }

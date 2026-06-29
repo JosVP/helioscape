@@ -1,13 +1,21 @@
 import { TestBed } from '@angular/core/testing';
-import { signal } from '@angular/core';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { computed, signal } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { Subject } from 'rxjs';
 import { ResearchService } from './research.service';
 import { DataService } from '@app/core/services/data.service';
 import { GameStateService } from '@app/core/services/game-state.service';
 import { EventBusService } from '@app/core/services/event-bus.service';
 import { TechTreeService } from './tech-tree.service';
-import type { ResearchTrack, ActiveResearchTrack, ResearchTrackStartedEvent, TechEffect, TechNode } from '@app/core/models';
+import type {
+  ResearchTrack,
+  ActiveResearchTrack,
+  ResearchTrackStartedEvent,
+  TechEffect,
+  TechNode,
+  ResearchNode,
+  ResearchSlot,
+} from '@app/core/models';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -31,6 +39,7 @@ function makeActiveTrack(overrides: Partial<ActiveResearchTrack> = {}): ActiveRe
   return {
     trackId: 'test_track',
     planetId: 'mars',
+    slotId: 'earth_core_1',
     isPaused: false,
     startYear: 2033,
     elapsedBeforeStart: 0,
@@ -43,8 +52,11 @@ function makeTechNode(overrides: Partial<TechNode> = {}): TechNode {
     id: 'test_node',
     planet: 'earth',
     displayName: 'Test Node',
+    category: 'capability',
+    tier: 1,
     description: 'A test tech node.',
     outcomeSummary: ['A test outcome.'],
+    unlockCondition: 'Available for tests.',
     prerequisites: [],
     spilloverPrerequisites: [],
     rpCost: 20,
@@ -64,12 +76,30 @@ function makeGameStateFake(opts: {
   usedRpCapacity?: number;
   totalRpCapacity?: number;
   gameYear?: number;
+  visibleResearchSlots?: ResearchSlot[];
 } = {}) {
   const completedTechs  = signal<string[]>(opts.completedTechs ?? []);
   const activeResearch  = signal<ActiveResearchTrack[]>(opts.activeResearch ?? []);
   const gameYearSig     = signal<number>(opts.gameYear ?? 2033);
   const usedRpCapSig    = signal<number>(opts.usedRpCapacity ?? 0);
   const totalRpCapSig   = signal<number>(opts.totalRpCapacity ?? 60);
+  const visibleSlotsSig = signal<ResearchSlot[]>(
+    opts.visibleResearchSlots ?? [
+      { id: 'earth_core_1', displayName: 'Earth Research I', planetId: 'earth', kind: 'default' },
+      { id: 'earth_core_2', displayName: 'Earth Research II', planetId: 'earth', kind: 'default' },
+    ],
+  );
+  const occupiedResearchSlotIds = computed(() => {
+    const occupied = new Set<string>();
+    for (const track of activeResearch()) {
+      if (!track.isPaused && track.slotId) occupied.add(track.slotId);
+    }
+    return occupied;
+  });
+  const availableResearchSlots = computed(() => {
+    const occupied = occupiedResearchSlotIds();
+    return visibleSlotsSig().filter((slot) => !occupied.has(slot.id));
+  });
 
   return {
     completedTechs:  completedTechs.asReadonly(),
@@ -77,6 +107,9 @@ function makeGameStateFake(opts: {
     gameYear:        gameYearSig.asReadonly(),
     usedRpCapacity:  usedRpCapSig.asReadonly(),
     totalRpCapacity: totalRpCapSig.asReadonly(),
+    visibleResearchSlots: visibleSlotsSig.asReadonly(),
+    occupiedResearchSlotIds,
+    availableResearchSlots,
 
     _setCompletedTechs:  (v: string[]) => completedTechs.set(v),
     _setActiveResearch:  (v: ActiveResearchTrack[]) => activeResearch.set(v),
@@ -88,10 +121,10 @@ function makeGameStateFake(opts: {
       activeResearch.update((tracks) => tracks.filter((t) => t.trackId !== trackId));
       completedTechs.update((techs) => (techs.includes(trackId) ? techs : [...techs, trackId]));
     }),
-    startResearch: vi.fn((trackId: string, planetId: string, startYear: number) => {
+    startResearch: vi.fn((trackId: string, planetId: string, startYear: number, slotId: string | null = null) => {
       activeResearch.update((tracks) => [
         ...tracks,
-        { trackId, planetId, isPaused: false, startYear, elapsedBeforeStart: 0 },
+        { trackId, planetId, slotId, isPaused: false, startYear, elapsedBeforeStart: 0 },
       ]);
     }),
     pauseResearch: vi.fn((trackId: string) => {
@@ -104,19 +137,53 @@ function makeGameStateFake(opts: {
         )
       );
     }),
-    resumeResearch: vi.fn((trackId: string) => {
+    resumeResearch: vi.fn((trackId: string, slotId: string | null = null) => {
       const year = gameYearSig();
       activeResearch.update((tracks) =>
-        tracks.map((t) => (t.trackId === trackId ? { ...t, isPaused: false, startYear: year } : t))
+        tracks.map((t) => (t.trackId === trackId ? { ...t, slotId, isPaused: false, startYear: year } : t))
       );
     }),
   };
 }
 
 function makeDataFake(tracks: ResearchTrack[] = [], techNodes: TechNode[] = []) {
+  const trackNodes = tracks.map((track): ResearchNode => ({
+    id: track.id,
+    planet: track.planet,
+    displayName: track.displayName,
+    category: 'capability',
+    tier: 1,
+    durationYears: track.durationYears,
+    description: track.description,
+    outcomeSummary: [],
+    unlockCondition: track.prerequisiteTech ? `Complete ${track.prerequisiteTech}.` : 'Available for tests.',
+    prerequisites: track.prerequisiteTech ? [track.prerequisiteTech] : [],
+    spilloverPrerequisites: [],
+    effects: track.onCompleteEffects,
+  }));
+  const techResearchNodes = techNodes.map((node): ResearchNode => ({
+    id: node.id,
+    planet: node.planet,
+    displayName: node.displayName,
+    category: node.category ?? 'capability',
+    tier: (node.tier ?? 1) as 1 | 2 | 3,
+    durationYears: node.durationYears,
+    description: node.description,
+    outcomeSummary: node.outcomeSummary,
+    unlockCondition: node.unlockCondition ?? 'Available for tests.',
+    prerequisites: node.prerequisites,
+    prerequisiteMode: node.prerequisiteMode,
+    spilloverPrerequisites: node.spilloverPrerequisites,
+    spilloverGate: node.spilloverGate,
+    effects: node.effects,
+    collaborative: node.collaborative,
+    colonySlotPlanet: node.colonySlotPlanet,
+  }));
+  const researchNodes = [...trackNodes, ...techResearchNodes];
   return {
+    getResearchNode: vi.fn((id: string) => researchNodes.find((node) => node.id === id) ?? null),
     getResearchTrack: vi.fn((id: string) => tracks.find((t) => t.id === id) ?? null),
-    getTechNode:      vi.fn((id: string) => techNodes.find((node) => node.id === id) ?? null),
+    getTechNode:      vi.fn((id: string) => techNodes.find((node) => node.id === id) ?? trackNodes.find((node) => node.id === id) ?? null),
   };
 }
 
@@ -168,6 +235,10 @@ describe('ResearchService', () => {
 
     service = TestBed.inject(ResearchService);
   }
+
+  afterEach(() => {
+    TestBed.resetTestingModule();
+  });
 
   // -------------------------------------------------------------------------
   // processYear — via effect
@@ -228,7 +299,7 @@ describe('ResearchService', () => {
   // -------------------------------------------------------------------------
 
   describe('_completeTrack (via processYear)', () => {
-    it('calls techTree.applyEffects with the track onCompleteEffects and planetId', () => {
+    it('delegates completed canonical research effects to TechTreeService', () => {
       const effect: TechEffect = { type: 'unlock_tech', target: 'some_tech' };
       const trackDef    = makeTrackDef({ durationYears: 5, onCompleteEffects: [effect] });
       const activeTrack = makeActiveTrack({ startYear: 2028, elapsedBeforeStart: 0, planetId: 'mars' });
@@ -236,7 +307,7 @@ describe('ResearchService', () => {
       setup([trackDef], { activeResearch: [activeTrack], gameYear: 2033 });
       TestBed.flushEffects();
 
-      expect(techTree.applyEffects).toHaveBeenCalledWith([effect], 'mars');
+      expect(techTree.completeNodeResearch).toHaveBeenCalledWith('mars', 'test_track');
     });
 
     it('emits researchCompleted$ with the trackId', () => {
@@ -264,15 +335,17 @@ describe('ResearchService', () => {
       expect(service.canStartTrack('nonexistent')).toBe(false);
     });
 
-    it('returns false when prerequisiteTech is not in completedTechs', () => {
+    it('returns false when prerequisites are not met', () => {
       const trackDef = makeTrackDef({ prerequisiteTech: 'prereq_tech' });
       setup([trackDef], { completedTechs: [] });
+      techTree.canUnlock.mockReturnValue(false);
       expect(service.canStartTrack('test_track')).toBe(false);
     });
 
     it('returns false when the track is already completed', () => {
       const trackDef = makeTrackDef();
       setup([trackDef], { completedTechs: ['prereq_tech', 'test_track'] });
+      techTree.canUnlock.mockReturnValue(true);
       expect(service.canStartTrack('test_track')).toBe(false);
     });
 
@@ -288,13 +361,16 @@ describe('ResearchService', () => {
       expect(service.canStartTrack('test_track')).toBe(false);
     });
 
-    it('returns false when RP capacity would be exceeded by a new track', () => {
+    it('returns false when no visible research slot is free', () => {
       const trackDef = makeTrackDef({ rpCost: 20 });
       setup([trackDef], {
         completedTechs:  ['prereq_tech'],
-        usedRpCapacity:  50,
-        totalRpCapacity: 60,
+        activeResearch:  [
+          makeActiveTrack({ trackId: 'a', slotId: 'earth_core_1' }),
+          makeActiveTrack({ trackId: 'b', slotId: 'earth_core_2' }),
+        ],
       });
+      techTree.canUnlock.mockReturnValue(true);
       expect(service.canStartTrack('test_track')).toBe(false);
     });
 
@@ -302,9 +378,8 @@ describe('ResearchService', () => {
       const trackDef = makeTrackDef({ rpCost: 20 });
       setup([trackDef], {
         completedTechs:  ['prereq_tech'],
-        usedRpCapacity:  30,
-        totalRpCapacity: 60,
       });
+      techTree.canUnlock.mockReturnValue(true);
       expect(service.canStartTrack('test_track')).toBe(true);
     });
 
@@ -314,9 +389,8 @@ describe('ResearchService', () => {
       setup([trackDef], {
         completedTechs:  ['prereq_tech'],
         activeResearch:  [pausedTrack],
-        usedRpCapacity:  55,
-        totalRpCapacity: 60,
       });
+      techTree.canUnlock.mockReturnValue(true);
       expect(service.canStartTrack('test_track')).toBe(true);
     });
   });
@@ -332,13 +406,12 @@ describe('ResearchService', () => {
       setup([trackDef], {
         completedTechs:  ['prereq_tech'],
         activeResearch:  [pausedTrack],
-        usedRpCapacity:  0,
-        totalRpCapacity: 60,
       });
+      techTree.canUnlock.mockReturnValue(true);
 
       service.startTrack('test_track', 'mars');
 
-      expect(gameState.resumeResearch).toHaveBeenCalledWith('test_track');
+      expect(gameState.resumeResearch).toHaveBeenCalledWith('test_track', 'earth_core_1');
       expect(gameState.startResearch).not.toHaveBeenCalled();
     });
 
@@ -346,23 +419,21 @@ describe('ResearchService', () => {
       const trackDef = makeTrackDef({ rpCost: 20 });
       setup([trackDef], {
         completedTechs:  ['prereq_tech'],
-        usedRpCapacity:  0,
-        totalRpCapacity: 60,
         gameYear:        2040,
       });
+      techTree.canUnlock.mockReturnValue(true);
 
       service.startTrack('test_track', 'mars');
 
-      expect(gameState.startResearch).toHaveBeenCalledWith('test_track', 'mars', 2040);
+      expect(gameState.startResearch).toHaveBeenCalledWith('test_track', 'mars', 2040, 'earth_core_1');
     });
 
     it('emits researchTrackStarted$ for a valid new track', () => {
       const trackDef = makeTrackDef({ rpCost: 20 });
       setup([trackDef], {
         completedTechs:  ['prereq_tech'],
-        usedRpCapacity:  0,
-        totalRpCapacity: 60,
       });
+      techTree.canUnlock.mockReturnValue(true);
       const emitted: ResearchTrackStartedEvent[] = [];
       eventBus.researchTrackStarted$.subscribe((event) => emitted.push(event));
 
@@ -376,9 +447,8 @@ describe('ResearchService', () => {
       setup([trackDef], {
         completedTechs:  ['prereq_tech'],
         activeResearch:  [makeActiveTrack({ isPaused: true, planetId: 'mars' })],
-        usedRpCapacity:  0,
-        totalRpCapacity: 60,
       });
+      techTree.canUnlock.mockReturnValue(true);
       const emitted: ResearchTrackStartedEvent[] = [];
       eventBus.researchTrackStarted$.subscribe((event) => emitted.push(event));
 
@@ -407,20 +477,25 @@ describe('ResearchService', () => {
   describe('startTechTrack()', () => {
     it('emits researchTrackStarted$ for a valid tech node track', () => {
       const node = makeTechNode({ id: 'test_node', planet: 'earth', rpCost: 20 });
-      setup([], { usedRpCapacity: 0, totalRpCapacity: 60 }, [node]);
+      setup([], {}, [node]);
       techTree.canUnlock.mockReturnValue(true);
       const emitted: ResearchTrackStartedEvent[] = [];
       eventBus.researchTrackStarted$.subscribe((event) => emitted.push(event));
 
       service.startTechTrack('test_node', 'earth');
 
-      expect(gameState.startResearch).toHaveBeenCalledWith('test_node', 'earth', 2033);
+      expect(gameState.startResearch).toHaveBeenCalledWith('test_node', 'earth', 2033, 'earth_core_1');
       expect(emitted).toEqual([{ trackId: 'test_node', planetId: 'earth' }]);
     });
 
     it('does not emit researchTrackStarted$ when the tech node cannot start', () => {
       const node = makeTechNode({ id: 'test_node', planet: 'earth', rpCost: 20 });
-      setup([], { usedRpCapacity: 50, totalRpCapacity: 60 }, [node]);
+      setup([], {
+        activeResearch: [
+          makeActiveTrack({ trackId: 'a', slotId: 'earth_core_1' }),
+          makeActiveTrack({ trackId: 'b', slotId: 'earth_core_2' }),
+        ],
+      }, [node]);
       techTree.canUnlock.mockReturnValue(true);
       const emitted: ResearchTrackStartedEvent[] = [];
       eventBus.researchTrackStarted$.subscribe((event) => emitted.push(event));
@@ -479,15 +554,17 @@ describe('ResearchService', () => {
 
       service.resumeTrack('test_track');
 
-      expect(gameState.resumeResearch).toHaveBeenCalledWith('test_track');
+      expect(gameState.resumeResearch).toHaveBeenCalledWith('test_track', 'earth_core_1');
     });
 
-    it('is a no-op when RP capacity would be exceeded', () => {
+    it('is a no-op when no research slot is free', () => {
       const trackDef = makeTrackDef({ rpCost: 20 });
       setup([trackDef], {
-        activeResearch:  [makeActiveTrack({ isPaused: true })],
-        usedRpCapacity:  50,
-        totalRpCapacity: 60,
+        activeResearch:  [
+          makeActiveTrack({ isPaused: true }),
+          makeActiveTrack({ trackId: 'a', slotId: 'earth_core_1' }),
+          makeActiveTrack({ trackId: 'b', slotId: 'earth_core_2' }),
+        ],
       });
 
       service.resumeTrack('test_track');

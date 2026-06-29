@@ -95,6 +95,7 @@ describe('PlanetUnlockService', () => {
   const planetUnlocks = signal<Record<string, PlanetUnlockState>>({});
   const cultureEventQueue = signal<{ eventId: string; queuedAtYear: number; priority: boolean; wasInterrupted: boolean }[]>([]);
   const earthFlags = signal<Record<string, boolean>>({});
+  const mercurySelectedZone = signal<string | null>(null);
 
   let planetTransitStarted$: Subject<PlanetTransitEvent>;
   let planetUnlocked$: Subject<PlanetUnlockEvent>;
@@ -128,6 +129,7 @@ describe('PlanetUnlockService', () => {
     });
     cultureEventQueue.set([]);
     earthFlags.set({});
+    mercurySelectedZone.set(null);
     transitEvents = [];
     unlockEvents = [];
     planetTransitStarted$ = new Subject<PlanetTransitEvent>();
@@ -161,7 +163,7 @@ describe('PlanetUnlockService', () => {
           planetId: 'mercury',
           phase: 2,
           minOperationalYears: 20,
-          eventId: 'ce_venus_unlocked',
+          eventId: 'ce_inner_worlds_unlocked',
           setFlag: 'venus_opening_decision_available',
         },
       }),
@@ -174,6 +176,7 @@ describe('PlanetUnlockService', () => {
           provide: DataService,
           useValue: {
             getAllPlanets: () => planetData,
+            getPlanet: (id: string) => planetData.find((planet) => planet.id === id),
             getCultureEvent: (id: string) => makeEvent(id),
           },
         },
@@ -188,6 +191,7 @@ describe('PlanetUnlockService', () => {
             completedTechs: completedTechs.asReadonly(),
             planets: planets.asReadonly(),
             planetUnlocks: planetUnlocks.asReadonly(),
+            mercurySelectedZone: mercurySelectedZone.asReadonly(),
             cultureEventQueue: cultureEventQueue.asReadonly(),
             earthFlags: earthFlags.asReadonly(),
             commitPlanetMission: (
@@ -299,6 +303,46 @@ describe('PlanetUnlockService', () => {
 
     expect(planetUnlocks()['mars'].status).toBe('unlocked');
     expect(planetUnlocks()['venus'].status).toBe('unlocked');
+    expect(earthFlags()['venus_opening_decision_available']).toBe(true);
+  });
+
+  it('unlocks Mars and Venus together from Mercury zone selection and queues one combined event', () => {
+    planetData = planetData.map((planet) => {
+      if (planet.id === 'mars') {
+        return makePlanetData({
+          id: 'mars',
+          displayName: 'Mars',
+          unlock: { type: 'mercury_zone_selected', eventId: 'ce_inner_worlds_unlocked' },
+        });
+      }
+      if (planet.id === 'venus') {
+        return makePlanetData({
+          id: 'venus',
+          displayName: 'Venus',
+          unlock: {
+            type: 'mercury_zone_selected',
+            eventId: 'ce_inner_worlds_unlocked',
+            setFlag: 'venus_opening_decision_available',
+          },
+        });
+      }
+      return planet;
+    });
+
+    service.processUnlocks(2040, completedTechs(), planets(), planetUnlocks(), 'caloris_basin');
+    service.processUnlocks(2041, completedTechs(), planets(), planetUnlocks(), 'caloris_basin');
+
+    expect(planetUnlocks()['mars'].status).toBe('unlocked');
+    expect(planetUnlocks()['venus'].status).toBe('unlocked');
+    expect(unlockEvents).toEqual([
+      { planetId: 'mars', unlockedYear: 2040 },
+      { planetId: 'venus', unlockedYear: 2040 },
+    ]);
+    expect(cultureEventQueue()).toEqual([
+      { eventId: 'ce_inner_worlds_unlocked', queuedAtYear: 2040, priority: false, wasInterrupted: false },
+    ]);
+    expect(planetUnlocks()['mars'].firedFlags).toContain('ce_inner_worlds_unlocked');
+    expect(planetUnlocks()['venus'].firedFlags).toContain('ce_inner_worlds_unlocked');
     expect(earthFlags()['venus_opening_decision_available']).toBe(true);
   });
 });

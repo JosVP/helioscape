@@ -4,6 +4,7 @@ import { TechNodeCardComponent } from './tech-node-card.component';
 import { GameStateService } from '@app/core/services/game-state.service';
 import { DataService } from '@app/core/services/data.service';
 import type { TechNode } from '@app/core/models';
+import type { NodeVisibility } from '../tech-node-view.model';
 
 const MOCK_NODE: TechNode = {
   id: 'earth_advanced_renewables',
@@ -47,11 +48,7 @@ describe('TechNodeCardComponent', () => {
     }).compileComponents();
   });
 
-  function createComponent(
-    visibility: 'completed' | 'available' | 'hint',
-    interactive = true,
-    isRevealRecent = false,
-  ): void {
+  function createComponent(visibility: NodeVisibility, interactive = true, isRevealRecent = false): void {
     fixture = TestBed.createComponent(TechNodeCardComponent);
     component = fixture.componentInstance;
     fixture.componentRef.setInput('node', MOCK_NODE);
@@ -74,23 +71,25 @@ describe('TechNodeCardComponent', () => {
     expect(name.textContent).toContain('Advanced Renewables Integration');
   });
 
-  it('shows ??? when visibility is "hint"', () => {
-    createComponent('hint');
+  it('shows display name when visibility is "locked"', () => {
+    createComponent('locked');
     const name = fixture.nativeElement.querySelector('.tech-node__name');
-    expect(name.textContent).toContain('???');
+    expect(name.textContent).toContain('Advanced Renewables Integration');
   });
 
-  it('does not show RP cost for hint nodes', () => {
-    createComponent('hint');
+  it('shows metadata for locked nodes', () => {
+    createComponent('locked');
     const meta = fixture.nativeElement.querySelector('.tech-node__meta');
-    expect(meta).toBeNull();
+    expect(meta).not.toBeNull();
+    expect(meta.textContent).toContain('locked');
   });
 
-  it('shows RP cost and duration for available nodes', () => {
+  it('shows tier and duration for available nodes', () => {
     createComponent('available');
     const meta = fixture.nativeElement.querySelector('.tech-node__meta');
     expect(meta).not.toBeNull();
-    expect(meta.textContent).toContain('30 RP');
+    expect(meta.textContent).toContain('Tier 1');
+    expect(meta.textContent).toContain('20yr');
   });
 
   it('emits nodeClicked when interactive available node is clicked', () => {
@@ -117,13 +116,12 @@ describe('TechNodeCardComponent', () => {
     expect(emitted).toBe('earth_advanced_renewables');
   });
 
-  it('emits nodeSelected for hint nodes without revealing details', () => {
-    createComponent('hint', true);
+  it('emits nodeSelected for locked nodes', () => {
+    createComponent('locked', true);
     let emitted: string | undefined;
     component.nodeSelected.subscribe((id: string) => (emitted = id));
     fixture.nativeElement.querySelector('.tech-node').click();
     expect(emitted).toBe('earth_advanced_renewables');
-    expect(fixture.nativeElement.querySelector('.tech-node__meta')).toBeNull();
   });
 
   it('emits nodeSelected on keyboard activation', () => {
@@ -172,18 +170,22 @@ describe('TechNodeCardComponent', () => {
     expect(badge).toBeNull();
   });
 
-  it('shows prerequisite in tooltip', () => {
-    mockCompletedTechs.set([]);
-    createComponent('available');
-    const tooltip = fixture.nativeElement.querySelector('.tech-node__tooltip');
-    expect(tooltip).not.toBeNull();
-    expect(tooltip.textContent).toContain('Launch Mercury Mission');
+  it('shows progress for running nodes', () => {
+    createComponent('running');
+    fixture.componentRef.setInput('progressPercent', 40);
+    fixture.componentRef.setInput('etaYear', 2044);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('[role="progressbar"]')).not.toBeNull();
+    expect(fixture.nativeElement.textContent).toContain('Est. 2044');
   });
 
-  it('marks met prerequisites in green', () => {
-    mockCompletedTechs.set(['earth_launch_mercury_mission']);
-    createComponent('available');
-    const metPrereq = fixture.nativeElement.querySelector('.tech-node__tooltip-prereq--met');
-    expect(metPrereq).not.toBeNull();
+  it('shows progress for paused nodes without an ETA', () => {
+    createComponent('paused');
+    fixture.componentRef.setInput('progressPercent', 40);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('[role="progressbar"]')).not.toBeNull();
+    expect(fixture.nativeElement.textContent).not.toContain('Est.');
   });
 });

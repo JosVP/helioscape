@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { signal } from '@angular/core';
+import { computed, signal } from '@angular/core';
 import { Subject } from 'rxjs';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import type { ActiveResearchTrack, PendingFork, TechNode, TechUnlockedEvent } from '@app/core/models';
+import type { ActiveResearchTrack, PendingFork, ResearchSlot, TechNode, TechUnlockedEvent } from '@app/core/models';
 import { DataService } from '@app/core/services/data.service';
 import { EventBusService } from '@app/core/services/event-bus.service';
 import { GameStateService } from '@app/core/services/game-state.service';
@@ -128,12 +128,30 @@ function makeGameStateFake() {
   const usedRpCapacity = signal(0);
   const totalRpCapacity = signal(60);
   const pendingFork = signal<PendingFork | null>(null);
+  const visibleResearchSlots = signal<ResearchSlot[]>([
+    { id: 'earth_core_1', displayName: 'Earth Research I', planetId: 'earth', kind: 'default' },
+    { id: 'earth_core_2', displayName: 'Earth Research II', planetId: 'earth', kind: 'default' },
+  ]);
+  const occupiedResearchSlotIds = computed(() => {
+    const occupied = new Set<string>();
+    for (const track of activeResearch()) {
+      if (!track.isPaused && track.slotId) occupied.add(track.slotId);
+    }
+    return occupied;
+  });
+  const availableResearchSlots = computed(() => {
+    const occupied = occupiedResearchSlotIds();
+    return visibleResearchSlots().filter((slot) => !occupied.has(slot.id));
+  });
 
   return {
     gameYear: gameYear.asReadonly(),
     completedTechs: completedTechs.asReadonly(),
     completedResearchYears: completedResearchYears.asReadonly(),
     activeResearch: activeResearch.asReadonly(),
+    visibleResearchSlots: visibleResearchSlots.asReadonly(),
+    occupiedResearchSlotIds,
+    availableResearchSlots,
     usedRpCapacity: usedRpCapacity.asReadonly(),
     totalRpCapacity: totalRpCapacity.asReadonly(),
     pendingFork: pendingFork.asReadonly(),
@@ -147,7 +165,7 @@ function makeDataFake(): Pick<DataService, 'getTechNode' | 'getTechNodesForPlane
   return {
     getTechNode: (id: string) => TECH_NODES.find((node) => node.id === id),
     getTechNodesForPlanet: (planetId: string) =>
-      planetId === 'earth' ? TECH_NODES : [],
+      TECH_NODES.filter((node) => node.planet === planetId),
   };
 }
 
@@ -181,7 +199,7 @@ function makeEventBusFake(): Pick<EventBusService, 'techUnlocked$' | 'researchCo
 describe('ResearchHubComponent', () => {
   let fixture: ComponentFixture<ResearchHubComponent>;
   let gameState: ReturnType<typeof makeGameStateFake>;
-  let researchService: Pick<ResearchService, 'startTechTrack'>;
+  let researchService: Pick<ResearchService, 'startTechTrack' | 'canStartTechTrack'>;
   let eventBus: ReturnType<typeof makeEventBusFake>;
 
   beforeEach(async () => {
@@ -191,7 +209,10 @@ describe('ResearchHubComponent', () => {
       return 1;
     });
 
-    researchService = { startTechTrack: vi.fn() };
+    researchService = {
+      canStartTechTrack: vi.fn((nodeId: string) => nodeId !== 'earth_blocked_capacity'),
+      startTechTrack: vi.fn(),
+    };
     gameState = makeGameStateFake();
     eventBus = makeEventBusFake();
 
@@ -265,17 +286,17 @@ describe('ResearchHubComponent', () => {
   it('shows capacity warning instead of start action when RP capacity is short', () => {
     clickNode('earth_blocked_capacity');
 
-    expect(inspectorText()).toContain('20 more RP capacity');
+    expect(inspectorText()).toContain('All visible research slots are currently occupied.');
     expect(fixture.nativeElement.querySelector('.tech-inspector__start')).toBeNull();
   });
 
-  it('keeps hint node details hidden while showing known prerequisites', () => {
+  it('shows locked node details with known prerequisites', () => {
     clickNode('earth_newly_available');
 
-    expect(inspectorText()).toContain('Locked technology');
+    expect(inspectorText()).toContain('Newly Available Follow-Up');
     expect(inspectorText()).toContain('Available Energy Grid');
-    expect(inspectorText()).not.toContain('This should not steal the inspector selection');
-    expect(inspectorText()).not.toContain('Keeps the current selection stable');
+    expect(inspectorText()).toContain('This should not steal the inspector selection');
+    expect(inspectorText()).toContain('Keeps the current selection stable');
   });
 
   it('does not auto-select a newly available node after the current selection completes', () => {
@@ -290,22 +311,22 @@ describe('ResearchHubComponent', () => {
     expect(inspectorText()).not.toContain('Newly Available Follow-Up');
   });
 
-  it('previews Moon tracks unlocked by an available launch node as hint cards', () => {
+  it('shows Moon spillover tracks as locked cards until unlocked', () => {
     const moonPreview = nodeCard('moon_low_gravity_medicine');
 
     expect(moonPreview).not.toBeNull();
-    expect(moonPreview?.classList).toContain('tech-node--hint');
-    expect(moonPreview?.textContent).toContain('???');
-    expect(moonPreview?.textContent).not.toContain('Low Gravity Medicine');
+    expect(moonPreview?.classList).toContain('tech-node--locked');
+    expect(moonPreview?.textContent).toContain('Low Gravity Medicine');
   });
 
-  it('previews direct follow-up nodes but does not cascade through hinted nodes', () => {
+  it('shows locked follow-up nodes without hiding second-layer children', () => {
     const directPreview = nodeCard('earth_newly_available');
     const secondLayerPreview = nodeCard('earth_preview_child');
 
     expect(directPreview).not.toBeNull();
-    expect(directPreview?.classList).toContain('tech-node--hint');
-    expect(secondLayerPreview).toBeNull();
+    expect(directPreview?.classList).toContain('tech-node--locked');
+    expect(secondLayerPreview).not.toBeNull();
+    expect(secondLayerPreview?.classList).toContain('tech-node--locked');
   });
 
   it('marks completed cards briefly after researchCompleted emits', () => {

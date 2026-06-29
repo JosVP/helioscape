@@ -15,6 +15,5 @@ export class TechNodeIconComponent {
   readonly iconPath = input<string | undefined>(undefined);
   readonly silhouetteIconPath = input<string | undefined>(undefined);
 
-  readonly isHint = computed(() => this.visibility() === 'hint');
-  readonly imagePath = computed(() => (this.isHint() ? this.silhouetteIconPath() : this.iconPath()));
+  readonly imagePath = computed(() => this.iconPath() ?? this.silhouetteIconPath());
 }
