@@ -404,11 +404,9 @@ Post-first-era research arc. Systematic search for existing/past solar system bi
 ---
 
 ## ART DIRECTION
-- Pixel art filter over 3D (Godot post-processing shader on 3D viewport)
-- Stepped animation at 6-8fps, variable frame hold (extreme positions held longer)
 - Bold committed palettes per planet. Warm + vibrant.
 - Workflow: AI generates variations → Jos redraws best ones in own artstyle
-- Culture event cards: left portrait vignette (3:4) + text right. Shareable as PNG (post-V1).
+- Culture event cards: left portrait vignette (3:4) + text right. Shareable as PNG (post-V1). AI generates text → Jos rewrites them in "human way of writing"
 
 ---
 

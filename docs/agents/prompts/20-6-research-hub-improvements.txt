@@ -1,0 +1,15 @@
+TODO prompt:
+
+right now in the research hub
+- you don't see the amount of RP that you have
+- you don't see an overview of all researches that are happening. the top bar currently contains a lot of empty space, so the image on the right needs to leave and then this overview needs to be shown on the top right of this research hub screen.
+- in the overview you should be able to click on the research and then you go to the research
+- you should be able to pause your research. research progress is halted but not lost. pausing frees up RP so you can research other things
+- "new" badge and visual state for new nodes should not be removed after a few seconds, but only when the player clicks on it
+- a "???" node will not show the title of the node. however in the "prerequisites" section, the title of this required "???" node actually does show the title of the node
+- the list of prerequisite nodes should be a list of buttons. clicking on the prerequisite node will select said node in the inspector (as long as the prerequisite is not a "???")
+- moonbase "phase 1" nodes are unlocked after mercury mission unlock. these "phase 1" nodes can unlock "moon phase 2" nodes but the visual order needs to swap. "moon phase 2" nodes need to go below "moon phase 1" nodes instead of "phase 2" nodes being above "phase 1" nodes.
+- node__tooltip needs to be removed, cleanup all code
+- when the text inside the inspector gets too long, the "start research" button is sticky but the text from the research node is "touching" the sticky start button. there needs to be some spacing between the node text and the sticky start button
+- fusion ignition theory should show the culture event, but you only see that when the research hub is closed. this (and other landmark nodes) should show the event on top of the research hub.
+- "mars unlocked" and "venus unlocked" both unlock at the same time, these should be combined into a single event with both mars and venus in the CE svg/illustration

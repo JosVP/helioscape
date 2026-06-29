@@ -1,0 +1,23 @@
+i'm making a game as a solo dev, i want your honest, realistic opinion on it.
+
+some facts:
+1. i'm a solo dev with a family/kids and a fulltime job so my time per week is limited (~10 hours a week?)
+2. i'm a senior front-end (angular) developer with 20 years of experience. i have an affinity for the front of the front-end and have a good feeling for making things look/feel good in the UI/UX department, CSS animations, etc
+3. i am using agentic coding to brainstorm on ideas, analyze a feature and then implementing it through different developer agents.
+4. i tried doing this with godot because it seemed like a logical choice, but agentic coding & godot lead to terrible results and i burned through 25% tokens without having anything that i could use.
+5. i switched to an angular project because using html & css (and canas/three.js) will allow me to implement the UI of the game much faster and much more logical. plus i know this so i can adjust code myself much more easily. the final build will be done in Tauri
+6. this will become a steam game only for now, maybe with dlc in the future if it sells well enough
+
+questions:
+1. what do you think of the game and concept
+2. is it unique enough to stand out against other strategy/sim/colony games
+3. will i be able to generate enough audience/community/wishlists in the sea of steam games
+4. do you think this type of game will be fun enough and catch/keep the attention of players. once the initial version is up and running, i was start a youtube/twitter/reddit devlog as a marketing campaign
+5. what would an educated quess be on commercial success? how many games could this sell on the low and high ends?
+6. what would a good price be for this game?
+7. what kind of risks and gaps do you see for the development of this game
+8. what kind of risks do you see why people would not want to play this game
+9. why do you think people will do want to play this game
+
+about the game:
+- See pitch-gdd.md
