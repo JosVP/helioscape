@@ -1,0 +1,127 @@
+Implement Research Hub V2 step 4: research arcs, arc log, and deterministic knowledge transfer.
+
+Read first:
+- AGENTS.md
+- docs/agents/ARCHITECTURE.md
+- docs/agents/prompts/26-0-research-hub-v2-overview.txt
+- docs/agents/prompts/26-1-research-track-models-data.txt
+- docs/agents/prompts/26-2-research-slot-runtime-service.txt
+- docs/agents/prompts/26-3-research-hub-v2-ui.txt
+- docs/GDD/research-hub-gdd.md
+- docs/GDD/research-hub-gdd-addendum.md
+- docs/GDD/research-arcs-gdd.md
+
+GOAL
+
+Add the arc layer as a read/write system around research nodes. Implement deterministic transfer metadata and a durable arc log that the Research Hub can display.
+
+LIKELY FILES
+
+- src/app/core/models/research-track.model.ts
+- src/app/core/models/game-state.model.ts
+- src/app/core/services/game-state.service.ts
+- src/app/core/services/save.service.ts
+- src/app/core/services/data.service.ts
+- src/app/core/systems/research.service.ts
+- src/app/core/systems/research-arc.service.ts (new, if useful)
+- public/data/research-tracks.json
+- public/data/research-arcs.json (new, optional; use if arc display copy is cleaner outside node data)
+- src/app/features/research-hub/**
+- related specs
+
+ARC DATA REQUIREMENTS
+
+Support arcs from research-arcs-gdd.md:
+- Hunt for Life
+- Deep Ocean Exploration
+- Solar Gravitational Lens
+- Understanding the Universe
+
+Arc definition shape may be in public/data/research-arcs.json:
+  id: string
+  displayName: string
+  type: 'open' | 'closed'
+  description: string
+  nodeIds: string[]
+  knownFindings: { id: string; title: string; requirement: string; eventId?: string }[]
+
+Node-level metadata remains on research nodes:
+  arcIds?: string[]
+  transfersFrom?: ResearchTransfer[]
+
+ARC LOG STATE
+
+Persist arc findings separately from culture-event history:
+
+arcLog: Record<string, ResearchArcLogEntry[]>
+
+ResearchArcLogEntry:
+  arcId: string
+  findingId: string
+  year: number
+  title: string
+  summary: string
+  eventId?: string
+
+GameStateService should expose:
+- readonly arcLog
+- addArcFinding(entry) idempotent by arcId + findingId
+
+SaveService should migrate missing arcLog to {}.
+
+DETERMINISTIC TRANSFER REQUIREMENTS
+
+Implement deterministic transfer only. Do not add probabilistic confidence scoring in this prompt.
+
+1. Metadata rendering
+   - Dotted transfer links in graph are distinct from prerequisite links.
+   - Inspector lists "Informed by" transfers with effect + reason.
+   - Arc view lists transfer outputs in plain language.
+
+2. Mechanical hooks
+   - Add a small service/helper that can answer deterministic transfer state, for example:
+     isTransferActive(toNodeId, fromNodeId)
+     getActiveTransfersForNode(nodeId)
+   - A transfer is active when its fromNodeId is completed.
+   - Effects are data-driven, but actual downstream systems may only consume a subset now.
+
+3. Concrete deterministic examples to support now
+   - Deep Ocean Exploration / Hadal Exploration complete gates positive Hunt for Life conclusions at Enceladus/Europa. If the source node is incomplete, those probe outcomes must resolve to inconclusive when that future system evaluates them. If the probe system does not exist yet, expose a typed helper and tests for the gate.
+   - Earth CO2 Drawdown -> Venus CO2 Removal can be represented as queue_reduction metadata. If the Venus queue system cannot consume it yet, render it in UI and expose a helper for future systems.
+   - Mars bio phases -> Venus bio phases can be represented as variance_reduction metadata. If bio variance system cannot consume it yet, render and expose helper.
+
+4. Arc finding writes
+   - When a research node completes and has arc membership or known finding triggers, append relevant finding entries to arcLog.
+   - If a finding has eventId, also request the matching CultureEvent through EventBus/CultureEventService.
+   - The arc log remains durable even if the CE is dismissed or never auto-shown.
+
+RESEARCH HUB ARC VIEW
+
+Add an Arc view/tab/panel in Research Hub:
+- Lists arcs with type open/closed.
+- Lists member nodes as clickable buttons/selectors that switch back to tree selection.
+- Lists findings so far from arcLog.
+- Shows next known finding requirement if data provides one.
+- Lists knowledge transfer outputs.
+
+This is read-only. It does not start research and does not add mechanics beyond surfacing arc state.
+
+TESTS
+
+- addArcFinding is idempotent and saved/hydrated.
+- Completing an arc node appends expected arc finding.
+- Finding with eventId requests corresponding culture event.
+- Transfer helper returns active only when source node is completed.
+- Inspector renders transfer metadata.
+- Arc view lists findings and member-node buttons.
+- Member-node button selects/focuses the research node.
+
+VALIDATION
+
+Run targeted arc/GameState/ResearchHub specs, then ng build.
+
+OUT OF SCOPE
+
+- Probabilistic confidence mechanics.
+- Full future probe mission implementation.
+- Writing large new CE chains beyond minimal referenced events/placeholders needed for compile/data consistency.

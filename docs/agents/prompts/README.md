@@ -90,6 +90,10 @@ Steam SDK integration (requires Steamworks account — do last) (use Sonnet 4.6)
 
 Verification steps before first run.
 
+### Block 26 (26-0 to 26-6): Research Hub V2 + Arcs
+
+Replacement post-playtest Research Hub rewrite. Converts old tech-tree/RP-capacity architecture into canonical Research Tracks, slot-based research, persistent new-node state, Research Arcs, deterministic knowledge transfer, arc log, and culture-event overlay/unlock fixes. Run after reviewing the new Research Hub GDD files.
+
 ## Important Notes
 
 - Always have `AGENTS.md` and `ARCHITECTURE.md` open as context when working
@@ -98,4 +102,4 @@ Verification steps before first run.
 - Follow the numbered order strictly — later prompts depend on earlier ones
 - Use the model recommendations in each block header for cost optimization
 
-## Total Prompts: 58 core (00–17) + 28 post-playtest (18–25) = 86
+## Total Prompts: 58 core (00–17) + 28 post-playtest (18–25) + 7 Research Hub V2 (26) = 93

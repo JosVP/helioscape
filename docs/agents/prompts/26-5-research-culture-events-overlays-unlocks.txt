@@ -1,0 +1,82 @@
+Implement Research Hub V2 step 5: culture-event overlay layering, landmark research events, and merged Mars/Venus unlock event.
+
+Read first:
+- AGENTS.md
+- docs/agents/ARCHITECTURE.md
+- docs/agents/prompts/26-0-research-hub-v2-overview.txt
+- docs/agents/prompts/26-1-research-track-models-data.txt
+- docs/agents/prompts/26-2-research-slot-runtime-service.txt
+- docs/agents/prompts/26-3-research-hub-v2-ui.txt
+- docs/agents/prompts/26-4-research-arcs-deterministic-transfer.txt
+- docs/GDD/research-hub-gdd.md
+- docs/GDD/research-arcs-gdd.md
+- docs/agents/prompts/20-6-research-hub-improvements.txt
+
+GOAL
+
+Ensure landmark research and planet-unlock culture events display correctly with the Research Hub open, and merge simultaneous Mars/Venus unlock events into one combined event.
+
+LIKELY FILES
+
+- src/app/features/culture-events/culture-event-card/culture-event-card.component.ts/html/scss
+- src/app/features/game-shell/game-shell.component.html/scss if overlay order requires it
+- src/app/core/systems/culture-event.service.ts
+- src/app/core/systems/planet-unlock.service.ts
+- src/app/core/services/event-bus.service.ts if a new event type is needed
+- public/data/culture-events.json
+- public/data/planets.json if unlock event ids are data-driven there
+- public/assets/svg/portraits or public/assets/svg/vignettes for merged placeholder art if needed
+- related specs
+
+REQUIREMENTS
+
+1. Culture event overlays above Research Hub
+   - Landmark CE modals must appear above the Research Hub overlay.
+   - Fusion Ignition Theory completion should show its CE immediately even when Research Hub is open.
+   - Do not require the player to close Research Hub to see a modal event.
+   - Fix z-index/DOM order in a maintainable way using existing overlay conventions.
+   - Preserve toast/bell behavior for non-modal text-only events.
+
+2. Landmark research events
+   - Confirm ResearchService completion -> ResearchEffect emit_event -> CultureEventService queue path still works after research-track renames.
+   - Ensure events marked presentation: 'modal' or priority/choice events auto-display.
+   - Ordinary research completions should remain local UI + notification, not a modal.
+
+3. Merge Mars/Venus unlock CE
+   - Current data has ce_mars_unlocked and ce_venus_unlocked separately. Replace simultaneous unlock behavior with one combined event, for example ce_inner_worlds_unlocked.
+   - The event should mention both Mars and Venus becoming reachable.
+   - The portrait/illustration should include both Mars and Venus. If no asset exists, generate a clear placeholder SVG at the exact referenced path using the placeholder SVG process.
+   - Update planet unlock data/service so unlocking both in the same moment queues one combined event rather than two separate events.
+   - Avoid double firing on save/load or if one planet was already unlocked by an older save.
+
+4. Arc finding CEs
+   - If 26-4 added arc findings with eventId, make sure those eventIds queue/display correctly.
+   - The arc log entry is still the durable record; the CE is narrative presentation.
+
+5. No unrelated CE rewrite
+   - Do not rewrite all culture event triggers in this prompt.
+   - Only touch what is required for landmark research visibility, merged Mars/Venus unlock, and arc finding integration.
+
+TESTS
+
+- Fusion Ignition Theory completion queues/displays modal event while Research Hub is open.
+- Culture event card overlay has stacking above Research Hub.
+- Simultaneous Mars/Venus unlock queues exactly one combined event.
+- Replaying/checking unlock state does not duplicate the combined event.
+- Arc finding with eventId requests a CE and still persists arcLog.
+
+VALIDATION
+
+Run targeted CultureEventService / PlanetUnlockService / relevant component specs, then ng build.
+
+ASSETS
+
+If needed, create placeholder SVG:
+- public/assets/svg/portraits/ce_inner_worlds_unlocked.svg
+- Content: obvious placeholder showing Mars and Venus discs, dashed border/PLACEHOLDER marker, correct dimensions matching portrait assets.
+
+OUT OF SCOPE
+
+- Full culture-event trigger overhaul beyond the above.
+- New long CE chains for every arc.
+- Audio feedback.

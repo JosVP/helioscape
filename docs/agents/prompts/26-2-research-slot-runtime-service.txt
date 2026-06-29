@@ -1,0 +1,119 @@
+Implement Research Hub V2 step 2: slot-based research runtime and save migration.
+
+Read first:
+- AGENTS.md
+- docs/agents/ARCHITECTURE.md
+- docs/agents/prompts/26-0-research-hub-v2-overview.txt
+- docs/agents/prompts/26-1-research-track-models-data.txt
+- docs/GDD/research-hub-gdd.md
+- Current GameStateService, ResearchService, TechTreeService/renamed ResearchTrackService, SaveService, EventBusService, and related specs.
+
+GOAL
+
+Replace RP capacity with visible research slots and make ResearchService run canonical ResearchNode tracks only.
+
+LIKELY FILES
+
+- src/app/core/services/game-state.service.ts
+- src/app/core/systems/research.service.ts
+- src/app/core/systems/tech-tree.service.ts or renamed research-track.service.ts
+- src/app/core/services/save.service.ts
+- src/app/core/models/game-state.model.ts
+- src/app/core/services/event-bus.service.ts
+- src/app/core/systems/research.service.spec.ts
+- src/app/core/services/game-state.service.spec.ts if present
+- src/app/core/services/save.service.spec.ts if present
+- src/app/shared/components/resource-power-bar/* if it still shows RP
+
+SLOT RULES
+
+1. Slot visibility and count
+   - Slot 1 and Slot 2 are visible from game start.
+   - Mars and Venus planet/menu unlocks are separate from research-slot unlocks. Do not reveal colony research slots just because the planet becomes selectable.
+   - Reveal the Mars colony research slot when Mars population reaches the colony research threshold.
+   - Reveal the Venus colony research slot when Venus population reaches the colony research threshold.
+   - Use 50,000 colonists as the default threshold for each planet, but keep it data-driven/tunable rather than hardcoded in component code.
+   - If Mars and Venus both cross their thresholds in the same game-year, both colony slots should become visible immediately. Do not artificially delay either slot.
+   - Derive visible slots from GameStateService planet population/colony state, do not store a manually maintained slot count unless save compatibility requires it.
+
+2. Starting research
+   - A non-collaborative node can start only if:
+     - node exists
+     - node is not completed
+     - node is not already running
+     - all prerequisites/unlock conditions are met
+     - at least one visible slot is free
+   - Starting assigns the first free visible slotId.
+   - Completion frees the slot.
+   - Earth/default slots may run normal research. Colony slots may run only research assigned to that colony or explicitly marked as eligible for colony contribution.
+
+3. Pausing and resuming
+   - Pausing snapshots elapsed years, sets isPaused true, and frees the slot by setting slotId to null.
+   - Progress is not lost.
+   - Resuming requires a visible free slot and assigns one.
+   - Resume keeps elapsedBeforeStart and sets startYear to current gameYear.
+
+4. Collaborative nodes
+   - Add runtime scaffolding for collaborative nodes from research-hub-gdd-addendum.md.
+   - A collaborative node occupies all visible research slots while running.
+   - It can start only when all visible slots are free.
+   - No other research can start while collaborative research is active.
+   - Collaborative completion frees all slots.
+   - It is acceptable if no current V1 node uses collaborative yet, but the service/model must support it.
+
+5. Architect research time reductions
+   - Do not implement RP capacity boosts.
+   - If current data still has rp_capacity_boost effects, treat them as legacy no-ops or migrate them to flat research-time-reduction fields/effects per the GDD.
+   - Research duration reductions must be flat years, applied to active and future nodes if the node/effect says so. Keep values data-driven.
+
+6. Completion
+   - Completion records completedResearchYears.
+   - Completion applies ResearchEffect entries through the renamed research system service.
+   - Completion emits researchCompleted$ and any renamed event as needed.
+
+STATE SHAPE
+
+Use GameStateService as the single source of truth:
+- completedResearch: string[] or rename completedTechs to completedResearchNodeIds
+- completedResearchYears: Record<string, number>
+- activeResearch: ActiveResearch[] with nodeId, slotId, isPaused, startYear, elapsedBeforeStart
+- arcLog: Record<string, ResearchArcLogEntry[]> or equivalent (the write API may be added in 26-4, but reserve state/save shape now if practical)
+
+SAVE MIGRATION
+
+- Migrate old ActiveResearchTrack.trackId to ActiveResearch.nodeId.
+- Migrate old entries without slotId:
+  - running entries receive slots in order up to visible slot count
+  - overflow entries become paused with slotId null
+- Migrate old completedTechs to completedResearchNodeIds if renamed.
+- Migrate old saves without arcLog to an empty object.
+
+RESOURCE/POWER BAR
+
+- Remove or replace RP display in ResourcePowerBarComponent.
+- Do not show Research Points in global bottom bar after this prompt.
+- Research slot state belongs in Research Hub header/overview (26-3), not as a global RP bar.
+
+TESTS
+
+- Starts exactly two nodes at game start; third start fails before colony slot thresholds are met.
+- Unlocking Mars and Venus as planets does not reveal colony research slots.
+- Mars reaching the threshold reveals the Mars colony slot.
+- Venus reaching the threshold reveals the Venus colony slot.
+- Mars and Venus reaching their thresholds in the same game-year reveals both colony slots without needing a later tick.
+- Colony slots reject research not assigned/eligible for that colony.
+- Pausing frees a slot and preserves elapsed progress.
+- Resuming consumes a free slot and continues from elapsed progress.
+- Collaborative node requires all visible slots free and blocks other starts.
+- Completion applies effects and records completed year.
+- Save migration maps old trackId state into new nodeId/slot state.
+
+VALIDATION
+
+Run targeted ResearchService/GameStateService/SaveService specs, then ng build.
+
+OUT OF SCOPE
+
+- Research Hub visual layout (26-3).
+- Arc view and deterministic transfer effects (26-4).
+- Culture-event overlay/z-index work (26-5).

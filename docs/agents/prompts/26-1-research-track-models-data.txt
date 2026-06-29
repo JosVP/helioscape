@@ -1,0 +1,125 @@
+Implement Research Hub V2 step 1: canonical research-track naming, models, and data migration.
+
+Read first:
+- AGENTS.md
+- docs/agents/ARCHITECTURE.md
+- docs/agents/prompts/26-0-research-hub-v2-overview.txt
+- docs/GDD/research-hub-gdd.md
+- docs/GDD/research-hub-gdd-addendum.md
+- docs/GDD/research-arcs-gdd.md
+- Current files under src/app/core/models, src/app/core/services/data.service.ts, and public/data/tech-tree.json / public/data/research-tracks.json.
+
+GOAL
+
+Make research tracks the single canonical data/model concept. The old tech-tree model and the old separate research-tracks model must be merged into one research-track/research-node abstraction.
+
+LIKELY FILES
+
+- Rename src/app/core/models/tech-tree.model.ts to src/app/core/models/research-track.model.ts
+- Update src/app/core/models/index.ts
+- Update imports across src/app/** from TechNode / TechEffect / ResearchTrack / ActiveResearchTrack to the new names
+- Rename public/data/tech-tree.json to public/data/research-tracks.json after merging unique old research-track entries
+- Remove or archive the old public/data/research-tracks.json content by merging it into the canonical file; do not leave two canonical sources
+- Update src/app/core/services/data.service.ts accessors
+- Update specs that import model names or data accessors
+
+NEW MODEL SHAPE
+
+Define exported interfaces/types using research vocabulary:
+
+ResearchNode:
+  id: string
+  planet: string
+  displayName: string
+  category: 'capability' | 'efficiency' | 'reactive' | 'identity'
+  tier: 1 | 2 | 3
+  postV1?: boolean
+  collaborative?: boolean
+  durationYears: number
+  description: string
+  outcomeSummary: string[]
+  unlockCondition: string
+  prerequisites: string[]
+  prerequisiteMode?: 'all' | 'any'
+  spilloverPrerequisites: string[]
+  spilloverGate?: { mode: 'min_naturalist_nodes'; count: number }
+  effects: ResearchEffect[]
+  arcIds?: string[]
+  transfersFrom?: ResearchTransfer[]
+  visualOrder?: number
+  iconPath?: string
+
+ResearchTransfer:
+  fromNodeId: string
+  effect: 'capability_gate' | 'queue_reduction' | 'time_reduction' | 'event_mitigation' | 'variance_reduction' | 'research_time_reduction'
+  reason: string
+  description: string
+
+ResearchEffect:
+  Keep existing TechEffect behavior but rename the type. Update effect names only where required by the new GDD:
+  - remove rp_capacity_boost from new content; architect research should use flat research-time-reduction effects, not RP capacity
+  - keep existing effect cases temporarily if old systems still compile, but mark RP boost as legacy during migration
+
+ActiveResearch:
+  readonly nodeId: string
+  readonly planetId: string
+  readonly slotId: string | null
+  readonly isPaused: boolean
+  readonly startYear: number
+  readonly elapsedBeforeStart: number
+
+ResearchArcLogEntry:
+  readonly arcId: string
+  readonly findingId: string
+  readonly year: number
+  readonly title: string
+  readonly summary: string
+  readonly eventId?: string
+
+DATA MIGRATION REQUIREMENTS
+
+1. Canonical JSON file
+   - public/data/research-tracks.json becomes the single canonical research graph file.
+   - Existing public/data/tech-tree.json content is migrated into it.
+   - The old small public/data/research-tracks.json entries should be merged as nodes or removed if they duplicate canonical GDD nodes.
+
+2. Remove RP data from new nodes
+   - Remove rpCost from the canonical node schema.
+   - Keep durationYears.
+   - Update player-facing copy from RP capacity language to slot/time language.
+
+3. Full visible graph support
+   - Every node must have displayName, tier, category, unlockCondition, description, outcomeSummary, durationYears, prerequisites, spilloverPrerequisites, effects.
+   - Locked nodes can display title and unlockCondition from data.
+   - Do not rely on silhouetteIconPath for hidden ??? nodes in the new system.
+
+4. Moon visual order
+   - Add visualOrder (or equivalent data-driven ordering) so Moon Phase 1 nodes render above/before Moon Phase 2 in the intended visual order. Do not depend only on recursive prerequisite depth.
+
+5. Accessor rename
+   - DataService should expose research-language methods:
+     getResearchNode(id)
+     getResearchNodesForPlanet(planetId)
+     getAllResearchNodes()
+   - Remove or temporarily deprecate getTechNode/getTechNodesForPlanet. If compatibility wrappers are needed, keep them only until 26-6.
+
+6. Type aliases
+   - Avoid broad permanent aliases like type TechNode = ResearchNode. If temporary aliases are required to keep this prompt small, add a clear TODO in 26-6 prompt scope and remove them there.
+
+TESTS
+
+- DataService loads the canonical research-tracks.json file.
+- getResearchNode returns migrated nodes.
+- getResearchNodesForPlanet returns Earth/Moon/Mars/Venus/Mercury nodes from one source.
+- No code path requires public/data/tech-tree.json after this prompt.
+- Model imports compile.
+
+VALIDATION
+
+Run targeted DataService/model specs if present, then run ng build.
+
+OUT OF SCOPE
+
+- Runtime slot enforcement (26-2).
+- Research Hub UI rewrite (26-3).
+- Arc view rendering (26-4).

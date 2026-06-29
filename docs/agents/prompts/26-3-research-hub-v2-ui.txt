@@ -1,0 +1,110 @@
+Implement Research Hub V2 step 3: slot overview, full-visible research tree, inspector, and new-node behavior.
+
+Read first:
+- AGENTS.md
+- docs/agents/ARCHITECTURE.md
+- docs/agents/prompts/26-0-research-hub-v2-overview.txt
+- docs/agents/prompts/26-1-research-track-models-data.txt
+- docs/agents/prompts/26-2-research-slot-runtime-service.txt
+- docs/GDD/research-hub-gdd.md
+- docs/agents/prompts/20-6-research-hub-improvements.txt
+- Current src/app/features/research-hub/** files.
+
+GOAL
+
+Rewrite the Research Hub UI around research slots and the always-visible research graph. Remove tooltip/??? behavior and make the inspector the primary detail and action surface.
+
+LIKELY FILES
+
+- Rename src/app/features/research-hub/tech-node-card/* to research-node-card/*
+- Rename src/app/features/research-hub/tech-node-inspector/* to research-node-inspector/*
+- Rename src/app/features/research-hub/tech-node-icon/* to research-node-icon/*
+- Rename tech-node-view.model.ts to research-node-view.model.ts
+- src/app/features/research-hub/research-hub.component.ts/html/scss
+- Related component specs
+
+LAYOUT REQUIREMENTS
+
+1. Header
+   - Remove the research-hub vignette/image on the right.
+   - Use that top-right space for a Research Slots overview.
+   - Slot overview shows all currently visible slots:
+     - empty slot
+     - running node displayName + progress + ETA + pause button
+     - paused node displayName + frozen progress + resume button when a slot is free
+    - Hidden future colony slots may be hinted subtly as future expandable if it fits the design, but Mars/Venus colony slots should only become fully visible per 26-2 population-threshold rules.
+    - If hinted, labels should communicate population-based colony contribution, not planet menu unlock. Example: "Mars research slot: colony threshold not reached".
+
+2. Active research overview interactions
+   - Clicking a running or paused slot selects/focuses that research node in the graph and inspector.
+   - Pause/resume buttons call ResearchService only; no game logic in the component.
+
+3. Tree visibility
+   - All research nodes are visible from game start.
+   - Locked nodes show displayName, tier, category, icon, and unlockCondition.
+   - Remove "???" and hint/silhouette title masking.
+   - Locked nodes are selectable and readable, but start is disabled.
+   - Completed, running, paused, available, locked, and post-V1 states should be visually distinct.
+
+4. Card content
+   - Show node name, tier, category, duration, and status.
+   - Remove RP cost display entirely.
+   - Remove node__tooltip / tech-node__tooltip markup and all tooltip SCSS/code.
+   - Keep stable card dimensions so graph lines do not jump.
+
+5. Inspector
+   - Shows icon, title, planet, tier/category, status, duration, description, outcome summary, unlock condition, progress, ETA, completed year.
+   - Shows Start Research only when available and a slot is free.
+   - Shows Pause for running selected node.
+   - Shows Resume for paused selected node when a slot is free.
+   - Sticky action area must not touch long text; add bottom padding/spacing so content breathes above the sticky button.
+
+6. Prerequisites as buttons
+   - Prerequisites list is a list of buttons, not passive text.
+   - Clicking a prerequisite selects that node in the inspector and scrolls/focuses it if practical.
+   - Since ??? nodes are removed, prerequisite titles may always show.
+   - Disabled/missing prerequisite references should render as inert text only if data is invalid; do not crash.
+
+7. New-node state
+   - Add persistent UI acknowledgement state for newly available nodes.
+   - A node becomes New when it transitions from locked to available.
+   - Clicking the new node selects it but keeps New visible.
+   - New clears when the selected new node is left for another selected node.
+   - New clears when the node is started.
+   - New is not timer-based; remove the old 2-second reveal timer behavior.
+   - This can be UI-only state unless save persistence is clearly needed; prefer UI-only for this prompt.
+
+8. Moon visual order
+   - Use data-driven visualOrder/tier ordering from 26-1.
+   - Moon Phase 2 nodes must render below Moon Phase 1 nodes as requested.
+   - Do not rely solely on recursive prerequisite depth.
+
+ACCESSIBILITY
+
+- Cards are keyboard-selectable.
+- Slot pause/resume buttons have explicit labels.
+- Selected node uses aria-current or equivalent.
+- Progress bars have accessible values and labels.
+
+TESTS
+
+- All nodes render with names even when locked.
+- Locked node inspector shows unlock condition but no Start button.
+- Available node Start calls ResearchService.
+- Running selected node shows Pause and progress/ETA.
+- Paused selected node shows Resume when a slot is free.
+- Slot overview click selects the active/paused node.
+- Prerequisite button selects prerequisite node.
+- New state persists on first click, clears when selecting another node, and clears on start.
+- Tooltip DOM/classes are removed.
+- Long inspector content does not overlap sticky actions (class/style test if feasible; otherwise component screenshot/manual note).
+
+VALIDATION
+
+Run targeted ResearchHubComponent / research-node-card / research-node-inspector specs, then ng build.
+
+OUT OF SCOPE
+
+- Arc tab/view (26-4), except leave layout room if convenient.
+- Culture-event layering (26-5).
+- Deep visual polish beyond functional readable V2 layout.

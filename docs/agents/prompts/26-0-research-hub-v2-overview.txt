@@ -1,0 +1,92 @@
+Note: this is the overview prompt for the Research Hub V2 rewrite. Do not implement from this file alone. Use it as context before running 26-1 through 26-6 in order.
+
+Read first:
+- AGENTS.md
+- docs/agents/ARCHITECTURE.md
+- docs/GDD/research-hub-gdd.md
+- docs/GDD/research-hub-gdd-addendum.md
+- docs/GDD/research-arcs-gdd.md
+- docs/agents/prompts/20-6-research-hub-improvements.txt
+
+GOAL
+
+Replace the current RP-capacity / tech-tree Research Hub with the new Research Tracks + Research Arcs design.
+
+Canonical language and architecture:
+- "Research track" is the canonical gameplay concept.
+- "Research node" is the individual node/card in the graph.
+- The old tech tree and research tracks are the same system under different names. Merge them.
+- Rename existing tech-tree files/symbols/components to research-track/research-node naming during this rewrite.
+- Do not leave a second parallel tech-tree abstraction behind unless a temporary compatibility alias is required inside a single migration prompt.
+
+DESIGN DECISIONS LOCKED
+
+1. Research slots replace RP capacity.
+   - Start with 2 visible research slots.
+   - Mars and Venus menu/planet access can unlock simultaneously, but that does not unlock their research slots.
+   - Reveal the Mars colony research slot when Mars reaches the colony population threshold.
+   - Reveal the Venus colony research slot when Venus reaches the colony population threshold.
+   - Default threshold: 50,000 colonists per planet. Keep this data-driven/tunable. Rationale: 10k-20k is a fragile settlement; 50k better represents a stable colony with enough schools, labs, specialists, and institutional continuity to run assigned research.
+   - If Mars and Venus both cross their thresholds in the same game-year, both colony slots may appear together. Do not artificially delay either slot.
+   - Paused research keeps progress but frees its occupied slot.
+   - A resumed node occupies a slot again.
+
+2. Full tree visibility.
+   - Per research-hub-gdd.md, all nodes are visible from game start.
+   - Locked nodes show name, tier, icon, and unlock condition.
+   - Do not use "???" silhouettes or hidden titles in the new system.
+
+3. New-node state.
+   - Newly available nodes show a persistent New state.
+   - Clicking a new node selects it but does NOT clear New.
+   - New clears when the player selects a different node after viewing it.
+   - New also clears when the player starts/researches that node.
+   - New state is UI acknowledgement state, not a timed animation.
+
+4. Deterministic knowledge transfer for now.
+   - Implement explicit transfer metadata and deterministic effects.
+   - Do not add probabilistic confidence mechanics yet.
+   - Example: Deep Ocean Exploration complete deterministically enables positive Hunt for Life conclusions at Enceladus/Europa; without it the result is forced inconclusive.
+
+5. Arc findings.
+   - Persist arc findings in an arc-log object in GameStateService / save data.
+   - A culture event may fire alongside a finding, but the arc log is the durable source for Research Hub arc view.
+
+6. 20-6 improvements triage.
+   Keep/adapt:
+   - Active research overview in top-right of hub header.
+   - Click active research in overview to select/focus node.
+   - Pause/resume from hub.
+   - Prerequisite list is buttons in inspector; clicking selects that prerequisite node.
+   - Moon Phase 2 rows render below Moon Phase 1 rows, matching new visual order.
+   - Remove node tooltip code.
+   - Add spacing above sticky inspector actions.
+   - Landmark culture events appear above the Research Hub.
+   - Merge Mars and Venus unlock events into a single combined event.
+   Replace/drop:
+   - RP amount display becomes slot occupancy display.
+   - ??? prerequisite-title leak is obsolete because ??? nodes are removed.
+
+IMPLEMENTATION PROMPT ORDER
+
+26-1 — Canonical naming, models, and data migration.
+26-2 — Slot-based runtime mechanics and save migration.
+26-3 — Research Hub V2 tree, slots, inspector, and new-node behavior.
+26-4 — Research arcs, arc log, and deterministic transfer metadata.
+26-5 — Culture-event overlay, landmark events, and merged Mars/Venus unlock CE.
+26-6 — Final cleanup, tests, and old tech-tree removal pass.
+
+GENERAL RULES
+
+- Keep state in GameStateService; systems call typed mutation methods.
+- Components display state and call system methods only.
+- GameLoopService remains the only game timer.
+- Progress is derived from gameYear, startYear, elapsedBeforeStart, and durationYears.
+- All content lives in public/data/*.json.
+- No hardcoded node names, descriptions, unlock conditions, transfer effects, or arc copy in TypeScript.
+- Use standalone Angular components, OnPush, signals, inject(), input()/output(), @if/@for.
+- Keep edits scoped to the research rewrite unless a dependent compile break requires a local compatibility update.
+
+VALIDATION EXPECTATION
+
+Every implementation prompt must run a focused validation after edits. Prefer targeted Vitest specs for touched services/components, then ng build as the authoritative compile check when models/renames are involved.

@@ -1,0 +1,96 @@
+Implement Research Hub V2 step 6: final cleanup, old tech-tree removal, tests, and validation.
+
+Read first:
+- AGENTS.md
+- docs/agents/ARCHITECTURE.md
+- docs/agents/prompts/26-0-research-hub-v2-overview.txt
+- docs/agents/prompts/26-1-research-track-models-data.txt
+- docs/agents/prompts/26-2-research-slot-runtime-service.txt
+- docs/agents/prompts/26-3-research-hub-v2-ui.txt
+- docs/agents/prompts/26-4-research-arcs-deterministic-transfer.txt
+- docs/agents/prompts/26-5-research-culture-events-overlays-unlocks.txt
+
+GOAL
+
+Remove temporary compatibility code and ensure the new Research Tracks + Arcs system is internally consistent, tested, and build-clean.
+
+LIKELY FILES
+
+- All files touched by 26-1 through 26-5
+- src/app/core/models/index.ts
+- src/app/core/services/data.service.ts
+- src/app/core/systems/*research*.ts
+- src/app/features/research-hub/**
+- public/data/*.json
+- public/assets/svg/** if placeholders were added
+- docs/agents/TODO.md if deferred follow-up needs tracking
+
+CLEANUP REQUIREMENTS
+
+1. Naming cleanup
+   - Remove old TechNode / TechTree / tech-node permanent aliases.
+   - Remove getTechNode / getTechNodesForPlanet wrappers if they are no longer needed.
+   - Rename remaining file/component/class references where practical:
+     TechNodeCard -> ResearchNodeCard
+     TechNodeInspector -> ResearchNodeInspector
+     TechNodeIcon -> ResearchNodeIcon
+     TechTreeService -> ResearchTrackService or ResearchGraphService, whichever was chosen earlier
+   - Grep for "tech tree", "TechNode", "tech-node", "rpCost", "RP capacity", "Research Points" and either remove, rename, or explicitly leave only in historical prompt/docs.
+
+2. Data cleanup
+   - Ensure public/data/tech-tree.json is gone or no longer loaded.
+   - Ensure public/data/research-tracks.json is canonical and complete.
+   - Ensure no duplicate old research-track entries conflict with canonical node ids.
+   - Ensure all node ids referenced by prerequisites, transfers, arc definitions, events, and effects exist.
+
+3. UI cleanup
+   - Ensure tooltip markup/classes are removed.
+   - Ensure ???/hint/silhouette title masking is removed.
+   - Ensure Research Hub header uses slot overview, not the old vignette image.
+   - Ensure bottom global resource/power bar no longer shows RP.
+
+4. Save compatibility
+   - Old saves with activeResearch.trackId should migrate.
+   - Old saves with completedTechs should migrate.
+   - Old saves without arcLog should load.
+   - If migration cannot preserve a field perfectly, document the fallback in TODO.md.
+
+5. Tests to add or update
+   Service-level:
+   - slot visibility: 2 start, 3 after Mars or Venus, 4 after both
+   - start/pause/resume/complete slot behavior
+   - collaborative node behavior
+   - deterministic transfer helper
+   - arcLog add/save/hydrate
+   - merged Mars/Venus event dedupe
+
+   Component-level:
+   - locked nodes show names/unlock conditions
+   - active slot overview selects nodes
+   - new-node acknowledgement behavior
+   - prerequisite buttons select nodes
+   - inspector action spacing and sticky action presence
+   - arc view lists findings and node links
+
+   Data-level:
+   - all prerequisites resolve
+   - all transfersFrom source nodes resolve
+   - all arc nodeIds resolve
+   - all eventIds referenced by effects/findings resolve
+
+6. TODO tracking
+   - If post-V1 systems are represented only by helpers/scaffolding, add concise TODO.md entries for their future consumers.
+   - Do not add inline TODO comments.
+
+VALIDATION
+
+Run the most focused updated specs first, then run:
+- ng build
+
+If full test suite is already known to have unrelated failures, run the touched specs directly with Vitest and report remaining unrelated failures clearly.
+
+OUT OF SCOPE
+
+- Large balance pass on all durations/effects.
+- Full post-V1 probe/outer-ring gameplay.
+- Frontend visual polish beyond correctness/readability/accessibility.
