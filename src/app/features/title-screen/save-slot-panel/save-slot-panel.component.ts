@@ -75,7 +75,12 @@ export class SaveSlotPanelComponent {
         }
         break;
       case 'LOAD':
-        this.saveService.load(slot).then(() => this.router.navigate(['/game']));
+        this.saveService.load(slot).then((loaded) => {
+          if (!loaded) return;
+          this.slotSelected.emit(slot);
+          this.closed.emit();
+          this.router.navigate(['/game']);
+        });
         break;
       case 'SAVE':
         this.saveService.save(slot).then(() => {

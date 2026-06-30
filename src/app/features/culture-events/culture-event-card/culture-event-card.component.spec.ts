@@ -1,8 +1,9 @@
 import { TestBed } from '@angular/core/testing';
-import { signal } from '@angular/core';
+import { signal, type WritableSignal } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { CultureEventCardComponent } from './culture-event-card.component';
 import { CultureEventService } from '@app/core/systems/culture-event.service';
+import { GameStateService } from '@app/core/services/game-state.service';
 import type { CultureEvent, CultureEventChoice } from '@app/core/models';
 
 // ---------------------------------------------------------------------------
@@ -54,19 +55,24 @@ function setup(event: CultureEvent | null = null): {
   fixture: ReturnType<typeof TestBed.createComponent<CultureEventCardComponent>>;
   component: CultureEventCardComponent;
   fakeSvc: FakeService;
+  interactionLockedSignal: WritableSignal<boolean>;
 } {
   const fakeSvc = makeFakeService(event);
+  const interactionLockedSignal = signal(false);
 
   TestBed.configureTestingModule({
     imports: [CultureEventCardComponent],
-    providers: [{ provide: CultureEventService, useValue: fakeSvc }],
+    providers: [
+      { provide: CultureEventService, useValue: fakeSvc },
+      { provide: GameStateService, useValue: { interactionLocked: interactionLockedSignal.asReadonly() } },
+    ],
   });
 
   const fixture = TestBed.createComponent(CultureEventCardComponent);
   const component = fixture.componentInstance;
   fixture.detectChanges();
 
-  return { fixture, component, fakeSvc };
+  return { fixture, component, fakeSvc, interactionLockedSignal };
 }
 
 // ---------------------------------------------------------------------------
@@ -116,6 +122,15 @@ describe('CultureEventCardComponent', () => {
       btn?.click();
       expect(fakeSvc.closeCurrentEvent).toHaveBeenCalledOnce();
     });
+
+    it('does not close the event while interactions are locked', () => {
+      const { component, fakeSvc, interactionLockedSignal } = setup(makeEvent({ choices: [] }));
+      interactionLockedSignal.set(true);
+
+      component.onContinue();
+
+      expect(fakeSvc.closeCurrentEvent).not.toHaveBeenCalled();
+    });
   });
 
   // ── Choice buttons ────────────────────────────────────────────────────────
@@ -140,6 +155,16 @@ describe('CultureEventCardComponent', () => {
       const btn = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('.card-overlay__btn');
       btn?.click();
       expect(fakeSvc.applyChoice).toHaveBeenCalledWith(choice);
+    });
+
+    it('does not apply choices while interactions are locked', () => {
+      const choice = makeChoice('naturalist');
+      const { component, fakeSvc, interactionLockedSignal } = setup(makeEvent({ choices: [choice] }));
+      interactionLockedSignal.set(true);
+
+      component.onChoice(choice);
+
+      expect(fakeSvc.applyChoice).not.toHaveBeenCalled();
     });
   });
 
@@ -174,6 +199,15 @@ describe('CultureEventCardComponent', () => {
     it('does nothing on Enter when event is not visible', () => {
       const { component, fakeSvc } = setup(null);
       component.onKeyDown(new KeyboardEvent('keydown', { key: 'Enter' }));
+      expect(fakeSvc.closeCurrentEvent).not.toHaveBeenCalled();
+    });
+
+    it('does nothing on Enter while interactions are locked', () => {
+      const { component, fakeSvc, interactionLockedSignal } = setup(makeEvent({ choices: [] }));
+      interactionLockedSignal.set(true);
+
+      component.onKeyDown(new KeyboardEvent('keydown', { key: 'Enter' }));
+
       expect(fakeSvc.closeCurrentEvent).not.toHaveBeenCalled();
     });
   });

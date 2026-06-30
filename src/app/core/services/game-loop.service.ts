@@ -65,16 +65,13 @@ export class GameLoopService {
   /** Stop the clock and mark the game as paused. */
   pause(): void {
     this.cancelScheduled(/* saveRemaining */ true);
-    if (!this.gameState.isPaused()) {
-      this.gameState.togglePause();
-    }
+    this.gameState.setPaused(true);
   }
 
   /** Unpause and restart the clock, honouring any saved remaining tick time. */
   resume(): void {
-    if (this.gameState.isPaused()) {
-      this.gameState.togglePause();
-    }
+    if (this.intervalId !== null) return;
+    this.gameState.setPaused(false);
     this.schedule(this.tickMs());
   }
 

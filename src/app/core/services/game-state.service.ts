@@ -232,6 +232,9 @@ export class GameStateService {
   /** @deprecated Research V2 uses occupiedResearchSlotIds. */
   readonly usedRpCapacity = computed<number>(() => this.occupiedResearchSlotIds().size);
 
+  /** True when in-game surfaces must ignore player interaction. */
+  readonly interactionLocked = computed<boolean>(() => this._isPaused());
+
   /**
    * Power balance for all operational Mercury grid buildings.
    * energyDrawGw < 0 = produced; energyDrawGw > 0 = consumed.
@@ -254,6 +257,10 @@ export class GameStateService {
 
   togglePause(): void {
     this._isPaused.update((p) => !p);
+  }
+
+  setPaused(paused: boolean): void {
+    this._isPaused.set(paused);
   }
 
   // -------------------------------------------------------------------------

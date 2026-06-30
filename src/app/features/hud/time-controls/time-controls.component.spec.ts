@@ -43,20 +43,26 @@ describe('TimeControlsComponent', () => {
     TestBed.resetTestingModule();
   });
 
-  it('clicking pause calls gameLoop.pause() when not paused', () => {
+  it('clicking pause emits pauseRequested when not paused', () => {
     const fixture = setup();
+    const pauseSpy = vi.fn();
+    fixture.componentInstance.pauseRequested.subscribe(pauseSpy);
     const btn: HTMLButtonElement = fixture.nativeElement.querySelector('.time-controls__btn--pause');
     btn.click();
-    expect(mockGameLoop.pause).toHaveBeenCalledOnce();
+    expect(pauseSpy).toHaveBeenCalledOnce();
+    expect(mockGameLoop.pause).not.toHaveBeenCalled();
     expect(mockGameLoop.resume).not.toHaveBeenCalled();
   });
 
-  it('clicking pause calls gameLoop.resume() when already paused', () => {
+  it('clicking pause emits pauseRequested when already paused', () => {
     isPausedSignal.set(true);
     const fixture = setup();
+    const pauseSpy = vi.fn();
+    fixture.componentInstance.pauseRequested.subscribe(pauseSpy);
     const btn: HTMLButtonElement = fixture.nativeElement.querySelector('.time-controls__btn--pause');
     btn.click();
-    expect(mockGameLoop.resume).toHaveBeenCalledOnce();
+    expect(pauseSpy).toHaveBeenCalledOnce();
+    expect(mockGameLoop.resume).not.toHaveBeenCalled();
     expect(mockGameLoop.pause).not.toHaveBeenCalled();
   });
 

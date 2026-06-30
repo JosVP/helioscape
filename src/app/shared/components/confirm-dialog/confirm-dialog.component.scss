@@ -1,0 +1,62 @@
+:host {
+  display: block;
+}
+
+.confirm-dialog {
+  display: grid;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  background: var(--color-bg-elevated);
+  border: var(--border-accent);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-panel);
+  color: var(--color-text-primary);
+
+  &__message,
+  &__warning {
+    margin: 0;
+  }
+
+  &__message {
+    font-size: var(--text-sm);
+    line-height: 1.5;
+  }
+
+  &__warning {
+    color: var(--color-bad);
+    font-size: var(--text-xs);
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-sm);
+  }
+
+  &__button {
+    border: var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--color-bg-surface);
+    color: var(--color-text-primary);
+    font: inherit;
+    cursor: pointer;
+    transition: var(--transition-ui);
+
+    &:hover,
+    &:focus-visible {
+      border-color: var(--color-accent);
+      box-shadow: var(--shadow-btn-glow);
+      outline: none;
+    }
+
+    &--confirm {
+      background: var(--color-accent-dim);
+    }
+
+    &--destructive {
+      background: var(--color-bad);
+      color: var(--color-bg-base);
+    }
+  }
+}

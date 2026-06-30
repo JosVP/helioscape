@@ -158,4 +158,15 @@ describe('HudComponent', () => {
     const fixture = setup();
     expect(fixture.nativeElement.querySelector('app-time-controls')).not.toBeNull();
   });
+
+  it('forwards pause requests from TimeControls', () => {
+    const fixture = setup();
+    const pauseSpy = vi.fn();
+    fixture.componentInstance.pauseRequested.subscribe(pauseSpy);
+
+    const btn: HTMLButtonElement = fixture.nativeElement.querySelector('.time-controls__btn--pause');
+    btn.click();
+
+    expect(pauseSpy).toHaveBeenCalledOnce();
+  });
 });

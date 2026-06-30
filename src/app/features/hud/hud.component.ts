@@ -4,10 +4,10 @@ import {
   DestroyRef,
   effect,
   inject,
+  output,
   signal,
   untracked,
 } from '@angular/core';
-import { GameLoopService } from '@app/core/services/game-loop.service';
 import { GameStateService } from '@app/core/services/game-state.service';
 import { SaveService } from '@app/core/services/save.service';
 import { CultureEventBellComponent } from '@app/features/culture-events/culture-event-bell/culture-event-bell.component';
@@ -37,11 +37,11 @@ const AUTOSAVE_VISIBLE_MS = 2500;
   styleUrl: './hud.component.scss',
 })
 export class HudComponent {
-  private readonly gameLoop = inject(GameLoopService);
   private readonly gameState = inject(GameStateService);
   private readonly saveService = inject(SaveService);
   private readonly destroyRef = inject(DestroyRef);
 
+  readonly pauseRequested = output<void>();
   readonly showAutosave = signal(false);
 
   private autosaveTimer: ReturnType<typeof setTimeout> | null = null;

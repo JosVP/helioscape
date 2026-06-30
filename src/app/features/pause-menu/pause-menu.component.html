@@ -1,0 +1,73 @@
+@if (isOpen()) {
+  <div class="pause-menu" role="presentation">
+    <div class="pause-menu__backdrop" aria-hidden="true"></div>
+
+    <section
+      #panel
+      class="pause-menu__panel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="pause-menu-title"
+      tabindex="-1"
+    >
+      <header class="pause-menu__header">
+        <p class="pause-menu__eyebrow">Simulation paused</p>
+        <h2 class="pause-menu__title" id="pause-menu-title">Pause Menu</h2>
+      </header>
+
+      @if (activeView() === 'menu') {
+        <nav class="pause-menu__actions" aria-label="Pause menu actions">
+          <button #firstButton type="button" class="pause-menu__button pause-menu__button--primary" (click)="onResume()">
+            Resume
+          </button>
+          <button type="button" class="pause-menu__button" (click)="openSave()">Save Game</button>
+          <button type="button" class="pause-menu__button" (click)="requestLoad()">Load Game</button>
+          <button type="button" class="pause-menu__button" (click)="openSettings()">Settings</button>
+          <button type="button" class="pause-menu__button pause-menu__button--warn" (click)="requestReturnToTitle()">
+            Quit to Title
+          </button>
+          @if (isTauri) {
+            <button type="button" class="pause-menu__button pause-menu__button--warn" (click)="requestQuit()">
+              Quit to Desktop
+            </button>
+          }
+        </nav>
+      }
+
+      @if (pendingConfirm() === 'load') {
+        <app-confirm-dialog
+          message="Loading another save will replace the current timeline in memory. Continue?"
+          [isDestructive]="true"
+          (confirmed)="confirmLoad()"
+          (cancelled)="cancelConfirm()"
+        />
+      } @else if (pendingConfirm() === 'title') {
+        <app-confirm-dialog
+          message="Return to the title screen? Unsaved progress since the last save will be lost."
+          [isDestructive]="true"
+          (confirmed)="confirmReturnToTitle()"
+          (cancelled)="cancelConfirm()"
+        />
+      } @else if (pendingConfirm() === 'quit') {
+        <app-confirm-dialog
+          message="Native quit is reserved for the desktop shell."
+          [isDestructive]="true"
+          (confirmed)="confirmQuit()"
+          (cancelled)="cancelConfirm()"
+        />
+      }
+
+      @if (activeView() === 'save') {
+        <app-save-slot-panel mode="SAVE" (closed)="onChildPanelClosed()" />
+      } @else if (activeView() === 'load') {
+        <app-save-slot-panel
+          mode="LOAD"
+          (slotSelected)="onLoadCompleted()"
+          (closed)="onChildPanelClosed()"
+        />
+      } @else if (activeView() === 'settings') {
+        <app-settings (closed)="onChildPanelClosed()" />
+      }
+    </section>
+  </div>
+}

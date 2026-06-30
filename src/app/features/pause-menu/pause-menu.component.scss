@@ -1,0 +1,113 @@
+:host {
+  display: contents;
+}
+
+.pause-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  display: grid;
+  place-items: center;
+  padding: var(--space-lg);
+
+  &__backdrop {
+    position: absolute;
+    inset: 0;
+    background: var(--color-bg-overlay);
+    animation: pause-menu-fade var(--transition-reveal) both;
+  }
+
+  &__panel {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    gap: var(--space-md);
+    width: min(420px, calc(100vw - var(--space-xl)));
+    max-height: calc(100vh - var(--space-xl));
+    overflow: auto;
+    padding: var(--space-lg);
+    background: var(--color-bg-surface);
+    border: var(--border-accent);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-panel);
+    color: var(--color-text-primary);
+    animation: pause-menu-panel-in var(--transition-reveal) both;
+  }
+
+  &__header {
+    display: grid;
+    gap: var(--space-xs);
+  }
+
+  &__eyebrow,
+  &__title {
+    margin: 0;
+  }
+
+  &__eyebrow {
+    color: var(--color-text-secondary);
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+  }
+
+  &__title {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+  }
+
+  &__actions {
+    display: grid;
+    gap: var(--space-sm);
+  }
+
+  &__button {
+    width: 100%;
+    border: var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--color-bg-elevated);
+    color: var(--color-text-primary);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: var(--transition-ui);
+
+    &:hover,
+    &:focus-visible {
+      border-color: var(--color-accent);
+      box-shadow: var(--shadow-btn-glow);
+      outline: none;
+      transform: translateY(-1px);
+    }
+
+    &--primary {
+      background: var(--color-accent-dim);
+    }
+
+    &--warn {
+      color: var(--color-warn);
+    }
+  }
+}
+
+@keyframes pause-menu-fade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pause-menu-panel-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

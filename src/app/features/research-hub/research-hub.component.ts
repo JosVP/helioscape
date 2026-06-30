@@ -163,15 +163,18 @@ export class ResearchHubComponent implements OnDestroy {
   }
 
   close(): void {
+    if (this.gameState.interactionLocked()) return;
     this.closed.emit();
   }
 
   @HostListener('document:keydown.escape')
   onEscape(): void {
+    if (this.gameState.interactionLocked()) return;
     this.close();
   }
 
   onNodeSelect(nodeId: string): void {
+    if (this.gameState.interactionLocked()) return;
     const previousId = this.selectedNodeId();
     if (previousId && previousId !== nodeId) {
       this.acknowledgeNewNode(previousId);
@@ -180,6 +183,7 @@ export class ResearchHubComponent implements OnDestroy {
   }
 
   onStartSelectedNode(nodeId: string): void {
+    if (this.gameState.interactionLocked()) return;
     const entry = this.entryMap().get(nodeId);
     if (!entry || !this.researchService.canStartTechTrack(entry.node.id, entry.node.planet)) return;
     this.acknowledgeNewNode(nodeId);
@@ -187,15 +191,18 @@ export class ResearchHubComponent implements OnDestroy {
   }
 
   onPauseSelectedNode(nodeId: string): void {
+    if (this.gameState.interactionLocked()) return;
     this.researchService.pauseTrack(nodeId);
   }
 
   onResumeSelectedNode(nodeId: string): void {
+    if (this.gameState.interactionLocked()) return;
     this.acknowledgeNewNode(nodeId);
     this.researchService.resumeTrack(nodeId);
   }
 
   focusNode(nodeId: string): void {
+    if (this.gameState.interactionLocked()) return;
     if (this.entryMap().has(nodeId)) {
       this.onNodeSelect(nodeId);
     }

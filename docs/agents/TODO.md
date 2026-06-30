@@ -167,15 +167,6 @@ No inline `// TODO:` comments in code - all tracking happens here to avoid dupli
 - **Prompt block**: 08-2
 - **Added**: 2026-06-11 | **Card completed**: 2026-06-13 | **Toast completed**: 2026-06-13
 
-### PauseMenuComponent — pause menu overlay
-
-- **File**: src/app/features/pause-menu/pause-menu.component.ts
-- **Location**: Whole file (currently a stub)
-- **TODO**: Resume / Save / Load / Settings / Quit. Receives isOpen input, emits closed output.
-- **Depends on**: GameShellComponent (done)
-- **Prompt block**: TBD (Pause Menu block)
-- **Added**: 2026-06-11
-
 ### SettingsService — Audio Volume Integration
 
 - **File**: src/app/core/services/settings.service.ts

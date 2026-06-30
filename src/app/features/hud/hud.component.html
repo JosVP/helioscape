@@ -8,7 +8,7 @@
 
 <div class="hud__right">
   <app-culture-event-bell />
-  <app-time-controls />
+  <app-time-controls (pauseRequested)="pauseRequested.emit()" />
   <span class="hud__autosave" [class.hud__autosave--visible]="showAutosave()">
     Autosaved ✓
   </span>

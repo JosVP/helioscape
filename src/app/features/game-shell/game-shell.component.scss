@@ -1,4 +1,13 @@
 :host {
+  display: block;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background: var(--color-bg-base);
+  overflow: hidden;
+}
+
+.game-shell__content {
   display: grid;
   grid-template:
     'hud     hud'    auto
@@ -8,8 +17,10 @@
   width: 100%;
   height: 100%;
   position: relative;
-  background: var(--color-bg-base);
-  overflow: hidden;
+
+  &--locked {
+    pointer-events: none;
+  }
 }
 
 app-hud {

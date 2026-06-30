@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, output } from '@angular/core';
 import { GameLoopService } from '@app/core/services/game-loop.service';
 import { GameStateService } from '@app/core/services/game-state.service';
 
@@ -21,6 +21,8 @@ export class TimeControlsComponent {
   private readonly gameLoop = inject(GameLoopService);
   private readonly gameState = inject(GameStateService);
 
+  readonly pauseRequested = output<void>();
+
   readonly isPaused = this.gameState.isPaused;
   readonly gameSpeed = this.gameState.gameSpeed;
   readonly isFirstPlaythrough = this.gameState.isFirstPlaythrough;
@@ -29,11 +31,7 @@ export class TimeControlsComponent {
   readonly speedLabel = computed(() => `${this.gameSpeed()}×`);
 
   togglePause(): void {
-    if (this.isPaused()) {
-      this.gameLoop.resume();
-    } else {
-      this.gameLoop.pause();
-    }
+    this.pauseRequested.emit();
   }
 
   toggleSpeed(): void {

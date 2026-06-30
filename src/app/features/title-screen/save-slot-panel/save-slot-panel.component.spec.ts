@@ -172,9 +172,15 @@ describe('SaveSlotPanelComponent', () => {
     const infos = [emptySlot(0), occupiedSlot(1), emptySlot(2), emptySlot(3)];
     await setup(infos, 'LOAD');
     await flushPromises();
+    const selectedSlots: number[] = [];
+    let closedEmitted = false;
+    component.slotSelected.subscribe((s) => selectedSlots.push(s));
+    component.closed.subscribe(() => (closedEmitted = true));
     component.onAction(1, infos[1]);
     await flushPromises();
     expect(loadFn).toHaveBeenCalledWith(1);
+    expect(selectedSlots).toEqual([1]);
+    expect(closedEmitted).toBe(true);
     expect(navigateSpy).toHaveBeenCalledWith(['/game']);
   });
 

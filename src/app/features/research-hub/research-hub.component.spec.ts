@@ -65,6 +65,7 @@ function makeNode(overrides: Partial<ResearchNode>): ResearchNode {
 }
 
 function makeGameStateFake() {
+  const interactionLocked = signal(false);
   const gameYear = signal(2040);
   const completedTechs = signal<string[]>(['earth_parent']);
   const completedResearchYears = signal<Record<string, number>>({ earth_parent: 2039 });
@@ -84,6 +85,8 @@ function makeGameStateFake() {
     arcLog: arcLog.asReadonly(),
     visibleResearchSlots: availableResearchSlots.asReadonly(),
     occupiedResearchSlotIds: computed(() => new Set<string>()),
+    interactionLocked: interactionLocked.asReadonly(),
+    setInteractionLocked: (value: boolean) => interactionLocked.set(value),
     setCompletedTechs: (value: string[]) => completedTechs.set(value),
     setActiveResearch: (value: ActiveResearchTrack[]) => activeResearch.set(value),
   };
@@ -152,6 +155,19 @@ describe('ResearchHubComponent', () => {
     expect(researchService.startTechTrack).toHaveBeenCalledWith('earth_child', 'earth');
     expect(researchService.pauseTrack).toHaveBeenCalledWith('earth_child');
     expect(researchService.resumeTrack).toHaveBeenCalledWith('earth_child');
+  });
+
+  it('does not start, pause, or resume while interactions are locked', () => {
+    gameState.setInteractionLocked(true);
+    const component = createComponent();
+
+    component.onStartSelectedNode('earth_child');
+    component.onPauseSelectedNode('earth_child');
+    component.onResumeSelectedNode('earth_child');
+
+    expect(researchService.startTechTrack).not.toHaveBeenCalled();
+    expect(researchService.pauseTrack).not.toHaveBeenCalled();
+    expect(researchService.resumeTrack).not.toHaveBeenCalled();
   });
 
   it('shows standalone arc progress when an unlock node is complete', () => {

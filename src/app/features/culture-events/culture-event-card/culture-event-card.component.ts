@@ -10,6 +10,7 @@ import {
   untracked,
 } from '@angular/core';
 import type { CultureEventChoice } from '@app/core/models';
+import { GameStateService } from '@app/core/services/game-state.service';
 import { CultureEventService } from '@app/core/systems/culture-event.service';
 
 @Component({
@@ -21,6 +22,7 @@ import { CultureEventService } from '@app/core/systems/culture-event.service';
 })
 export class CultureEventCardComponent {
   private readonly cultureEventService = inject(CultureEventService);
+  private readonly gameState = inject(GameStateService);
   private readonly elementRef = inject(ElementRef<HTMLElement>);
 
   readonly event = this.cultureEventService.currentEvent;
@@ -59,16 +61,19 @@ export class CultureEventCardComponent {
   }
 
   onContinue(): void {
+    if (this.gameState.interactionLocked()) return;
     this.cultureEventService.closeCurrentEvent();
   }
 
   onChoice(choice: CultureEventChoice): void {
+    if (this.gameState.interactionLocked()) return;
     this.cultureEventService.applyChoice(choice);
   }
 
   @HostListener('document:keydown', ['$event'])
   onKeyDown(e: KeyboardEvent): void {
     if (!this.isVisible()) return;
+    if (this.gameState.interactionLocked()) return;
 
     const choices = this.event()?.choices ?? [];
 

@@ -1,38 +1,46 @@
-<app-hud />
+<div
+  class="game-shell__content"
+  [class.game-shell__content--locked]="gameState.interactionLocked()"
+  [attr.inert]="gameState.interactionLocked() ? '' : null"
+>
+  <app-hud (pauseRequested)="openPauseMenu()" />
 
-<app-planets-menu [selectedPlanetId]="selectedPlanetId()" />
+  <app-planets-menu [selectedPlanetId]="selectedPlanetId()" />
 
-<!-- Orrery is hidden with display:none (not destroyed) so Three.js scene is preserved. -->
-<app-orrery [style.display]="activeView() === 'orrery' ? 'block' : 'none'" />
+  <!-- Orrery is hidden with display:none (not destroyed) so Three.js scene is preserved. -->
+  <app-orrery [style.display]="activeView() === 'orrery' ? 'block' : 'none'" />
 
-<!-- Mercury full-screen RTS view. Hidden when orrery is active. -->
-<app-mercury
-  [style.display]="activeView() === 'mercury' ? 'block' : 'none'"
-  (backToOrrery)="activeView.set('orrery')"
-/>
+  <!-- Mercury full-screen RTS view. Hidden when orrery is active. -->
+  <app-mercury
+    [style.display]="activeView() === 'mercury' ? 'block' : 'none'"
+    (backToOrrery)="activeView.set('orrery')"
+  />
 
-<app-planet-panel
-  [planetId]="selectedPlanetId()"
-  (closed)="closePlanetPanel()"
-/>
+  <app-planet-panel
+    [planetId]="selectedPlanetId()"
+    (closed)="closePlanetPanel()"
+  />
 
-<app-culture-event-card />
+  <app-culture-event-card />
 
-<!-- Toast stack lives here (outside app-hud) so position:fixed is not
-     confined by app-hud's stacking context. z-index: 200 in toast SCSS. -->
-<app-culture-event-toast />
+  <!-- Toast stack lives here (outside app-hud) so position:fixed is not
+       confined by app-hud's stacking context. z-index: 200 in toast SCSS. -->
+  <app-culture-event-toast />
+
+  @if (isResearchHubOpen()) {
+    <app-research-hub
+      [focusedNodeId]="pendingResearchHubFocusNodeId()"
+      (focusHandled)="onResearchHubFocusHandled()"
+      (closed)="closeResearchHub()"
+    />
+  }
+
+  <app-resource-power-bar [showReservationInputs]="activeView() === 'mercury'" />
+</div>
 
 <app-pause-menu
   [isOpen]="isPauseMenuOpen()"
-  (closed)="isPauseMenuOpen.set(false)"
+  (resumeRequested)="closePauseMenu()"
+  (loadCompleted)="handlePauseLoadCompleted()"
+  (returnToTitleRequested)="returnToTitle()"
 />
-
-@if (isResearchHubOpen()) {
-  <app-research-hub
-    [focusedNodeId]="pendingResearchHubFocusNodeId()"
-    (focusHandled)="onResearchHubFocusHandled()"
-    (closed)="closeResearchHub()"
-  />
-}
-
-<app-resource-power-bar [showReservationInputs]="activeView() === 'mercury'" />

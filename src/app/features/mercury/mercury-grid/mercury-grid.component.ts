@@ -318,6 +318,7 @@ export class MercuryGridComponent implements AfterViewInit, OnDestroy {
    * Does nothing during drag-pan (drag takes priority).
    */
   private applyEdgeScroll(): void {
+    if (this.gameState.interactionLocked()) return;
     if (!isFinite(this.edgeScrollX)) return;
 
     const zone  = MercuryGridComponent.EDGE_ZONE;
@@ -353,8 +354,15 @@ export class MercuryGridComponent implements AfterViewInit, OnDestroy {
 
     // Read all signals ONCE at the top of the frame — never mid-render.
     const buildings = this.gameState.mercuryBuildings();
+    const locked = this.gameState.interactionLocked();
     const selectedId = this.selectedBuildingId();
     const reducedMotion = this.settings.reducedMotion();
+
+    if (locked) {
+      this.hoverTile = null;
+      this._hoveredTileInfo.set(null);
+      this._hoveredMiningLocation.set(null);
+    }
 
     // The tile (0,0) top-vertex is always drawn at (vw/2, ORIGIN_Y) in draw-space.
     // ctx.translate(panX, panY) shifts the entire drawn scene, so the screen position
@@ -402,7 +410,7 @@ export class MercuryGridComponent implements AfterViewInit, OnDestroy {
     this.drawWorkers();
 
     // Hover preview
-    if (selectedId !== null && this.hoverTile !== null) {
+    if (!locked && selectedId !== null && this.hoverTile !== null) {
       this.drawHoverPreview(this.hoverTile, selectedId, buildings, originX, timestamp, reducedMotion);
     }
 
@@ -688,6 +696,7 @@ export class MercuryGridComponent implements AfterViewInit, OnDestroy {
   // ---------------------------------------------------------------------------
 
   private onMouseMove(e: MouseEvent): void {
+    if (this.gameState.interactionLocked()) return;
     // Always track position so edge-scroll knows where the mouse is.
     this.edgeScrollX = e.offsetX;
     this.edgeScrollY = e.offsetY;
@@ -696,6 +705,7 @@ export class MercuryGridComponent implements AfterViewInit, OnDestroy {
 
   /** Recalculate the hovered tile from a viewport pixel position. */
   private updateHoverFromScreenPos(screenX: number, screenY: number): void {
+    if (this.gameState.interactionLocked()) return;
     const originX = this.viewW / 2;
     // Un-apply the horizontal scale centred on vw/2 before toGrid.
     const scaleX  = MercuryGridComponent.SCALE_X;
@@ -732,6 +742,7 @@ export class MercuryGridComponent implements AfterViewInit, OnDestroy {
   }
 
   private onClick(e: MouseEvent): void {
+    if (this.gameState.interactionLocked()) return;
     const originX = this.viewW / 2;
     const scaleX  = MercuryGridComponent.SCALE_X;
     const drawX   = originX + (e.offsetX - originX) / scaleX;
@@ -777,6 +788,7 @@ export class MercuryGridComponent implements AfterViewInit, OnDestroy {
   }
 
   private onKeyDown(e: KeyboardEvent): void {
+    if (this.gameState.interactionLocked()) return;
     const moves: Record<string, { dc: number; dr: number }> = {
       ArrowLeft:  { dc: -1, dr:  0 },
       ArrowRight: { dc:  1, dr:  0 },

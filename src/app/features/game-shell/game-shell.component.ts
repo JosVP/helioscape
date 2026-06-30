@@ -8,6 +8,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AudioService } from '@app/core/services/audio.service';
 import { EventBusService } from '@app/core/services/event-bus.service';
@@ -51,6 +52,7 @@ export class GameShellComponent implements OnInit, OnDestroy {
   readonly gameState = inject(GameStateService);
   private readonly eventBus = inject(EventBusService);
   private readonly audioService = inject(AudioService);
+  private readonly router = inject(Router);
   private readonly planetUnlockService = inject(PlanetUnlockService);
   private readonly researchArcService = inject(ResearchArcService);
   private readonly destroyRef = inject(DestroyRef);
@@ -99,11 +101,10 @@ export class GameShellComponent implements OnInit, OnDestroy {
   // Host listeners
   // ---------------------------------------------------------------------------
 
-  /** Toggle pause menu on Escape, unless another overlay (Research Hub) is already open. */
+  /** Toggle the authoritative pause menu on Escape. */
   @HostListener('document:keydown.escape')
   onEscape(): void {
-    if (this.isResearchHubOpen()) return; // ResearchHub handles its own Escape
-    this.isPauseMenuOpen.update((v) => !v);
+    this.togglePauseMenu();
   }
 
   /**
@@ -126,6 +127,38 @@ export class GameShellComponent implements OnInit, OnDestroy {
 
   closePlanetPanel(): void {
     this.selectedPlanetId.set(null);
+  }
+
+  openPauseMenu(): void {
+    if (this.isPauseMenuOpen()) return;
+    this.gameLoop.pause();
+    this.isPauseMenuOpen.set(true);
+  }
+
+  closePauseMenu(options: { resume?: boolean } = {}): void {
+    const shouldResume = options.resume ?? true;
+    this.isPauseMenuOpen.set(false);
+    if (shouldResume) {
+      this.gameLoop.resume();
+    }
+  }
+
+  togglePauseMenu(): void {
+    if (this.isPauseMenuOpen()) {
+      this.closePauseMenu();
+    } else {
+      this.openPauseMenu();
+    }
+  }
+
+  returnToTitle(): void {
+    this.closePauseMenu({ resume: false });
+    void this.router.navigate(['/']);
+  }
+
+  handlePauseLoadCompleted(): void {
+    this.gameLoop.pause();
+    this.isPauseMenuOpen.set(true);
   }
 
   closeResearchHub(): void {

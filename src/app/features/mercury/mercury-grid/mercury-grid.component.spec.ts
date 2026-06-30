@@ -78,13 +78,16 @@ function mockCanvasContext(): CanvasRenderingContext2D {
 
 function makeGameStateFake(buildings: PlacedBuilding[] = []) {
   const buildingsSig = signal<PlacedBuilding[]>(buildings);
+  const interactionLockedSig = signal(false);
   const placeMock = vi.fn((b: PlacedBuilding) =>
     buildingsSig.update((prev) => [...prev, b]),
   );
   return {
     mercuryBuildings: buildingsSig.asReadonly(),
+    interactionLocked: interactionLockedSig.asReadonly(),
     placeMercuryBuilding: placeMock,
     _set: (v: PlacedBuilding[]) => buildingsSig.set(v),
+    _setInteractionLocked: (value: boolean) => interactionLockedSig.set(value),
     _placeMock: placeMock,
   };
 }
@@ -239,6 +242,21 @@ describe('MercuryGridComponent', () => {
     expect(placed.buildingId).toBe('mining_outpost');
     expect(placed.status).toBe('building');
     expect(placed.buildProgressYears).toBe(0);
+  });
+
+  it('does not place buildings while interactions are locked', () => {
+    const { fixture, gameStateFake } = setup([]);
+    gameStateFake._setInteractionLocked(true);
+    fixture.componentRef.setInput('selectedBuildingId', 'mining_outpost');
+    fixture.detectChanges();
+
+    const clickEvent = new MouseEvent('click', { bubbles: true });
+    const canvas = fixture.nativeElement.querySelector('canvas') as HTMLCanvasElement;
+    Object.defineProperty(clickEvent, 'offsetX', { value: 320 });
+    Object.defineProperty(clickEvent, 'offsetY', { value: 80 });
+    canvas.dispatchEvent(clickEvent);
+
+    expect(gameStateFake._placeMock).not.toHaveBeenCalled();
   });
 
   it('does not call placeMercuryBuilding when clicking out of grid bounds', () => {
