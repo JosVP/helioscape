@@ -1,20 +1,152 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 512" width="1024" height="512" preserveAspectRatio="none">
-  <!-- PLACEHOLDER: replace with final Mercury equirectangular texture -->
-  <rect width="1024" height="512" fill="#8c7f73"/>
-  <ellipse cx="190" cy="180" rx="150" ry="92" fill="#5f564f" opacity="0.28"/>
-  <ellipse cx="595" cy="302" rx="190" ry="82" fill="#3f3935" opacity="0.22"/>
-  <ellipse cx="850" cy="160" rx="120" ry="76" fill="#b0a59b" opacity="0.2"/>
-  <g fill="none" stroke="#4f4741" stroke-opacity="0.65">
-    <circle cx="150" cy="132" r="32" stroke-width="7"/><circle cx="150" cy="132" r="15" stroke-width="4"/>
-    <circle cx="300" cy="310" r="44" stroke-width="8"/><circle cx="520" cy="170" r="26" stroke-width="6"/>
-    <circle cx="725" cy="270" r="38" stroke-width="7"/><circle cx="900" cy="365" r="30" stroke-width="6"/>
-    <circle cx="72" cy="390" r="22" stroke-width="5"/><circle cx="980" cy="92" r="26" stroke-width="6"/>
-  </g>
-  <g fill="#3f3935" opacity="0.38">
-    <circle cx="150" cy="132" r="12"/><circle cx="300" cy="310" r="17"/><circle cx="520" cy="170" r="10"/>
-    <circle cx="725" cy="270" r="15"/><circle cx="900" cy="365" r="12"/><circle cx="72" cy="390" r="8"/>
-  </g>
-  <path d="M80 250 C190 190 280 280 385 220 S600 210 760 145 S930 180 1024 125" fill="none" stroke="#5f564f" stroke-width="10" stroke-opacity="0.32"/>
-  <rect x="2" y="2" width="1020" height="508" fill="none" stroke="#ffffff" stroke-opacity="0.28" stroke-dasharray="18 12"/>
-  <text x="1004" y="492" fill="#ffffff" fill-opacity="0.22" font-family="monospace" font-size="28" text-anchor="end">PLACEHOLDER</text>
-</svg>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   viewBox="0 0 1024 512"
+   width="1024"
+   height="512"
+   preserveAspectRatio="none"
+   version="1.1"
+   id="svg16"
+   sodipodi:docname="mercury-texture.svg"
+   xml:space="preserve"
+   inkscape:version="1.4 (e7c3feb1, 2024-10-09)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"><defs
+     id="defs16" /><sodipodi:namedview
+     id="namedview16"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="0.515625"
+     inkscape:cx="518.78788"
+     inkscape:cy="221.09091"
+     inkscape:window-width="1920"
+     inkscape:window-height="941"
+     inkscape:window-x="1920"
+     inkscape:window-y="30"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg16" /><!-- PLACEHOLDER: replace with final Mercury equirectangular texture --><rect
+     width="1024"
+     height="512"
+     fill="#8c7f73"
+     id="rect1" /><ellipse
+     cx="190"
+     cy="180"
+     rx="150"
+     ry="92"
+     fill="#5f564f"
+     opacity="0.28"
+     id="ellipse1" /><ellipse
+     cx="595"
+     cy="302"
+     rx="190"
+     ry="82"
+     fill="#3f3935"
+     opacity="0.22"
+     id="ellipse2" /><ellipse
+     cx="850"
+     cy="160"
+     rx="120"
+     ry="76"
+     fill="#b0a59b"
+     opacity="0.2"
+     id="ellipse3" /><g
+     fill="none"
+     stroke="#4f4741"
+     stroke-opacity="0.65"
+     id="g10"><circle
+       cx="150"
+       cy="132"
+       r="32"
+       stroke-width="7"
+       id="circle3" /><circle
+       cx="150"
+       cy="132"
+       r="15"
+       stroke-width="4"
+       id="circle4" /><circle
+       cx="300"
+       cy="310"
+       r="44"
+       stroke-width="8"
+       id="circle5" /><circle
+       cx="520"
+       cy="170"
+       r="26"
+       stroke-width="6"
+       id="circle6" /><circle
+       cx="725"
+       cy="270"
+       r="38"
+       stroke-width="7"
+       id="circle7" /><circle
+       cx="900"
+       cy="365"
+       r="30"
+       stroke-width="6"
+       id="circle8" /><circle
+       cx="72"
+       cy="390"
+       r="22"
+       stroke-width="5"
+       id="circle9" /><circle
+       cx="980"
+       cy="92"
+       r="26"
+       stroke-width="6"
+       id="circle10" /></g><g
+     fill="#3f3935"
+     opacity="0.38"
+     id="g16"><circle
+       cx="150"
+       cy="132"
+       r="12"
+       id="circle11" /><circle
+       cx="300"
+       cy="310"
+       r="17"
+       id="circle12" /><circle
+       cx="520"
+       cy="170"
+       r="10"
+       id="circle13" /><circle
+       cx="725"
+       cy="270"
+       r="15"
+       id="circle14" /><circle
+       cx="900"
+       cy="365"
+       r="12"
+       id="circle15" /><circle
+       cx="72"
+       cy="390"
+       r="8"
+       id="circle16" /></g><path
+     d="M80 250 C190 190 280 280 385 220 S600 210 760 145 S930 180 1024 125"
+     fill="none"
+     stroke="#5f564f"
+     stroke-width="10"
+     stroke-opacity="0.32"
+     id="path16" /><rect
+     x="2"
+     y="2"
+     width="1020"
+     height="508"
+     fill="none"
+     stroke="#ffffff"
+     stroke-opacity="0.28"
+     stroke-dasharray="18 12"
+     id="rect16" /><text
+     x="1004"
+     y="492"
+     fill="#ffffff"
+     fill-opacity="0.22"
+     font-family="monospace"
+     font-size="28"
+     text-anchor="end"
+     id="text16">PLACEHOLDER</text></svg>
