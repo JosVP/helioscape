@@ -10,7 +10,7 @@ import { DataService } from '@app/core/services/data.service';
 import { EventBusService } from '@app/core/services/event-bus.service';
 import { GameStateService } from '@app/core/services/game-state.service';
 import { OrreryComponent } from './orrery.component';
-import { ORBIT_SPEED_FACTOR } from './orrery-scene.config';
+import { DEFAULT_ORRERY_VISUAL_EFFECTS_CONFIG, ORBIT_SPEED_FACTOR } from './orrery-scene.config';
 import type {
   OrreryAtmosphereGlowObject,
   OrreryBackdropPalette,
@@ -31,7 +31,7 @@ interface OrreryComponentAccess {
   _canvasRef: ElementRef<HTMLCanvasElement>;
   _renderer: THREE.WebGLRenderer;
   _scene: THREE.Scene;
-  _camera: THREE.PerspectiveCamera;
+  _camera: THREE.OrthographicCamera | THREE.PerspectiveCamera;
   _dysonMaterial: THREE.MeshStandardMaterial;
   _starfield: THREE.Points | null;
   _composer: { render: ReturnType<typeof vi.fn>; setSize: ReturnType<typeof vi.fn>; dispose: ReturnType<typeof vi.fn> } | null;
@@ -342,7 +342,7 @@ describe('OrreryComponent', () => {
     expect(marsOrbitMaterial.uniforms.uOpacity.value).toBe(0.2);
   });
 
-  it('dims a locked hovered planet during RAF', () => {
+  it('keeps a locked hovered planet visually undimmed during RAF', () => {
     const component = setup();
     const access = component as unknown as OrreryComponentAccess;
     const renderer = { render: vi.fn(), dispose: vi.fn() } as unknown as THREE.WebGLRenderer;
@@ -377,8 +377,8 @@ describe('OrreryComponent', () => {
 
     access._animate();
 
-    expect(`#${shaderMaterial.uniforms.uTintColor.value.getHexString()}`).toBe('#8a929b');
-    expect(shaderMaterial.uniforms.uLitBrightness.value).toBe(0.45);
+    expect(`#${shaderMaterial.uniforms.uTintColor.value.getHexString()}`).toBe('#ffffff');
+    expect(shaderMaterial.uniforms.uLitBrightness.value).toBe(1);
   });
 
   it('uses one cached target list for planet and orbit pointer resolution', () => {
@@ -482,7 +482,8 @@ describe('OrreryComponent', () => {
     expect(renderer.setSize).toHaveBeenCalledWith(320, 180, false);
     expect(composer.setSize).toHaveBeenCalledWith(320, 180);
     expect(pixelatePass.setSize).toHaveBeenCalledWith(320, 180);
-    expect(access._camera.aspect).toBeCloseTo(320 / 180);
+    expect(access._camera instanceof THREE.PerspectiveCamera ? access._camera.aspect : 320 / 180)
+      .toBeCloseTo(320 / 180);
   });
 
   it('updates shader uniforms and planet rotation during RAF', () => {
@@ -500,6 +501,7 @@ describe('OrreryComponent', () => {
         uLitBrightness: { value: 1 },
         uShadowOpacity: { value: 0.5 },
         uShadowTint: { value: new THREE.Color('#000000') },
+        uTerminatorSoftness: { value: 0.18 },
         uLightingEnabled: { value: true },
       },
     }) as OrreryPlanetMaterial;
@@ -511,6 +513,7 @@ describe('OrreryComponent', () => {
         uOpacity: { value: 0 },
         uLitBrightness: { value: 1 },
         uShadowOpacity: { value: 0.5 },
+        uTerminatorSoftness: { value: 0.18 },
         uLayerIntensity: { value: 1 },
         uNightOnly: { value: false },
         uLightingEnabled: { value: true },
@@ -529,20 +532,14 @@ describe('OrreryComponent', () => {
     access._planetLayers.set('earth', [
       { key: 'cloud', mesh: cloudLayerMesh, material: cloudLayerMaterial },
     ]);
-    const atmosphereMaterial = new THREE.ShaderMaterial({
-      uniforms: {
-        uColor: { value: new THREE.Color('#000000') },
-        uIntensity: { value: 0 },
-      },
-    }) as OrreryAtmosphereGlowObject['material'];
-    const atmosphereMesh = new THREE.Mesh(
-      new THREE.SphereGeometry(1, 8, 8),
-      atmosphereMaterial
-    ) as OrreryAtmosphereGlowObject['mesh'];
+    const atmosphereTexture = new THREE.CanvasTexture(document.createElement('canvas'));
+    const atmosphereMaterial = new THREE.SpriteMaterial({ map: atmosphereTexture, color: '#000000' });
+    const atmosphereSprite = new THREE.Sprite(atmosphereMaterial);
     access._atmosphereGlows.set('earth', {
       planetId: 'earth',
-      mesh: atmosphereMesh,
+      sprite: atmosphereSprite,
       material: atmosphereMaterial,
+      texture: atmosphereTexture,
       staticIntensity: 0.85,
     });
 
@@ -551,9 +548,14 @@ describe('OrreryComponent', () => {
     expect(`#${shaderMaterial.uniforms.uBaseColor.value.getHexString()}`).toBe('#3a7ab8');
     expect(shaderMaterial.uniforms.uSunDirection.value.length()).toBeCloseTo(1);
     expect(cloudLayerMaterial.uniforms.uSunDirection.value.length()).toBeCloseTo(1);
-    expect(atmosphereMesh.position.length()).toBeGreaterThan(0);
-    expect(`#${atmosphereMaterial.uniforms.uColor.value.getHexString()}`).toBe('#3a7ab8');
-    expect(atmosphereMaterial.uniforms.uIntensity.value).toBe(0);
+    expect(atmosphereSprite.position.length()).toBeGreaterThan(0);
+    expect(atmosphereSprite.quaternion.equals(access._camera.quaternion)).toBe(true);
+    expect(atmosphereMaterial.rotation).not.toBe(0);
+    expect(`#${atmosphereMaterial.color.getHexString()}`).toBe('#3a7ab8');
+    expect(atmosphereMaterial.opacity).toBeCloseTo(
+      Math.max(0.82, 0.85) *
+      Math.log2(1 + DEFAULT_ORRERY_VISUAL_EFFECTS_CONFIG.atmosphereGlow.intensity)
+    );
     expect(planetMesh.rotation.y).toBe(0);
     expect(renderer.render).toHaveBeenCalledOnce();
   });

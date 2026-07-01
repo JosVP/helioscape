@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 import * as THREE from 'three';
 import type { PlanetData } from '@app/core/models';
 import {
+  DEFAULT_ORRERY_DAY_NIGHT_LIGHTING_OPTIONS,
   DEFAULT_ORRERY_VISUAL_EFFECTS_CONFIG,
   DEFAULT_ORRERY_GRID_OPTIONS,
   ORRERY_ORBIT_RING_CONFIG,
@@ -17,11 +18,11 @@ import {
   buildStarfield,
   buildSun,
   buildSunGlow,
+  createCamera,
   disposeScene,
   loadOrrerySvgTexture,
 } from './orrery-scene.builder';
 import type {
-  OrreryAtmosphereGlowMaterial,
   OrreryBackdropPalette,
   OrreryLayerMaterial,
   OrreryPlanetMaterial,
@@ -75,6 +76,14 @@ function makePlanetData(withTexture = false): PlanetData {
 }
 
 describe('orrery scene builder', () => {
+  it('createCamera uses orthographic projection so planets stay circular off-axis', () => {
+    const camera = createCamera(16 / 9);
+
+    expect(camera).toBeInstanceOf(THREE.OrthographicCamera);
+    expect(camera.top).toBeGreaterThan(0);
+    expect(camera.right).toBeGreaterThan(camera.top);
+  });
+
   it('buildBackground assigns and returns a canvas texture', () => {
     const scene = new THREE.Scene();
 
@@ -203,7 +212,10 @@ describe('orrery scene builder', () => {
     expect(glow?.texture).toBeInstanceOf(THREE.CanvasTexture);
     expect(glow?.material.blending).toBe(THREE.AdditiveBlending);
     expect(glow?.material.depthWrite).toBe(false);
-    expect(glow?.material.depthTest).toBe(false);
+    expect(glow?.material.depthTest).toBe(true);
+    expect(glow?.sprite.scale.x).toBe(DEFAULT_ORRERY_VISUAL_EFFECTS_CONFIG.sunGlow.size);
+    expect(glow?.sprite.renderOrder).toBe(20);
+    expect(glow?.texture.image.width).toBe(256);
     expect(scene.children).toContain(glow?.sprite);
   });
 
@@ -220,7 +232,7 @@ describe('orrery scene builder', () => {
     expect(scene.children).toHaveLength(0);
   });
 
-  it('buildAtmosphereGlow creates a larger additive back-side shell when enabled', () => {
+  it('buildAtmosphereGlow creates an additive camera-facing sprite when enabled', () => {
     const scene = new THREE.Scene();
 
     const glow = buildAtmosphereGlow(
@@ -231,18 +243,24 @@ describe('orrery scene builder', () => {
     );
 
     expect(glow).not.toBeNull();
-    expect(glow?.mesh).toBeInstanceOf(THREE.Mesh);
-    expect(glow?.material).toBeInstanceOf(THREE.ShaderMaterial);
+    expect(glow?.sprite).toBeInstanceOf(THREE.Sprite);
+    expect(glow?.texture).toBeInstanceOf(THREE.CanvasTexture);
+    expect(glow?.material).toBeInstanceOf(THREE.SpriteMaterial);
     expect(glow?.material.blending).toBe(THREE.AdditiveBlending);
-    expect(glow?.material.side).toBe(THREE.BackSide);
     expect(glow?.material.depthWrite).toBe(false);
-    expect(glow?.mesh.geometry.parameters.radius).toBeGreaterThan(PLANET_ORBITS['earth'].visualRadius);
-    expect(scene.children).toContain(glow?.mesh);
+    expect(glow?.material.depthTest).toBe(false);
+    expect(glow?.sprite.scale.x).toBeGreaterThan(PLANET_ORBITS['earth'].visualRadius);
+    expect(glow?.sprite.scale.x).toBeLessThan(PLANET_ORBITS['earth'].visualRadius * 3);
+    expect(glow?.sprite.renderOrder).toBe(18);
+    expect(glow?.texture.image.width).toBe(256);
+    expect(scene.children).toContain(glow?.sprite);
   });
 
-  it('buildAtmosphereGlow returns null when planet data disables it', () => {
+  it('buildAtmosphereGlow still creates a stylized glow when planet data has no atmosphere', () => {
     const scene = new THREE.Scene();
     const planetData = makePlanetData();
+    planetData.initialState.atmosphereColor = '#000000';
+    planetData.visual.baseColor = '#8c7f73';
     planetData.visual.atmosphereGlow = { enabled: false, intensity: 0 };
 
     const glow = buildAtmosphereGlow(
@@ -252,8 +270,9 @@ describe('orrery scene builder', () => {
       DEFAULT_ORRERY_VISUAL_EFFECTS_CONFIG.atmosphereGlow
     );
 
-    expect(glow).toBeNull();
-    expect(scene.children).toHaveLength(0);
+    expect(glow).not.toBeNull();
+    expect(`#${glow?.material.color.getHexString()}`).toBe('#8c7f73');
+    expect(scene.children).toContain(glow?.sprite);
   });
 
   it('loadOrrerySvgTexture loads and configures a disposable texture from a path', () => {
@@ -293,9 +312,15 @@ describe('orrery scene builder', () => {
     expect(planetMaterial.uniforms.uBaseTexture.value).toBe(baseTexture);
     expect(planetMaterial.uniforms.uHasBaseTexture.value).toBe(true);
     expect(`#${planetMaterial.uniforms.uBaseColor.value.getHexString()}`).toBe('#3a7ab8');
+    expect(planetMaterial.uniforms.uTerminatorSoftness.value).toBe(
+      DEFAULT_ORRERY_DAY_NIGHT_LIGHTING_OPTIONS.terminatorSoftness
+    );
     expect(layerObjects.map((layer) => layer.key)).toEqual(['cloud', 'cityLights']);
     expect(layerObjects[0].material.uniforms.uLayerTexture.value).toBe(cloudTexture);
     expect(layerObjects[1].material.uniforms.uLayerTexture.value).toBe(cityLightsTexture);
+    expect(layerObjects[0].material.uniforms.uTerminatorSoftness.value).toBe(
+      DEFAULT_ORRERY_DAY_NIGHT_LIGHTING_OPTIONS.terminatorSoftness
+    );
     expect(layerObjects[1].material.uniforms.uNightOnly.value).toBe(true);
     expect(layerObjects[1].material.blending).toBe(THREE.AdditiveBlending);
     expect(layerObjects[1].mesh.renderOrder).toBeGreaterThan(layerObjects[0].mesh.renderOrder);
@@ -362,15 +387,6 @@ describe('orrery scene builder', () => {
     const spriteMaterialDispose = vi.spyOn(spriteMaterial, 'dispose');
     scene.add(new THREE.Sprite(spriteMaterial));
 
-    const atmosphereMaterial = new THREE.ShaderMaterial({
-      uniforms: {
-        uColor: { value: new THREE.Color('#4488ff') },
-        uIntensity: { value: 1 },
-      },
-    }) as OrreryAtmosphereGlowMaterial;
-    const atmosphereMaterialDispose = vi.spyOn(atmosphereMaterial, 'dispose');
-    scene.add(new THREE.Mesh(new THREE.SphereGeometry(1, 8, 8), atmosphereMaterial));
-
     const renderer = { dispose: vi.fn() } as unknown as THREE.WebGLRenderer;
 
     disposeScene(scene, renderer);
@@ -390,7 +406,6 @@ describe('orrery scene builder', () => {
     expect(shaderMaterialDispose).toHaveBeenCalledOnce();
     expect(spriteTextureDispose).toHaveBeenCalledOnce();
     expect(spriteMaterialDispose).toHaveBeenCalledOnce();
-    expect(atmosphereMaterialDispose).toHaveBeenCalledOnce();
     expect(renderer.dispose).toHaveBeenCalledOnce();
   });
 });

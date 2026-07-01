@@ -37,6 +37,8 @@ export interface OrreryDayNightLightingOptions {
   readonly litSideBrightness?: number;
   readonly darkSideShadowOpacity?: number;
   readonly darkSideShadowTint?: string;
+  /** Higher values widen the soft transition between day and night. */
+  readonly terminatorSoftness?: number;
   readonly cityLightsIntensity?: number;
 }
 
@@ -78,6 +80,7 @@ export interface OrreryPlanetUniforms {
   readonly uLitBrightness: THREE.IUniform<number>;
   readonly uShadowOpacity: THREE.IUniform<number>;
   readonly uShadowTint: THREE.IUniform<THREE.Color>;
+  readonly uTerminatorSoftness: THREE.IUniform<number>;
   readonly uLightingEnabled: THREE.IUniform<boolean>;
 }
 
@@ -90,22 +93,13 @@ export interface OrreryLayerUniforms {
   readonly uOpacity: THREE.IUniform<number>;
   readonly uLitBrightness: THREE.IUniform<number>;
   readonly uShadowOpacity: THREE.IUniform<number>;
+  readonly uTerminatorSoftness: THREE.IUniform<number>;
   readonly uLayerIntensity: THREE.IUniform<number>;
   readonly uNightOnly: THREE.IUniform<boolean>;
   readonly uLightingEnabled: THREE.IUniform<boolean>;
 }
 
 export type OrreryLayerMaterial = THREE.ShaderMaterial & { uniforms: OrreryLayerUniforms };
-
-export interface OrreryAtmosphereGlowUniforms {
-  readonly [key: string]: THREE.IUniform<unknown>;
-  readonly uColor: THREE.IUniform<THREE.Color>;
-  readonly uIntensity: THREE.IUniform<number>;
-}
-
-export type OrreryAtmosphereGlowMaterial = THREE.ShaderMaterial & {
-  uniforms: OrreryAtmosphereGlowUniforms;
-};
 
 export interface OrreryOrbitUniforms {
   readonly [key: string]: THREE.IUniform<unknown>;
@@ -131,8 +125,9 @@ export interface OrrerySunGlowObjects {
 
 export interface OrreryAtmosphereGlowObject {
   readonly planetId: string;
-  readonly mesh: THREE.Mesh<THREE.SphereGeometry, OrreryAtmosphereGlowMaterial>;
-  readonly material: OrreryAtmosphereGlowMaterial;
+  readonly sprite: THREE.Sprite;
+  readonly material: THREE.SpriteMaterial;
+  readonly texture: THREE.CanvasTexture;
   readonly staticIntensity: number;
 }
 

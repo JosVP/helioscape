@@ -4,13 +4,14 @@ export const DEFAULT_ORRERY_CAMERA_CONFIG = {
   position: {
     x: 10,
     y: 9.7,
-    z: 21,
+    z: 18,
   },
   lookAt: {
     x: 0,
-    y: -5.2,
+    y: 0,
     z: 0,
-  }
+  },
+  orthographicViewHeight: 16.3,
 } as const;
 
 export const DEFAULT_ORRERY_STARFIELD_OPTIONS = {
@@ -34,6 +35,7 @@ export const DEFAULT_ORRERY_DAY_NIGHT_LIGHTING_OPTIONS = {
   litSideBrightness: 1.0,
   darkSideShadowOpacity: 0.9,
   darkSideShadowTint: '#000000',
+  terminatorSoftness: 0.4,
   cityLightsIntensity: 1.0,
 } as const;
 
@@ -46,14 +48,14 @@ export const DEFAULT_ORRERY_VISUAL_EFFECTS_CONFIG: OrreryVisualEffectsConfig = {
   sunGlow: {
     enabled: true,
     color: '',
-    size: 15,
-    intensity: 0.4,
+    size: 3,
+    intensity: 1,
     textureSize: 256,
   },
   atmosphereGlow: {
-    enabled: false,
-    thickness: 0.1,
-    intensity: 0.75,
+    enabled: true,
+    thickness: 1,
+    intensity: 4,
   },
 };
 
@@ -62,14 +64,14 @@ export const ORRERY_STARFIELD_ROTATION_SPEED = 0;
 export const PLANET_ORBITS: Record<string, PlanetOrreryConfig> = {
   mercury: {
     orreryRadius: 5,
-    orbitalPeriod: 0.241,
+    orbitalPeriod: 2.241,
     initialAngle: Math.PI,
     visualRadius: 0.35,
     hitRadius: 0.9,
   },
   venus: {
     orreryRadius: 8,
-    orbitalPeriod: 0.615,
+    orbitalPeriod: 1.615,
     initialAngle: Math.PI * 1.5,
     visualRadius: 0.6,
     hitRadius: 1.3,

@@ -35,6 +35,7 @@ import {
   createLights,
   createRenderer,
   disposeScene,
+  updateCameraAspect,
 } from './orrery-scene.builder';
 import type {
   OrreryAtmosphereGlowObject,
@@ -70,7 +71,7 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
   // ── Three.js core ──────────────────────────────────────────────────────────
   private _renderer!: THREE.WebGLRenderer;
   private _scene!: THREE.Scene;
-  private _camera!: THREE.PerspectiveCamera;
+  private _camera!: THREE.OrthographicCamera | THREE.PerspectiveCamera;
   private _rafId: number | null = null;
   private _lastRenderedFrameTimeMs: number | null = null;
 
@@ -93,6 +94,10 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
   private readonly _planetData = new Map<string, PlanetData>();
   private readonly _planetOrbitEntries = Object.entries(PLANET_ORBITS);
   private readonly _raycastTargets: THREE.Object3D[] = [];
+  private readonly _glowWorldPosition = new THREE.Vector3();
+  private readonly _glowSunWorldPosition = new THREE.Vector3();
+  private readonly _glowScreenPosition = new THREE.Vector3();
+  private readonly _glowSunScreenPosition = new THREE.Vector3();
   private _orbitBaseColor = '';
   private _orbitHoverColor = '';
 
@@ -380,7 +385,6 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
       const z = Math.sin(angle) * config.orreryRadius;
       const planetMesh = this._planetMeshes.get(id);
       planetMesh?.position.set(x, 0, z);
-      this._atmosphereGlows.get(id)?.mesh.position.set(x, 0, z);
       const layerObjects = this._planetLayers.get(id) ?? EMPTY_PLANET_LAYERS;
       for (const layerObject of layerObjects) {
         layerObject.mesh.position.set(x, 0, z);
@@ -391,12 +395,8 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
       const staticPlanet = this._planetData.get(id);
       if (!material || !staticPlanet) continue;
 
-      const isLocked = planetUnlocks[id]?.status !== 'unlocked';
-
       const visualParams = planetsState[id]?.visualParams;
-      const baseHex = isLocked
-        ? staticPlanet.visual.baseColor
-        : (visualParams?.atmosphereColor || staticPlanet.visual.baseColor);
+      const baseHex = visualParams?.atmosphereColor || staticPlanet.visual.baseColor;
       const rotationSpeed = visualParams?.axisSpinSpeed ?? staticPlanet.initialState.axisSpinSpeed;
       const cloudRotationSpeed =
         visualParams?.cloudRotationSpeed ?? staticPlanet.initialState.cloudRotationSpeed;
@@ -406,19 +406,41 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
         visualParams?.cityLightsIntensity ?? (staticPlanet.visual.layerTextures['cityLights'] ? 1 : 0);
       const atmosphereGlow = this._atmosphereGlows.get(id);
       if (atmosphereGlow) {
-        const glowColor = staticPlanet.visual.atmosphereGlow?.color ??
-          visualParams?.atmosphereColor ??
-          staticPlanet.initialState.atmosphereColor;
-        const atmosphereDensity = visualParams?.atmosphereDensity ?? staticPlanet.initialState.atmosphereDensity;
-        atmosphereGlow.material.uniforms.uColor.value.set(glowColor);
-        atmosphereGlow.material.uniforms.uIntensity.value =
-          atmosphereDensity *
-          atmosphereGlow.staticIntensity *
-          this._visualEffectsConfig.atmosphereGlow.intensity;
+        const staticGlowColor = staticPlanet.visual.atmosphereGlow?.color;
+        const visualGlowColor = visualParams?.atmosphereColor ?? staticPlanet.initialState.atmosphereColor;
+        const glowColor = staticGlowColor && staticGlowColor !== '#000000'
+          ? staticGlowColor
+          : visualGlowColor !== '#000000'
+            ? visualGlowColor
+            : staticPlanet.visual.baseColor;
+        const glowScale = config.visualRadius * 2.5;
+        this._glowWorldPosition.set(x, 0, z);
+        this._glowSunWorldPosition.set(0, 0, 0);
+        this._glowScreenPosition.copy(this._glowWorldPosition).project(this._camera);
+        this._glowSunScreenPosition.copy(this._glowSunWorldPosition).project(this._camera);
+        const screenSunAngle = Math.atan2(
+          this._glowSunScreenPosition.y - this._glowScreenPosition.y,
+          this._glowSunScreenPosition.x - this._glowScreenPosition.x
+        );
+        const screenDistanceFromSun = this._glowScreenPosition.distanceTo(this._glowSunScreenPosition);
+        const planetDistanceFromCamera = this._camera.position.distanceTo(this._glowWorldPosition);
+        const sunDistanceFromCamera = this._camera.position.distanceTo(this._glowSunWorldPosition);
+        const isBehindSun = planetDistanceFromCamera > sunDistanceFromCamera;
+        const overlapsSun = screenDistanceFromSun <
+          this._projectedScreenRadius(1.2) + this._projectedScreenRadius(glowScale * 0.5);
+        atmosphereGlow.sprite.position.copy(this._glowWorldPosition);
+        atmosphereGlow.sprite.quaternion.copy(this._camera.quaternion);
+        atmosphereGlow.material.rotation = screenSunAngle;
+        atmosphereGlow.sprite.scale.set(glowScale, glowScale, 1);
+        atmosphereGlow.sprite.visible = !(isBehindSun && overlapsSun);
+        atmosphereGlow.material.color.set(glowColor);
+        const glowIntensity = Math.max(0, this._visualEffectsConfig.atmosphereGlow.intensity);
+        const intensityMultiplier = Math.log2(1 + glowIntensity);
+        atmosphereGlow.material.opacity = Math.max(0.82, atmosphereGlow.staticIntensity) * intensityMultiplier;
       }
 
-      material.uniforms.uTintColor.value.set(isLocked ? '#8a929b' : '#ffffff');
-      material.uniforms.uLitBrightness.value = isLocked ? 0.45 : 1;
+      material.uniforms.uTintColor.value.set('#ffffff');
+      material.uniforms.uLitBrightness.value = 1;
 
       material.uniforms.uBaseColor.value.set(baseHex);
       material.uniforms.uSunDirection.value.set(-x, 0, -z).normalize();
@@ -491,6 +513,16 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
     return 1;
   }
 
+  private _projectedScreenRadius(worldRadius: number): number {
+    if (this._camera instanceof THREE.OrthographicCamera) {
+      return worldRadius / ((this._camera.top - this._camera.bottom) * 0.5);
+    }
+
+    const distance = this._camera.position.length();
+    const viewHalfHeight = Math.tan(THREE.MathUtils.degToRad(this._camera.fov) * 0.5) * distance;
+    return worldRadius / viewHalfHeight;
+  }
+
   // ---------------------------------------------------------------------------
   // Interaction handlers
   // ---------------------------------------------------------------------------
@@ -539,8 +571,7 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
     if (width === 0 || height === 0) return;
     // false = do not override CSS canvas dimensions
     this._renderer.setSize(width, height, false);
-    this._camera.aspect = width / height;
-    this._camera.updateProjectionMatrix();
+    updateCameraAspect(this._camera, width / height);
     this._composer?.setSize(width, height);
     this._pixelatePass?.setSize(width, height);
   }
