@@ -9,11 +9,15 @@
   display: grid;
   place-items: center;
   padding: var(--space-lg);
+  color: var(--color-text-primary);
 
   &__backdrop {
     position: absolute;
     inset: 0;
-    background: var(--color-bg-overlay);
+    background:
+      linear-gradient(180deg, var(--color-bg-overlay), var(--color-bg-overlay)),
+      var(--color-bg-base);
+    backdrop-filter: blur(var(--space-xs));
     animation: pause-menu-fade var(--transition-reveal) both;
   }
 
@@ -21,17 +25,22 @@
     position: relative;
     z-index: 1;
     display: grid;
-    gap: var(--space-md);
-    width: min(420px, calc(100vw - var(--space-xl)));
+    gap: var(--space-lg);
+    width: min(460px, calc(100vw - var(--space-xl)));
     max-height: calc(100vh - var(--space-xl));
     overflow: auto;
     padding: var(--space-lg);
-    background: var(--color-bg-surface);
+    background:
+      linear-gradient(180deg, var(--color-bg-elevated), var(--color-bg-surface));
     border: var(--border-accent);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-panel);
-    color: var(--color-text-primary);
     animation: pause-menu-panel-in var(--transition-reveal) both;
+
+    &:focus-visible {
+      outline: var(--focus-ring);
+      outline-offset: var(--space-xs);
+    }
   }
 
   &__header {
@@ -47,12 +56,14 @@
   &__eyebrow {
     color: var(--color-text-secondary);
     font-size: var(--text-xs);
+    letter-spacing: 0.04em;
     text-transform: uppercase;
   }
 
   &__title {
     font-family: var(--font-display);
     font-size: var(--text-xl);
+    line-height: 1.25;
   }
 
   &__actions {
@@ -64,7 +75,7 @@
     width: 100%;
     border: var(--border-subtle);
     border-radius: var(--radius-sm);
-    padding: var(--space-sm) var(--space-md);
+    padding: var(--space-md);
     background: var(--color-bg-elevated);
     color: var(--color-text-primary);
     font: inherit;
@@ -80,6 +91,11 @@
       transform: translateY(-1px);
     }
 
+    &:focus-visible {
+      outline: var(--focus-ring);
+      outline-offset: var(--space-xs);
+    }
+
     &--primary {
       background: var(--color-accent-dim);
     }
@@ -88,6 +104,14 @@
       color: var(--color-warn);
     }
   }
+}
+
+:host-context(.high-contrast) .pause-menu__panel {
+  border-color: var(--color-accent-glow);
+}
+
+:host-context(.high-contrast) .pause-menu__button {
+  border-color: var(--color-border-strong);
 }
 
 @keyframes pause-menu-fade {

@@ -72,6 +72,7 @@
   --radius-lg: 12px;
   --border-subtle: 1px solid rgba(255, 255, 255, 0.06);
   --border-accent: 1px solid var(--color-accent-dim);
+  --focus-ring: 2px solid var(--color-accent-glow);
 
   // Typography — display sizes
   --text-title: clamp(2rem, 7vw, 4.5rem);

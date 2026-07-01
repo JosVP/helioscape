@@ -12,9 +12,16 @@
   box-shadow: var(--shadow-panel);
   color: var(--color-text-primary);
 
+  &__title,
   &__message,
   &__warning {
     margin: 0;
+  }
+
+  &__title {
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    line-height: 1.35;
   }
 
   &__message {
@@ -47,7 +54,8 @@
     &:focus-visible {
       border-color: var(--color-accent);
       box-shadow: var(--shadow-btn-glow);
-      outline: none;
+      outline: var(--focus-ring);
+      outline-offset: var(--space-xs);
     }
 
     &--confirm {

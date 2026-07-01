@@ -1,5 +1,12 @@
-<div class="confirm-dialog" role="group" aria-label="Confirmation required">
-  <p class="confirm-dialog__message">{{ message() }}</p>
+<div
+  class="confirm-dialog"
+  [attr.role]="isDestructive() ? 'alertdialog' : 'dialog'"
+  aria-modal="false"
+  aria-labelledby="confirm-dialog-title"
+  aria-describedby="confirm-dialog-message"
+>
+  <p class="confirm-dialog__title" id="confirm-dialog-title">Confirmation required</p>
+  <p class="confirm-dialog__message" id="confirm-dialog-message">{{ message() }}</p>
 
   @if (isDestructive()) {
     <p class="confirm-dialog__warning">This cannot be undone.</p>
@@ -11,11 +18,15 @@
       class="confirm-dialog__button confirm-dialog__button--confirm"
       [class.confirm-dialog__button--destructive]="isDestructive()"
       (click)="confirmed.emit()"
-    >Confirm</button>
+    >
+      Confirm
+    </button>
     <button
       type="button"
       class="confirm-dialog__button confirm-dialog__button--cancel"
       (click)="cancelled.emit()"
-    >Cancel</button>
+    >
+      Cancel
+    </button>
   </div>
 </div>

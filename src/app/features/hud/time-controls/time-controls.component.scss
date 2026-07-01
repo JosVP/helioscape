@@ -31,6 +31,14 @@
     border-color: var(--color-accent-dim);
   }
 
+  &:focus-visible {
+    color: var(--color-text-primary);
+    border-color: var(--color-accent);
+    outline: var(--focus-ring);
+    outline-offset: var(--space-xs);
+    box-shadow: var(--shadow-btn-glow);
+  }
+
   &--active {
     color: var(--color-accent);
     border-color: var(--color-accent-dim);

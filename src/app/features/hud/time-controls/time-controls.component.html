@@ -1,5 +1,6 @@
-<div class="time-controls">
+<div class="time-controls" role="group" aria-label="Time controls">
   <button
+    type="button"
     class="time-controls__btn time-controls__btn--pause"
     [class.time-controls__btn--active]="isPaused()"
     (click)="togglePause()"
@@ -11,6 +12,7 @@
 
   @if (!isFirstPlaythrough()) {
     <button
+      type="button"
       class="time-controls__btn time-controls__btn--speed"
       (click)="toggleSpeed()"
       [attr.aria-label]="'Speed: ' + speedLabel()"

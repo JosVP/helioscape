@@ -8,16 +8,22 @@
       role="dialog"
       aria-modal="true"
       aria-labelledby="pause-menu-title"
+      aria-describedby="pause-menu-status"
       tabindex="-1"
     >
       <header class="pause-menu__header">
-        <p class="pause-menu__eyebrow">Simulation paused</p>
+        <p class="pause-menu__eyebrow" id="pause-menu-status">Simulation paused</p>
         <h2 class="pause-menu__title" id="pause-menu-title">Pause Menu</h2>
       </header>
 
       @if (activeView() === 'menu') {
         <nav class="pause-menu__actions" aria-label="Pause menu actions">
-          <button #firstButton type="button" class="pause-menu__button pause-menu__button--primary" (click)="onResume()">
+          <button
+            #firstButton
+            type="button"
+            class="pause-menu__button pause-menu__button--primary"
+            (click)="onResume()"
+          >
             Resume
           </button>
           <button type="button" class="pause-menu__button" (click)="openSave()">Save Game</button>
