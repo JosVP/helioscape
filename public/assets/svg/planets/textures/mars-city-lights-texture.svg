@@ -21,6 +21,4 @@
     <circle cx="666" cy="258" r="1.5"/>
     <circle cx="758" cy="346" r="1.5"/>
   </g>
-  <rect x="2" y="2" width="1020" height="508" fill="none" stroke="#ffffff" stroke-opacity="0.35" stroke-dasharray="16 10"/>
-  <text x="512" y="478" fill="#ffffff" fill-opacity="0.5" font-family="monospace" font-size="26" text-anchor="middle">mars city lights placeholder</text>
 </svg>

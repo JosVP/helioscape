@@ -327,16 +327,7 @@
        r="1.5"
        id="circle23" />
   </g>
-  <rect
-     x="2"
-     y="2"
-     width="1020"
-     height="508"
-     fill="none"
-     stroke="#ffffff"
-     stroke-opacity="0.35"
-     stroke-dasharray="16 10"
-     id="rect23" />
+  
   <text
      x="512"
      y="478"
