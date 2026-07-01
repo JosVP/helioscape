@@ -12,10 +12,8 @@ import {
 } from './orrery-scene.config';
 import {
   buildAtmosphereGlow,
-  buildBackground,
   buildEclipticGrid,
   buildPlanetObjects,
-  buildStarfield,
   buildSun,
   buildSunGlow,
   createCamera,
@@ -29,13 +27,9 @@ import type {
 } from './orrery-scene.types';
 
 const palette: OrreryBackdropPalette = {
-  backgroundCore: '#21180f',
-  backgroundEdge: '#040609',
   grid: '#6091aa',
   orbit: '#5f91aa',
   orbitHover: '#ffbe76',
-  star: '#f4ead1',
-  featureStar: '#ffc766',
 };
 
 function attributeArray(object: THREE.Object3D): Float32Array {
@@ -82,30 +76,6 @@ describe('orrery scene builder', () => {
     expect(camera).toBeInstanceOf(THREE.OrthographicCamera);
     expect(camera.top).toBeGreaterThan(0);
     expect(camera.right).toBeGreaterThan(camera.top);
-  });
-
-  it('buildBackground assigns and returns a canvas texture', () => {
-    const scene = new THREE.Scene();
-
-    const texture = buildBackground(scene, palette);
-
-    expect(texture).toBeInstanceOf(THREE.CanvasTexture);
-    expect(scene.background).toBe(texture);
-  });
-
-  it('buildStarfield creates one points object with one geometry and one material', () => {
-    const scene = new THREE.Scene();
-
-    const points = buildStarfield(scene, {
-      palette,
-      starCount: 4,
-      featureStarCount: 2,
-    });
-
-    expect(points).toBeInstanceOf(THREE.Points);
-    expect(points.geometry.getAttribute('position').count).toBe(6);
-    expect(points.material).toBeInstanceOf(THREE.PointsMaterial);
-    expect(scene.children).toContain(points);
   });
 
   it('buildEclipticGrid aligns rings to configured orbit radii and toggles spokes', () => {

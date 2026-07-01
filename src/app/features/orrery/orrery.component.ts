@@ -20,15 +20,12 @@ import { GameStateService } from '@app/core/services/game-state.service';
 import {
   DEFAULT_ORRERY_VISUAL_EFFECTS_CONFIG,
   ORBIT_SPEED_FACTOR,
-  ORRERY_STARFIELD_ROTATION_SPEED,
   PLANET_ORBITS,
 } from './orrery-scene.config';
 import {
   buildAtmosphereGlow,
-  buildBackground,
   buildEclipticGrid,
   buildPlanetObjects,
-  buildStarfield,
   buildSun,
   buildSunGlow,
   createCamera,
@@ -105,10 +102,6 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
   private _dysonMaterial!: THREE.MeshStandardMaterial;
   private _sunGlow: OrrerySunGlowObjects | null = null;
 
-  // ── Backdrop visuals ───────────────────────────────────────────────────────
-  private _starfield: THREE.Points | null = null;
-  private readonly _starfieldRotationSpeed = ORRERY_STARFIELD_ROTATION_SPEED;
-
   // ── Interaction state ──────────────────────────────────────────────────────
   /** Planet hovered by moving the mouse over the orrery canvas. */
   private _hoveredPlanetId: string | null = null;
@@ -140,8 +133,6 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
     this._orbitHoverColor = backdropPalette.orbitHover;
     this._visualEffectsConfig = this._readVisualEffectsConfig();
 
-    buildBackground(this._scene, backdropPalette);
-    this._starfield = buildStarfield(this._scene, { palette: backdropPalette });
     // buildEclipticGrid(this._scene, PLANET_ORBITS, {
     //   color: backdropPalette.grid,
     //   opacity: ORRERY_GRID_OPACITY,
@@ -223,7 +214,6 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
     this._planetAngles.clear();
     this._planetData.clear();
     this._raycastTargets.length = 0;
-    this._starfield = null;
     this._sunGlow = null;
   }
 
@@ -262,13 +252,9 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
     const readToken = (name: string): string => styles.getPropertyValue(name).trim();
 
     return {
-      backgroundCore: readToken('--orrery-bg-core'),
-      backgroundEdge: readToken('--orrery-bg-edge'),
       grid: readToken('--orrery-grid'),
       orbit: readToken('--orrery-orbit'),
       orbitHover: readToken('--orrery-orbit-hover'),
-      star: readToken('--orrery-star'),
-      featureStar: readToken('--orrery-star-feature'),
     };
   }
 
@@ -480,11 +466,6 @@ export class OrreryComponent implements AfterViewInit, OnDestroy {
 
     // ── 6. Update Dyson swarm opacity ─────────────────────────────────────────
     this._dysonMaterial.opacity = (dysonCoverage / 100) * 0.4;
-
-    // ── 7. Optional backdrop drift ────────────────────────────────────────────
-    if (this._starfieldRotationSpeed !== 0 && this._starfield) {
-      this._starfield.rotation.y += this._starfieldRotationSpeed * frameMultiplier;
-    }
 
     if (this._sunGlow) {
       this._sunGlow.sprite.quaternion.copy(this._camera.quaternion);

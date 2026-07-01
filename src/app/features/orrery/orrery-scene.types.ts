@@ -1,22 +1,9 @@
 import * as THREE from 'three';
 
 export interface OrreryBackdropPalette {
-  readonly backgroundCore: string;
-  readonly backgroundEdge: string;
   readonly grid: string;
   readonly orbit: string;
   readonly orbitHover: string;
-  readonly star: string;
-  readonly featureStar: string;
-}
-
-export interface OrreryStarfieldOptions {
-  readonly palette: OrreryBackdropPalette;
-  readonly starCount?: number;
-  readonly featureStarCount?: number;
-  readonly radius?: number;
-  readonly depth?: number;
-  readonly opacity?: number;
 }
 
 export interface OrreryGridOptions {
@@ -129,12 +116,6 @@ export interface OrreryAtmosphereGlowObject {
   readonly material: THREE.SpriteMaterial;
   readonly texture: THREE.CanvasTexture;
   readonly staticIntensity: number;
-}
-
-export interface OrreryBackdropObjects {
-  readonly backgroundTexture: THREE.CanvasTexture;
-  readonly starfield: THREE.Points;
-  readonly eclipticGrid: THREE.Object3D;
 }
 
 export interface PlanetOrreryConfig {

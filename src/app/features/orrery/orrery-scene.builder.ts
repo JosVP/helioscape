@@ -11,7 +11,6 @@ import {
   DEFAULT_ORRERY_CAMERA_CONFIG,
   DEFAULT_ORRERY_DAY_NIGHT_LIGHTING_OPTIONS,
   DEFAULT_ORRERY_GRID_OPTIONS,
-  DEFAULT_ORRERY_STARFIELD_OPTIONS,
   ORRERY_ASSET_PATHS,
   ORRERY_ORBIT_RING_CONFIG,
 } from './orrery-scene.config';
@@ -28,7 +27,6 @@ import type {
   OrreryPlanetLayerObject,
   OrreryPlanetMaterial,
   OrreryPlanetUniforms,
-  OrreryStarfieldOptions,
   OrrerySunGlowConfig,
   OrrerySunGlowObjects,
   PlanetObjects,
@@ -39,16 +37,13 @@ import type {
 export {
   DEFAULT_ORRERY_DAY_NIGHT_LIGHTING_OPTIONS,
   DEFAULT_ORRERY_GRID_OPTIONS,
-  DEFAULT_ORRERY_STARFIELD_OPTIONS,
   DEFAULT_ORRERY_VISUAL_EFFECTS_CONFIG,
   ORBIT_SPEED_FACTOR,
-  ORRERY_STARFIELD_ROTATION_SPEED,
   PLANET_ORBITS,
 } from './orrery-scene.config';
 export type {
   OrreryAtmosphereGlowConfig,
   OrreryAtmosphereGlowObject,
-  OrreryBackdropObjects,
   OrreryBackdropPalette,
   OrreryDayNightLightingOptions,
   OrreryGridOptions,
@@ -61,7 +56,6 @@ export type {
   OrreryPlanetMaterial,
   OrreryPlanetUniforms,
   OrreryPixelateConfig,
-  OrreryStarfieldOptions,
   OrrerySunGlowConfig,
   OrrerySunGlowObjects,
   OrreryVisualEffectsConfig,
@@ -184,14 +178,6 @@ void main() {
   gl_FragColor = linearToOutputTexel(vec4(uColor, alpha * uOpacity));
 }
 `;
-
-function seededRandom(seed: number): () => number {
-  let state = seed >>> 0;
-  return () => {
-    state = (1664525 * state + 1013904223) >>> 0;
-    return state / 0x100000000;
-  };
-}
 
 function createCanvas(width: number, height: number): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
@@ -389,103 +375,6 @@ export function createLights(scene: THREE.Scene): void {
 // ---------------------------------------------------------------------------
 // Backdrop
 // ---------------------------------------------------------------------------
-
-export function buildBackground(
-  scene: THREE.Scene,
-  palette: OrreryBackdropPalette
-): THREE.CanvasTexture {
-  const canvas = createCanvas(1024, 1024);
-  const context = getCanvasContext(canvas);
-
-  if (context) {
-    const gradient = context.createRadialGradient(512, 592, 24, 512, 592, 760);
-    gradient.addColorStop(0, palette.backgroundCore);
-    gradient.addColorStop(0.22, palette.backgroundCore);
-    gradient.addColorStop(1, palette.backgroundEdge);
-
-    context.fillStyle = gradient;
-    context.fillRect(0, 0, canvas.width, canvas.height);
-  }
-
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.colorSpace = THREE.SRGBColorSpace;
-  scene.background = texture;
-  return texture;
-}
-
-export function buildStarfield(
-  scene: THREE.Scene,
-  options: OrreryStarfieldOptions
-): THREE.Points {
-  const starCount = options.starCount ?? DEFAULT_ORRERY_STARFIELD_OPTIONS.starCount;
-  const featureStarCount =
-    options.featureStarCount ?? DEFAULT_ORRERY_STARFIELD_OPTIONS.featureStarCount;
-  const radius = options.radius ?? DEFAULT_ORRERY_STARFIELD_OPTIONS.radius;
-  const depth = options.depth ?? DEFAULT_ORRERY_STARFIELD_OPTIONS.depth;
-  const opacity = options.opacity ?? DEFAULT_ORRERY_STARFIELD_OPTIONS.opacity;
-  const totalStars = Math.max(0, starCount) + Math.max(0, featureStarCount);
-  const positions = new Float32Array(totalStars * 3);
-  const colors = new Float32Array(totalStars * 3);
-  const random = seededRandom(0x5eed18);
-  const starColor = new THREE.Color(options.palette.star);
-  const featureColor = new THREE.Color(options.palette.featureStar);
-
-  for (let index = 0; index < totalStars; index += 1) {
-    const isFeature = index >= starCount;
-    const angle = random() * Math.PI * 2;
-    const distance = Math.sqrt(random()) * radius;
-    const height = (random() - 0.5) * radius * 0.38;
-    const layerDepth = depth - random() * radius * 0.24;
-    const color = isFeature ? featureColor : starColor;
-    const positionIndex = index * 3;
-
-    positions[positionIndex] = Math.cos(angle) * distance;
-    positions[positionIndex + 1] = height;
-    positions[positionIndex + 2] = Math.sin(angle) * distance + layerDepth;
-    colors[positionIndex] = color.r;
-    colors[positionIndex + 1] = color.g;
-    colors[positionIndex + 2] = color.b;
-  }
-
-  const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-  geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-
-  function createDiscTexture(): THREE.CanvasTexture {
-    const canvas = document.createElement('canvas');
-    canvas.width = 64;
-    canvas.height = 64;
-
-    const context = canvas.getContext('2d');
-    if (context) {
-      const gradient = context.createRadialGradient(32, 32, 0, 32, 32, 32);
-      gradient.addColorStop(0, 'rgba(255,255,255,1)');
-      gradient.addColorStop(0.7, 'rgba(255,255,255,1)');
-      gradient.addColorStop(1, 'rgba(255,255,255,0)');
-      context.fillStyle = gradient;
-      context.fillRect(0, 0, 64, 64);
-    }
-
-    return new THREE.CanvasTexture(canvas);
-  }
-
-const material = new THREE.PointsMaterial({
-  size: 0.2,
-  transparent: true,
-  opacity,
-  depthWrite: false,
-  blending: THREE.AdditiveBlending,
-  sizeAttenuation: true,
-  vertexColors: true,
-  map: createDiscTexture(),
-  alphaTest: 0.01,
-});
-
-const points = new THREE.Points(geometry, material);
-  points.frustumCulled = false;
-  scene.add(points);
-  return points;
-}
 
 export function buildEclipticGrid(
   scene: THREE.Scene,

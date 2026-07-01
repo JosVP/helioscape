@@ -14,14 +14,6 @@ export const DEFAULT_ORRERY_CAMERA_CONFIG = {
   orthographicViewHeight: 16.3,
 } as const;
 
-export const DEFAULT_ORRERY_STARFIELD_OPTIONS = {
-  starCount: 1999,
-  featureStarCount: 0,
-  radius: 78,
-  depth: -47,
-  opacity: 0.8,
-} as const;
-
 export const DEFAULT_ORRERY_GRID_OPTIONS = {
   gridOpacity: 0.14,
   orbitOpacity: 0.12,
@@ -59,19 +51,17 @@ export const DEFAULT_ORRERY_VISUAL_EFFECTS_CONFIG: OrreryVisualEffectsConfig = {
   },
 };
 
-export const ORRERY_STARFIELD_ROTATION_SPEED = 0;
-
 export const PLANET_ORBITS: Record<string, PlanetOrreryConfig> = {
   mercury: {
     orreryRadius: 5,
-    orbitalPeriod: 2.241,
+    orbitalPeriod: 0.241,
     initialAngle: Math.PI,
     visualRadius: 0.35,
     hitRadius: 0.9,
   },
   venus: {
     orreryRadius: 8,
-    orbitalPeriod: 1.615,
+    orbitalPeriod: 0.615,
     initialAngle: Math.PI * 1.5,
     visualRadius: 0.6,
     hitRadius: 1.3,

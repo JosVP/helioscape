@@ -33,7 +33,6 @@ interface OrreryComponentAccess {
   _scene: THREE.Scene;
   _camera: THREE.OrthographicCamera | THREE.PerspectiveCamera;
   _dysonMaterial: THREE.MeshStandardMaterial;
-  _starfield: THREE.Points | null;
   _composer: { render: ReturnType<typeof vi.fn>; setSize: ReturnType<typeof vi.fn>; dispose: ReturnType<typeof vi.fn> } | null;
   _pixelatePass: { setSize: ReturnType<typeof vi.fn>; dispose: ReturnType<typeof vi.fn> } | null;
   _outputPass: { dispose: ReturnType<typeof vi.fn> } | null;
@@ -167,19 +166,15 @@ describe('OrreryComponent', () => {
     TestBed.resetTestingModule();
   });
 
-  it('reads the complete backdrop palette from design tokens', () => {
+  it('reads the complete orrery guide palette from design tokens', () => {
     const component = setup();
     const access = component as unknown as OrreryComponentAccess;
     const getComputedStyleSpy = vi.spyOn(window, 'getComputedStyle').mockReturnValue({
       getPropertyValue: (name: string) => {
         const tokens: Record<string, string> = {
-          '--orrery-bg-core': ' #21180f ',
-          '--orrery-bg-edge': ' #040609 ',
           '--orrery-grid': ' rgba(96, 145, 170, 0.68) ',
           '--orrery-orbit': ' #5f91aa ',
           '--orrery-orbit-hover': ' #ffbe76 ',
-          '--orrery-star': ' #f4ead1 ',
-          '--orrery-star-feature': ' #ffc766 ',
         };
         return tokens[name] ?? '';
       },
@@ -189,13 +184,9 @@ describe('OrreryComponent', () => {
 
     expect(getComputedStyleSpy).toHaveBeenCalledWith(document.documentElement);
     expect(palette).toEqual({
-      backgroundCore: '#21180f',
-      backgroundEdge: '#040609',
       grid: 'rgba(96, 145, 170, 0.68)',
       orbit: '#5f91aa',
       orbitHover: '#ffbe76',
-      star: '#f4ead1',
-      featureStar: '#ffc766',
     });
   });
 
@@ -230,7 +221,6 @@ describe('OrreryComponent', () => {
     access._scene = new THREE.Scene();
     access._camera = new THREE.PerspectiveCamera();
     access._dysonMaterial = new THREE.MeshStandardMaterial({ transparent: true, opacity: 0 });
-    access._starfield = null;
     access._visualEffectsConfig = { ...access._visualEffectsConfig, fps: 24 };
 
     access._animate(0);
@@ -250,7 +240,6 @@ describe('OrreryComponent', () => {
     access._scene = new THREE.Scene();
     access._camera = new THREE.PerspectiveCamera();
     access._dysonMaterial = new THREE.MeshStandardMaterial({ transparent: true, opacity: 0 });
-    access._starfield = null;
     access._planetAngles.set('earth', 0);
     access._visualEffectsConfig = { ...access._visualEffectsConfig, fps: 24 };
 
@@ -272,7 +261,6 @@ describe('OrreryComponent', () => {
     access._scene = new THREE.Scene();
     access._camera = new THREE.PerspectiveCamera();
     access._dysonMaterial = new THREE.MeshStandardMaterial({ transparent: true, opacity: 0 });
-    access._starfield = null;
     access._visualEffectsConfig = { ...access._visualEffectsConfig, fps: null };
 
     access._animate(0);
@@ -280,25 +268,6 @@ describe('OrreryComponent', () => {
     access._animate(20);
 
     expect(renderer.render).toHaveBeenCalledTimes(3);
-  });
-
-  it('does not rotate the starfield when rotation speed is zero', () => {
-    const component = setup();
-    const access = component as unknown as OrreryComponentAccess;
-    const starfield = new THREE.Points(new THREE.BufferGeometry(), new THREE.PointsMaterial());
-    const renderer = { render: vi.fn(), dispose: vi.fn() } as unknown as THREE.WebGLRenderer;
-    vi.spyOn(globalThis, 'requestAnimationFrame').mockReturnValue(1);
-
-    access._renderer = renderer;
-    access._scene = new THREE.Scene();
-    access._camera = new THREE.PerspectiveCamera();
-    access._dysonMaterial = new THREE.MeshStandardMaterial({ transparent: true, opacity: 0 });
-    access._starfield = starfield;
-
-    access._animate();
-
-    expect(starfield.rotation.y).toBe(0);
-    expect(renderer.render).toHaveBeenCalledOnce();
   });
 
   it('highlights only the active orbit ring during RAF', () => {
@@ -327,7 +296,6 @@ describe('OrreryComponent', () => {
     access._scene = new THREE.Scene();
     access._camera = new THREE.PerspectiveCamera();
     access._dysonMaterial = new THREE.MeshStandardMaterial({ transparent: true, opacity: 0 });
-    access._starfield = null;
     access._orbitMaterials.set('earth', earthOrbitMaterial);
     access._orbitMaterials.set('mars', marsOrbitMaterial);
     access._hoveredPlanetId = 'earth';
@@ -366,7 +334,6 @@ describe('OrreryComponent', () => {
     access._scene = new THREE.Scene();
     access._camera = new THREE.PerspectiveCamera();
     access._dysonMaterial = new THREE.MeshStandardMaterial({ transparent: true, opacity: 0 });
-    access._starfield = null;
     access._planetMeshes.set('earth', planetMesh);
     access._planetData.set('earth', makePlanetData('earth', '#3a7ab8'));
     access._planetMaterials.set('earth', shaderMaterial);
@@ -456,7 +423,6 @@ describe('OrreryComponent', () => {
     access._scene = new THREE.Scene();
     access._camera = new THREE.PerspectiveCamera();
     access._dysonMaterial = new THREE.MeshStandardMaterial({ transparent: true, opacity: 0 });
-    access._starfield = null;
     access._composer = composer;
 
     access._animate();
@@ -525,7 +491,6 @@ describe('OrreryComponent', () => {
     access._scene = new THREE.Scene();
     access._camera = new THREE.PerspectiveCamera();
     access._dysonMaterial = new THREE.MeshStandardMaterial({ transparent: true, opacity: 0 });
-    access._starfield = null;
     access._planetMeshes.set('earth', planetMesh);
     access._planetData.set('earth', makePlanetData('earth', '#3a7ab8'));
     access._planetMaterials.set('earth', shaderMaterial);
